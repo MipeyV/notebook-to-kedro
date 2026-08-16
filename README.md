@@ -179,15 +179,17 @@ Such suggestions would still pass through deterministic validation and be presen
 
 ## Project status
 
-The project is currently in its design phase. No converter has been implemented yet.
+The project is currently in its specification phase. No converter has been implemented yet.
 
 The first technical milestone is a notebook analyzer that produces an inspectable intermediate representation without generating a Kedro project.
+
+The initial deterministic analysis contract is documented in [docs/mvp-contract.md](docs/mvp-contract.md), and its interchange model is defined in [docs/notebook-facts-schema.md](docs/notebook-facts-schema.md).
 
 Progress and architectural decisions are recorded chronologically in [JOURNAL.md](JOURNAL.md).
 
 ## Initial roadmap
 
-1. Formalize the supported notebook subset.
+1. ✅ Formalize the supported notebook subset.
 2. Initialize the Python package and quality tooling.
 3. Load and validate notebooks.
 4. Analyze cells with Python's AST.

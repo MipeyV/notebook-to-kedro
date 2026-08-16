@@ -40,6 +40,35 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-08-16 — Deterministic analysis contract specified
+
+### Completed
+
+- Defined the accepted, warned, and rejected notebook constructs for the first milestone.
+- Defined the versioned `NotebookFacts` interchange schema.
+- Documented source provenance, symbols, calls, dependencies, and diagnostics.
+- Added `simple_training.ipynb` as the first reference fixture.
+- Validated the fixture as Jupyter `nbformat` 4.5 JSON.
+- Verified that all Python code cells parse successfully without being executed.
+
+### Decisions
+
+- Static source facts will be extracted deterministically before any LLM is invoked.
+- `NotebookFacts` will be the canonical typed representation and JSON interchange format.
+- DataFrames may be offered as inspection views but will not be the source of truth.
+- A future semantic planner will produce a separate `ConversionPlan` without modifying source facts.
+- Diagnostic codes will be treated as public API once released.
+
+### Open questions
+
+- Choose the concrete Python model implementation: standard-library dataclasses, Pydantic, or a combination of both.
+- Decide how much nested-scope detail belongs in schema version 1.0.
+- Define the unsupported notebook fixtures required for each initial diagnostic code.
+
+### Next step
+
+- Initialize the Python package and quality tooling, then encode the documented IR as typed models.
+
 ## 2026-08-16 — English adopted as the project language
 
 ### Completed
