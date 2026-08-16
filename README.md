@@ -1,36 +1,36 @@
 # Notebook to Kedro
 
-> Transformer progressivement un notebook Data Science relativement propre en un projet Kedro structuré, reproductible et facile à valider humainement.
+> Progressively transform a reasonably clean Data Science notebook into a structured, reproducible Kedro project that is easy to review.
 
-## Contexte
+## Context
 
-Les workflows de Machine Learning commencent souvent dans un notebook Jupyter utilisé comme environnement d'expérimentation :
+Machine Learning workflows often begin in a Jupyter notebook used as an experimentation environment:
 
 ```text
-chargement des données
+data loading
     → preprocessing
     → feature engineering
-    → séparation train/test
-    → entraînement
-    → prédiction
-    → évaluation
+    → train/test split
+    → training
+    → prediction
+    → evaluation
 ```
 
-Lorsqu'une expérimentation doit devenir un projet maintenable, une grande partie du travail consiste à restructurer manuellement ce notebook :
+When an experiment needs to become a maintainable project, much of the work consists of manually restructuring the notebook:
 
-- extraire des fonctions ;
-- identifier les entrées et sorties de chaque étape ;
-- construire des nodes et une pipeline Kedro ;
-- déplacer les paramètres vers la configuration ;
-- déclarer les jeux de données ;
-- organiser le code et séparer les responsabilités ;
-- rendre le workflow reproductible et testable.
+- extracting functions;
+- identifying the inputs and outputs of each step;
+- building Kedro nodes and a pipeline;
+- moving parameters into configuration;
+- declaring datasets;
+- organizing the code and separating responsibilities;
+- making the workflow reproducible and testable.
 
-Ce travail est utile, mais répétitif. **Notebook to Kedro** cherche à en automatiser la partie mécanique tout en rendant visibles les ambiguïtés qui nécessitent une décision humaine.
+This work is valuable but repetitive. **Notebook to Kedro** aims to automate its mechanical parts while exposing ambiguities that require human judgement.
 
-## Objectif
+## Goal
 
-L'interface cible de la bibliothèque est volontairement simple :
+The target library interface is deliberately simple:
 
 ```python
 from notebook_to_kedro import convert
@@ -41,94 +41,94 @@ report = convert(
 )
 ```
 
-À terme, le dossier généré devra être un projet Kedro cohérent dont le workflow peut être lancé avec :
+Eventually, the generated directory should be a coherent Kedro project whose workflow can be started with:
 
 ```bash
 cd generated/my_kedro_project
 kedro run
 ```
 
-La réussite ne se limite pas à produire du code syntaxiquement valide : les sorties observables du projet généré devront être comparables à celles du notebook source.
+Success means more than generating syntactically valid code: the observable outputs of the generated project should be comparable to those of the source notebook.
 
-## Positionnement
+## Positioning
 
-Le projet ne promet pas de transformer automatiquement n'importe quel notebook chaotique en code prêt pour la production.
+This project does not promise to turn any chaotic notebook into production-ready code automatically.
 
-Il vise plutôt à :
+Instead, it aims to:
 
-> automatiser une grande partie du refactoring répétitif d'un notebook ML séquentiel et relativement propre vers une pipeline Kedro structurée, avec diagnostics explicites et validation humaine.
+> automate much of the repetitive refactoring required to turn a reasonably clean, sequential ML notebook into a structured Kedro pipeline, with explicit diagnostics and human review.
 
-L'outil devra savoir distinguer trois situations :
+The tool should distinguish between three outcomes:
 
-1. la conversion est supportée ;
-2. la conversion est possible mais comporte des avertissements ;
-3. la conversion est refusée avec une explication actionnable.
+1. conversion is supported;
+2. conversion is possible but produces warnings;
+3. conversion is rejected with an actionable explanation.
 
-## Périmètre initial
+## Initial scope
 
-Le MVP ciblera des notebooks :
+The MVP will target notebooks that are:
 
-- écrits en Python ;
-- syntaxiquement valides ;
-- exécutables dans l'ordre des cellules ;
-- sans dépendance à un état interactif antérieur ;
-- utilisant principalement des variables nommées pour transmettre les résultats entre étapes ;
-- composés de transformations de données et d'étapes ML relativement explicites.
+- written in Python;
+- syntactically valid;
+- executable in cell order;
+- independent of previous interactive state;
+- primarily using named variables to pass results between steps;
+- composed of reasonably explicit data transformations and ML steps.
 
-Le MVP ne cherchera pas à gérer :
+The MVP will not attempt to support:
 
-- les cellules exécutées dans un ordre incohérent ;
-- les magies Jupyter et les commandes shell ;
-- `exec`, `eval` et les imports dynamiques ;
-- les mutations et effets de bord impossibles à déterminer statiquement ;
-- les dépendances externes complexes ou leur version exacte ;
-- tous les frameworks de Machine Learning ;
-- le déploiement, le serving, le monitoring ou l'infrastructure cloud.
+- cells executed in an inconsistent order;
+- Jupyter magics and shell commands;
+- `exec`, `eval`, or dynamic imports;
+- mutations and side effects that cannot be determined statically;
+- complex external dependencies or the inference of their exact versions;
+- every Machine Learning framework;
+- deployment, serving, production monitoring, or cloud infrastructure.
 
-Quand une construction n'est pas supportée, l'outil devra la signaler plutôt que générer silencieusement un résultat douteux.
+When a construct is not supported, the tool should report it rather than silently generate a questionable result.
 
-## Architecture envisagée
+## Proposed architecture
 
 ```text
 Notebook .ipynb
       ↓
-Loader et validation
+Loading and validation
       ↓
-Analyse AST des cellules
+Cell-level AST analysis
       ↓
-Résolution des symboles et dépendances
+Symbol and dependency resolution
       ↓
-Représentation intermédiaire + diagnostics
+Intermediate representation + diagnostics
       ↓
-Générateur Kedro versionné
+Versioned Kedro generator
       ↓
-Écriture transactionnelle des fichiers
+Transactional filesystem writer
       ↓
-Projet généré + rapport de conversion
+Generated project + conversion report
 ```
 
 ### Loader
 
-Le loader ouvre le notebook, valide son format et restitue ses cellules dans l'ordre source. Il ne réalise aucune analyse métier.
+The loader opens the notebook, validates its format, and returns its cells in source order. It performs no semantic analysis.
 
-### Analyseur
+### Analyzer
 
-L'analyseur s'appuie autant que possible sur l'AST Python pour identifier :
+The analyzer relies on Python's AST wherever possible to identify:
 
-- les imports ;
-- les symboles définis et utilisés ;
-- les fonctions et classes ;
-- les dépendances entre cellules ;
-- les mutations ou effets de bord suspects ;
-- les constructions non supportées.
+- imports;
+- defined and referenced symbols;
+- functions and classes;
+- dependencies between cells;
+- suspicious mutations or side effects;
+- unsupported constructs.
 
-L'analyse statique ne pouvant pas garantir seule l'équivalence sémantique, ses limites devront apparaître dans les diagnostics.
+Static analysis alone cannot guarantee semantic equivalence, so its limitations must be represented in the diagnostics.
 
-### Représentation intermédiaire
+### Intermediate representation
 
-L'analyse du notebook ne produira pas directement du code Kedro. Une représentation intermédiaire décrira les tâches, leurs entrées et sorties, leur provenance et les paramètres reconnus.
+Notebook analysis will not generate Kedro code directly. An intermediate representation will describe tasks, their inputs and outputs, their provenance, and recognized parameters.
 
-Exemple conceptuel :
+Conceptual example:
 
 ```python
 Task(
@@ -141,65 +141,65 @@ Task(
 )
 ```
 
-Cette séparation permettra de faire évoluer l'analyse et la génération indépendamment.
+This boundary will allow analysis and generation to evolve independently.
 
-### Générateur Kedro
+### Kedro generator
 
-Le générateur transformera uniquement la représentation intermédiaire. Il créera une structure Kedro compatible avec une version explicitement ciblée, notamment :
+The generator will consume only the intermediate representation. It will create a Kedro structure compatible with an explicitly targeted version, including:
 
-- les fonctions de nodes ;
-- la définition de la pipeline ;
-- son enregistrement ;
-- la configuration des paramètres ;
-- le catalogue des entrées et sorties persistantes ;
-- les fichiers minimaux permettant l'exécution du projet.
+- node functions;
+- the pipeline definition;
+- pipeline registration;
+- parameter configuration;
+- a catalog for persistent inputs and outputs;
+- the minimum project files required for execution.
 
-## Principes de conception
+## Design principles
 
-- **Déterminisme d'abord** : parsing, graphe de dépendances, génération et validation ne dépendent pas d'un LLM.
-- **Traçabilité** : toute tâche générée reste reliée à ses cellules sources.
-- **Échec explicite** : une ambiguïté importante bloque la conversion ou produit un avertissement visible.
-- **Pas d'écrasement silencieux** : une destination existante est protégée par défaut.
-- **Simplicité** : fonctions, dataclasses et modules ciblés avant toute abstraction plus générale.
-- **Testabilité** : les décisions d'analyse et le projet généré doivent pouvoir être testés séparément.
-- **Validation humaine** : le rapport de conversion fait partie du produit.
+- **Determinism first**: parsing, dependency analysis, generation, and validation do not depend on an LLM.
+- **Traceability**: every generated task remains linked to its source cells.
+- **Explicit failure**: significant ambiguity blocks conversion or produces a visible warning.
+- **No silent overwrites**: an existing destination is protected by default.
+- **Simplicity**: focused functions, dataclasses, and modules before broader abstractions.
+- **Testability**: analysis decisions and generated projects can be tested independently.
+- **Human review**: the conversion report is part of the product.
 
-## Place éventuelle d'un LLM
+## Possible future role for an LLM
 
-Le cœur du MVP restera déterministe. Un LLM pourra éventuellement assister, dans une phase ultérieure :
+The core MVP will remain deterministic. A later version could use an LLM to assist with:
 
-- le nommage métier des nodes ;
-- la classification des blocs ;
-- le regroupement de plusieurs cellules ;
-- l'extraction de paramètres ambigus ;
-- le refactoring de code impératif complexe ;
-- la proposition de tests.
+- domain-aware node naming;
+- block classification;
+- grouping multiple cells;
+- extracting ambiguous parameters;
+- refactoring complex imperative code;
+- suggesting tests.
 
-Ces suggestions devront toujours passer par les validations déterministes et être présentées à l'utilisateur avant adoption.
+Such suggestions would still pass through deterministic validation and be presented to the user before adoption.
 
-## État du projet
+## Project status
 
-Le projet est en phase de cadrage. Aucun convertisseur n'est encore implémenté.
+The project is currently in its design phase. No converter has been implemented yet.
 
-La première étape technique prévue consiste à construire un analyseur de notebook capable de produire une représentation intermédiaire inspectable, sans générer de projet Kedro.
+The first technical milestone is a notebook analyzer that produces an inspectable intermediate representation without generating a Kedro project.
 
-L'avancement et les décisions sont consignés chronologiquement dans [JOURNAL.md](JOURNAL.md).
+Progress and architectural decisions are recorded chronologically in [JOURNAL.md](JOURNAL.md).
 
-## Roadmap initiale
+## Initial roadmap
 
-1. Formaliser le sous-ensemble de notebooks supporté.
-2. Initialiser le package Python et son outillage qualité.
-3. Charger et valider les notebooks.
-4. Analyser les cellules avec l'AST Python.
-5. Résoudre les dépendances et produire la représentation intermédiaire.
-6. Générer un projet Kedro minimal pour des fixtures contrôlées.
-7. Vérifier l'équivalence sur des sorties observables.
-8. Ajouter progressivement les paramètres, catalogues et diagnostics avancés.
+1. Formalize the supported notebook subset.
+2. Initialize the Python package and quality tooling.
+3. Load and validate notebooks.
+4. Analyze cells with Python's AST.
+5. Resolve dependencies and produce the intermediate representation.
+6. Generate a minimal Kedro project for controlled fixtures.
+7. Verify equivalence through observable outputs.
+8. Gradually add parameters, catalogs, and advanced diagnostics.
 
-## Contributions
+## Contributing
 
-Le projet débute. Les conventions de développement, commandes d'installation et règles de contribution seront ajoutées avec le premier squelette Python.
+The project is at an early stage. Development conventions, installation commands, and contribution guidelines will be added with the first Python package skeleton.
 
-## Nom du projet
+## Project name
 
-**Notebook to Kedro** est un nom provisoire. Le nom du package Python envisagé est `notebook_to_kedro`.
+**Notebook to Kedro** is a working name. The planned Python package name is `notebook_to_kedro`.

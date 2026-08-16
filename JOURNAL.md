@@ -1,76 +1,95 @@
-# Journal de développement
+# Development Journal
 
-Ce fichier retrace chronologiquement l'évolution de **Notebook to Kedro**.
+This file provides a chronological record of **Notebook to Kedro** development.
 
-Il sert à conserver :
+It keeps track of:
 
-- ce qui a réellement été réalisé ;
-- les décisions d'architecture et leur justification ;
-- les limites découvertes ;
-- les questions encore ouvertes ;
-- la prochaine étape concrète.
+- work that has actually been completed;
+- architectural decisions and their rationale;
+- limitations discovered along the way;
+- unresolved questions;
+- the next concrete step.
 
-Le journal n'est pas un changelog de version ni une simple backlog. Une entrée est ajoutée lorsqu'un travail est terminé ou lorsqu'une décision structurante est prise.
+This journal is neither a release changelog nor a simple backlog. An entry is added when work is completed or a structural decision is made.
 
-## Convention des entrées
+## Entry convention
 
-Chaque nouvelle entrée suit autant que possible cette structure :
+New entries should follow this structure whenever possible:
 
 ```markdown
-## AAAA-MM-JJ — Titre court
+## YYYY-MM-DD — Short title
 
-### Réalisé
-
-- ...
-
-### Décisions
+### Completed
 
 - ...
 
-### Points ouverts
+### Decisions
 
 - ...
 
-### Prochaine étape
+### Open questions
+
+- ...
+
+### Next step
 
 - ...
 ```
 
-Les entrées les plus récentes seront ajoutées en haut, juste après cette convention, afin que l'état actuel soit immédiatement visible.
+The newest entries are added at the top, immediately below this convention, so the current state remains easy to find.
 
 ---
 
-## 2026-08-16 — Initialisation du projet
+## 2026-08-16 — English adopted as the project language
 
-### Réalisé
+### Completed
 
-- Clarification du problème ciblé : automatiser le passage d'un notebook Data Science relativement propre vers un projet Kedro structuré.
-- Définition d'un premier périmètre fonctionnel et des limites du MVP.
-- Proposition d'une architecture en étapes : chargement, analyse AST, résolution des dépendances, représentation intermédiaire, génération Kedro et écriture des fichiers.
-- Identification des principaux risques : état implicite, mutations, effets de bord, scopes Python, inférence des paramètres et compatibilité Kedro.
-- Création du `README.md` présentant le contexte, les objectifs, le périmètre et la roadmap initiale.
-- Création de ce journal de développement.
-- Initialisation du dépôt Git local avec une branche principale `main`.
-- Ajout de la licence open source MIT.
-- Création et connexion du dépôt GitHub public `MipeyV/notebook-to-kedro`.
+- Translated the project documentation from French to English.
+- Kept the MIT license in English.
 
-### Décisions
+### Decisions
 
-- Le MVP ne dépendra pas d'un LLM.
-- La représentation intermédiaire sera séparée du générateur Kedro.
-- Une cellule de code convertible correspondra initialement à une tâche au maximum ; la fusion automatique de cellules est reportée.
-- Les cas ambigus devront produire des diagnostics explicites et pourront bloquer la génération.
-- La première étape d'implémentation portera sur l'analyse du notebook, pas sur la génération Kedro.
-- Le projet Kedro produit ciblera une version explicitement définie et testée.
+- English is now the default language for documentation, source code, comments, diagnostics, commit messages, and future project artifacts.
 
-### Points ouverts
+### Open questions
 
-- Choisir les versions minimales de Python et Kedro.
-- Définir précisément la matrice des constructions supportées, averties et interdites.
-- Définir la forme finale des objets de la représentation intermédiaire.
-- Choisir la convention d'extraction explicite des paramètres.
-- Décider du nom définitif du projet et vérifier sa disponibilité avant publication éventuelle.
+- None for this documentation change.
 
-### Prochaine étape
+### Next step
 
-- Initialiser le squelette Python en `src/` et spécifier les premiers notebooks fixtures avant d'implémenter le loader.
+- Initialize the Python package skeleton and specify the first notebook fixtures before implementing the loader.
+
+## 2026-08-16 — Project initialization
+
+### Completed
+
+- Clarified the target problem: automate the transition from a reasonably clean Data Science notebook to a structured Kedro project.
+- Defined the initial functional scope and MVP boundaries.
+- Proposed a staged architecture: loading, AST analysis, dependency resolution, intermediate representation, Kedro generation, and filesystem writing.
+- Identified the primary risks: implicit state, mutations, side effects, Python scopes, parameter inference, and Kedro compatibility.
+- Created `README.md` with the project context, goals, scope, and initial roadmap.
+- Created this development journal.
+- Initialized the local Git repository with `main` as its primary branch.
+- Added the open-source MIT license.
+- Created and connected the public `MipeyV/notebook-to-kedro` GitHub repository.
+
+### Decisions
+
+- The MVP will not depend on an LLM.
+- The intermediate representation will remain separate from the Kedro generator.
+- Initially, one convertible code cell will map to at most one task; automatic cell merging is deferred.
+- Ambiguous cases must produce explicit diagnostics and may block generation.
+- The first implementation milestone will focus on notebook analysis rather than Kedro generation.
+- Generated Kedro projects will target an explicitly defined and tested version.
+
+### Open questions
+
+- Choose the minimum supported Python and Kedro versions.
+- Define the exact matrix of supported, warned, and rejected constructs.
+- Finalize the intermediate representation models.
+- Choose a convention for explicit parameter extraction.
+- Decide on the final project name and verify its availability before any package publication.
+
+### Next step
+
+- Initialize the Python package skeleton and specify the first notebook fixtures before implementing the loader.
