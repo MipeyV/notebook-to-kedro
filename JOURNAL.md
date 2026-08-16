@@ -51,6 +51,8 @@ Les entrées les plus récentes seront ajoutées en haut, juste après cette con
 - Création du `README.md` présentant le contexte, les objectifs, le périmètre et la roadmap initiale.
 - Création de ce journal de développement.
 - Initialisation du dépôt Git local avec une branche principale `main`.
+- Ajout de la licence open source MIT.
+- Création et connexion du dépôt GitHub public `MipeyV/notebook-to-kedro`.
 
 ### Décisions
 
