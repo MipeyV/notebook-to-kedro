@@ -187,6 +187,8 @@ The initial deterministic analysis contract is documented in [docs/mvp-contract.
 
 The first reference fixture runs a deterministic Iris classification workflow. It provides a known-good baseline whose predictions and accuracy can later be compared with the generated Kedro pipeline.
 
+The planned module boundaries and test strategy are described in [docs/architecture.md](docs/architecture.md). Supported runtimes and library-support levels are defined in [docs/compatibility.md](docs/compatibility.md).
+
 Progress and architectural decisions are recorded chronologically in [JOURNAL.md](JOURNAL.md).
 
 ## Initial roadmap
@@ -202,7 +204,19 @@ Progress and architectural decisions are recorded chronologically in [JOURNAL.md
 
 ## Contributing
 
-The project is at an early stage. Development conventions, installation commands, and contribution guidelines will be added with the first Python package skeleton.
+The project uses [uv](https://docs.astral.sh/uv/) for Python and dependency management.
+
+```bash
+uv sync
+uv run pytest
+uv run ruff check .
+uv run ruff format --check .
+uv run mypy
+uv build
+uv run pre-commit install
+```
+
+The committed `uv.lock` file defines the reproducible development and CI environment. See [docs/decisions/0001-use-uv.md](docs/decisions/0001-use-uv.md) for the decision record.
 
 ## Project name
 

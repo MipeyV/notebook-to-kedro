@@ -1,0 +1,147 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "notebook-to-kedro"
+version = "0.1.0"
+description = "Convert structured Data Science notebooks into reviewable Kedro projects."
+readme = "README.md"
+requires-python = ">=3.11,<3.14"
+license = { file = "LICENSE" }
+authors = [
+    { name = "Mickael Vo", email = "mickael.vo@telecom-paris.fr" },
+]
+keywords = ["ast", "data-science", "jupyter", "kedro", "mlops"]
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Typing :: Typed",
+]
+dependencies = [
+    "nbformat>=5.10,<6",
+]
+
+[project.urls]
+Documentation = "https://github.com/MipeyV/notebook-to-kedro#readme"
+Issues = "https://github.com/MipeyV/notebook-to-kedro/issues"
+Repository = "https://github.com/MipeyV/notebook-to-kedro"
+
+[dependency-groups]
+lint = [
+    "mypy>=1.19,<2",
+    "pre-commit>=4.3,<5",
+    "ruff>=0.14,<1",
+]
+test = [
+    "ipykernel>=7.1,<8",
+    "kedro>=1.5,<2",
+    "nbclient>=0.10,<1",
+    "pandas>=2.2,<4",
+    "pytest>=9,<10",
+    "pytest-cov>=7,<8",
+    "scikit-learn>=1.7,<2",
+]
+dev = [
+    { include-group = "lint" },
+    { include-group = "test" },
+]
+
+[tool.uv]
+default-groups = ["dev"]
+required-version = ">=0.12,<0.13"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/notebook_to_kedro"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+extend-exclude = ["tests/fixtures/notebooks"]
+
+[tool.ruff.lint]
+select = [
+    "A",
+    "ANN",
+    "ARG",
+    "B",
+    "C4",
+    "D",
+    "E",
+    "F",
+    "FA",
+    "FBT",
+    "I",
+    "ICN",
+    "N",
+    "PERF",
+    "PIE",
+    "PL",
+    "PT",
+    "PTH",
+    "PYI",
+    "RSE",
+    "RUF",
+    "SIM",
+    "T10",
+    "T20",
+    "TC",
+    "UP",
+    "W",
+]
+ignore = [
+    "D203",
+    "D213",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["ANN", "D", "PLR2004", "S101"]
+
+[tool.ruff.format]
+docstring-code-format = true
+line-ending = "lf"
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+files = ["src", "tests"]
+exclude = ["tests/fixtures"]
+warn_unreachable = true
+
+[tool.pytest.ini_options]
+addopts = [
+    "--strict-config",
+    "--strict-markers",
+    "--cov=notebook_to_kedro",
+    "--cov-report=term-missing",
+    "--cov-fail-under=100",
+]
+testpaths = ["tests"]
+markers = [
+    "end_to_end: complete notebook-to-Kedro equivalence tests",
+    "external: tests requiring an external service or network access",
+    "integration: tests crossing component or process boundaries",
+    "llm: tests invoking a real language model provider",
+]
+filterwarnings = [
+    "ignore:Proactor event loop does not implement add_reader.*:RuntimeWarning:zmq._future",
+]
+
+[tool.coverage.run]
+branch = true
+source = ["notebook_to_kedro"]
+
+[tool.coverage.report]
+exclude_also = [
+    "if TYPE_CHECKING:",
+    "if __name__ == .__main__.:",
+    "raise NotImplementedError",
+]
+show_missing = true
+skip_covered = true
