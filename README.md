@@ -179,7 +179,7 @@ Such suggestions would still pass through deterministic validation and be presen
 
 ## Project status
 
-The project is currently in its specification phase. No converter has been implemented yet.
+The project is currently implementing its deterministic analysis frontend. No converter has been implemented yet.
 
 The first technical milestone is a notebook analyzer that produces an inspectable intermediate representation without generating a Kedro project.
 
@@ -189,18 +189,26 @@ The first reference fixture runs a deterministic Iris classification workflow. I
 
 The planned module boundaries and test strategy are described in [docs/architecture.md](docs/architecture.md). Supported runtimes and library-support levels are defined in [docs/compatibility.md](docs/compatibility.md).
 
+The first versioned IR is implemented as immutable Python models with deterministic dictionary and JSON round trips:
+
+```python
+json_text = facts.to_json()
+restored = NotebookFacts.from_json(json_text)
+```
+
 Progress and architectural decisions are recorded chronologically in [JOURNAL.md](JOURNAL.md).
 
 ## Initial roadmap
 
-1. ✅ Formalize the supported notebook subset.
-2. Initialize the Python package and quality tooling.
-3. Load and validate notebooks.
-4. Analyze cells with Python's AST.
-5. Resolve dependencies and produce the intermediate representation.
-6. Generate a minimal Kedro project for controlled fixtures.
-7. Verify equivalence through observable outputs.
-8. Gradually add parameters, catalogs, and advanced diagnostics.
+1. [x] Formalize the supported notebook subset.
+2. [x] Initialize the Python package and quality tooling.
+3. [x] Implement the immutable intermediate representation and serialization.
+4. [ ] Load and validate notebooks.
+5. [ ] Analyze cells with Python's AST.
+6. [ ] Resolve cross-cell dependencies.
+7. [ ] Generate a minimal Kedro project for controlled fixtures.
+8. [ ] Verify equivalence through observable outputs.
+9. [ ] Gradually add semantic planning, parameters, catalogs, and advanced diagnostics.
 
 ## Contributing
 

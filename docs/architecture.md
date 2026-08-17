@@ -279,15 +279,15 @@ They require explicit credentials and run only in a protected workflow or manual
 
 ## Delivery increments
 
-1. Project tooling and package skeleton.
-2. Typed `NotebookFacts` models.
-3. Notebook loader.
-4. Cell-level AST analysis.
-5. Cross-cell dependency resolution.
-6. Facts serialization and analysis report.
-7. Fixture-backed semantic planning.
-8. Minimal Kedro generation.
-9. Notebook-to-Kedro equivalence testing.
-10. Optional real LLM provider integration.
+1. [x] Project tooling and package skeleton.
+2. [x] Typed `NotebookFacts` models and deterministic serialization.
+3. [ ] Notebook loader.
+4. [ ] Cell-level AST analysis.
+5. [ ] Cross-cell dependency resolution.
+6. [ ] Analysis report.
+7. [ ] Fixture-backed semantic planning.
+8. [ ] Minimal Kedro generation.
+9. [ ] Notebook-to-Kedro equivalence testing.
+10. [ ] Optional real LLM provider integration.
 
 Each increment must leave the repository linted, typed, tested, and documented.
