@@ -155,6 +155,7 @@ Development-only packages are separated by purpose:
 [dependency-groups]
 lint = [
     "mypy",
+    "pre-commit",
     "ruff",
 ]
 test = [

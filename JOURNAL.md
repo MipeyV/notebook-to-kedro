@@ -40,6 +40,40 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-08-17 — Project architecture and uv tooling initialized
+
+### Completed
+
+- Documented the source-module boundaries, dependency direction, and test architecture.
+- Defined Python, Kedro, notebook-format, and library-support compatibility levels.
+- Recorded uv adoption in the first architecture decision record.
+- Installed uv 0.12.5 and generated the cross-platform `uv.lock` file.
+- Created the `src/` package skeleton with typed-package metadata.
+- Configured Hatchling, Ruff, strict mypy, pytest, coverage, and pre-commit.
+- Added unit and integration test directories with automated Iris notebook execution.
+- Added a GitHub Actions matrix for Python 3.11, 3.12, and 3.13.
+- Built the source distribution and wheel successfully.
+
+### Decisions
+
+- Python 3.12 is the primary development and strict-typing version.
+- The initial compatibility matrix covers Python 3.11 through 3.13.
+- The published runtime depends only on `nbformat`; ML and Kedro packages remain test dependencies.
+- Kedro `>=1.5,<2` is the initial generated-project compatibility target.
+- CI runs deterministic tests across the Python matrix and the complete integration suite on Python 3.12.
+- GitHub Actions use a pinned `setup-uv` commit and a fixed uv version.
+- Line endings are normalized to LF for source, configuration, documentation, and notebook files.
+
+### Open questions
+
+- Decide when Python 3.10 and 3.14 should enter the compatibility matrix.
+- Define the first typed `NotebookFacts` implementation without prematurely adding Pydantic.
+- Add a second file-backed notebook fixture for Data Catalog coverage.
+
+### Next step
+
+- Implement the immutable `NotebookFacts` domain models and their deterministic JSON serialization.
+
 ## 2026-08-17 — Reference notebook made executable
 
 ### Completed
