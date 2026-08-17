@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from enum import StrEnum
 from pathlib import PurePosixPath
 from string import hexdigits
-from typing import TypeAlias
+from typing import Self, TypeAlias
 
 JsonPrimitive: TypeAlias = str | int | float | bool | None
 SHA256_HEX_LENGTH = 64
@@ -368,6 +368,39 @@ class NotebookFacts:
     symbols: tuple[SymbolFacts, ...] = ()
     dependencies: tuple[DependencyFacts, ...] = ()
     diagnostics: tuple[Diagnostic, ...] = ()
+
+    def to_dict(self) -> dict[str, object]:
+        """Return the canonical JSON-compatible representation."""
+        from notebook_to_kedro.ir.serialization import notebook_facts_to_dict  # noqa: PLC0415
+
+        return notebook_facts_to_dict(self)
+
+    def to_json(self, *, indent: int | None = 2) -> str:
+        """Serialize facts to deterministic JSON."""
+        from notebook_to_kedro.ir.serialization import notebook_facts_to_json  # noqa: PLC0415
+
+        return notebook_facts_to_json(self, indent=indent)
+
+    @classmethod
+    def from_dict(cls, payload: dict[str, object]) -> Self:
+        """Reconstruct facts from the canonical dictionary format."""
+        from notebook_to_kedro.ir.serialization import notebook_facts_from_dict  # noqa: PLC0415
+
+        return cls._require_matching_type(notebook_facts_from_dict(payload))
+
+    @classmethod
+    def from_json(cls, payload: str) -> Self:
+        """Reconstruct facts from canonical JSON."""
+        from notebook_to_kedro.ir.serialization import notebook_facts_from_json  # noqa: PLC0415
+
+        return cls._require_matching_type(notebook_facts_from_json(payload))
+
+    @classmethod
+    def _require_matching_type(cls, facts: "NotebookFacts") -> Self:
+        if cls is not NotebookFacts:
+            msg = "NotebookFacts deserialization does not support subclasses"
+            raise TypeError(msg)
+        return facts  # type: ignore[return-value]
 
     def __post_init__(self) -> None:
         _require_non_empty(self.schema_version, "schema_version")

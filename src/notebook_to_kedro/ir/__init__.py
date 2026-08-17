@@ -20,6 +20,12 @@ from notebook_to_kedro.ir.facts import (
     SymbolFacts,
     SymbolKind,
 )
+from notebook_to_kedro.ir.serialization import (
+    notebook_facts_from_dict,
+    notebook_facts_from_json,
+    notebook_facts_to_dict,
+    notebook_facts_to_json,
+)
 
 __all__ = [
     "CallFacts",
@@ -40,4 +46,8 @@ __all__ = [
     "SymbolAccess",
     "SymbolFacts",
     "SymbolKind",
+    "notebook_facts_from_dict",
+    "notebook_facts_from_json",
+    "notebook_facts_to_dict",
+    "notebook_facts_to_json",
 ]
