@@ -187,6 +187,8 @@ The initial deterministic analysis contract is documented in [docs/mvp-contract.
 
 The first reference fixture runs a deterministic Iris classification workflow. It provides a known-good baseline whose predictions and accuracy can later be compared with the generated Kedro pipeline.
 
+The planned module boundaries and test strategy are described in [docs/architecture.md](docs/architecture.md). Supported runtimes and library-support levels are defined in [docs/compatibility.md](docs/compatibility.md).
+
 Progress and architectural decisions are recorded chronologically in [JOURNAL.md](JOURNAL.md).
 
 ## Initial roadmap
