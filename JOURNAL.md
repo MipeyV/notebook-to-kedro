@@ -40,6 +40,34 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-08-17 — Reference notebook made executable
+
+### Completed
+
+- Replaced the nonexistent CSV input in `simple_training.ipynb` with scikit-learn's bundled Iris dataset.
+- Added a deterministic, stratified train/test split and fixed model random state.
+- Added a minimum accuracy assertion to make silent workflow regressions visible.
+- Executed the full notebook through a real Jupyter kernel without persisting generated outputs.
+- Confirmed an accuracy of `0.9` and 30 predictions on the test split.
+- Updated the facts schema examples to reflect the executable data-loading cell.
+
+### Decisions
+
+- The first fixture uses a bundled dataset so it remains deterministic and requires no runtime network access.
+- Notebook execution validation is separate from static analyzer tests, which must never execute source code.
+- A later fixture will exercise file-backed input and Kedro Data Catalog generation independently.
+- Future notebook-to-Kedro equivalence tests will compare observable values such as predictions and metrics, not only successful execution.
+
+### Open questions
+
+- Define the exact equivalence policy for floating-point metrics, arrays, and tabular outputs.
+- Select the file-backed dataset and dataset format for the Data Catalog fixture.
+- Decide whether executed reference outputs should be stored as snapshots or recomputed in CI.
+
+### Next step
+
+- Initialize the Python package and reproducible test dependencies, then automate reference-notebook execution in the test suite.
+
 ## 2026-08-16 — Deterministic analysis contract specified
 
 ### Completed

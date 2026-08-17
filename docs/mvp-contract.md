@@ -137,6 +137,8 @@ Milestone 1 is complete when:
 7. the implementation executes no notebook code;
 8. unit and integration tests pass in CI.
 
+The reference fixture itself is validated separately by executing it in a clean test environment. Analyzer tests must continue to operate without executing notebook code.
+
 ## Explicit non-goals
 
 Milestone 1 does not include:

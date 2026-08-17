@@ -69,10 +69,10 @@ Paths serialized in the document should use POSIX separators for portability. Ab
   "index": 3,
   "kind": "code",
   "execution_count": null,
-  "source": "df = pd.read_csv(\"data/customers.csv\")",
+  "source": "iris = load_iris(as_frame=True)\ndf = iris.frame",
   "statements": [],
-  "reads": ["pd"],
-  "writes": ["df"],
+  "reads": ["load_iris", "iris"],
+  "writes": ["iris", "df"],
   "imports": [],
   "calls": [],
   "diagnostic_codes": []
@@ -111,10 +111,10 @@ Lines are one-based and columns are zero-based, matching Python AST conventions.
   "id": "cell-0003-stmt-0000",
   "index": 0,
   "ast_type": "Assign",
-  "source": "df = pd.read_csv(\"data/customers.csv\")",
+  "source": "iris = load_iris(as_frame=True)",
   "location": {},
-  "reads": ["pd"],
-  "writes": ["df"],
+  "reads": ["load_iris"],
+  "writes": ["iris"],
   "calls": ["cell-0003-call-0000"],
   "conditional": false
 }
@@ -142,12 +142,14 @@ For `import pandas as pd`, `module` is `pandas`, `name` is `null`, and `bound_na
 ```json
 {
   "id": "cell-0003-call-0000",
-  "qualified_name": "pd.read_csv",
-  "receiver": "pd",
-  "method": "read_csv",
-  "positional_argument_sources": ["\"data/customers.csv\""],
-  "keyword_argument_sources": {},
-  "literal_arguments": ["data/customers.csv"],
+  "qualified_name": "load_iris",
+  "receiver": null,
+  "method": null,
+  "positional_argument_sources": [],
+  "keyword_argument_sources": {
+    "as_frame": "True"
+  },
+  "literal_arguments": [true],
   "possible_mutation_targets": [],
   "location": {}
 }
@@ -238,6 +240,7 @@ The implementation should include an explicit `blocking` boolean rather than inf
 The first fixture should demonstrate at least these dependencies:
 
 ```text
+iris (load cell)        → df assignment in the same cell
 df (load cell)          → df (feature cell)
 X, y (feature cell)     → train_test_split cell
 X_train, y_train        → training cell

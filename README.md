@@ -185,6 +185,8 @@ The first technical milestone is a notebook analyzer that produces an inspectabl
 
 The initial deterministic analysis contract is documented in [docs/mvp-contract.md](docs/mvp-contract.md), and its interchange model is defined in [docs/notebook-facts-schema.md](docs/notebook-facts-schema.md).
 
+The first reference fixture runs a deterministic Iris classification workflow. It provides a known-good baseline whose predictions and accuracy can later be compared with the generated Kedro pipeline.
+
 Progress and architectural decisions are recorded chronologically in [JOURNAL.md](JOURNAL.md).
 
 ## Initial roadmap
