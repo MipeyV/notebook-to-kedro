@@ -282,7 +282,7 @@ They require explicit credentials and run only in a protected workflow or manual
 1. [x] Project tooling and package skeleton.
 2. [x] Typed `NotebookFacts` models and deterministic serialization.
 3. [x] Notebook loader.
-4. [ ] Cell-level AST analysis.
+4. [x] Cell-level AST analysis.
 5. [ ] Cross-cell dependency resolution.
 6. [ ] Analysis report.
 7. [ ] Fixture-backed semantic planning.

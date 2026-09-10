@@ -40,6 +40,36 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-09-10 — Cell-level AST analysis implemented
+
+### Completed
+
+- Added a deterministic AST analyzer that consumes `LoadedNotebook` and returns `NotebookFacts`.
+- Preserved non-code cells while extracting code-cell statements, imports, calls, reads, and writes.
+- Recorded regular imports, from-imports, function definitions, class definitions, assignments, tuple/list unpacking writes, attribute reads, subscript reads, ordinary calls, and method calls.
+- Added blocking diagnostics for invalid Python syntax, Jupyter magics, shell escapes, and dynamic execution calls.
+- Added mutation warnings for known estimator-style mutating method calls such as `fit`.
+- Categorized discovered symbols as imports, data, functions, classes, or unknown reads.
+- Added unit tests for AST extraction and an integration test for the reference Iris notebook analysis.
+- Reached 100% statement and branch coverage with 112 passing tests.
+
+### Decisions
+
+- The analyzer returns `NotebookFacts` with empty dependency facts until cross-cell dependency resolution is implemented.
+- Cell-level reads include unresolved names as `unknown` symbols rather than emitting unresolved-dependency diagnostics in this increment.
+- Calls are represented syntactically; referenced notebook packages are never imported by the analyzer.
+- The initial mutation heuristic is deliberately narrow and currently covers selected estimator-style methods.
+
+### Open questions
+
+- Decide how broad the first mutation and side-effect heuristic should be beyond estimator-style method calls.
+- Decide whether unresolved local reads should emit `DF001` during symbol construction or only after dependency resolution.
+- Define how function body free variables should be reported once scope analysis is introduced.
+
+### Next step
+
+- Implement cross-cell symbol and dependency resolution from the collected cell-level reads and writes.
+
 ## 2026-09-10 — Notebook loader implemented
 
 ### Completed
