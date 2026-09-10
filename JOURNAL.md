@@ -40,6 +40,34 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-09-10 — Notebook loader implemented
+
+### Completed
+
+- Added a notebook loading boundary with immutable source models for loaded notebooks and cells.
+- Loaded notebooks through `nbformat` without converting their declared notebook format version.
+- Validated that notebooks use `nbformat` major version 4 and are identified as Python through language metadata or kernelspec metadata.
+- Preserved physical cell order, cell source, execution counters, kernel name, relative POSIX path, and source-content SHA-256.
+- Added stable `NB001` and `NB002` loader errors for unsupported loading and language cases.
+- Added unit tests for successful loading, rejected notebooks, defensive loader validation, and immutable loaded source models.
+- Reached 100% statement and branch coverage with 98 passing tests.
+
+### Decisions
+
+- The loader returns notebook source models rather than `NotebookFacts`; AST analysis remains a separate component.
+- Notebook format validation uses `nbformat.NO_CONVERT` so unsupported major versions are not silently upgraded during loading.
+- Loader cell IDs are derived from physical source order instead of trusting optional notebook cell IDs.
+- Paths emitted by the loader are relative to the selected project root when possible, with a file-name fallback outside that root.
+
+### Open questions
+
+- Decide whether loader errors should later be converted directly into `Diagnostic` records or remain exception-first until partial facts are available.
+- Decide which notebook metadata fields beyond language and kernel should be preserved for semantic planning.
+
+### Next step
+
+- Implement cell-level AST analysis for supported Python code cells without resolving cross-cell dependencies yet.
+
 ## 2026-08-17 — NotebookFacts intermediate representation implemented
 
 ### Completed
