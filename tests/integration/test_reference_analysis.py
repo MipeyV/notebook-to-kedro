@@ -2,6 +2,7 @@
 
 from pathlib import Path
 
+from notebook_to_kedro import analyze_notebook_path
 from notebook_to_kedro.analysis import analyze_notebook
 from notebook_to_kedro.ir import CellKind
 from notebook_to_kedro.notebook import load_notebook
@@ -34,3 +35,12 @@ def test_reference_notebook_static_analysis_extracts_reviewed_facts() -> None:
     } <= dependency_symbols
     assert "DF003" in {diagnostic.code for diagnostic in facts.diagnostics}
     assert any(call.qualified_name == "model.fit" for cell in code_cells for call in cell.calls)
+
+
+def test_public_api_analyzes_reference_notebook_path() -> None:
+    """The package-level API loads and analyzes a notebook path."""
+    facts = analyze_notebook_path(REFERENCE_NOTEBOOK)
+
+    assert facts.notebook.path == "tests/fixtures/notebooks/simple_training.ipynb"
+    assert len(facts.cells) == 12
+    assert any(dependency.symbol == "model" for dependency in facts.dependencies)

@@ -200,6 +200,14 @@ The notebook loader now validates local Jupyter notebooks, rejects unsupported f
 
 The analyzer extracts imports, top-level statements, reads, writes, calls, and blocking syntax diagnostics from loaded notebooks. It resolves cross-cell dependencies by linking reads to the most recent earlier data definition.
 
+The package now exposes a public analysis entrypoint that loads a notebook path and returns deterministic `NotebookFacts`:
+
+```python
+from notebook_to_kedro import analyze_notebook_path
+
+facts = analyze_notebook_path("notebooks/model.ipynb")
+```
+
 Progress and architectural decisions are recorded chronologically in [JOURNAL.md](JOURNAL.md).
 
 ## Initial roadmap
