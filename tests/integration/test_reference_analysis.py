@@ -18,9 +18,19 @@ def test_reference_notebook_static_analysis_extracts_reviewed_facts() -> None:
 
     assert len(facts.cells) == 12
     assert len(code_cells) == 7
-    assert facts.dependencies == ()
+    dependency_symbols = {dependency.symbol for dependency in facts.dependencies}
     assert facts.notebook.path == "tests/fixtures/notebooks/simple_training.ipynb"
     assert {"load_iris", "train_test_split", "RandomForestClassifier"} <= symbols.keys()
     assert {"df", "X", "y", "X_train", "model", "predictions", "accuracy"} <= symbols.keys()
+    assert {
+        "df",
+        "X",
+        "y",
+        "X_train",
+        "y_train",
+        "model",
+        "X_test",
+        "predictions",
+    } <= dependency_symbols
     assert "DF003" in {diagnostic.code for diagnostic in facts.diagnostics}
     assert any(call.qualified_name == "model.fit" for cell in code_cells for call in cell.calls)

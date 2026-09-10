@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import ast
 import builtins
-from collections import defaultdict
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
 
+from notebook_to_kedro.analysis.dependencies import resolve_dependencies
 from notebook_to_kedro.ir import (
     CallFacts,
     CellFacts,
@@ -24,9 +24,6 @@ from notebook_to_kedro.ir import (
     Severity,
     SourceLocation,
     StatementFacts,
-    SymbolAccess,
-    SymbolFacts,
-    SymbolKind,
 )
 from notebook_to_kedro.notebook import LoadedCell, LoadedNotebook, NotebookCellKind
 
@@ -36,18 +33,19 @@ MUTATING_METHODS = frozenset({"fit", "fit_transform", "partial_fit"})
 
 
 def analyze_notebook(notebook: LoadedNotebook) -> NotebookFacts:
-    """Analyze loaded notebook cells and return source facts without dependencies."""
+    """Analyze loaded notebook cells and resolve source facts."""
     diagnostics: list[Diagnostic] = []
     analyzed_cells: list[CellFacts] = []
-    definitions: dict[str, list[SymbolAccess]] = defaultdict(list)
-    reads: dict[str, list[SymbolAccess]] = defaultdict(list)
-    symbol_kinds: dict[str, SymbolKind] = {}
 
     for loaded_cell in notebook.cells:
         cell, cell_diagnostics = _analyze_cell(loaded_cell)
         analyzed_cells.append(cell)
         diagnostics.extend(cell_diagnostics)
-        _collect_symbol_accesses(cell, definitions, reads, symbol_kinds)
+
+    cells, symbols, dependencies, resolved_diagnostics = resolve_dependencies(
+        tuple(analyzed_cells),
+        tuple(diagnostics),
+    )
 
     return NotebookFacts(
         schema_version="1.0",
@@ -61,10 +59,10 @@ def analyze_notebook(notebook: LoadedNotebook) -> NotebookFacts:
             cell_count=notebook.cell_count,
             content_sha256=notebook.content_sha256,
         ),
-        cells=tuple(analyzed_cells),
-        symbols=_build_symbols(definitions, reads, symbol_kinds),
-        dependencies=(),
-        diagnostics=tuple(diagnostics),
+        cells=cells,
+        symbols=symbols,
+        dependencies=dependencies,
+        diagnostics=resolved_diagnostics,
     )
 
 
@@ -289,6 +287,8 @@ def _literal_arguments(call: ast.Call) -> tuple[str | int | float | bool | None,
 def _statement_reads(statement: ast.stmt) -> tuple[str, ...]:
     if isinstance(statement, ast.Import | ast.ImportFrom):
         return ()
+    if isinstance(statement, ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef):
+        return ()
     reads: list[str] = []
     for node in ast.walk(statement):
         if (
@@ -316,53 +316,6 @@ def _statement_writes(statement: ast.stmt) -> tuple[str, ...]:
         for node in ast.walk(statement)
         if isinstance(node, ast.Name) and isinstance(node.ctx, ast.Store)
     )
-
-
-def _collect_symbol_accesses(
-    cell: CellFacts,
-    definitions: dict[str, list[SymbolAccess]],
-    reads: dict[str, list[SymbolAccess]],
-    symbol_kinds: dict[str, SymbolKind],
-) -> None:
-    import_names = {import_.bound_name for import_ in cell.imports}
-    for statement in cell.statements:
-        access = SymbolAccess(cell.index, statement.id)
-        for name in statement.writes:
-            definitions[name].append(access)
-            symbol_kind = _symbol_kind_for_write(name, statement.ast_type, import_names)
-            symbol_kinds.setdefault(name, symbol_kind)
-        for name in statement.reads:
-            reads[name].append(access)
-
-
-def _build_symbols(
-    definitions: dict[str, list[SymbolAccess]],
-    reads: dict[str, list[SymbolAccess]],
-    symbol_kinds: dict[str, SymbolKind],
-) -> tuple[SymbolFacts, ...]:
-    names = sorted(set(definitions) | set(reads))
-    symbols: list[SymbolFacts] = []
-    for name in names:
-        name_definitions = tuple(definitions.get(name, ()))
-        symbols.append(
-            SymbolFacts(
-                name=name,
-                kind=symbol_kinds.get(name, SymbolKind.UNKNOWN),
-                definitions=name_definitions,
-                reads=tuple(reads.get(name, ())),
-            )
-        )
-    return tuple(symbols)
-
-
-def _symbol_kind_for_write(name: str, ast_type: str, import_names: set[str]) -> SymbolKind:
-    if name in import_names:
-        return SymbolKind.IMPORT
-    if ast_type in {"FunctionDef", "AsyncFunctionDef"}:
-        return SymbolKind.FUNCTION
-    if ast_type == "ClassDef":
-        return SymbolKind.CLASS
-    return SymbolKind.DATA
 
 
 def _iter_calls(statement: ast.stmt) -> Iterable[ast.Call]:
