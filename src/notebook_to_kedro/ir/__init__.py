@@ -1,0 +1,53 @@
+"""Intermediate representation contracts."""
+
+from notebook_to_kedro.ir.facts import (
+    CallFacts,
+    CellFacts,
+    CellKind,
+    DependencyFacts,
+    Diagnostic,
+    DiagnosticDetail,
+    ImportFacts,
+    ImportKind,
+    JsonPrimitive,
+    KeywordArgument,
+    NotebookFacts,
+    NotebookMetadata,
+    Severity,
+    SourceLocation,
+    StatementFacts,
+    SymbolAccess,
+    SymbolFacts,
+    SymbolKind,
+)
+from notebook_to_kedro.ir.serialization import (
+    notebook_facts_from_dict,
+    notebook_facts_from_json,
+    notebook_facts_to_dict,
+    notebook_facts_to_json,
+)
+
+__all__ = [
+    "CallFacts",
+    "CellFacts",
+    "CellKind",
+    "DependencyFacts",
+    "Diagnostic",
+    "DiagnosticDetail",
+    "ImportFacts",
+    "ImportKind",
+    "JsonPrimitive",
+    "KeywordArgument",
+    "NotebookFacts",
+    "NotebookMetadata",
+    "Severity",
+    "SourceLocation",
+    "StatementFacts",
+    "SymbolAccess",
+    "SymbolFacts",
+    "SymbolKind",
+    "notebook_facts_from_dict",
+    "notebook_facts_from_json",
+    "notebook_facts_to_dict",
+    "notebook_facts_to_json",
+]

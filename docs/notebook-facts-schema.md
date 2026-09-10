@@ -217,6 +217,7 @@ A dependency represents a name-flow edge. It does not imply serialization, objec
   "code": "DF003",
   "severity": "warning",
   "message": "Method call may mutate 'model'.",
+  "blocking": false,
   "location": {},
   "related_symbol": "model",
   "details": {
@@ -230,10 +231,23 @@ A dependency represents a name-flow edge. It does not imply serialization, objec
 - `severity` is one of `info`, `warning`, or `error`.
 - `message` is human-readable and written in English.
 - `code` is stable and machine-readable.
+- `blocking` explicitly controls whether semantic planning may continue.
 - `details` contains JSON-compatible structured context.
-- error diagnostics marked as blocking prevent semantic planning.
+- diagnostics marked as blocking prevent semantic planning regardless of severity.
 
-The implementation should include an explicit `blocking` boolean rather than infer it from severity if non-blocking errors are ever introduced.
+## Python API
+
+The immutable models are implemented with frozen, slotted dataclasses and expose deterministic serialization helpers:
+
+```python
+payload = facts.to_dict()
+json_text = facts.to_json()
+
+restored_from_dict = NotebookFacts.from_dict(payload)
+restored_from_json = NotebookFacts.from_json(json_text)
+```
+
+Deserialization reconstructs the same typed models and reapplies every invariant. The canonical JSON representation sorts object keys, preserves ordered arrays, keeps Unicode text readable, and never serializes an absolute notebook path.
 
 ## Expected facts for the reference notebook
 

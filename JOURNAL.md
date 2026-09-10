@@ -40,6 +40,37 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-08-17 — NotebookFacts intermediate representation implemented
+
+### Completed
+
+- Implemented frozen, slotted dataclasses for notebook metadata, cells, statements, imports, calls, symbols, dependencies, and diagnostics.
+- Added explicit enums for cell, import, symbol, and diagnostic categories.
+- Enforced local and document-wide invariants at construction time.
+- Implemented deterministic dictionary and JSON serialization.
+- Implemented validated deserialization from dictionaries and JSON.
+- Added unit and contract tests covering the complete public interchange schema.
+- Reached 100% statement and branch coverage with 62 passing tests.
+
+### Decisions
+
+- The IR uses standard-library dataclasses rather than Pydantic for the deterministic core.
+- Source facts are immutable after construction.
+- Diagnostic blocking behavior is explicit and independent from severity.
+- Notebook paths are relative and use POSIX separators in serialized output.
+- Arbitrary nested diagnostic metadata is deferred; schema 1.0 supports immutable JSON primitives.
+- Deserialization of `NotebookFacts` subclasses is rejected until an extension contract exists.
+
+### Open questions
+
+- Determine whether future schema versions need nested diagnostic detail values.
+- Define the migration policy before publishing a second schema version.
+- Decide which notebook metadata fields beyond kernel and language are relevant to semantic planning.
+
+### Next step
+
+- Implement the notebook loader that validates `nbformat` 4 Python notebooks and produces normalized cell source models without AST analysis.
+
 ## 2026-08-17 — Project architecture and uv tooling initialized
 
 ### Completed
