@@ -40,6 +40,34 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-09-10 — Generated pipeline equivalence test implemented
+
+### Completed
+
+- Added an end-to-end test for the reference notebook-to-Kedro path.
+- Executed the source notebook with `nbclient` to obtain the expected final accuracy.
+- Generated a Kedro project from `plan_notebook_path` and `generate_kedro_project`.
+- Imported the generated pipeline package from the temporary project source tree.
+- Ran the generated Kedro pipeline with `SequentialRunner` and in-memory datasets.
+- Compared the generated pipeline's final `accuracy` output with the executed notebook output.
+- Reached 100% statement and branch coverage with 130 passing tests.
+
+### Decisions
+
+- The first equivalence check compares the final accuracy because it is the stable observable output already exposed by the reference notebook.
+- The generated pipeline is executed in memory to avoid introducing catalog files before the file-backed dataset fixture exists.
+- Intermediate predictions are not compared yet because Kedro may release intermediate in-memory datasets after execution.
+
+### Open questions
+
+- Decide which intermediate artifacts should be persisted or captured for richer equivalence checks.
+- Add a file-backed fixture before implementing catalog generation.
+- Decide how to separate fast default tests from heavier end-to-end validation as the suite grows.
+
+### Next step
+
+- Add a second fixture with file-backed tabular input and generate a minimal Kedro catalog for it.
+
 ## 2026-09-10 — Minimal Kedro project skeleton generator implemented
 
 ### Completed

@@ -289,7 +289,7 @@ They require explicit credentials and run only in a protected workflow or manual
 6. [x] Public analysis API.
 7. [x] Deterministic task planning.
 8. [x] Minimal Kedro project skeleton generation.
-9. [ ] Notebook-to-Kedro equivalence testing.
+9. [x] Reference notebook-to-Kedro equivalence testing.
 10. [ ] Optional real LLM provider integration.
 
 Each increment must leave the repository linted, typed, tested, and documented.
