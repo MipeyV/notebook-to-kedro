@@ -40,6 +40,30 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-09-10 — Public analysis API implemented
+
+### Completed
+
+- Added `analyze_notebook_path` as the package-level entrypoint for loading and analyzing a notebook path.
+- Reused the existing validated notebook loader and deterministic analyzer instead of adding a separate analysis path.
+- Added unit coverage for the root package export.
+- Added integration coverage for analyzing the reference notebook through the public API.
+
+### Decisions
+
+- The public API accepts file paths while the lower-level analyzer continues to accept an already loaded notebook model.
+- The API returns `NotebookFacts` directly so downstream planning and reporting can build on the same canonical IR.
+- CLI commands and human-readable reports remain out of scope for this increment.
+
+### Open questions
+
+- Decide whether the first user-facing report should be JSON-only, Markdown, or a typed report model.
+- Decide how loader exceptions should be surfaced once a CLI or conversion report exists.
+
+### Next step
+
+- Implement a minimal task planner that groups analyzable code cells into Kedro-oriented task candidates without generating project files yet.
+
 ## 2026-09-10 — Cross-cell dependency resolution implemented
 
 ### Completed
