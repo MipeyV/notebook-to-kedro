@@ -82,7 +82,8 @@ from notebook_to_kedro import analyze, convert
 Initial milestone:
 
 ```python
-facts = analyze("notebooks/model.ipynb")
+facts = analyze_notebook_path("notebooks/model.ipynb")
+plan = plan_notebook_path("notebooks/model.ipynb")
 ```
 
 Target API:
@@ -284,8 +285,8 @@ They require explicit credentials and run only in a protected workflow or manual
 3. [x] Notebook loader.
 4. [x] Cell-level AST analysis.
 5. [x] Cross-cell dependency resolution.
-6. [ ] Analysis report.
-7. [ ] Fixture-backed semantic planning.
+6. [x] Public analysis API.
+7. [x] Deterministic task planning.
 8. [ ] Minimal Kedro generation.
 9. [ ] Notebook-to-Kedro equivalence testing.
 10. [ ] Optional real LLM provider integration.

@@ -40,6 +40,34 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-09-10 — Minimal task planner implemented
+
+### Completed
+
+- Added immutable `ConversionPlan` and `TaskCandidate` contracts for proposed Kedro-oriented tasks.
+- Added a deterministic `plan_tasks` planner that creates one task candidate per analyzable code cell with data outputs.
+- Skipped markdown, raw, empty, and import-only cells.
+- Derived task inputs from resolved dependencies plus unresolved non-import reads that still require review.
+- Exposed `plan_notebook_path` as a package-level API that loads, analyzes, and plans a notebook path.
+- Added unit and integration coverage for planning the reference notebook.
+
+### Decisions
+
+- The first planner is deterministic and does not use an LLM.
+- Planning stops when blocking diagnostics are present in the source facts.
+- Task names are stable cell-derived identifiers until semantic naming is introduced.
+- The planner proposes task boundaries only; Kedro files are not generated in this increment.
+
+### Open questions
+
+- Decide how task candidates should be reviewed and renamed before generation.
+- Decide how imports should be represented in the future generated module.
+- Decide whether adjacent code cells should be merged before Kedro node generation.
+
+### Next step
+
+- Implement minimal Kedro project generation from reviewed task candidates for the controlled reference fixture.
+
 ## 2026-09-10 — Public analysis API implemented
 
 ### Completed

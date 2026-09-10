@@ -1,6 +1,6 @@
 """Package metadata tests."""
 
-from notebook_to_kedro import __version__, analyze_notebook_path
+from notebook_to_kedro import __version__, analyze_notebook_path, plan_notebook_path
 
 
 def test_package_exposes_version() -> None:
@@ -12,3 +12,9 @@ def test_package_exposes_public_analysis_api() -> None:
     """The package root exposes the notebook path analysis entrypoint."""
     assert analyze_notebook_path.__name__ == "analyze_notebook_path"
     assert callable(analyze_notebook_path)
+
+
+def test_package_exposes_public_planning_api() -> None:
+    """The package root exposes the notebook path planning entrypoint."""
+    assert plan_notebook_path.__name__ == "plan_notebook_path"
+    assert callable(plan_notebook_path)
