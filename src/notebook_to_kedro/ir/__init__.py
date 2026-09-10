@@ -20,6 +20,7 @@ from notebook_to_kedro.ir.facts import (
     SymbolFacts,
     SymbolKind,
 )
+from notebook_to_kedro.ir.plan import ConversionPlan, TaskCandidate
 from notebook_to_kedro.ir.serialization import (
     notebook_facts_from_dict,
     notebook_facts_from_json,
@@ -31,6 +32,7 @@ __all__ = [
     "CallFacts",
     "CellFacts",
     "CellKind",
+    "ConversionPlan",
     "DependencyFacts",
     "Diagnostic",
     "DiagnosticDetail",
@@ -46,6 +48,7 @@ __all__ = [
     "SymbolAccess",
     "SymbolFacts",
     "SymbolKind",
+    "TaskCandidate",
     "notebook_facts_from_dict",
     "notebook_facts_from_json",
     "notebook_facts_to_dict",
