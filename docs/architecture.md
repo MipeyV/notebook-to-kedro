@@ -84,6 +84,7 @@ Initial milestone:
 ```python
 facts = analyze_notebook_path("notebooks/model.ipynb")
 plan = plan_notebook_path("notebooks/model.ipynb")
+created_files = generate_kedro_project(plan, "generated/model_project")
 ```
 
 Target API:
@@ -287,7 +288,7 @@ They require explicit credentials and run only in a protected workflow or manual
 5. [x] Cross-cell dependency resolution.
 6. [x] Public analysis API.
 7. [x] Deterministic task planning.
-8. [ ] Minimal Kedro generation.
+8. [x] Minimal Kedro project skeleton generation.
 9. [ ] Notebook-to-Kedro equivalence testing.
 10. [ ] Optional real LLM provider integration.
 

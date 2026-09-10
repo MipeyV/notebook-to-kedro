@@ -28,6 +28,7 @@ def plan_tasks(facts: NotebookFacts) -> ConversionPlan:
             planner_version=PLANNER_VERSION,
             notebook_path=facts.notebook.path,
             task_candidates=(),
+            imports=_imports(facts),
             blocking_diagnostic_codes=blocking_codes,
         )
 
@@ -54,6 +55,7 @@ def plan_tasks(facts: NotebookFacts) -> ConversionPlan:
         planner_version=PLANNER_VERSION,
         notebook_path=facts.notebook.path,
         task_candidates=candidates,
+        imports=_imports(facts),
     )
 
 
@@ -94,6 +96,15 @@ def _task_candidate(
 def _blocking_diagnostic_codes(facts: NotebookFacts) -> tuple[str, ...]:
     return _ordered_names(
         diagnostic.code for diagnostic in facts.diagnostics if diagnostic.blocking
+    )
+
+
+def _imports(facts: NotebookFacts) -> tuple[str, ...]:
+    return tuple(
+        statement.source
+        for cell in facts.cells
+        for statement in cell.statements
+        if statement.ast_type in {"Import", "ImportFrom"}
     )
 
 

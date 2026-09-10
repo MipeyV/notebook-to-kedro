@@ -216,6 +216,14 @@ from notebook_to_kedro import plan_notebook_path
 plan = plan_notebook_path("notebooks/model.ipynb")
 ```
 
+The first Kedro generator writes an importable minimal project skeleton from a `ConversionPlan`:
+
+```python
+from notebook_to_kedro import generate_kedro_project
+
+generate_kedro_project(plan, "generated/model_project")
+```
+
 Progress and architectural decisions are recorded chronologically in [JOURNAL.md](JOURNAL.md).
 
 ## Initial roadmap
@@ -227,7 +235,7 @@ Progress and architectural decisions are recorded chronologically in [JOURNAL.md
 5. [x] Analyze cells with Python's AST.
 6. [x] Resolve cross-cell dependencies.
 7. [x] Plan minimal Kedro-oriented task candidates.
-8. [ ] Generate a minimal Kedro project for controlled fixtures.
+8. [x] Generate a minimal Kedro project skeleton for controlled fixtures.
 9. [ ] Verify equivalence through observable outputs.
 10. [ ] Gradually add semantic planning, parameters, catalogs, and advanced diagnostics.
 
