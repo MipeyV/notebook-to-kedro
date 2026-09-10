@@ -9,3 +9,7 @@ class NotebookLoadError(ValueError):
         super().__init__(f"{code}: {message}")
         self.code = code
         self.message = message
+
+
+class ProjectGenerationError(ValueError):
+    """Raised when a generated project cannot be written safely."""

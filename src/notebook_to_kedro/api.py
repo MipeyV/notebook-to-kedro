@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from notebook_to_kedro.analysis import analyze_notebook
+from notebook_to_kedro.generation import generate_kedro_project
 from notebook_to_kedro.notebook import load_notebook
 from notebook_to_kedro.semantic import plan_tasks
 
@@ -26,3 +27,6 @@ def plan_notebook_path(
 ) -> ConversionPlan:
     """Load and analyze a notebook path, then return deterministic task candidates."""
     return plan_tasks(analyze_notebook_path(path, project_root=project_root))
+
+
+__all__ = ["analyze_notebook_path", "generate_kedro_project", "plan_notebook_path"]

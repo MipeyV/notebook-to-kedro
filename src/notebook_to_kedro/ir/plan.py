@@ -25,4 +25,5 @@ class ConversionPlan:
     planner_version: str
     notebook_path: str
     task_candidates: tuple[TaskCandidate, ...]
+    imports: tuple[str, ...] = ()
     blocking_diagnostic_codes: tuple[str, ...] = ()

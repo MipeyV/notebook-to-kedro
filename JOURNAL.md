@@ -40,6 +40,36 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-09-10 — Minimal Kedro project skeleton generator implemented
+
+### Completed
+
+- Added a Kedro generation boundary that consumes `ConversionPlan`.
+- Generated a minimal project skeleton with `pyproject.toml`, package files, pipeline registry, nodes, and pipeline definition.
+- Rendered task candidates as node functions while preserving source code and notebook imports.
+- Remapped repeated symbol outputs to unique Kedro dataset names such as `df__cell_0005`.
+- Rejected existing destinations to avoid silent overwrites.
+- Rejected generation when blocking diagnostics are present.
+- Exposed `generate_kedro_project` through the package-level API.
+- Added tests that import the generated Kedro pipeline and verify the reference fixture produces six nodes.
+
+### Decisions
+
+- The first generator targets an importable skeleton before running a full Kedro project.
+- Generated project dependencies include Kedro, pandas, and scikit-learn for the controlled reference fixture.
+- Dataset names are derived from source symbols, with version suffixes only when a symbol is redefined.
+- Catalog generation, parameter extraction, and project execution are deferred to later increments.
+
+### Open questions
+
+- Decide how generated projects should declare catalog entries for file-backed datasets.
+- Decide how task candidates should be reviewed or renamed before rendering production node names.
+- Decide whether mutable estimator flows should remain single-cell nodes or become explicit train/predict abstractions.
+
+### Next step
+
+- Add an end-to-end fixture that executes the generated Kedro pipeline and compares observable outputs with the source notebook.
+
 ## 2026-09-10 — Minimal task planner implemented
 
 ### Completed
