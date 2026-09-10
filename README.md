@@ -198,7 +198,7 @@ restored = NotebookFacts.from_json(json_text)
 
 The notebook loader now validates local Jupyter notebooks, rejects unsupported formats and non-Python notebooks with stable diagnostic codes, and returns normalized source cells without executing or analyzing notebook code.
 
-The first cell-level AST analyzer extracts imports, top-level statements, reads, writes, calls, and blocking syntax diagnostics from loaded notebooks. Cross-cell dependency resolution is intentionally left to the next increment.
+The analyzer extracts imports, top-level statements, reads, writes, calls, and blocking syntax diagnostics from loaded notebooks. It resolves cross-cell dependencies by linking reads to the most recent earlier data definition.
 
 Progress and architectural decisions are recorded chronologically in [JOURNAL.md](JOURNAL.md).
 
@@ -209,7 +209,7 @@ Progress and architectural decisions are recorded chronologically in [JOURNAL.md
 3. [x] Implement the immutable intermediate representation and serialization.
 4. [x] Load and validate notebooks.
 5. [x] Analyze cells with Python's AST.
-6. [ ] Resolve cross-cell dependencies.
+6. [x] Resolve cross-cell dependencies.
 7. [ ] Generate a minimal Kedro project for controlled fixtures.
 8. [ ] Verify equivalence through observable outputs.
 9. [ ] Gradually add semantic planning, parameters, catalogs, and advanced diagnostics.

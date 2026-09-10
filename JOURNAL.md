@@ -40,6 +40,36 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-09-10 — Cross-cell dependency resolution implemented
+
+### Completed
+
+- Added a dependency resolver that links a statement read to the most recent earlier data definition in physical cell order.
+- Integrated dependency resolution into the deterministic analyzer output.
+- Kept same-cell reads represented as statement facts without producing cross-cell dependency edges.
+- Ignored imported names as dependency producers while still satisfying reads of imported bindings.
+- Added `DF001` diagnostics for reads without a known producer or import binding.
+- Added `DF002` diagnostics for repeated top-level data definitions.
+- Updated the reference notebook analysis integration test to assert reviewed dependency symbols.
+- Reached 100% statement and branch coverage with 116 passing tests.
+
+### Decisions
+
+- Dependency facts are cross-cell edges only because the current IR requires producer cells to precede consumer cells.
+- The resolver uses physical source order and does not inspect execution counters or runtime object identity.
+- Imported names remain symbol facts of kind `import` but do not produce dependency facts.
+- Same-statement writes do not satisfy reads from that same statement.
+
+### Open questions
+
+- Decide whether same-cell producer/consumer relationships need their own fact type in a future schema version.
+- Decide when execution counter inconsistency should emit `NB003`.
+- Refine unresolved-read handling once local scope and function-body free-variable analysis are implemented.
+
+### Next step
+
+- Implement an analysis report or public `analyze` API that loads a notebook path and returns `NotebookFacts`.
+
 ## 2026-09-10 — Cell-level AST analysis implemented
 
 ### Completed

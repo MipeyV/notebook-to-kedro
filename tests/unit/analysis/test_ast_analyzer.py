@@ -95,10 +95,16 @@ def test_analyze_notebook_extracts_method_calls_and_mutation_warning() -> None:
     assert facts.cells[0].calls[0].method == "fit"
     assert facts.cells[0].calls[0].positional_argument_sources == ("X_train", "y_train")
     assert facts.cells[0].calls[0].possible_mutation_targets == ("model",)
-    assert facts.cells[0].diagnostic_codes == ("DF003",)
-    assert facts.diagnostics[0].code == "DF003"
-    assert facts.diagnostics[0].severity is Severity.WARNING
-    assert facts.diagnostics[0].related_symbol == "model"
+    assert facts.cells[0].diagnostic_codes == ("DF003", "DF001")
+    mutation_diagnostic = next(
+        diagnostic for diagnostic in facts.diagnostics if diagnostic.code == "DF003"
+    )
+    unresolved_symbols = {
+        diagnostic.related_symbol for diagnostic in facts.diagnostics if diagnostic.code == "DF001"
+    }
+    assert mutation_diagnostic.severity is Severity.WARNING
+    assert mutation_diagnostic.related_symbol == "model"
+    assert {"model", "X_train", "y_train", "X_test"} <= unresolved_symbols
 
 
 def test_analyze_notebook_reports_magic_before_python_parsing() -> None:
@@ -132,8 +138,8 @@ def test_analyze_notebook_reports_dynamic_execution_calls() -> None:
     assert facts.diagnostics[0].details[0].value == "exec"
 
 
-def test_analyze_notebook_builds_symbols_without_cross_cell_dependencies() -> None:
-    """Cell-level analysis records accesses but leaves dependency resolution empty."""
+def test_analyze_notebook_builds_symbols_and_cross_cell_dependencies() -> None:
+    """Reads link to the latest earlier producer across physical cell order."""
     notebook = _loaded_notebook(
         _code_cell("value = 1", index=0),
         _code_cell("other = value + missing", index=1),
@@ -147,7 +153,12 @@ def test_analyze_notebook_builds_symbols_without_cross_cell_dependencies() -> No
     assert symbols["value"].reads[0].cell_index == 1
     assert symbols["missing"].kind is SymbolKind.UNKNOWN
     assert symbols["other"].kind is SymbolKind.DATA
-    assert facts.dependencies == ()
+    assert len(facts.dependencies) == 1
+    assert facts.dependencies[0].symbol == "value"
+    assert facts.dependencies[0].producer.cell_index == 0
+    assert facts.dependencies[0].consumer.cell_index == 1
+    assert facts.diagnostics[0].code == "DF001"
+    assert facts.diagnostics[0].related_symbol == "missing"
 
 
 def test_analyze_notebook_marks_import_symbols() -> None:
@@ -213,6 +224,54 @@ def test_analyze_notebook_keeps_only_json_primitive_literal_arguments() -> None:
     facts = analyze_notebook(_loaded_notebook(_code_cell("func(1, [2], flag=False, name='x')")))
 
     assert facts.cells[0].calls[0].literal_arguments == (1, False, "x")
+
+
+def test_analyze_notebook_uses_most_recent_definition() -> None:
+    """A read depends on the most recent previous definition of a symbol."""
+    notebook = _loaded_notebook(
+        _code_cell("value = 1", index=0),
+        _code_cell("value = 2", index=1),
+        _code_cell("result = value", index=2),
+    )
+
+    facts = analyze_notebook(notebook)
+
+    assert facts.dependencies[0].symbol == "value"
+    assert facts.dependencies[0].producer.cell_index == 1
+    assert facts.dependencies[0].consumer.cell_index == 2
+    assert facts.diagnostics[0].code == "DF002"
+    assert facts.diagnostics[0].related_symbol == "value"
+    assert facts.cells[1].diagnostic_codes == ("DF002",)
+
+
+def test_analyze_notebook_does_not_create_dependencies_for_import_reads() -> None:
+    """Imported names satisfy reads without becoming data dependencies."""
+    notebook = _loaded_notebook(
+        _code_cell("import pathlib", index=0),
+        _code_cell("path = pathlib.Path('.')", index=1),
+    )
+
+    facts = analyze_notebook(notebook)
+
+    assert facts.dependencies == ()
+    assert facts.diagnostics == ()
+
+
+def test_analyze_notebook_does_not_create_same_cell_dependencies() -> None:
+    """Same-cell reads are represented in facts but not as cross-cell dependency edges."""
+    facts = analyze_notebook(_loaded_notebook(_code_cell("value = 1\nother = value")))
+
+    assert facts.dependencies == ()
+    assert facts.diagnostics == ()
+
+
+def test_analyze_notebook_reports_self_assignment_without_prior_definition() -> None:
+    """A write in the same statement does not satisfy that statement's read."""
+    facts = analyze_notebook(_loaded_notebook(_code_cell("value = value + 1")))
+
+    assert facts.dependencies == ()
+    assert facts.diagnostics[0].code == "DF001"
+    assert facts.diagnostics[0].related_symbol == "value"
 
 
 def test_analyzer_helper_fallbacks_cover_ast_edge_shapes() -> None:

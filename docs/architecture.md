@@ -283,7 +283,7 @@ They require explicit credentials and run only in a protected workflow or manual
 2. [x] Typed `NotebookFacts` models and deterministic serialization.
 3. [x] Notebook loader.
 4. [x] Cell-level AST analysis.
-5. [ ] Cross-cell dependency resolution.
+5. [x] Cross-cell dependency resolution.
 6. [ ] Analysis report.
 7. [ ] Fixture-backed semantic planning.
 8. [ ] Minimal Kedro generation.
