@@ -13,3 +13,7 @@ class NotebookLoadError(ValueError):
 
 class ProjectGenerationError(ValueError):
     """Raised when a generated project cannot be written safely."""
+
+
+class ConversionPlanValidationError(ValueError):
+    """Raised when a conversion plan is not safe to generate."""

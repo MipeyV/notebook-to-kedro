@@ -85,6 +85,7 @@ Initial milestone:
 facts = analyze_notebook_path("notebooks/model.ipynb")
 plan = plan_notebook_path("notebooks/model.ipynb")
 report = render_conversion_report(plan)
+validate_conversion_plan(plan)
 created_files = generate_kedro_project(plan, "generated/model_project")
 ```
 
@@ -178,6 +179,8 @@ The first implementation and default tests use a deterministic fake or fixture-b
 The semantic layer may propose but cannot silently override static evidence.
 
 The deterministic planner assigns stable, valid Python identifiers to task candidates. It prefers recognized source patterns such as train/test split, model training, prediction, and evaluation, then falls back to the nearest preceding Markdown heading, and finally to a `cell_0000` style name when no semantic clue is available.
+
+`semantic/validation.py` validates `ConversionPlan` invariants before generation. It rejects blocked plans, duplicate task or configuration names, invalid Python task identifiers, and task parameter references that do not resolve to extracted parameters.
 
 ### Kedro generation
 

@@ -224,6 +224,14 @@ from notebook_to_kedro import render_conversion_report
 report = render_conversion_report(plan)
 ```
 
+Plans can also be validated explicitly before generation:
+
+```python
+from notebook_to_kedro import validate_conversion_plan
+
+validate_conversion_plan(plan)
+```
+
 The same static review flow is available from the command line:
 
 ```bash
@@ -274,7 +282,8 @@ Progress and architectural decisions are recorded chronologically in [JOURNAL.md
 14. [x] Add a minimal CLI for planning and reporting.
 15. [x] Add a CLI command for generating a Kedro project.
 16. [x] Report expected CLI failures without stack traces.
-17. [ ] Gradually add semantic planning, richer catalogs, and advanced diagnostics.
+17. [x] Validate conversion plans explicitly before CLI generation.
+18. [ ] Gradually add semantic planning, richer catalogs, and advanced diagnostics.
 
 ## Contributing
 
