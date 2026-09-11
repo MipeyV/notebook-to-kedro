@@ -1,8 +1,13 @@
 """Immutable conversion planning contracts."""
 
 from dataclasses import dataclass
+from typing import TypeAlias
 
 from notebook_to_kedro.ir.facts import JsonPrimitive
+
+PlanParameterValue: TypeAlias = (
+    JsonPrimitive | tuple[JsonPrimitive, ...] | tuple[tuple[str, JsonPrimitive], ...]
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -35,7 +40,7 @@ class ParameterValue:
     """Parameter proposed for generated Kedro configuration."""
 
     name: str
-    value: JsonPrimitive
+    value: PlanParameterValue
     function_argument: str
     source_cell_id: str
 

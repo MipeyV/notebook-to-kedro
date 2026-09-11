@@ -146,5 +146,15 @@ def _generated_pipeline(module_name: str) -> Pipeline:
 def _memory_catalog(pipeline: Pipeline, plan: ConversionPlan) -> DataCatalog:
     catalog = DataCatalog({name: MemoryDataset() for name in pipeline.datasets()})
     for parameter in plan.parameters:
-        catalog.save(f"params:{parameter.name}", parameter.value)
+        catalog.save(f"params:{parameter.name}", _runtime_parameter_value(parameter.value))
     return catalog
+
+
+def _runtime_parameter_value(value: object) -> object:
+    if isinstance(value, tuple) and all(
+        isinstance(item, tuple) and len(item) == 2 and isinstance(item[0], str) for item in value
+    ):
+        return dict(value)
+    if isinstance(value, tuple):
+        return list(value)
+    return value

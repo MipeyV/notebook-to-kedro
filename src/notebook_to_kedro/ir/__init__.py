@@ -25,6 +25,7 @@ from notebook_to_kedro.ir.plan import (
     ConversionPlan,
     ParameterValue,
     PlanDiagnostic,
+    PlanParameterValue,
     TaskCandidate,
 )
 from notebook_to_kedro.ir.serialization import (
@@ -51,6 +52,7 @@ __all__ = [
     "NotebookMetadata",
     "ParameterValue",
     "PlanDiagnostic",
+    "PlanParameterValue",
     "Severity",
     "SourceLocation",
     "StatementFacts",

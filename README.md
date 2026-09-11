@@ -266,6 +266,8 @@ The supported scikit-learn workflow now includes a simple `StandardScaler` prepr
 
 The planner recognizes simple pandas preprocessing steps such as `dropna`, `fillna`, and `assign` when they rewrite a dataframe variable, producing reviewable node names like `clean_data`, `impute_missing_values`, and `engineer_features`.
 
+The planner also extracts selected literal pandas preprocessing parameters into Kedro configuration, including `fillna(value=...)`, positional `fillna({...})`, and `drop(columns=[...])`.
+
 The planner also emits conversion diagnostics for review risks such as fallback names, inherited cell diagnostics, unresolved external inputs, and tasks without data outputs. These diagnostics are visible in the Markdown report and do not block generation unless the plan itself has blocking diagnostics.
 
 Progress and architectural decisions are recorded chronologically in [JOURNAL.md](JOURNAL.md).
@@ -292,7 +294,8 @@ Progress and architectural decisions are recorded chronologically in [JOURNAL.md
 18. [x] Add reviewable conversion diagnostics to plans and reports.
 19. [x] Support a simple `StandardScaler` preprocessing pattern.
 20. [x] Support simple pandas preprocessing naming patterns.
-21. [ ] Gradually add semantic planning, richer catalogs, and advanced diagnostics.
+21. [x] Extract selected literal pandas preprocessing parameters.
+22. [ ] Gradually add semantic planning, richer catalogs, and advanced diagnostics.
 
 ## Contributing
 

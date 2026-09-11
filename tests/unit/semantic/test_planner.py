@@ -150,6 +150,52 @@ def test_plan_tasks_names_simple_pandas_transform_steps() -> None:
         "impute_missing_values",
         "engineer_features",
     )
+    assert plan.task_candidates[2].parameters == ("impute_missing_values.fillna_values",)
+    assert plan.parameters[0].value == (("feature", 0),)
+    assert plan.parameters[0].function_argument == "impute_missing_values_fillna_values"
+
+
+def test_plan_tasks_extracts_drop_columns_parameter() -> None:
+    facts = analyze_notebook(
+        _loaded_notebook(
+            _code_cell("df = load()", index=0),
+            LoadedCell("cell-0001", 1, NotebookCellKind.MARKDOWN, "## Prepare features"),
+            _code_cell('X = df.drop(columns=["target"])\ny = df["target"]', index=2),
+        )
+    )
+
+    plan = plan_tasks(facts)
+
+    assert plan.task_candidates[1].parameters == ("prepare_features.drop_columns",)
+    assert plan.parameters[0].value == ("target",)
+    assert plan.parameters[0].function_argument == "prepare_features_drop_columns"
+
+
+def test_plan_tasks_extracts_fillna_value_keyword_parameter() -> None:
+    facts = analyze_notebook(
+        _loaded_notebook(
+            _code_cell("df = load()", index=0),
+            _code_cell('df = df.fillna(value={"feature": 0})', index=1),
+        )
+    )
+
+    plan = plan_tasks(facts)
+
+    assert plan.task_candidates[1].parameters == ("impute_missing_values.fillna_values",)
+    assert plan.parameters[0].value == (("feature", 0),)
+
+
+def test_plan_tasks_ignores_unsupported_pandas_collection_parameters() -> None:
+    facts = analyze_notebook(
+        _loaded_notebook(
+            _code_cell("df = load()", index=0),
+            _code_cell('df = df.fillna({"feature": [0]})', index=1),
+        )
+    )
+
+    plan = plan_tasks(facts)
+
+    assert plan.parameters == ()
 
 
 def test_plan_tasks_stops_on_blocking_diagnostics() -> None:
