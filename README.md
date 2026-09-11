@@ -264,6 +264,8 @@ Generated node names are now deterministic but reviewable: the planner uses near
 
 The supported scikit-learn workflow now includes a simple `StandardScaler` preprocessing step using `fit_transform` and `transform`, with literal `with_mean` and `with_std` parameters extracted into Kedro configuration.
 
+The planner recognizes simple pandas preprocessing steps such as `dropna`, `fillna`, and `assign` when they rewrite a dataframe variable, producing reviewable node names like `clean_data`, `impute_missing_values`, and `engineer_features`.
+
 The planner also emits conversion diagnostics for review risks such as fallback names, inherited cell diagnostics, unresolved external inputs, and tasks without data outputs. These diagnostics are visible in the Markdown report and do not block generation unless the plan itself has blocking diagnostics.
 
 Progress and architectural decisions are recorded chronologically in [JOURNAL.md](JOURNAL.md).
@@ -289,7 +291,8 @@ Progress and architectural decisions are recorded chronologically in [JOURNAL.md
 17. [x] Validate conversion plans explicitly before CLI generation.
 18. [x] Add reviewable conversion diagnostics to plans and reports.
 19. [x] Support a simple `StandardScaler` preprocessing pattern.
-20. [ ] Gradually add semantic planning, richer catalogs, and advanced diagnostics.
+20. [x] Support simple pandas preprocessing naming patterns.
+21. [ ] Gradually add semantic planning, richer catalogs, and advanced diagnostics.
 
 ## Contributing
 

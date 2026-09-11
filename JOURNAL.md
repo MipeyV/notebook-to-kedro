@@ -40,6 +40,34 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-09-11 - Pandas preprocessing naming patterns implemented
+
+### Completed
+
+- Added deterministic task naming for simple pandas dataframe rewrites:
+  `dropna` as `clean_data`, `fillna` as `impute_missing_values`, and `assign` as `engineer_features`.
+- Kept existing mixed feature-preparation cells named from Markdown headings instead of over-classifying them as cleaning tasks.
+- Added a pandas preprocessing reference notebook with missing-value imputation and feature engineering.
+- Added integration coverage for pandas preprocessing task names and dataframe redefinition flow.
+- Added end-to-end equivalence coverage comparing the pandas preprocessing notebook accuracy with the generated Kedro pipeline.
+- Reached 100% statement and branch coverage with 171 passing tests.
+
+### Decisions
+
+- The first pandas support improves semantic naming only; generated code still preserves the source pandas expressions.
+- Patterns trigger on direct dataframe rewrites to keep the heuristic conservative.
+- Argument parameterization for pandas transformations remains separate from naming.
+
+### Open questions
+
+- Decide which pandas arguments should become Kedro parameters.
+- Add support for joins, groupby aggregations, and column normalization patterns.
+- Decide whether dataframe schema hints belong in `ConversionPlan`.
+
+### Next step
+
+- Add pandas parameter extraction for simple literal `fillna` and selected `drop`/`assign` arguments, or add richer data-source catalog support.
+
 ## 2026-09-11 - StandardScaler preprocessing pattern implemented
 
 ### Completed

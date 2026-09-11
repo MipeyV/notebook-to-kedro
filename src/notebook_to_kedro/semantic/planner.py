@@ -207,6 +207,12 @@ def _pattern_name(cell: CellFacts) -> str | None:
         name.endswith("_scaled") for name in cell.writes
     ):
         name = "scale_features"
+    elif "fillna" in methods and cell.writes == ("df",):
+        name = "impute_missing_values"
+    elif "assign" in methods and cell.writes == ("df",):
+        name = "engineer_features"
+    elif "dropna" in methods and cell.writes == ("df",):
+        name = "clean_data"
     elif "accuracy" in cell.writes or any(
         name.endswith("accuracy_score") for name in qualified_names
     ):

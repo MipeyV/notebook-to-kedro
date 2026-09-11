@@ -12,6 +12,9 @@ FILE_BACKED_NOTEBOOK = (
     Path(__file__).parents[1] / "fixtures" / "notebooks" / "file_backed_training.ipynb"
 )
 SCALED_NOTEBOOK = Path(__file__).parents[1] / "fixtures" / "notebooks" / "scaled_training.ipynb"
+PANDAS_PREPROCESSING_NOTEBOOK = (
+    Path(__file__).parents[1] / "fixtures" / "notebooks" / "pandas_preprocessing_training.ipynb"
+)
 
 
 def test_reference_notebook_static_analysis_extracts_reviewed_facts() -> None:
@@ -118,3 +121,23 @@ def test_public_api_plans_scaled_notebook_transform_step() -> None:
         "train_model.n_estimators",
         "train_model.random_state",
     )
+
+
+def test_public_api_plans_pandas_preprocessing_steps() -> None:
+    """A notebook with pandas preprocessing produces named preprocessing tasks."""
+    plan = plan_notebook_path(PANDAS_PREPROCESSING_NOTEBOOK)
+
+    assert tuple(task.name for task in plan.task_candidates) == (
+        "load_data",
+        "impute_missing_values",
+        "engineer_features",
+        "prepare_features",
+        "split_data",
+        "train_model",
+        "predict",
+        "evaluate_model",
+    )
+    assert plan.task_candidates[1].inputs == ("df",)
+    assert plan.task_candidates[1].outputs == ("df",)
+    assert plan.task_candidates[2].inputs == ("df",)
+    assert plan.task_candidates[2].outputs == ("df",)
