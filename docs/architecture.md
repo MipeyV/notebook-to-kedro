@@ -84,6 +84,7 @@ Initial milestone:
 ```python
 facts = analyze_notebook_path("notebooks/model.ipynb")
 plan = plan_notebook_path("notebooks/model.ipynb")
+report = render_conversion_report(plan)
 created_files = generate_kedro_project(plan, "generated/model_project")
 ```
 
@@ -182,6 +183,10 @@ The deterministic planner assigns stable, valid Python identifiers to task candi
 - validate generated Python and project structure.
 
 Repetitive Kedro boilerplate is rendered deterministically. An optional code transformer may assist with complex source refactoring, but its output must pass deterministic validation.
+
+### Reporting
+
+`reporting.py` renders review artifacts from `ConversionPlan` without importing Kedro or reading notebook files. The first report format is deterministic Markdown covering summary metadata, proposed tasks, catalog datasets, extracted parameters, and blocking diagnostics.
 
 ### Filesystem writing
 
