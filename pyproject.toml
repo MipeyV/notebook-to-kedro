@@ -33,6 +33,9 @@ Documentation = "https://github.com/MipeyV/notebook-to-kedro#readme"
 Issues = "https://github.com/MipeyV/notebook-to-kedro/issues"
 Repository = "https://github.com/MipeyV/notebook-to-kedro"
 
+[project.scripts]
+notebook-to-kedro = "notebook_to_kedro.cli:main"
+
 [dependency-groups]
 lint = [
     "mypy>=1.19,<2",

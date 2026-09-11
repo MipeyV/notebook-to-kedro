@@ -224,6 +224,12 @@ from notebook_to_kedro import render_conversion_report
 report = render_conversion_report(plan)
 ```
 
+The same static review flow is available from the command line:
+
+```bash
+notebook-to-kedro plan notebooks/model.ipynb
+```
+
 The first Kedro generator writes an importable minimal project skeleton from a `ConversionPlan`:
 
 ```python
@@ -257,7 +263,8 @@ Progress and architectural decisions are recorded chronologically in [JOURNAL.md
 11. [x] Extract selected literal parameters into Kedro configuration.
 12. [x] Generate readable deterministic node names from headings and simple source patterns.
 13. [x] Render a reviewable Markdown conversion report.
-14. [ ] Gradually add semantic planning, richer catalogs, and advanced diagnostics.
+14. [x] Add a minimal CLI for planning and reporting.
+15. [ ] Gradually add semantic planning, richer catalogs, and advanced diagnostics.
 
 ## Contributing
 

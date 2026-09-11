@@ -40,6 +40,33 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-09-11 - Minimal planning CLI implemented
+
+### Completed
+
+- Added a `notebook-to-kedro` console script.
+- Implemented `notebook-to-kedro plan NOTEBOOK`.
+- Wired the command through the public planning and reporting APIs.
+- Added optional `--project-root` support for portable notebook paths in reports.
+- Added CLI unit tests for successful report output, project-root normalization, and missing commands.
+- Reached 100% statement and branch coverage with 151 passing tests.
+
+### Decisions
+
+- The initial CLI only exposes planning/reporting, because generation still benefits from explicit review.
+- CLI parsing stays thin and delegates analysis, planning, and reporting to existing public APIs.
+- The command writes Markdown to stdout so it can be redirected to a file or viewed directly.
+
+### Open questions
+
+- Decide CLI error formatting for notebook load and generation failures.
+- Add a `generate` command once report review and plan validation are sufficiently explicit.
+- Decide whether report output should support `--output`.
+
+### Next step
+
+- Add a CLI `generate` command that creates a Kedro project from a notebook path after the static planning path is available from the terminal.
+
 ## 2026-09-11 - Conversion report renderer implemented
 
 ### Completed
