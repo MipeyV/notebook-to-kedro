@@ -40,6 +40,35 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-09-11 - StandardScaler preprocessing pattern implemented
+
+### Completed
+
+- Added a scaled reference notebook fixture using `StandardScaler`.
+- Recognized scaling cells using `fit_transform` and `transform` as `scale_features` tasks.
+- Extracted literal `StandardScaler(with_mean=..., with_std=...)` parameters into Kedro configuration.
+- Rewrote generated scaler construction to consume Kedro `params:` inputs.
+- Added integration coverage for the planned scaling task and its parameters.
+- Added generated-project tests for scaler imports, node signatures, parameterized source, and pipeline parameter wiring.
+- Added end-to-end equivalence coverage comparing the scaled notebook accuracy with the generated Kedro pipeline.
+- Reached 100% statement and branch coverage with 168 passing tests.
+
+### Decisions
+
+- The first sklearn preprocessing support is intentionally limited to explicit `StandardScaler` usage in sequential code.
+- Scaling task naming is triggered only when transform calls produce `_scaled` outputs.
+- Broader sklearn pipeline and `ColumnTransformer` support remains out of scope until represented by dedicated fixtures.
+
+### Open questions
+
+- Add support for `fit_transform` outputs that do not use `_scaled` suffixes.
+- Decide how to model reusable transformer objects in the catalog or as intermediate memory datasets.
+- Add `ColumnTransformer` and sklearn `Pipeline` support after simple transformer patterns are stable.
+
+### Next step
+
+- Add more pandas transformation patterns such as `assign`, `fillna`, and `merge`, because they are common before sklearn preprocessing.
+
 ## 2026-09-11 - Reviewable plan diagnostics implemented
 
 ### Completed

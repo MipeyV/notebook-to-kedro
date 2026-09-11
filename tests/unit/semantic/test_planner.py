@@ -101,6 +101,37 @@ def test_plan_tasks_extracts_supported_literal_parameters() -> None:
     )
 
 
+def test_plan_tasks_extracts_standard_scaler_parameters() -> None:
+    facts = analyze_notebook(
+        _loaded_notebook(
+            _code_cell("X_train = 1\nX_test = 2", index=0),
+            _code_cell(
+                "\n".join(
+                    (
+                        "scaler = StandardScaler(with_mean=True, with_std=False)",
+                        "X_train_scaled = scaler.fit_transform(X_train)",
+                        "X_test_scaled = scaler.transform(X_test)",
+                    )
+                ),
+                index=1,
+            ),
+        )
+    )
+
+    plan = plan_tasks(facts)
+
+    assert plan.task_candidates[1].name == "scale_features"
+    assert plan.task_candidates[1].parameters == (
+        "scale_features.with_mean",
+        "scale_features.with_std",
+    )
+    assert tuple(parameter.value for parameter in plan.parameters) == (True, False)
+    assert tuple(parameter.function_argument for parameter in plan.parameters) == (
+        "scale_features_with_mean",
+        "scale_features_with_std",
+    )
+
+
 def test_plan_tasks_stops_on_blocking_diagnostics() -> None:
     facts = analyze_notebook(_loaded_notebook(_code_cell("%matplotlib inline", index=0)))
 

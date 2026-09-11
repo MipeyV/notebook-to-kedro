@@ -28,6 +28,7 @@ if TYPE_CHECKING:
 PLANNER_VERSION = "0.1.0"
 SUPPORTED_PARAMETER_KEYWORDS = {
     "RandomForestClassifier": frozenset({"n_estimators", "random_state"}),
+    "StandardScaler": frozenset({"with_mean", "with_std"}),
     "train_test_split": frozenset({"test_size", "random_state"}),
 }
 
@@ -199,21 +200,28 @@ def _markdown_heading(source: str) -> str | None:
 def _pattern_name(cell: CellFacts) -> str | None:
     qualified_names = {call.qualified_name for call in cell.calls}
     methods = {call.method for call in cell.calls if call.method is not None}
+    name = None
     if "train_test_split" in qualified_names:
-        return "split_data"
-    if "accuracy" in cell.writes or any(
+        name = "split_data"
+    elif {"fit_transform", "transform"} & methods and any(
+        name.endswith("_scaled") for name in cell.writes
+    ):
+        name = "scale_features"
+    elif "accuracy" in cell.writes or any(
         name.endswith("accuracy_score") for name in qualified_names
     ):
-        return "evaluate_model"
-    if "predictions" in cell.writes or "predict" in methods:
-        return "predict"
-    if "model" in cell.writes and ("fit" in methods or "RandomForestClassifier" in qualified_names):
-        return "train_model"
-    if any(
+        name = "evaluate_model"
+    elif "predictions" in cell.writes or "predict" in methods:
+        name = "predict"
+    elif "model" in cell.writes and (
+        "fit" in methods or "RandomForestClassifier" in qualified_names
+    ):
+        name = "train_model"
+    elif any(
         name.endswith(("load_iris", "load_wine", "load_breast_cancer")) for name in qualified_names
     ):
-        return "load_data"
-    return None
+        name = "load_data"
+    return name
 
 
 def _slug_identifier(value: str) -> str:

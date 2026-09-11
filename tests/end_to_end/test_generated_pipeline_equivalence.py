@@ -26,6 +26,7 @@ REFERENCE_NOTEBOOK = Path(__file__).parents[1] / "fixtures" / "notebooks" / "sim
 FILE_BACKED_NOTEBOOK = (
     Path(__file__).parents[1] / "fixtures" / "notebooks" / "file_backed_training.ipynb"
 )
+SCALED_NOTEBOOK = Path(__file__).parents[1] / "fixtures" / "notebooks" / "scaled_training.ipynb"
 
 
 @pytest.mark.end_to_end
@@ -67,6 +68,26 @@ def test_generated_kedro_pipeline_matches_file_backed_notebook_accuracy(
     pandas = importlib.import_module("pandas")
     read_csv = cast("Any", pandas).read_csv
     catalog.save("df", read_csv(generated_csv))
+
+    SequentialRunner().run(pipeline, catalog)
+
+    assert catalog.load("accuracy") == pytest.approx(notebook_accuracy)
+
+
+@pytest.mark.end_to_end
+def test_generated_kedro_pipeline_matches_scaled_notebook_accuracy(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A generated Kedro pipeline reproduces a notebook with sklearn scaling."""
+    notebook_accuracy = _reference_notebook_accuracy(SCALED_NOTEBOOK)
+    output_path = tmp_path / "generated"
+
+    plan = plan_notebook_path(SCALED_NOTEBOOK)
+    generate_kedro_project(plan, output_path, package_name="generated_scaled")
+    monkeypatch.syspath_prepend(str(output_path / "src"))
+
+    pipeline = _generated_pipeline("generated_scaled.pipelines.notebook_pipeline")
+    catalog = _memory_catalog(pipeline, plan)
 
     SequentialRunner().run(pipeline, catalog)
 
