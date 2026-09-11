@@ -88,6 +88,12 @@ report = render_conversion_report(plan)
 created_files = generate_kedro_project(plan, "generated/model_project")
 ```
 
+Initial command-line entrypoint:
+
+```bash
+notebook-to-kedro plan notebooks/model.ipynb
+```
+
 Target API:
 
 ```python
@@ -187,6 +193,10 @@ Repetitive Kedro boilerplate is rendered deterministically. An optional code tra
 ### Reporting
 
 `reporting.py` renders review artifacts from `ConversionPlan` without importing Kedro or reading notebook files. The first report format is deterministic Markdown covering summary metadata, proposed tasks, catalog datasets, extracted parameters, and blocking diagnostics.
+
+### CLI
+
+`cli.py` owns terminal argument parsing and delegates to the public API. It should remain thin: commands orchestrate existing use cases and write their results, while analysis, planning, reporting, and generation logic stay in their component modules.
 
 ### Filesystem writing
 
