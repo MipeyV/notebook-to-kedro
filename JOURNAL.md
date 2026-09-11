@@ -40,6 +40,33 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-09-11 - Friendly CLI errors implemented
+
+### Completed
+
+- Caught expected notebook loading and project generation errors at the CLI boundary.
+- Printed concise `Error: ...` messages to stderr instead of exposing stack traces.
+- Returned a stable non-zero exit code for expected CLI failures.
+- Preserved raw propagation for unexpected programming errors.
+- Added CLI tests for missing notebook files and existing output directories.
+- Reached 100% statement and branch coverage with 155 passing tests.
+
+### Decisions
+
+- Error formatting belongs in `cli.py`, not in lower-level loading, planning, or generation modules.
+- The first stable failure exit code is `1` for expected operational errors.
+- `argparse` remains responsible for command syntax errors.
+
+### Open questions
+
+- Decide whether distinct expected error categories should receive distinct exit codes.
+- Decide whether CLI errors should support a machine-readable JSON mode.
+- Add friendlier context for plans blocked by diagnostics.
+
+### Next step
+
+- Add explicit plan validation/reporting for blocked diagnostics before generation so users can see why a notebook cannot be converted.
+
 ## 2026-09-11 - Kedro generation CLI implemented
 
 ### Completed

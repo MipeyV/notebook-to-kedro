@@ -5,7 +5,6 @@ from pathlib import Path
 import pytest
 
 from notebook_to_kedro.cli import main
-from notebook_to_kedro.exceptions import ProjectGenerationError
 
 REFERENCE_NOTEBOOK = Path(__file__).parents[1] / "fixtures" / "notebooks" / "simple_training.ipynb"
 
@@ -96,9 +95,26 @@ def test_cli_generate_accepts_project_root(
     assert "Created Kedro project" in captured.out
 
 
-def test_cli_generate_rejects_existing_output_dir(tmp_path: Path) -> None:
+def test_cli_plan_reports_load_errors(capsys: pytest.CaptureFixture[str]) -> None:
+    exit_code = main(["plan", "missing.ipynb"])
+
+    captured = capsys.readouterr()
+
+    assert exit_code == 1
+    assert captured.out == ""
+    assert captured.err.startswith("Error: NB001: Cannot read notebook: missing.ipynb")
+
+
+def test_cli_generate_rejects_existing_output_dir(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
     output_dir = tmp_path / "generated"
     output_dir.mkdir()
 
-    with pytest.raises(ProjectGenerationError, match="Destination already exists"):
-        main(["generate", str(REFERENCE_NOTEBOOK), str(output_dir)])
+    exit_code = main(["generate", str(REFERENCE_NOTEBOOK), str(output_dir)])
+
+    captured = capsys.readouterr()
+
+    assert exit_code == 1
+    assert captured.out == ""
+    assert f"Error: Destination already exists: {output_dir}" in captured.err

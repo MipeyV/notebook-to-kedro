@@ -11,16 +11,23 @@ from notebook_to_kedro.api import (
     plan_notebook_path,
     render_conversion_report,
 )
+from notebook_to_kedro.exceptions import NotebookLoadError, ProjectGenerationError
+
+ERROR_EXIT_CODE = 1
 
 
 def main(argv: list[str] | None = None) -> int:
     """Run the Notebook to Kedro command-line interface."""
     parser = _parser()
     args = parser.parse_args(argv)
-    if args.command == "plan":
-        return _plan(args)
-    if args.command == "generate":
-        return _generate(args)
+    try:
+        if args.command == "plan":
+            return _plan(args)
+        if args.command == "generate":
+            return _generate(args)
+    except (NotebookLoadError, ProjectGenerationError) as error:
+        sys.stderr.write(f"Error: {error}\n")
+        return ERROR_EXIT_CODE
     parser.error("missing command")
 
 
