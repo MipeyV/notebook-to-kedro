@@ -1,5 +1,6 @@
 """Unit tests for minimal Kedro project generation."""
 
+import ast
 import importlib
 from pathlib import Path
 
@@ -7,7 +8,8 @@ import pytest
 
 from notebook_to_kedro import generate_kedro_project, plan_notebook_path
 from notebook_to_kedro.exceptions import ProjectGenerationError
-from notebook_to_kedro.ir import CatalogDataset, ConversionPlan, TaskCandidate
+from notebook_to_kedro.generation.kedro import generator
+from notebook_to_kedro.ir import CatalogDataset, ConversionPlan, ParameterValue, TaskCandidate
 
 REFERENCE_NOTEBOOK = Path(__file__).parents[2] / "fixtures" / "notebooks" / "simple_training.ipynb"
 
@@ -20,7 +22,7 @@ def test_generate_kedro_project_writes_importable_reference_project(
 
     created_files = generate_kedro_project(plan, output_path, package_name="generated_reference")
 
-    assert len(created_files) == 8
+    assert len(created_files) == 9
     pyproject_source = (output_path / "pyproject.toml").read_text(encoding="utf-8")
     assert pyproject_source.startswith("[project]")
     assert '"kedro>=1.5,<2"' in pyproject_source
@@ -40,7 +42,15 @@ def test_generate_kedro_project_writes_importable_reference_project(
     assert "from sklearn.datasets import load_iris" in nodes_source
     assert "def cell_0003():" in nodes_source
     assert "return iris, df" in nodes_source
+    assert "test_size=cell_0006_test_size" in nodes_source
+    assert "random_state=cell_0008_random_state" in nodes_source
     assert "'df__cell_0005'" in pipeline_source
+    assert "'cell_0006_test_size': 'params:cell_0006.test_size'" in pipeline_source
+    parameters_source = (output_path / "conf" / "base" / "parameters.yml").read_text(
+        encoding="utf-8"
+    )
+    assert "cell_0006.test_size: 0.2" in parameters_source
+    assert "cell_0008.n_estimators: 100" in parameters_source
 
     monkeypatch.syspath_prepend(str(output_path / "src"))
     pipeline_module = importlib.import_module("generated_reference.pipelines.notebook_pipeline")
@@ -185,6 +195,55 @@ def test_generate_kedro_project_writes_catalog_datasets(tmp_path: Path) -> None:
     ) == "value\n1\n"
 
 
+def test_generate_kedro_project_writes_supported_parameter_values(tmp_path: Path) -> None:
+    plan = ConversionPlan(
+        schema_version="1.0",
+        planner_version="0.1.0",
+        notebook_path="notebooks/example.ipynb",
+        parameters=(
+            ParameterValue(
+                name="cell_0000.flag",
+                value=True,
+                function_argument="cell_0000_flag",
+                source_cell_id="cell-0000",
+            ),
+            ParameterValue(
+                name="cell_0000.name",
+                value="demo",
+                function_argument="cell_0000_name",
+                source_cell_id="cell-0000",
+            ),
+            ParameterValue(
+                name="cell_0000.none_value",
+                value=None,
+                function_argument="cell_0000_none_value",
+                source_cell_id="cell-0000",
+            ),
+        ),
+        task_candidates=(
+            TaskCandidate(
+                id="task-0000",
+                name="cell_0000",
+                source_cell_ids=("cell-0000",),
+                statement_ids=("cell-0000-stmt-0000",),
+                inputs=(),
+                outputs=("result",),
+                source="result = func(flag=True, name='demo', none_value=None)",
+                parameters=("cell_0000.flag", "cell_0000.name", "cell_0000.none_value"),
+            ),
+        ),
+    )
+
+    generate_kedro_project(plan, tmp_path / "generated")
+
+    parameters_source = (tmp_path / "generated" / "conf" / "base" / "parameters.yml").read_text(
+        encoding="utf-8"
+    )
+    assert parameters_source == (
+        "cell_0000.flag: true\ncell_0000.name: 'demo'\ncell_0000.none_value: null\n"
+    )
+
+
 def test_generate_kedro_project_rejects_missing_catalog_source(tmp_path: Path) -> None:
     plan = ConversionPlan(
         schema_version="1.0",
@@ -266,3 +325,9 @@ def test_generate_kedro_project_rejects_invalid_package_name(tmp_path: Path) -> 
 
     with pytest.raises(ProjectGenerationError, match="Invalid generated package name"):
         generate_kedro_project(plan, tmp_path / "generated", package_name="_private")
+
+
+def test_generator_ast_helper_fallbacks_cover_uncommon_shapes() -> None:
+    assert generator._qualified_name(ast.Constant(value=1)) == "Constant"
+    assert generator._offset("value = 1", None, 0) == 0
+    assert generator._offset("value = 1", 1, None) == 0

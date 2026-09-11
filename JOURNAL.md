@@ -40,6 +40,37 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-09-11 — Selected Kedro parameter extraction implemented
+
+### Completed
+
+- Added `ParameterValue` records to `ConversionPlan`.
+- Extracted literal parameters from supported scikit-learn calls:
+  `train_test_split(test_size=..., random_state=...)` and
+  `RandomForestClassifier(n_estimators=..., random_state=...)`.
+- Attached extracted parameter names to their task candidates.
+- Generated `conf/base/parameters.yml` for extracted values.
+- Rewrote generated node code to use function arguments instead of hardcoded keyword literals.
+- Wired generated Kedro nodes with `params:<name>` inputs.
+- Updated end-to-end tests to load generated parameters into the in-memory Kedro catalog.
+- Reached 100% statement and branch coverage with 141 passing tests.
+
+### Decisions
+
+- The first parameter extraction pass is deterministic and limited to literal JSON-compatible values.
+- Parameter keys are cell-scoped, such as `cell_0006.test_size`, until semantic node naming exists.
+- Unsupported or non-literal keyword values remain in source code rather than being guessed.
+
+### Open questions
+
+- Decide how reviewed semantic node names should rename parameter keys.
+- Decide whether repeated parameter values should be deduplicated across nodes.
+- Extend parameter extraction to pandas and user-defined transformation thresholds.
+
+### Next step
+
+- Generate more reviewable node names from notebook headings or simple source patterns.
+
 ## 2026-09-11 — File-backed CSV catalog fixture implemented
 
 ### Completed

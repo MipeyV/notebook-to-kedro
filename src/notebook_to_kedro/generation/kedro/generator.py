@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import ast
 import shutil
 from dataclasses import dataclass
 from pathlib import Path
@@ -11,9 +12,13 @@ from typing import TYPE_CHECKING
 from notebook_to_kedro.exceptions import ProjectGenerationError
 
 if TYPE_CHECKING:
-    from notebook_to_kedro.ir import ConversionPlan, TaskCandidate
+    from notebook_to_kedro.ir import ConversionPlan, ParameterValue, TaskCandidate
 
 DEFAULT_PACKAGE_NAME = "generated_notebook"
+SUPPORTED_PARAMETER_KEYWORDS = {
+    "RandomForestClassifier": frozenset({"n_estimators", "random_state"}),
+    "train_test_split": frozenset({"test_size", "random_state"}),
+}
 
 
 def generate_kedro_project(
@@ -48,6 +53,8 @@ def generate_kedro_project(
     }
     if plan.catalog_datasets:
         files[root / "conf" / "base" / "catalog.yml"] = _catalog(plan)
+    if plan.parameters:
+        files[root / "conf" / "base" / "parameters.yml"] = _parameters(plan)
 
     created_paths: list[Path] = []
     for path, content in files.items():
@@ -135,6 +142,24 @@ def _catalog_dataset(name: str, type_: str, filepath: str) -> str:
 """
 
 
+def _parameters(plan: ConversionPlan) -> str:
+    return "\n".join(_parameter(parameter) for parameter in plan.parameters) + "\n"
+
+
+def _parameter(parameter: ParameterValue) -> str:
+    return f"{parameter.name}: {_parameter_value(parameter.value)}"
+
+
+def _parameter_value(value: object) -> str:
+    if isinstance(value, bool):
+        return "true" if value else "false"
+    if value is None:
+        return "null"
+    if isinstance(value, str):
+        return repr(value)
+    return str(value)
+
+
 def _catalog_file_copies(plan: ConversionPlan, root: Path) -> tuple[tuple[Path, Path], ...]:
     copies: list[tuple[Path, Path]] = []
     for dataset in plan.catalog_datasets:
@@ -149,10 +174,10 @@ def _catalog_file_copies(plan: ConversionPlan, root: Path) -> tuple[tuple[Path, 
 
 
 def _node_function(task: TaskCandidate) -> str:
-    parameters = ", ".join(task.inputs)
-    body = indent(task.source.rstrip(), "    ")
+    function_parameters = ", ".join((*task.inputs, *_parameter_arguments(task)))
+    body = indent(_parameterized_source(task).rstrip(), "    ")
     return_statement = _return_statement(task.outputs)
-    return f"""def {task.name}({parameters}):
+    return f"""def {task.name}({function_parameters}):
 {body}
     {return_statement}
 """
@@ -186,7 +211,7 @@ def create_pipeline(**kwargs: object) -> Pipeline:
 
 
 def _node_entry(entry: _PipelineEntry) -> str:
-    inputs = _inputs_argument(entry.inputs)
+    inputs = _inputs_argument(entry)
     outputs = _outputs_argument(entry.outputs)
     return f"""            node(
                 func=nodes.{entry.task.name},
@@ -201,6 +226,7 @@ class _PipelineEntry:
     task: TaskCandidate
     inputs: dict[str, str]
     outputs: tuple[str, ...]
+    parameters: dict[str, str]
 
 
 def _pipeline_entries(plan: ConversionPlan) -> tuple[_PipelineEntry, ...]:
@@ -212,7 +238,14 @@ def _pipeline_entries(plan: ConversionPlan) -> tuple[_PipelineEntry, ...]:
             _output_dataset(symbol, task, latest_dataset_by_symbol) for symbol in task.outputs
         )
         latest_dataset_by_symbol.update(zip(task.outputs, outputs, strict=True))
-        entries.append(_PipelineEntry(task=task, inputs=inputs, outputs=outputs))
+        entries.append(
+            _PipelineEntry(
+                task=task,
+                inputs=inputs,
+                outputs=outputs,
+                parameters=_task_parameter_inputs(plan, task),
+            )
+        )
     return tuple(entries)
 
 
@@ -224,12 +257,80 @@ def _output_dataset(
     return symbol
 
 
-def _inputs_argument(values: dict[str, str]) -> str:
+def _inputs_argument(entry: _PipelineEntry) -> str:
+    return _node_inputs_argument({**entry.inputs, **entry.parameters})
+
+
+def _node_inputs_argument(values: dict[str, str]) -> str:
     if not values:
         return "None"
     if all(parameter == dataset for parameter, dataset in values.items()):
         return _quoted_sequence(tuple(values))
     return repr(values)
+
+
+def _task_parameter_inputs(plan: ConversionPlan, task: TaskCandidate) -> dict[str, str]:
+    parameters_by_name = {parameter.name: parameter for parameter in plan.parameters}
+    return {
+        parameters_by_name[name].function_argument: f"params:{name}" for name in task.parameters
+    }
+
+
+def _parameter_arguments(task: TaskCandidate) -> tuple[str, ...]:
+    return tuple(name.replace(".", "_") for name in task.parameters)
+
+
+def _parameterized_source(task: TaskCandidate) -> str:
+    if not task.parameters:
+        return task.source
+    module = ast.parse(task.source)
+    replacements: list[tuple[int, int, str]] = []
+    supported_parameter_names = {
+        parameter_name.rsplit(".", maxsplit=1)[1] for parameter_name in task.parameters
+    }
+    for node in ast.walk(module):
+        if not isinstance(node, ast.Call):
+            continue
+        supported_keywords = SUPPORTED_PARAMETER_KEYWORDS.get(_qualified_name(node.func))
+        if supported_keywords is None:
+            continue
+        for keyword in node.keywords:
+            if (
+                keyword.arg is None
+                or keyword.arg not in supported_keywords
+                or keyword.arg not in supported_parameter_names
+            ):
+                continue
+            replacements.append(
+                (
+                    _offset(task.source, keyword.value.lineno, keyword.value.col_offset),
+                    _offset(task.source, keyword.value.end_lineno, keyword.value.end_col_offset),
+                    f"{task.name}_{keyword.arg}",
+                )
+            )
+    return _replace_ranges(task.source, replacements)
+
+
+def _qualified_name(node: ast.expr) -> str:
+    if isinstance(node, ast.Name):
+        return node.id
+    if isinstance(node, ast.Attribute):
+        parent = _qualified_name(node.value)
+        return f"{parent}.{node.attr}" if parent else node.attr
+    return type(node).__name__
+
+
+def _offset(source: str, line_number: int | None, column: int | None) -> int:
+    if line_number is None or column is None:
+        return 0
+    return sum(len(line) for line in source.splitlines(keepends=True)[: line_number - 1]) + column
+
+
+def _replace_ranges(source: str, replacements: list[tuple[int, int, str]]) -> str:
+    result = source
+    for start, end, value in sorted(replacements, reverse=True):
+        result = f"{result[:start]}{value}{result[end:]}"
+    return result
 
 
 def _outputs_argument(values: tuple[str, ...]) -> str:

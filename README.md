@@ -228,6 +228,8 @@ The end-to-end suite now executes the generated Kedro pipeline for the reference
 
 The planner recognizes simple `pd.read_csv("...")` assignments as catalog inputs. The generator writes a minimal `conf/base/catalog.yml` for those CSV-backed datasets and copies the source CSV into the generated project's `data/01_raw/` directory.
 
+The planner also extracts selected literal scikit-learn parameters, and the generator writes `conf/base/parameters.yml` while wiring nodes with Kedro `params:` inputs.
+
 Progress and architectural decisions are recorded chronologically in [JOURNAL.md](JOURNAL.md).
 
 ## Initial roadmap
@@ -242,7 +244,8 @@ Progress and architectural decisions are recorded chronologically in [JOURNAL.md
 8. [x] Generate a minimal Kedro project skeleton for controlled fixtures.
 9. [x] Verify reference fixture equivalence through observable outputs.
 10. [x] Add a file-backed CSV fixture with minimal catalog generation.
-11. [ ] Gradually add semantic planning, parameters, catalogs, and advanced diagnostics.
+11. [x] Extract selected literal parameters into Kedro configuration.
+12. [ ] Gradually add semantic planning, richer catalogs, and advanced diagnostics.
 
 ## Contributing
 

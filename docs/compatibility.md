@@ -65,6 +65,7 @@ The first milestone focuses on:
 - ordinary calls;
 - reads and writes of named values;
 - basic cross-cell dependencies.
+- selected literal scikit-learn keyword parameters.
 
 Complex scopes, conditional writes, dynamic execution, shell commands, and Jupyter magics follow the policy in [mvp-contract.md](mvp-contract.md).
 
