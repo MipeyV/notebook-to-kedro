@@ -132,6 +132,26 @@ def test_plan_tasks_extracts_standard_scaler_parameters() -> None:
     )
 
 
+def test_plan_tasks_names_simple_pandas_transform_steps() -> None:
+    facts = analyze_notebook(
+        _loaded_notebook(
+            _code_cell("df = load()", index=0),
+            _code_cell("df = df.dropna()", index=1),
+            _code_cell('df = df.fillna({"feature": 0})', index=2),
+            _code_cell('df = df.assign(feature_sum=df["a"] + df["b"])', index=3),
+        )
+    )
+
+    plan = plan_tasks(facts)
+
+    assert tuple(task.name for task in plan.task_candidates) == (
+        "cell_0000",
+        "clean_data",
+        "impute_missing_values",
+        "engineer_features",
+    )
+
+
 def test_plan_tasks_stops_on_blocking_diagnostics() -> None:
     facts = analyze_notebook(_loaded_notebook(_code_cell("%matplotlib inline", index=0)))
 

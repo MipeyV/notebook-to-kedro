@@ -69,6 +69,8 @@ The first milestone focuses on:
 - deterministic task naming from Markdown headings and simple ML source patterns.
 - simple scikit-learn preprocessing with `StandardScaler.fit_transform(...)` and
   `StandardScaler.transform(...)`.
+- simple pandas preprocessing names for dataframe rewrites using `dropna`, `fillna`, and
+  `assign`.
 
 Complex scopes, conditional writes, dynamic execution, shell commands, and Jupyter magics follow the policy in [mvp-contract.md](mvp-contract.md).
 
@@ -103,6 +105,8 @@ Pattern support is introduced operation by operation and documented with fixture
 Readable node naming is a Level 1 planner feature. It currently recognizes simple scikit-learn workflow patterns and otherwise derives valid identifiers from Markdown headings when present.
 
 The first preprocessing pattern supports a single explicit `StandardScaler` object in ordinary top-to-bottom code. Literal `with_mean` and `with_std` arguments are extracted into generated parameters. This does not imply general support for arbitrary sklearn pipelines, `ColumnTransformer`, or nested preprocessing graphs.
+
+Pandas preprocessing support currently improves plan naming for direct dataframe rewrites. It does not yet infer schemas, validate column existence, or parameterize transformation arguments.
 
 ### Level 2 — generated-project integration
 

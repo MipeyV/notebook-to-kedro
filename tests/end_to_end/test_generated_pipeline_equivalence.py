@@ -27,6 +27,9 @@ FILE_BACKED_NOTEBOOK = (
     Path(__file__).parents[1] / "fixtures" / "notebooks" / "file_backed_training.ipynb"
 )
 SCALED_NOTEBOOK = Path(__file__).parents[1] / "fixtures" / "notebooks" / "scaled_training.ipynb"
+PANDAS_PREPROCESSING_NOTEBOOK = (
+    Path(__file__).parents[1] / "fixtures" / "notebooks" / "pandas_preprocessing_training.ipynb"
+)
 
 
 @pytest.mark.end_to_end
@@ -87,6 +90,26 @@ def test_generated_kedro_pipeline_matches_scaled_notebook_accuracy(
     monkeypatch.syspath_prepend(str(output_path / "src"))
 
     pipeline = _generated_pipeline("generated_scaled.pipelines.notebook_pipeline")
+    catalog = _memory_catalog(pipeline, plan)
+
+    SequentialRunner().run(pipeline, catalog)
+
+    assert catalog.load("accuracy") == pytest.approx(notebook_accuracy)
+
+
+@pytest.mark.end_to_end
+def test_generated_kedro_pipeline_matches_pandas_preprocessing_notebook_accuracy(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A generated Kedro pipeline reproduces a notebook with pandas preprocessing."""
+    notebook_accuracy = _reference_notebook_accuracy(PANDAS_PREPROCESSING_NOTEBOOK)
+    output_path = tmp_path / "generated"
+
+    plan = plan_notebook_path(PANDAS_PREPROCESSING_NOTEBOOK)
+    generate_kedro_project(plan, output_path, package_name="generated_pandas_preprocessing")
+    monkeypatch.syspath_prepend(str(output_path / "src"))
+
+    pipeline = _generated_pipeline("generated_pandas_preprocessing.pipelines.notebook_pipeline")
     catalog = _memory_catalog(pipeline, plan)
 
     SequentialRunner().run(pipeline, catalog)
