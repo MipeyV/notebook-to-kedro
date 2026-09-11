@@ -4,6 +4,16 @@ from dataclasses import dataclass
 
 
 @dataclass(frozen=True, slots=True)
+class CatalogDataset:
+    """Dataset proposed for a generated Kedro catalog."""
+
+    name: str
+    type: str
+    filepath: str
+    source_filepath: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
 class TaskCandidate:
     """Proposed Kedro-oriented task boundary derived from source facts."""
 
@@ -26,4 +36,5 @@ class ConversionPlan:
     notebook_path: str
     task_candidates: tuple[TaskCandidate, ...]
     imports: tuple[str, ...] = ()
+    catalog_datasets: tuple[CatalogDataset, ...] = ()
     blocking_diagnostic_codes: tuple[str, ...] = ()

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import importlib
 from pathlib import Path
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Any, cast
 
 import nbformat
 import pytest
@@ -21,6 +21,9 @@ if TYPE_CHECKING:
     from kedro.pipeline import Pipeline
 
 REFERENCE_NOTEBOOK = Path(__file__).parents[1] / "fixtures" / "notebooks" / "simple_training.ipynb"
+FILE_BACKED_NOTEBOOK = (
+    Path(__file__).parents[1] / "fixtures" / "notebooks" / "file_backed_training.ipynb"
+)
 
 
 @pytest.mark.end_to_end
@@ -46,17 +49,45 @@ def test_generated_kedro_pipeline_matches_reference_notebook_accuracy(
     assert catalog.load("accuracy") == pytest.approx(notebook_accuracy)
 
 
-def _reference_notebook_accuracy() -> float:
+@pytest.mark.end_to_end
+def test_generated_kedro_pipeline_matches_file_backed_notebook_accuracy(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A generated Kedro pipeline can consume catalog-backed tabular input."""
+    notebook_accuracy = _reference_notebook_accuracy(FILE_BACKED_NOTEBOOK)
+    output_path = tmp_path / "generated"
+
+    generate_kedro_project(
+        plan_notebook_path(FILE_BACKED_NOTEBOOK),
+        output_path,
+        package_name="generated_file_backed",
+    )
+    generated_csv = output_path / "data" / "01_raw" / "binary_classification.csv"
+    assert generated_csv.exists()
+    monkeypatch.syspath_prepend(str(output_path / "src"))
+
+    pipeline = _generated_pipeline("generated_file_backed.pipelines.notebook_pipeline")
+    catalog = DataCatalog({name: MemoryDataset() for name in pipeline.datasets()})
+    pandas = importlib.import_module("pandas")
+    read_csv = cast("Any", pandas).read_csv
+    catalog.save("df", read_csv(generated_csv))
+
+    SequentialRunner().run(pipeline, catalog)
+
+    assert catalog.load("accuracy") == pytest.approx(notebook_accuracy)
+
+
+def _reference_notebook_accuracy(notebook_path: Path = REFERENCE_NOTEBOOK) -> float:
     notebook = cast(
         "NotebookNode",
-        nbformat.read(REFERENCE_NOTEBOOK, as_version=4),  # type: ignore[no-untyped-call]
+        nbformat.read(notebook_path, as_version=4),  # type: ignore[no-untyped-call]
     )
     executed = NotebookClient(
         notebook,
         timeout=60,
         kernel_name="python3",
         allow_errors=False,
-    ).execute(cwd=str(REFERENCE_NOTEBOOK.parent))
+    ).execute(cwd=str(notebook_path.parent))
     last_code_cell = next(cell for cell in reversed(executed.cells) if cell.cell_type == "code")
     result = next(
         output["data"]["text/plain"]

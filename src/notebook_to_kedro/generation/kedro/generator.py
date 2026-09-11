@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import shutil
 from dataclasses import dataclass
 from pathlib import Path
 from textwrap import indent
@@ -45,11 +46,19 @@ def generate_kedro_project(
         pipeline_root / "nodes.py": _nodes(plan),
         pipeline_root / "pipeline.py": _pipeline(plan, package_name),
     }
+    if plan.catalog_datasets:
+        files[root / "conf" / "base" / "catalog.yml"] = _catalog(plan)
 
+    created_paths: list[Path] = []
     for path, content in files.items():
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(content, encoding="utf-8", newline="\n")
-    return tuple(files)
+        created_paths.append(path)
+    for source_path, target_path in _catalog_file_copies(plan, root):
+        target_path.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(source_path, target_path)
+        created_paths.append(target_path)
+    return tuple(created_paths)
 
 
 def _pyproject(package_name: str) -> str:
@@ -59,6 +68,7 @@ version = "0.1.0"
 requires-python = ">=3.11,<3.14"
 dependencies = [
     "kedro>=1.5,<2",
+    "kedro-datasets[pandas]>=8,<9",
     "pandas>=2.2,<4",
     "scikit-learn>=1.7,<2",
 ]
@@ -106,6 +116,36 @@ def _nodes(plan: ConversionPlan) -> str:
     sections = [*plan.imports, ""]
     sections.extend(_node_function(task) for task in plan.task_candidates)
     return "\n\n".join(section for section in sections if section).rstrip() + "\n"
+
+
+def _catalog(plan: ConversionPlan) -> str:
+    return (
+        "\n".join(
+            _catalog_dataset(dataset.name, dataset.type, dataset.filepath)
+            for dataset in plan.catalog_datasets
+        ).rstrip()
+        + "\n"
+    )
+
+
+def _catalog_dataset(name: str, type_: str, filepath: str) -> str:
+    return f"""{name}:
+  type: {type_}
+  filepath: {filepath}
+"""
+
+
+def _catalog_file_copies(plan: ConversionPlan, root: Path) -> tuple[tuple[Path, Path], ...]:
+    copies: list[tuple[Path, Path]] = []
+    for dataset in plan.catalog_datasets:
+        if dataset.source_filepath is None:
+            continue
+        source_path = Path(dataset.source_filepath)
+        if not source_path.exists():
+            message = f"Catalog source file does not exist: {dataset.source_filepath}"
+            raise ProjectGenerationError(message)
+        copies.append((source_path, root / dataset.filepath))
+    return tuple(copies)
 
 
 def _node_function(task: TaskCandidate) -> str:

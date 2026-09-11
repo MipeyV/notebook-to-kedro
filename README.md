@@ -226,6 +226,8 @@ generate_kedro_project(plan, "generated/model_project")
 
 The end-to-end suite now executes the generated Kedro pipeline for the reference Iris notebook and compares its final accuracy with the notebook output.
 
+The planner recognizes simple `pd.read_csv("...")` assignments as catalog inputs. The generator writes a minimal `conf/base/catalog.yml` for those CSV-backed datasets and copies the source CSV into the generated project's `data/01_raw/` directory.
+
 Progress and architectural decisions are recorded chronologically in [JOURNAL.md](JOURNAL.md).
 
 ## Initial roadmap
@@ -239,7 +241,8 @@ Progress and architectural decisions are recorded chronologically in [JOURNAL.md
 7. [x] Plan minimal Kedro-oriented task candidates.
 8. [x] Generate a minimal Kedro project skeleton for controlled fixtures.
 9. [x] Verify reference fixture equivalence through observable outputs.
-10. [ ] Gradually add semantic planning, parameters, catalogs, and advanced diagnostics.
+10. [x] Add a file-backed CSV fixture with minimal catalog generation.
+11. [ ] Gradually add semantic planning, parameters, catalogs, and advanced diagnostics.
 
 ## Contributing
 
