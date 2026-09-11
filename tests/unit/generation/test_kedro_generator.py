@@ -7,7 +7,7 @@ import pytest
 
 from notebook_to_kedro import generate_kedro_project, plan_notebook_path
 from notebook_to_kedro.exceptions import ProjectGenerationError
-from notebook_to_kedro.ir import ConversionPlan, TaskCandidate
+from notebook_to_kedro.ir import CatalogDataset, ConversionPlan, TaskCandidate
 
 REFERENCE_NOTEBOOK = Path(__file__).parents[2] / "fixtures" / "notebooks" / "simple_training.ipynb"
 
@@ -142,6 +142,88 @@ def test_generate_kedro_project_handles_side_effect_task(tmp_path: Path) -> None
     ).read_text(encoding="utf-8")
     assert "return None" in nodes_source
     assert "outputs=None" in pipeline_source
+
+
+def test_generate_kedro_project_writes_catalog_datasets(tmp_path: Path) -> None:
+    source_csv = tmp_path / "source.csv"
+    source_csv.write_text("value\n1\n", encoding="utf-8")
+    plan = ConversionPlan(
+        schema_version="1.0",
+        planner_version="0.1.0",
+        notebook_path="notebooks/example.ipynb",
+        catalog_datasets=(
+            CatalogDataset(
+                name="df",
+                type="kedro_datasets.pandas.CSVDataset",
+                filepath="data/01_raw/example.csv",
+                source_filepath=str(source_csv),
+            ),
+        ),
+        task_candidates=(
+            TaskCandidate(
+                id="task-0001",
+                name="cell_0001",
+                source_cell_ids=("cell-0001",),
+                statement_ids=("cell-0001-stmt-0000",),
+                inputs=("df",),
+                outputs=("result",),
+                source="result = df",
+            ),
+        ),
+    )
+
+    created_files = generate_kedro_project(plan, tmp_path / "generated")
+
+    catalog_path = tmp_path / "generated" / "conf" / "base" / "catalog.yml"
+    assert catalog_path in created_files
+    assert tmp_path / "generated" / "data" / "01_raw" / "example.csv" in created_files
+    assert catalog_path.read_text(encoding="utf-8") == (
+        "df:\n  type: kedro_datasets.pandas.CSVDataset\n  filepath: data/01_raw/example.csv\n"
+    )
+    assert (tmp_path / "generated" / "data" / "01_raw" / "example.csv").read_text(
+        encoding="utf-8"
+    ) == "value\n1\n"
+
+
+def test_generate_kedro_project_rejects_missing_catalog_source(tmp_path: Path) -> None:
+    plan = ConversionPlan(
+        schema_version="1.0",
+        planner_version="0.1.0",
+        notebook_path="notebooks/example.ipynb",
+        catalog_datasets=(
+            CatalogDataset(
+                name="df",
+                type="kedro_datasets.pandas.CSVDataset",
+                filepath="data/01_raw/missing.csv",
+                source_filepath=str(tmp_path / "missing.csv"),
+            ),
+        ),
+        task_candidates=(),
+    )
+
+    with pytest.raises(ProjectGenerationError, match="Catalog source file does not exist"):
+        generate_kedro_project(plan, tmp_path / "generated")
+
+
+def test_generate_kedro_project_allows_catalog_without_source_copy(tmp_path: Path) -> None:
+    plan = ConversionPlan(
+        schema_version="1.0",
+        planner_version="0.1.0",
+        notebook_path="notebooks/example.ipynb",
+        catalog_datasets=(
+            CatalogDataset(
+                name="df",
+                type="kedro_datasets.pandas.CSVDataset",
+                filepath="data/01_raw/example.csv",
+            ),
+        ),
+        task_candidates=(),
+    )
+
+    created_files = generate_kedro_project(plan, tmp_path / "generated")
+
+    assert tmp_path / "generated" / "conf" / "base" / "catalog.yml" in created_files
+    assert tmp_path / "generated" / "data" / "01_raw" / "example.csv" not in created_files
 
 
 def test_generate_kedro_project_rejects_existing_destination(tmp_path: Path) -> None:

@@ -290,6 +290,7 @@ They require explicit credentials and run only in a protected workflow or manual
 7. [x] Deterministic task planning.
 8. [x] Minimal Kedro project skeleton generation.
 9. [x] Reference notebook-to-Kedro equivalence testing.
-10. [ ] Optional real LLM provider integration.
+10. [x] File-backed CSV catalog fixture.
+11. [ ] Optional real LLM provider integration.
 
 Each increment must leave the repository linted, typed, tested, and documented.

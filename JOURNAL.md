@@ -40,6 +40,34 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-09-11 — File-backed CSV catalog fixture implemented
+
+### Completed
+
+- Added a second reference notebook that loads a local CSV with `pd.read_csv`.
+- Added a small deterministic tabular classification CSV fixture.
+- Extended `ConversionPlan` with proposed catalog datasets.
+- Detected simple `pd.read_csv("...")` assignments as CSV catalog inputs.
+- Skipped CSV loading cells when creating task candidates so generated nodes consume catalog inputs.
+- Generated `conf/base/catalog.yml` entries with `kedro_datasets.pandas.CSVDataset`.
+- Copied detected source CSV files into the generated project's `data/01_raw/` directory.
+- Added unit, integration, and end-to-end coverage for the file-backed workflow.
+- Verified that the generated Kedro pipeline matches the source notebook final accuracy for the CSV-backed fixture.
+
+### Decisions
+
+- The first catalog pattern requires a literal string filepath in a direct `read_csv` assignment.
+- The generated project declares `kedro-datasets[pandas]` when CSV catalog support is used.
+- End-to-end tests still execute with in-memory datasets while loading the generated-project copy of the CSV.
+
+### Open questions
+
+- Add support for parameter extraction before broadening catalog formats.
+
+### Next step
+
+- Extract simple literal parameters such as `test_size`, `random_state`, and `n_estimators` into a generated `parameters.yml`.
+
 ## 2026-09-10 — Generated pipeline equivalence test implemented
 
 ### Completed

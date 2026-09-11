@@ -105,7 +105,7 @@ Initial Level 2 targets:
 | Integration | Initial scope |
 | --- | --- |
 | Kedro | project structure, nodes, pipelines, parameters, registry |
-| kedro-datasets | local CSV and Parquet datasets in a later fixture |
+| kedro-datasets | local CSV datasets loaded from literal `pd.read_csv(...)` paths |
 | pandas | DataFrame node inputs and outputs |
 | scikit-learn | estimator training and prediction |
 
