@@ -169,6 +169,8 @@ The first implementation and default tests use a deterministic fake or fixture-b
 
 The semantic layer may propose but cannot silently override static evidence.
 
+The deterministic planner assigns stable, valid Python identifiers to task candidates. It prefers recognized source patterns such as train/test split, model training, prediction, and evaluation, then falls back to the nearest preceding Markdown heading, and finally to a `cell_0000` style name when no semantic clue is available.
+
 ### Kedro generation
 
 `generation/kedro/` consumes only a validated `ConversionPlan`:

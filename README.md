@@ -230,6 +230,8 @@ The planner recognizes simple `pd.read_csv("...")` assignments as catalog inputs
 
 The planner also extracts selected literal scikit-learn parameters, and the generator writes `conf/base/parameters.yml` while wiring nodes with Kedro `params:` inputs.
 
+Generated node names are now deterministic but reviewable: the planner uses nearby Markdown headings when available and falls back to simple source patterns such as `split_data`, `train_model`, `predict`, and `evaluate_model`.
+
 Progress and architectural decisions are recorded chronologically in [JOURNAL.md](JOURNAL.md).
 
 ## Initial roadmap
@@ -245,7 +247,8 @@ Progress and architectural decisions are recorded chronologically in [JOURNAL.md
 9. [x] Verify reference fixture equivalence through observable outputs.
 10. [x] Add a file-backed CSV fixture with minimal catalog generation.
 11. [x] Extract selected literal parameters into Kedro configuration.
-12. [ ] Gradually add semantic planning, richer catalogs, and advanced diagnostics.
+12. [x] Generate readable deterministic node names from headings and simple source patterns.
+13. [ ] Gradually add semantic planning, richer catalogs, and advanced diagnostics.
 
 ## Contributing
 

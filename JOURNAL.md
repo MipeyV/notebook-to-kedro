@@ -40,6 +40,34 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-09-11 - Readable deterministic node names implemented
+
+### Completed
+
+- Added deterministic task naming before parameter extraction.
+- Derived task names from recognized source patterns such as split, train, predict, evaluate, and load.
+- Used the nearest preceding Markdown heading as a fallback naming signal.
+- Kept generated names as valid Python identifiers and made duplicates deterministic with numeric suffixes.
+- Renamed extracted parameter keys to follow the readable node names, such as `split_data.test_size`.
+- Updated unit, integration, generation, and end-to-end expectations.
+- Reached 100% statement and branch coverage with 143 passing tests.
+
+### Decisions
+
+- Source patterns take precedence over Markdown headings because they are tied to executable evidence.
+- Markdown headings are still useful review signals for transformation cells without recognized library calls.
+- `cell_0000` remains the final fallback when no reliable semantic cue exists.
+
+### Open questions
+
+- Decide whether to expose naming confidence or provenance in `ConversionPlan`.
+- Add richer transformation naming beyond the current ML workflow patterns.
+- Decide when a naming proposal should require human review instead of being accepted automatically.
+
+### Next step
+
+- Add conversion report output so users can review planned nodes, parameters, catalog inputs, and diagnostics before trusting the generated project.
+
 ## 2026-09-11 — Selected Kedro parameter extraction implemented
 
 ### Completed
