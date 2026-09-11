@@ -5,6 +5,7 @@ from pathlib import Path
 import pytest
 
 from notebook_to_kedro.cli import main
+from notebook_to_kedro.exceptions import ProjectGenerationError
 
 REFERENCE_NOTEBOOK = Path(__file__).parents[1] / "fixtures" / "notebooks" / "simple_training.ipynb"
 
@@ -45,3 +46,59 @@ def test_cli_requires_command(capsys: pytest.CaptureFixture[str]) -> None:
 
     assert exc_info.value.code == 2
     assert "missing command" in captured.err
+
+
+def test_cli_generate_writes_kedro_project(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    output_dir = tmp_path / "generated"
+
+    exit_code = main(
+        [
+            "generate",
+            str(REFERENCE_NOTEBOOK),
+            str(output_dir),
+            "--package-name",
+            "cli_generated",
+        ]
+    )
+
+    captured = capsys.readouterr()
+
+    assert exit_code == 0
+    assert captured.err == ""
+    assert f"Created Kedro project at `{output_dir}`" in captured.out
+    assert f"- `{output_dir / 'pyproject.toml'}`" in captured.out
+    assert (output_dir / "src" / "cli_generated" / "pipelines" / "notebook_pipeline").is_dir()
+    assert (output_dir / "conf" / "base" / "parameters.yml").is_file()
+
+
+def test_cli_generate_accepts_project_root(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    project_root = REFERENCE_NOTEBOOK.parents[3]
+    output_dir = tmp_path / "generated"
+
+    exit_code = main(
+        [
+            "generate",
+            str(REFERENCE_NOTEBOOK),
+            str(output_dir),
+            "--project-root",
+            str(project_root),
+        ]
+    )
+
+    captured = capsys.readouterr()
+
+    assert exit_code == 0
+    assert (output_dir / "pyproject.toml").is_file()
+    assert "Created Kedro project" in captured.out
+
+
+def test_cli_generate_rejects_existing_output_dir(tmp_path: Path) -> None:
+    output_dir = tmp_path / "generated"
+    output_dir.mkdir()
+
+    with pytest.raises(ProjectGenerationError, match="Destination already exists"):
+        main(["generate", str(REFERENCE_NOTEBOOK), str(output_dir)])

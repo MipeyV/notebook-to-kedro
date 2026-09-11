@@ -92,6 +92,7 @@ Initial command-line entrypoint:
 
 ```bash
 notebook-to-kedro plan notebooks/model.ipynb
+notebook-to-kedro generate notebooks/model.ipynb generated/model_project
 ```
 
 Target API:
@@ -196,7 +197,7 @@ Repetitive Kedro boilerplate is rendered deterministically. An optional code tra
 
 ### CLI
 
-`cli.py` owns terminal argument parsing and delegates to the public API. It should remain thin: commands orchestrate existing use cases and write their results, while analysis, planning, reporting, and generation logic stay in their component modules.
+`cli.py` owns terminal argument parsing and delegates to the public API. It should remain thin: commands orchestrate existing use cases and write their results, while analysis, planning, reporting, and generation logic stay in their component modules. The initial commands render a review report and generate a minimal Kedro project from a notebook path.
 
 ### Filesystem writing
 
