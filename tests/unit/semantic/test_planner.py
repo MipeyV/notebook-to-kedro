@@ -44,7 +44,7 @@ def test_plan_tasks_creates_code_cell_candidates_with_data_flow() -> None:
     assert plan.planner_version == "0.1.0"
     assert plan.notebook_path == "tests/fixtures/notebooks/example.ipynb"
     assert tuple(task.id for task in plan.task_candidates) == ("task-0002", "task-0003")
-    assert plan.task_candidates[0].name == "cell_0002"
+    assert tuple(task.name for task in plan.task_candidates) == ("prepare", "prepare_2")
     assert plan.task_candidates[0].inputs == ()
     assert plan.task_candidates[0].outputs == ("raw",)
     assert plan.task_candidates[1].source_cell_ids == ("cell-0003",)
@@ -79,20 +79,20 @@ def test_plan_tasks_extracts_supported_literal_parameters() -> None:
     plan = plan_tasks(facts)
 
     assert tuple(parameter.name for parameter in plan.parameters) == (
-        "cell_0001.test_size",
-        "cell_0001.random_state",
-        "cell_0002.n_estimators",
-        "cell_0002.random_state",
+        "split_data.test_size",
+        "split_data.random_state",
+        "train_model.n_estimators",
+        "train_model.random_state",
     )
     assert tuple(parameter.value for parameter in plan.parameters) == (0.25, 42, 50, 42)
-    assert plan.parameters[0].function_argument == "cell_0001_test_size"
+    assert plan.parameters[0].function_argument == "split_data_test_size"
     assert plan.task_candidates[1].parameters == (
-        "cell_0001.test_size",
-        "cell_0001.random_state",
+        "split_data.test_size",
+        "split_data.random_state",
     )
     assert plan.task_candidates[2].parameters == (
-        "cell_0002.n_estimators",
-        "cell_0002.random_state",
+        "train_model.n_estimators",
+        "train_model.random_state",
     )
 
 
@@ -123,6 +123,44 @@ def test_plan_tasks_promotes_csv_loader_to_catalog_dataset() -> None:
     assert tuple(task.name for task in plan.task_candidates) == ("cell_0002",)
     assert plan.task_candidates[0].inputs == ("df",)
     assert plan.task_candidates[0].outputs == ("result",)
+
+
+def test_plan_tasks_uses_source_patterns_before_markdown_headings() -> None:
+    facts = analyze_notebook(
+        _loaded_notebook(
+            LoadedCell("cell-0000", 0, NotebookCellKind.MARKDOWN, "## Prepare features"),
+            _code_cell("X = df.drop(columns=['target'])\ny = df['target']", index=1),
+            _code_cell("X_train, X_test, y_train, y_test = train_test_split(X, y)", index=2),
+        )
+    )
+
+    plan = plan_tasks(facts)
+
+    assert tuple(task.name for task in plan.task_candidates) == (
+        "prepare_features",
+        "split_data",
+    )
+
+
+def test_plan_tasks_normalizes_markdown_headings_to_identifiers() -> None:
+    facts = analyze_notebook(
+        _loaded_notebook(
+            LoadedCell("cell-0000", 0, NotebookCellKind.MARKDOWN, "plain notes"),
+            _code_cell("fallback = 1", index=1),
+            LoadedCell("cell-0002", 2, NotebookCellKind.MARKDOWN, "## !!!"),
+            _code_cell("empty_slug = fallback + 1", index=3),
+            LoadedCell("cell-0004", 4, NotebookCellKind.MARKDOWN, "intro\n## 2026 Train"),
+            _code_cell("numbered = empty_slug + 1", index=5),
+        )
+    )
+
+    plan = plan_tasks(facts)
+
+    assert tuple(task.name for task in plan.task_candidates) == (
+        "cell_0001",
+        "task",
+        "task_2026_train",
+    )
 
 
 def test_plan_tasks_preserves_absolute_csv_source_path() -> None:

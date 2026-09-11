@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import ast
 import posixpath
+import re
 from dataclasses import dataclass
 from pathlib import PurePosixPath
 from typing import TYPE_CHECKING
@@ -32,6 +33,17 @@ SUPPORTED_PARAMETER_KEYWORDS = {
 
 def plan_tasks(facts: NotebookFacts) -> ConversionPlan:
     """Propose one task candidate per analyzable code cell with data outputs."""
+    catalog_datasets = _catalog_datasets(facts)
+    catalog_dataset_names = {dataset.name for dataset in catalog_datasets}
+    import_names = {symbol.name for symbol in facts.symbols if symbol.kind is SymbolKind.IMPORT}
+    data_symbols = {symbol.name for symbol in facts.symbols if symbol.kind is not SymbolKind.IMPORT}
+    task_names_by_cell = _task_names_by_cell(
+        facts,
+        import_names=import_names,
+        data_symbols=data_symbols,
+        catalog_dataset_names=catalog_dataset_names,
+    )
+    parameters = _parameters(facts, task_names_by_cell)
     blocking_codes = _blocking_diagnostic_codes(facts)
     if blocking_codes:
         return ConversionPlan(
@@ -40,17 +52,12 @@ def plan_tasks(facts: NotebookFacts) -> ConversionPlan:
             notebook_path=facts.notebook.path,
             task_candidates=(),
             imports=_imports(facts),
-            catalog_datasets=_catalog_datasets(facts),
-            parameters=_parameters(facts),
+            catalog_datasets=catalog_datasets,
+            parameters=parameters,
             blocking_diagnostic_codes=blocking_codes,
         )
 
-    catalog_datasets = _catalog_datasets(facts)
-    catalog_dataset_names = {dataset.name for dataset in catalog_datasets}
-    parameters = _parameters(facts)
     parameters_by_cell = _parameter_names_by_cell(parameters)
-    import_names = {symbol.name for symbol in facts.symbols if symbol.kind is SymbolKind.IMPORT}
-    data_symbols = {symbol.name for symbol in facts.symbols if symbol.kind is not SymbolKind.IMPORT}
     dependency_inputs_by_cell: dict[int, set[str]] = {}
     for dependency in facts.dependencies:
         dependency_inputs_by_cell.setdefault(dependency.consumer.cell_index, set()).add(
@@ -69,6 +76,7 @@ def plan_tasks(facts: NotebookFacts) -> ConversionPlan:
                     dependency_inputs_by_cell=dependency_inputs_by_cell,
                     catalog_dataset_names=catalog_dataset_names,
                     parameters_by_cell=parameters_by_cell,
+                    task_names_by_cell=task_names_by_cell,
                 ),
             )
         )
@@ -92,6 +100,7 @@ class _PlanningContext:
     dependency_inputs_by_cell: dict[int, set[str]]
     catalog_dataset_names: set[str]
     parameters_by_cell: dict[str, tuple[str, ...]]
+    task_names_by_cell: dict[str, str]
 
 
 def _task_candidate(
@@ -101,12 +110,11 @@ def _task_candidate(
     if cell.kind is not CellKind.CODE or not cell.statements:
         return None
 
-    outputs = tuple(
-        name
-        for name in cell.writes
-        if name in context.data_symbols
-        and name not in context.import_names
-        and name not in context.catalog_dataset_names
+    outputs = _task_outputs(
+        cell,
+        import_names=context.import_names,
+        data_symbols=context.data_symbols,
+        catalog_dataset_names=context.catalog_dataset_names,
     )
     if not outputs:
         return None
@@ -124,7 +132,7 @@ def _task_candidate(
     )
     return TaskCandidate(
         id=f"task-{cell.index:04d}",
-        name=f"cell_{cell.index:04d}",
+        name=context.task_names_by_cell[cell.id],
         source_cell_ids=(cell.id,),
         statement_ids=tuple(statement.id for statement in cell.statements),
         inputs=_ordered_names(inputs),
@@ -133,6 +141,94 @@ def _task_candidate(
         parameters=context.parameters_by_cell.get(cell.id, ()),
         diagnostic_codes=cell.diagnostic_codes,
     )
+
+
+def _task_names_by_cell(
+    facts: NotebookFacts,
+    *,
+    import_names: set[str],
+    data_symbols: set[str],
+    catalog_dataset_names: set[str],
+) -> dict[str, str]:
+    names_by_cell: dict[str, str] = {}
+    used_names: dict[str, int] = {}
+    current_heading: str | None = None
+    for cell in facts.cells:
+        if cell.kind is CellKind.MARKDOWN:
+            current_heading = _markdown_heading(cell.source) or current_heading
+            continue
+        if not _task_outputs(
+            cell,
+            import_names=import_names,
+            data_symbols=data_symbols,
+            catalog_dataset_names=catalog_dataset_names,
+        ):
+            continue
+        base_name = _pattern_name(cell) or current_heading or f"cell_{cell.index:04d}"
+        names_by_cell[cell.id] = _unique_task_name(_slug_identifier(base_name), used_names)
+    return names_by_cell
+
+
+def _task_outputs(
+    cell: CellFacts,
+    *,
+    import_names: set[str],
+    data_symbols: set[str],
+    catalog_dataset_names: set[str],
+) -> tuple[str, ...]:
+    if cell.kind is not CellKind.CODE or not cell.statements:
+        return ()
+    return tuple(
+        name
+        for name in cell.writes
+        if name in data_symbols and name not in import_names and name not in catalog_dataset_names
+    )
+
+
+def _markdown_heading(source: str) -> str | None:
+    for line in source.splitlines():
+        stripped = line.strip()
+        if stripped.startswith("#"):
+            return stripped.lstrip("#").strip()
+    return None
+
+
+def _pattern_name(cell: CellFacts) -> str | None:
+    qualified_names = {call.qualified_name for call in cell.calls}
+    methods = {call.method for call in cell.calls if call.method is not None}
+    if "train_test_split" in qualified_names:
+        return "split_data"
+    if "accuracy" in cell.writes or any(
+        name.endswith("accuracy_score") for name in qualified_names
+    ):
+        return "evaluate_model"
+    if "predictions" in cell.writes or "predict" in methods:
+        return "predict"
+    if "model" in cell.writes and ("fit" in methods or "RandomForestClassifier" in qualified_names):
+        return "train_model"
+    if any(
+        name.endswith(("load_iris", "load_wine", "load_breast_cancer")) for name in qualified_names
+    ):
+        return "load_data"
+    return None
+
+
+def _slug_identifier(value: str) -> str:
+    slug = re.sub(r"[^0-9A-Za-z_]+", "_", value.strip().lower()).strip("_")
+    slug = re.sub(r"_+", "_", slug)
+    if not slug:
+        return "task"
+    if slug[0].isdigit():
+        return f"task_{slug}"
+    return slug
+
+
+def _unique_task_name(base_name: str, used_names: dict[str, int]) -> str:
+    count = used_names.get(base_name, 0) + 1
+    used_names[base_name] = count
+    if count == 1:
+        return base_name
+    return f"{base_name}_{count}"
 
 
 def _blocking_diagnostic_codes(facts: NotebookFacts) -> tuple[str, ...]:
@@ -171,9 +267,14 @@ def _catalog_datasets(facts: NotebookFacts) -> tuple[CatalogDataset, ...]:
     return tuple(datasets)
 
 
-def _parameters(facts: NotebookFacts) -> tuple[ParameterValue, ...]:
+def _parameters(
+    facts: NotebookFacts, task_names_by_cell: dict[str, str]
+) -> tuple[ParameterValue, ...]:
     parameters: list[ParameterValue] = []
     for cell in facts.cells:
+        task_name = task_names_by_cell.get(cell.id)
+        if task_name is None:
+            continue
         for call in cell.calls:
             supported_keywords = SUPPORTED_PARAMETER_KEYWORDS.get(call.qualified_name)
             if supported_keywords is None:
@@ -186,9 +287,9 @@ def _parameters(facts: NotebookFacts) -> tuple[ParameterValue, ...]:
                     continue
                 parameters.append(
                     ParameterValue(
-                        name=f"cell_{cell.index:04d}.{keyword.name}",
+                        name=f"{task_name}.{keyword.name}",
                         value=value,
-                        function_argument=f"cell_{cell.index:04d}_{keyword.name}",
+                        function_argument=f"{task_name}_{keyword.name}",
                         source_cell_id=cell.id,
                     )
                 )

@@ -40,17 +40,17 @@ def test_generate_kedro_project_writes_importable_reference_project(
     ).read_text(encoding="utf-8")
 
     assert "from sklearn.datasets import load_iris" in nodes_source
-    assert "def cell_0003():" in nodes_source
+    assert "def load_data():" in nodes_source
     assert "return iris, df" in nodes_source
-    assert "test_size=cell_0006_test_size" in nodes_source
-    assert "random_state=cell_0008_random_state" in nodes_source
-    assert "'df__cell_0005'" in pipeline_source
-    assert "'cell_0006_test_size': 'params:cell_0006.test_size'" in pipeline_source
+    assert "test_size=split_data_test_size" in nodes_source
+    assert "random_state=train_model_random_state" in nodes_source
+    assert "'df__prepare_features'" in pipeline_source
+    assert "'split_data_test_size': 'params:split_data.test_size'" in pipeline_source
     parameters_source = (output_path / "conf" / "base" / "parameters.yml").read_text(
         encoding="utf-8"
     )
-    assert "cell_0006.test_size: 0.2" in parameters_source
-    assert "cell_0008.n_estimators: 100" in parameters_source
+    assert "split_data.test_size: 0.2" in parameters_source
+    assert "train_model.n_estimators: 100" in parameters_source
 
     monkeypatch.syspath_prepend(str(output_path / "src"))
     pipeline_module = importlib.import_module("generated_reference.pipelines.notebook_pipeline")

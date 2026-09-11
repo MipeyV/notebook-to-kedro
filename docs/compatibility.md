@@ -66,6 +66,7 @@ The first milestone focuses on:
 - reads and writes of named values;
 - basic cross-cell dependencies.
 - selected literal scikit-learn keyword parameters.
+- deterministic task naming from Markdown headings and simple ML source patterns.
 
 Complex scopes, conditional writes, dynamic execution, shell commands, and Jupyter magics follow the policy in [mvp-contract.md](mvp-contract.md).
 
@@ -96,6 +97,8 @@ Initial Level 1 candidates:
 | scikit-learn | splitting, estimator construction, `fit`, `transform`, `predict`, metrics |
 
 Pattern support is introduced operation by operation and documented with fixtures. A library name alone never implies complete support.
+
+Readable node naming is a Level 1 planner feature. It currently recognizes simple scikit-learn workflow patterns and otherwise derives valid identifiers from Markdown headings when present.
 
 ### Level 2 — generated-project integration
 

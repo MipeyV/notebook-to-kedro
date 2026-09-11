@@ -54,12 +54,12 @@ def test_public_api_plans_reference_notebook_tasks() -> None:
     plan = plan_notebook_path(REFERENCE_NOTEBOOK)
 
     assert tuple(task.name for task in plan.task_candidates) == (
-        "cell_0003",
-        "cell_0005",
-        "cell_0006",
-        "cell_0008",
-        "cell_0009",
-        "cell_0011",
+        "load_data",
+        "prepare_features",
+        "split_data",
+        "train_model",
+        "predict",
+        "evaluate_model",
     )
     assert plan.task_candidates[0].outputs == ("iris", "df")
     assert plan.task_candidates[1].inputs == ("df",)
@@ -79,11 +79,11 @@ def test_public_api_plans_file_backed_notebook_catalog_input() -> None:
         == "tests/fixtures/tabular/raw/binary_classification.csv"
     )
     assert tuple(task.name for task in plan.task_candidates) == (
-        "cell_0005",
-        "cell_0006",
-        "cell_0008",
-        "cell_0009",
-        "cell_0011",
+        "prepare_features",
+        "split_data",
+        "train_model",
+        "predict",
+        "evaluate_model",
     )
     assert plan.task_candidates[0].inputs == ("df",)
     assert plan.task_candidates[-1].outputs == ("accuracy",)
