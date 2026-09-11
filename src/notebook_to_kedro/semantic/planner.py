@@ -17,6 +17,7 @@ from notebook_to_kedro.ir import (
     ConversionPlan,
     NotebookFacts,
     ParameterValue,
+    PlanDiagnostic,
     SymbolKind,
     TaskCandidate,
 )
@@ -54,6 +55,7 @@ def plan_tasks(facts: NotebookFacts) -> ConversionPlan:
             imports=_imports(facts),
             catalog_datasets=catalog_datasets,
             parameters=parameters,
+            diagnostics=_blocking_plan_diagnostics(blocking_codes),
             blocking_diagnostic_codes=blocking_codes,
         )
 
@@ -90,6 +92,7 @@ def plan_tasks(facts: NotebookFacts) -> ConversionPlan:
         imports=_imports(facts),
         catalog_datasets=catalog_datasets,
         parameters=parameters,
+        diagnostics=_plan_diagnostics(candidates, catalog_dataset_names),
     )
 
 
@@ -235,6 +238,72 @@ def _blocking_diagnostic_codes(facts: NotebookFacts) -> tuple[str, ...]:
     return _ordered_names(
         diagnostic.code for diagnostic in facts.diagnostics if diagnostic.blocking
     )
+
+
+def _blocking_plan_diagnostics(codes: tuple[str, ...]) -> tuple[PlanDiagnostic, ...]:
+    return tuple(
+        PlanDiagnostic(
+            code="PD000",
+            severity="error",
+            message=f"Blocking source diagnostic prevents task planning: {code}.",
+        )
+        for code in codes
+    )
+
+
+def _plan_diagnostics(
+    candidates: tuple[TaskCandidate, ...], catalog_dataset_names: set[str]
+) -> tuple[PlanDiagnostic, ...]:
+    diagnostics: list[PlanDiagnostic] = []
+    produced_symbols = set(catalog_dataset_names)
+    for task in candidates:
+        diagnostics.extend(_task_review_diagnostics(task, produced_symbols))
+        produced_symbols.update(task.outputs)
+    return tuple(diagnostics)
+
+
+def _task_review_diagnostics(
+    task: TaskCandidate, produced_symbols: set[str]
+) -> tuple[PlanDiagnostic, ...]:
+    diagnostics: list[PlanDiagnostic] = []
+    if re.fullmatch(r"cell_\d{4}", task.name):
+        diagnostics.append(
+            PlanDiagnostic(
+                code="PD001",
+                severity="warning",
+                message=f"Task {task.name} uses a fallback cell-based name.",
+                task_id=task.id,
+            )
+        )
+    diagnostics.extend(
+        PlanDiagnostic(
+            code="PD002",
+            severity="warning",
+            message=f"Task {task.name} inherits source diagnostic {code}.",
+            task_id=task.id,
+        )
+        for code in task.diagnostic_codes
+    )
+    diagnostics.extend(
+        PlanDiagnostic(
+            code="PD003",
+            severity="warning",
+            message=f"Task {task.name} reads unresolved external input {input_name}.",
+            task_id=task.id,
+        )
+        for input_name in task.inputs
+        if input_name not in produced_symbols
+    )
+    if not task.outputs:
+        diagnostics.append(
+            PlanDiagnostic(
+                code="PD004",
+                severity="warning",
+                message=f"Task {task.name} has no data outputs.",
+                task_id=task.id,
+            )
+        )
+    return tuple(diagnostics)
 
 
 def _imports(facts: NotebookFacts) -> tuple[str, ...]:

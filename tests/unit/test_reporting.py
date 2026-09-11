@@ -1,7 +1,13 @@
 """Unit tests for conversion plan reporting."""
 
 from notebook_to_kedro import render_conversion_report
-from notebook_to_kedro.ir import CatalogDataset, ConversionPlan, ParameterValue, TaskCandidate
+from notebook_to_kedro.ir import (
+    CatalogDataset,
+    ConversionPlan,
+    ParameterValue,
+    PlanDiagnostic,
+    TaskCandidate,
+)
 
 
 def test_render_conversion_report_summarizes_reviewable_plan() -> None:
@@ -38,6 +44,14 @@ def test_render_conversion_report_summarizes_reviewable_plan() -> None:
                 diagnostic_codes=("DF003",),
             ),
         ),
+        diagnostics=(
+            PlanDiagnostic(
+                code="PD002",
+                severity="warning",
+                message="Task split_data inherits source diagnostic DF003.",
+                task_id="task-0003",
+            ),
+        ),
     )
 
     report = render_conversion_report(plan)
@@ -53,6 +67,7 @@ def test_render_conversion_report_summarizes_reviewable_plan() -> None:
         "- Task candidates: `1`\n"
         "- Catalog datasets: `1`\n"
         "- Parameters: `1`\n"
+        "- Plan diagnostics: `1`\n"
         "\n"
         "## Task Candidates\n"
         "| Node | Source cells | Inputs | Outputs | Parameters | Diagnostics |\n"
@@ -70,6 +85,12 @@ def test_render_conversion_report_summarizes_reviewable_plan() -> None:
         "| Name | Value | Function argument | Source cell |\n"
         "| --- | --- | --- | --- |\n"
         "| `split_data.test_size` | `0.2` | `split_data_test_size` | `cell-0003` |\n"
+        "\n"
+        "## Plan Diagnostics\n"
+        "| Code | Severity | Task | Message |\n"
+        "| --- | --- | --- | --- |\n"
+        "| `PD002` | `warning` | `task-0003` | Task split_data inherits source diagnostic "
+        "DF003. |\n"
         "\n"
         "## Blocking Diagnostics\n"
         "- None\n"
@@ -142,6 +163,13 @@ def test_render_conversion_report_escapes_markdown_table_values() -> None:
                 source_cell_id="cell-0001",
             ),
         ),
+        diagnostics=(
+            PlanDiagnostic(
+                code="PD|001",
+                severity="warning",
+                message="Needs review | fallback\nname.",
+            ),
+        ),
         task_candidates=(),
     )
 
@@ -151,3 +179,4 @@ def test_render_conversion_report_escapes_markdown_table_values() -> None:
     assert "`data\\\\raw\\\\example.csv`" in report
     assert "| `task.flag` | `true` | `task_flag` | `cell-0001 continued` |" in report
     assert "| `task.optional` | `null` | `task_optional` | `cell-0001` |" in report
+    assert "| `PD\\|001` | `warning` | None | Needs review \\| fallback name. |" in report

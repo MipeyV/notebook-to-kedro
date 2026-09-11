@@ -20,7 +20,13 @@ from notebook_to_kedro.ir.facts import (
     SymbolFacts,
     SymbolKind,
 )
-from notebook_to_kedro.ir.plan import CatalogDataset, ConversionPlan, ParameterValue, TaskCandidate
+from notebook_to_kedro.ir.plan import (
+    CatalogDataset,
+    ConversionPlan,
+    ParameterValue,
+    PlanDiagnostic,
+    TaskCandidate,
+)
 from notebook_to_kedro.ir.serialization import (
     notebook_facts_from_dict,
     notebook_facts_from_json,
@@ -44,6 +50,7 @@ __all__ = [
     "NotebookFacts",
     "NotebookMetadata",
     "ParameterValue",
+    "PlanDiagnostic",
     "Severity",
     "SourceLocation",
     "StatementFacts",

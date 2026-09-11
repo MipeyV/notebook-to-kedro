@@ -1,8 +1,10 @@
 """Unit tests for deterministic task planning."""
 
 from notebook_to_kedro.analysis import analyze_notebook
+from notebook_to_kedro.ir import TaskCandidate
 from notebook_to_kedro.notebook import LoadedCell, LoadedNotebook, NotebookCellKind
 from notebook_to_kedro.semantic import plan_tasks
+from notebook_to_kedro.semantic.planner import _plan_diagnostics
 
 SHA256 = "a" * 64
 
@@ -52,6 +54,9 @@ def test_plan_tasks_creates_code_cell_candidates_with_data_flow() -> None:
     assert plan.task_candidates[1].inputs == ("raw", "external")
     assert plan.task_candidates[1].outputs == ("clean",)
     assert plan.task_candidates[1].diagnostic_codes == ("DF001",)
+    assert tuple(diagnostic.code for diagnostic in plan.diagnostics) == ("PD002", "PD003")
+    assert plan.diagnostics[0].message == "Task prepare_2 inherits source diagnostic DF001."
+    assert plan.diagnostics[1].message == "Task prepare_2 reads unresolved external input external."
     assert plan.blocking_diagnostic_codes == ()
 
 
@@ -103,6 +108,8 @@ def test_plan_tasks_stops_on_blocking_diagnostics() -> None:
 
     assert plan.task_candidates == ()
     assert plan.blocking_diagnostic_codes == ("PY002",)
+    assert tuple(diagnostic.code for diagnostic in plan.diagnostics) == ("PD000",)
+    assert plan.diagnostics[0].severity == "error"
 
 
 def test_plan_tasks_promotes_csv_loader_to_catalog_dataset() -> None:
@@ -123,6 +130,8 @@ def test_plan_tasks_promotes_csv_loader_to_catalog_dataset() -> None:
     assert tuple(task.name for task in plan.task_candidates) == ("cell_0002",)
     assert plan.task_candidates[0].inputs == ("df",)
     assert plan.task_candidates[0].outputs == ("result",)
+    assert plan.diagnostics[0].code == "PD001"
+    assert plan.diagnostics[0].task_id == "task-0002"
 
 
 def test_plan_tasks_uses_source_patterns_before_markdown_headings() -> None:
@@ -161,6 +170,7 @@ def test_plan_tasks_normalizes_markdown_headings_to_identifiers() -> None:
         "task",
         "task_2026_train",
     )
+    assert tuple(diagnostic.code for diagnostic in plan.diagnostics) == ("PD001",)
 
 
 def test_plan_tasks_preserves_absolute_csv_source_path() -> None:
@@ -192,3 +202,23 @@ def test_plan_tasks_ignores_non_literal_and_non_primitive_parameters() -> None:
     plan = plan_tasks(facts)
 
     assert plan.parameters == ()
+
+
+def test_plan_diagnostics_warns_for_tasks_without_outputs() -> None:
+    diagnostics = _plan_diagnostics(
+        (
+            TaskCandidate(
+                id="task-0001",
+                name="notify",
+                source_cell_ids=("cell-0001",),
+                statement_ids=("cell-0001-stmt-0000",),
+                inputs=(),
+                outputs=(),
+                source="print('done')",
+            ),
+        ),
+        catalog_dataset_names=set(),
+    )
+
+    assert tuple(diagnostic.code for diagnostic in diagnostics) == ("PD004",)
+    assert diagnostics[0].message == "Task notify has no data outputs."

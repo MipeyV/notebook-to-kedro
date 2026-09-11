@@ -41,6 +41,16 @@ class ParameterValue:
 
 
 @dataclass(frozen=True, slots=True)
+class PlanDiagnostic:
+    """Review note attached to a conversion plan."""
+
+    code: str
+    severity: str
+    message: str
+    task_id: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
 class ConversionPlan:
     """Deterministic semantic plan proposed from notebook facts."""
 
@@ -51,4 +61,5 @@ class ConversionPlan:
     imports: tuple[str, ...] = ()
     catalog_datasets: tuple[CatalogDataset, ...] = ()
     parameters: tuple[ParameterValue, ...] = ()
+    diagnostics: tuple[PlanDiagnostic, ...] = ()
     blocking_diagnostic_codes: tuple[str, ...] = ()
