@@ -40,6 +40,34 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-09-11 - Conversion plan validation implemented
+
+### Completed
+
+- Added `validate_conversion_plan(plan)` as a public API.
+- Added `ConversionPlanValidationError` for plans that are unsafe to generate.
+- Validated blocking diagnostics, duplicate task IDs, duplicate task names, duplicate catalog dataset names, duplicate parameter names, duplicate parameter function arguments, invalid task identifiers, and unknown task parameter references.
+- Wired CLI `generate` to validate plans before writing files.
+- Extended friendly CLI error handling to plan validation failures.
+- Added unit tests for valid plans, each validation category, package exports, and blocked CLI generation.
+- Reached 100% statement and branch coverage with 163 passing tests.
+
+### Decisions
+
+- Plan validation lives in the semantic boundary because it checks conversion-plan intent before generator-specific rendering.
+- The Kedro generator keeps its local safety checks, but CLI generation now performs explicit validation first.
+- The first validation API raises a concise exception instead of returning a richer report object.
+
+### Open questions
+
+- Decide whether validation should return structured findings for machine-readable CLI and CI output.
+- Add diagnostic messages to blocked-plan validation once `ConversionPlan` preserves more diagnostic detail.
+- Decide whether generated projects should embed a copy of the validation report.
+
+### Next step
+
+- Add richer plan diagnostics for ambiguous or unsupported notebook patterns so validation/reporting can explain conversion risk beyond hard syntax blockers.
+
 ## 2026-09-11 - Friendly CLI errors implemented
 
 ### Completed

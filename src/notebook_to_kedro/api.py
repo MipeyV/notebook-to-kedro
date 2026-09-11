@@ -8,7 +8,7 @@ from notebook_to_kedro.analysis import analyze_notebook
 from notebook_to_kedro.generation import generate_kedro_project
 from notebook_to_kedro.notebook import load_notebook
 from notebook_to_kedro.reporting import render_conversion_report
-from notebook_to_kedro.semantic import plan_tasks
+from notebook_to_kedro.semantic import plan_tasks, validate_conversion_plan
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -35,4 +35,5 @@ __all__ = [
     "generate_kedro_project",
     "plan_notebook_path",
     "render_conversion_report",
+    "validate_conversion_plan",
 ]

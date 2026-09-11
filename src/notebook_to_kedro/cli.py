@@ -10,8 +10,13 @@ from notebook_to_kedro.api import (
     generate_kedro_project,
     plan_notebook_path,
     render_conversion_report,
+    validate_conversion_plan,
 )
-from notebook_to_kedro.exceptions import NotebookLoadError, ProjectGenerationError
+from notebook_to_kedro.exceptions import (
+    ConversionPlanValidationError,
+    NotebookLoadError,
+    ProjectGenerationError,
+)
 
 ERROR_EXIT_CODE = 1
 
@@ -25,7 +30,7 @@ def main(argv: list[str] | None = None) -> int:
             return _plan(args)
         if args.command == "generate":
             return _generate(args)
-    except (NotebookLoadError, ProjectGenerationError) as error:
+    except (ConversionPlanValidationError, NotebookLoadError, ProjectGenerationError) as error:
         sys.stderr.write(f"Error: {error}\n")
         return ERROR_EXIT_CODE
     parser.error("missing command")
@@ -76,6 +81,7 @@ def _plan(args: argparse.Namespace) -> int:
 
 def _generate(args: argparse.Namespace) -> int:
     plan = plan_notebook_path(args.notebook, project_root=args.project_root)
+    validate_conversion_plan(plan)
     created_files = generate_kedro_project(
         plan,
         args.output_dir,

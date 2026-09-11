@@ -5,8 +5,19 @@ from pathlib import Path
 import pytest
 
 from notebook_to_kedro.cli import main
+from notebook_to_kedro.ir import ConversionPlan
 
 REFERENCE_NOTEBOOK = Path(__file__).parents[1] / "fixtures" / "notebooks" / "simple_training.ipynb"
+
+
+def _blocked_plan(*_args: object, **_kwargs: object) -> ConversionPlan:
+    return ConversionPlan(
+        schema_version="1.0",
+        planner_version="0.1.0",
+        notebook_path="notebooks/model.ipynb",
+        task_candidates=(),
+        blocking_diagnostic_codes=("PY002",),
+    )
 
 
 def test_cli_plan_writes_conversion_report(capsys: pytest.CaptureFixture[str]) -> None:
@@ -118,3 +129,20 @@ def test_cli_generate_rejects_existing_output_dir(
     assert exit_code == 1
     assert captured.out == ""
     assert f"Error: Destination already exists: {output_dir}" in captured.err
+
+
+def test_cli_generate_reports_blocked_plans(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    output_dir = tmp_path / "generated"
+
+    monkeypatch.setattr("notebook_to_kedro.cli.plan_notebook_path", _blocked_plan)
+
+    exit_code = main(["generate", str(REFERENCE_NOTEBOOK), str(output_dir)])
+
+    captured = capsys.readouterr()
+
+    assert exit_code == 1
+    assert captured.out == ""
+    assert "Error: Invalid conversion plan: blocking diagnostics are present: PY002" in captured.err
+    assert not output_dir.exists()
