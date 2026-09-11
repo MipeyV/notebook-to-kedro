@@ -216,6 +216,14 @@ from notebook_to_kedro import plan_notebook_path
 plan = plan_notebook_path("notebooks/model.ipynb")
 ```
 
+The package can render a deterministic Markdown report from a plan so reviewers can inspect the proposed nodes, catalog datasets, parameters, and blocking diagnostics before generation:
+
+```python
+from notebook_to_kedro import render_conversion_report
+
+report = render_conversion_report(plan)
+```
+
 The first Kedro generator writes an importable minimal project skeleton from a `ConversionPlan`:
 
 ```python
@@ -248,7 +256,8 @@ Progress and architectural decisions are recorded chronologically in [JOURNAL.md
 10. [x] Add a file-backed CSV fixture with minimal catalog generation.
 11. [x] Extract selected literal parameters into Kedro configuration.
 12. [x] Generate readable deterministic node names from headings and simple source patterns.
-13. [ ] Gradually add semantic planning, richer catalogs, and advanced diagnostics.
+13. [x] Render a reviewable Markdown conversion report.
+14. [ ] Gradually add semantic planning, richer catalogs, and advanced diagnostics.
 
 ## Contributing
 

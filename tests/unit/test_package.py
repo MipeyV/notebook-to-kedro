@@ -5,6 +5,7 @@ from notebook_to_kedro import (
     analyze_notebook_path,
     generate_kedro_project,
     plan_notebook_path,
+    render_conversion_report,
 )
 
 
@@ -29,3 +30,9 @@ def test_package_exposes_public_generation_api() -> None:
     """The package root exposes the Kedro generation entrypoint."""
     assert generate_kedro_project.__name__ == "generate_kedro_project"
     assert callable(generate_kedro_project)
+
+
+def test_package_exposes_public_reporting_api() -> None:
+    """The package root exposes the conversion report renderer."""
+    assert render_conversion_report.__name__ == "render_conversion_report"
+    assert callable(render_conversion_report)

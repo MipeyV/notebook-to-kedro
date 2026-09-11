@@ -40,6 +40,34 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-09-11 - Conversion report renderer implemented
+
+### Completed
+
+- Added `render_conversion_report(plan)` as a public API.
+- Rendered deterministic Markdown summaries for conversion plans.
+- Included proposed task candidates with source cells, inputs, outputs, parameters, and diagnostics.
+- Included catalog datasets, extracted parameters, and blocking diagnostic codes.
+- Added Markdown escaping for table-sensitive values.
+- Covered complete, empty, blocked, and escaping cases in unit tests.
+- Reached 100% statement and branch coverage with 148 passing tests.
+
+### Decisions
+
+- The first report format is Markdown because it is readable in terminals, PRs, and docs.
+- Reporting depends only on `ConversionPlan`; it does not import Kedro or re-read notebooks.
+- Empty sections are explicit instead of omitted so reviewers can distinguish "none found" from missing output.
+
+### Open questions
+
+- Decide whether future reports should include diagnostic messages, not only codes.
+- Decide whether to add JSON report output for machines and CI annotations.
+- Decide how the future CLI should write or print reports.
+
+### Next step
+
+- Add a minimal CLI for planning/reporting so a user can run the static review flow from a notebook path.
+
 ## 2026-09-11 - Readable deterministic node names implemented
 
 ### Completed
