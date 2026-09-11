@@ -67,6 +67,8 @@ The first milestone focuses on:
 - basic cross-cell dependencies.
 - selected literal scikit-learn keyword parameters.
 - deterministic task naming from Markdown headings and simple ML source patterns.
+- simple scikit-learn preprocessing with `StandardScaler.fit_transform(...)` and
+  `StandardScaler.transform(...)`.
 
 Complex scopes, conditional writes, dynamic execution, shell commands, and Jupyter magics follow the policy in [mvp-contract.md](mvp-contract.md).
 
@@ -99,6 +101,8 @@ Initial Level 1 candidates:
 Pattern support is introduced operation by operation and documented with fixtures. A library name alone never implies complete support.
 
 Readable node naming is a Level 1 planner feature. It currently recognizes simple scikit-learn workflow patterns and otherwise derives valid identifiers from Markdown headings when present.
+
+The first preprocessing pattern supports a single explicit `StandardScaler` object in ordinary top-to-bottom code. Literal `with_mean` and `with_std` arguments are extracted into generated parameters. This does not imply general support for arbitrary sklearn pipelines, `ColumnTransformer`, or nested preprocessing graphs.
 
 ### Level 2 — generated-project integration
 

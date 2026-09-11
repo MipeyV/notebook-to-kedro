@@ -262,6 +262,8 @@ The planner also extracts selected literal scikit-learn parameters, and the gene
 
 Generated node names are now deterministic but reviewable: the planner uses nearby Markdown headings when available and falls back to simple source patterns such as `split_data`, `train_model`, `predict`, and `evaluate_model`.
 
+The supported scikit-learn workflow now includes a simple `StandardScaler` preprocessing step using `fit_transform` and `transform`, with literal `with_mean` and `with_std` parameters extracted into Kedro configuration.
+
 The planner also emits conversion diagnostics for review risks such as fallback names, inherited cell diagnostics, unresolved external inputs, and tasks without data outputs. These diagnostics are visible in the Markdown report and do not block generation unless the plan itself has blocking diagnostics.
 
 Progress and architectural decisions are recorded chronologically in [JOURNAL.md](JOURNAL.md).
@@ -286,7 +288,8 @@ Progress and architectural decisions are recorded chronologically in [JOURNAL.md
 16. [x] Report expected CLI failures without stack traces.
 17. [x] Validate conversion plans explicitly before CLI generation.
 18. [x] Add reviewable conversion diagnostics to plans and reports.
-19. [ ] Gradually add semantic planning, richer catalogs, and advanced diagnostics.
+19. [x] Support a simple `StandardScaler` preprocessing pattern.
+20. [ ] Gradually add semantic planning, richer catalogs, and advanced diagnostics.
 
 ## Contributing
 

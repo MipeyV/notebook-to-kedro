@@ -17,6 +17,7 @@ if TYPE_CHECKING:
 DEFAULT_PACKAGE_NAME = "generated_notebook"
 SUPPORTED_PARAMETER_KEYWORDS = {
     "RandomForestClassifier": frozenset({"n_estimators", "random_state"}),
+    "StandardScaler": frozenset({"with_mean", "with_std"}),
     "train_test_split": frozenset({"test_size", "random_state"}),
 }
 

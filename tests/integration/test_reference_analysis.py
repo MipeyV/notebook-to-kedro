@@ -11,6 +11,7 @@ REFERENCE_NOTEBOOK = Path(__file__).parents[1] / "fixtures" / "notebooks" / "sim
 FILE_BACKED_NOTEBOOK = (
     Path(__file__).parents[1] / "fixtures" / "notebooks" / "file_backed_training.ipynb"
 )
+SCALED_NOTEBOOK = Path(__file__).parents[1] / "fixtures" / "notebooks" / "scaled_training.ipynb"
 
 
 def test_reference_notebook_static_analysis_extracts_reviewed_facts() -> None:
@@ -87,3 +88,33 @@ def test_public_api_plans_file_backed_notebook_catalog_input() -> None:
     )
     assert plan.task_candidates[0].inputs == ("df",)
     assert plan.task_candidates[-1].outputs == ("accuracy",)
+
+
+def test_public_api_plans_scaled_notebook_transform_step() -> None:
+    """A notebook with sklearn preprocessing produces an explicit scaling task."""
+    plan = plan_notebook_path(SCALED_NOTEBOOK)
+
+    assert tuple(task.name for task in plan.task_candidates) == (
+        "load_data",
+        "prepare_features",
+        "split_data",
+        "scale_features",
+        "train_model",
+        "predict",
+        "evaluate_model",
+    )
+    scaling_task = plan.task_candidates[3]
+    assert scaling_task.inputs == ("X_train", "X_test")
+    assert scaling_task.outputs == ("scaler", "X_train_scaled", "X_test_scaled")
+    assert scaling_task.parameters == (
+        "scale_features.with_mean",
+        "scale_features.with_std",
+    )
+    assert tuple(parameter.name for parameter in plan.parameters) == (
+        "split_data.test_size",
+        "split_data.random_state",
+        "scale_features.with_mean",
+        "scale_features.with_std",
+        "train_model.n_estimators",
+        "train_model.random_state",
+    )

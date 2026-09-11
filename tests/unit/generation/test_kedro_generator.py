@@ -12,6 +12,7 @@ from notebook_to_kedro.generation.kedro import generator
 from notebook_to_kedro.ir import CatalogDataset, ConversionPlan, ParameterValue, TaskCandidate
 
 REFERENCE_NOTEBOOK = Path(__file__).parents[2] / "fixtures" / "notebooks" / "simple_training.ipynb"
+SCALED_NOTEBOOK = Path(__file__).parents[2] / "fixtures" / "notebooks" / "scaled_training.ipynb"
 
 
 def test_generate_kedro_project_writes_importable_reference_project(
@@ -58,6 +59,36 @@ def test_generate_kedro_project_writes_importable_reference_project(
     pipeline = pipeline_module.create_pipeline()
 
     assert len(pipeline.nodes) == 6
+
+
+def test_generate_kedro_project_parameterizes_standard_scaler(tmp_path: Path) -> None:
+    plan = plan_notebook_path(SCALED_NOTEBOOK)
+    output_path = tmp_path / "generated"
+
+    generate_kedro_project(plan, output_path, package_name="generated_scaled")
+
+    nodes_source = (
+        output_path / "src" / "generated_scaled" / "pipelines" / "notebook_pipeline" / "nodes.py"
+    ).read_text(encoding="utf-8")
+    pipeline_source = (
+        output_path / "src" / "generated_scaled" / "pipelines" / "notebook_pipeline" / "pipeline.py"
+    ).read_text(encoding="utf-8")
+    parameters_source = (output_path / "conf" / "base" / "parameters.yml").read_text(
+        encoding="utf-8"
+    )
+
+    assert "from sklearn.preprocessing import StandardScaler" in nodes_source
+    assert (
+        "def scale_features(X_train, X_test, scale_features_with_mean, scale_features_with_std):"
+        in (nodes_source)
+    )
+    assert (
+        "StandardScaler(with_mean=scale_features_with_mean, with_std=scale_features_with_std)"
+        in (nodes_source)
+    )
+    assert "'scale_features_with_mean': 'params:scale_features.with_mean'" in pipeline_source
+    assert "scale_features.with_mean: true" in parameters_source
+    assert "scale_features.with_std: true" in parameters_source
 
 
 def test_generate_kedro_project_remaps_redefined_symbol_inputs(tmp_path: Path) -> None:
