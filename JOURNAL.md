@@ -40,6 +40,33 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-09-11 - Kedro generation CLI implemented
+
+### Completed
+
+- Added `notebook-to-kedro generate NOTEBOOK OUTPUT_DIR`.
+- Wired generation through the existing public planning and Kedro generation APIs.
+- Added optional `--project-root` and `--package-name` support.
+- Printed the generated project destination and created file list to stdout.
+- Covered successful generation, project-root normalization, and existing-destination rejection.
+- Reached 100% statement and branch coverage with 154 passing tests.
+
+### Decisions
+
+- The CLI now supports the full manual flow: run `plan`, review the report, then run `generate`.
+- Generation errors still propagate from the underlying API for now, keeping this feature focused.
+- Output lists created paths directly so shell users can inspect or redirect it without extra parsing rules.
+
+### Open questions
+
+- Decide CLI error formatting for user-facing failures.
+- Decide whether `generate` should optionally print or save the report before writing files.
+- Add an `--output` option for reports if redirecting stdout is not enough.
+
+### Next step
+
+- Add friendly CLI error handling for notebook load errors and project generation errors.
+
 ## 2026-09-11 - Minimal planning CLI implemented
 
 ### Completed

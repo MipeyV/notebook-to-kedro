@@ -6,7 +6,11 @@ import argparse
 import sys
 from pathlib import Path
 
-from notebook_to_kedro.api import plan_notebook_path, render_conversion_report
+from notebook_to_kedro.api import (
+    generate_kedro_project,
+    plan_notebook_path,
+    render_conversion_report,
+)
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -15,6 +19,8 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     if args.command == "plan":
         return _plan(args)
+    if args.command == "generate":
+        return _generate(args)
     parser.error("missing command")
 
 
@@ -35,12 +41,42 @@ def _parser() -> argparse.ArgumentParser:
         default=None,
         help="root used to normalize notebook-relative paths",
     )
+    generate_parser = subparsers.add_parser(
+        "generate",
+        help="generate a minimal Kedro project from a notebook",
+    )
+    generate_parser.add_argument("notebook", type=Path, help="path to the source notebook")
+    generate_parser.add_argument("output_dir", type=Path, help="destination directory to create")
+    generate_parser.add_argument(
+        "--project-root",
+        type=Path,
+        default=None,
+        help="root used to normalize notebook-relative paths",
+    )
+    generate_parser.add_argument(
+        "--package-name",
+        default="generated_notebook",
+        help="Python package name for the generated Kedro project",
+    )
     return parser
 
 
 def _plan(args: argparse.Namespace) -> int:
     plan = plan_notebook_path(args.notebook, project_root=args.project_root)
     sys.stdout.write(render_conversion_report(plan))
+    return 0
+
+
+def _generate(args: argparse.Namespace) -> int:
+    plan = plan_notebook_path(args.notebook, project_root=args.project_root)
+    created_files = generate_kedro_project(
+        plan,
+        args.output_dir,
+        package_name=args.package_name,
+    )
+    sys.stdout.write(f"Created Kedro project at `{args.output_dir}`\n")
+    for path in created_files:
+        sys.stdout.write(f"- `{path}`\n")
     return 0
 
 
