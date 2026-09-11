@@ -2,6 +2,8 @@
 
 from dataclasses import dataclass
 
+from notebook_to_kedro.ir.facts import JsonPrimitive
+
 
 @dataclass(frozen=True, slots=True)
 class CatalogDataset:
@@ -24,7 +26,18 @@ class TaskCandidate:
     inputs: tuple[str, ...]
     outputs: tuple[str, ...]
     source: str
+    parameters: tuple[str, ...] = ()
     diagnostic_codes: tuple[str, ...] = ()
+
+
+@dataclass(frozen=True, slots=True)
+class ParameterValue:
+    """Parameter proposed for generated Kedro configuration."""
+
+    name: str
+    value: JsonPrimitive
+    function_argument: str
+    source_cell_id: str
 
 
 @dataclass(frozen=True, slots=True)
@@ -37,4 +50,5 @@ class ConversionPlan:
     task_candidates: tuple[TaskCandidate, ...]
     imports: tuple[str, ...] = ()
     catalog_datasets: tuple[CatalogDataset, ...] = ()
+    parameters: tuple[ParameterValue, ...] = ()
     blocking_diagnostic_codes: tuple[str, ...] = ()

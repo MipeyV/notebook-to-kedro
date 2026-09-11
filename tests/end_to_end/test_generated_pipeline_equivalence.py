@@ -20,6 +20,8 @@ if TYPE_CHECKING:
 
     from kedro.pipeline import Pipeline
 
+    from notebook_to_kedro.ir import ConversionPlan
+
 REFERENCE_NOTEBOOK = Path(__file__).parents[1] / "fixtures" / "notebooks" / "simple_training.ipynb"
 FILE_BACKED_NOTEBOOK = (
     Path(__file__).parents[1] / "fixtures" / "notebooks" / "file_backed_training.ipynb"
@@ -34,15 +36,12 @@ def test_generated_kedro_pipeline_matches_reference_notebook_accuracy(
     notebook_accuracy = _reference_notebook_accuracy()
     output_path = tmp_path / "generated"
 
-    generate_kedro_project(
-        plan_notebook_path(REFERENCE_NOTEBOOK),
-        output_path,
-        package_name="generated_reference",
-    )
+    plan = plan_notebook_path(REFERENCE_NOTEBOOK)
+    generate_kedro_project(plan, output_path, package_name="generated_reference")
     monkeypatch.syspath_prepend(str(output_path / "src"))
 
     pipeline = _generated_pipeline("generated_reference.pipelines.notebook_pipeline")
-    catalog = DataCatalog({name: MemoryDataset() for name in pipeline.datasets()})
+    catalog = _memory_catalog(pipeline, plan)
 
     SequentialRunner().run(pipeline, catalog)
 
@@ -57,17 +56,14 @@ def test_generated_kedro_pipeline_matches_file_backed_notebook_accuracy(
     notebook_accuracy = _reference_notebook_accuracy(FILE_BACKED_NOTEBOOK)
     output_path = tmp_path / "generated"
 
-    generate_kedro_project(
-        plan_notebook_path(FILE_BACKED_NOTEBOOK),
-        output_path,
-        package_name="generated_file_backed",
-    )
+    plan = plan_notebook_path(FILE_BACKED_NOTEBOOK)
+    generate_kedro_project(plan, output_path, package_name="generated_file_backed")
     generated_csv = output_path / "data" / "01_raw" / "binary_classification.csv"
     assert generated_csv.exists()
     monkeypatch.syspath_prepend(str(output_path / "src"))
 
     pipeline = _generated_pipeline("generated_file_backed.pipelines.notebook_pipeline")
-    catalog = DataCatalog({name: MemoryDataset() for name in pipeline.datasets()})
+    catalog = _memory_catalog(pipeline, plan)
     pandas = importlib.import_module("pandas")
     read_csv = cast("Any", pandas).read_csv
     catalog.save("df", read_csv(generated_csv))
@@ -101,3 +97,10 @@ def _generated_pipeline(module_name: str) -> Pipeline:
     pipeline_module = importlib.import_module(module_name)
     create_pipeline = cast("Callable[[], Pipeline]", pipeline_module.create_pipeline)
     return create_pipeline()
+
+
+def _memory_catalog(pipeline: Pipeline, plan: ConversionPlan) -> DataCatalog:
+    catalog = DataCatalog({name: MemoryDataset() for name in pipeline.datasets()})
+    for parameter in plan.parameters:
+        catalog.save(f"params:{parameter.name}", parameter.value)
+    return catalog

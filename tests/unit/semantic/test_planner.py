@@ -55,6 +55,47 @@ def test_plan_tasks_creates_code_cell_candidates_with_data_flow() -> None:
     assert plan.blocking_diagnostic_codes == ()
 
 
+def test_plan_tasks_extracts_supported_literal_parameters() -> None:
+    facts = analyze_notebook(
+        _loaded_notebook(
+            _code_cell("X = 1\ny = 2", index=0),
+            _code_cell(
+                "\n".join(
+                    (
+                        "X_train, X_test, y_train, y_test = train_test_split(",
+                        "    X, y, test_size=0.25, random_state=42",
+                        ")",
+                    )
+                ),
+                index=1,
+            ),
+            _code_cell(
+                "model = RandomForestClassifier(n_estimators=50, random_state=42)",
+                index=2,
+            ),
+        )
+    )
+
+    plan = plan_tasks(facts)
+
+    assert tuple(parameter.name for parameter in plan.parameters) == (
+        "cell_0001.test_size",
+        "cell_0001.random_state",
+        "cell_0002.n_estimators",
+        "cell_0002.random_state",
+    )
+    assert tuple(parameter.value for parameter in plan.parameters) == (0.25, 42, 50, 42)
+    assert plan.parameters[0].function_argument == "cell_0001_test_size"
+    assert plan.task_candidates[1].parameters == (
+        "cell_0001.test_size",
+        "cell_0001.random_state",
+    )
+    assert plan.task_candidates[2].parameters == (
+        "cell_0002.n_estimators",
+        "cell_0002.random_state",
+    )
+
+
 def test_plan_tasks_stops_on_blocking_diagnostics() -> None:
     facts = analyze_notebook(_loaded_notebook(_code_cell("%matplotlib inline", index=0)))
 
@@ -96,3 +137,20 @@ def test_plan_tasks_preserves_absolute_csv_source_path() -> None:
 
     assert plan.catalog_datasets[0].filepath == "data/01_raw/source.csv"
     assert plan.catalog_datasets[0].source_filepath == "/tmp/source.csv"
+
+
+def test_plan_tasks_ignores_non_literal_and_non_primitive_parameters() -> None:
+    facts = analyze_notebook(
+        _loaded_notebook(
+            _code_cell("size = 0.2", index=0),
+            _code_cell(
+                "X_train, X_test, y_train, y_test = train_test_split("
+                "X, y, test_size=size, random_state=[42])",
+                index=1,
+            ),
+        )
+    )
+
+    plan = plan_tasks(facts)
+
+    assert plan.parameters == ()

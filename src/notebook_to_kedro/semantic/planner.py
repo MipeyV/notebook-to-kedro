@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import ast
 import posixpath
+from dataclasses import dataclass
 from pathlib import PurePosixPath
 from typing import TYPE_CHECKING
 
@@ -13,6 +15,7 @@ from notebook_to_kedro.ir import (
     CellKind,
     ConversionPlan,
     NotebookFacts,
+    ParameterValue,
     SymbolKind,
     TaskCandidate,
 )
@@ -21,6 +24,10 @@ if TYPE_CHECKING:
     from collections.abc import Iterable
 
 PLANNER_VERSION = "0.1.0"
+SUPPORTED_PARAMETER_KEYWORDS = {
+    "RandomForestClassifier": frozenset({"n_estimators", "random_state"}),
+    "train_test_split": frozenset({"test_size", "random_state"}),
+}
 
 
 def plan_tasks(facts: NotebookFacts) -> ConversionPlan:
@@ -34,11 +41,14 @@ def plan_tasks(facts: NotebookFacts) -> ConversionPlan:
             task_candidates=(),
             imports=_imports(facts),
             catalog_datasets=_catalog_datasets(facts),
+            parameters=_parameters(facts),
             blocking_diagnostic_codes=blocking_codes,
         )
 
     catalog_datasets = _catalog_datasets(facts)
     catalog_dataset_names = {dataset.name for dataset in catalog_datasets}
+    parameters = _parameters(facts)
+    parameters_by_cell = _parameter_names_by_cell(parameters)
     import_names = {symbol.name for symbol in facts.symbols if symbol.kind is SymbolKind.IMPORT}
     data_symbols = {symbol.name for symbol in facts.symbols if symbol.kind is not SymbolKind.IMPORT}
     dependency_inputs_by_cell: dict[int, set[str]] = {}
@@ -52,7 +62,14 @@ def plan_tasks(facts: NotebookFacts) -> ConversionPlan:
         for cell in facts.cells
         if (
             candidate := _task_candidate(
-                cell, import_names, data_symbols, dependency_inputs_by_cell, catalog_dataset_names
+                cell,
+                _PlanningContext(
+                    import_names=import_names,
+                    data_symbols=data_symbols,
+                    dependency_inputs_by_cell=dependency_inputs_by_cell,
+                    catalog_dataset_names=catalog_dataset_names,
+                    parameters_by_cell=parameters_by_cell,
+                ),
             )
         )
         is not None
@@ -64,15 +81,22 @@ def plan_tasks(facts: NotebookFacts) -> ConversionPlan:
         task_candidates=candidates,
         imports=_imports(facts),
         catalog_datasets=catalog_datasets,
+        parameters=parameters,
     )
+
+
+@dataclass(frozen=True, slots=True)
+class _PlanningContext:
+    import_names: set[str]
+    data_symbols: set[str]
+    dependency_inputs_by_cell: dict[int, set[str]]
+    catalog_dataset_names: set[str]
+    parameters_by_cell: dict[str, tuple[str, ...]]
 
 
 def _task_candidate(
     cell: CellFacts,
-    import_names: set[str],
-    data_symbols: set[str],
-    dependency_inputs_by_cell: dict[int, set[str]],
-    catalog_dataset_names: set[str],
+    context: _PlanningContext,
 ) -> TaskCandidate | None:
     if cell.kind is not CellKind.CODE or not cell.statements:
         return None
@@ -80,17 +104,23 @@ def _task_candidate(
     outputs = tuple(
         name
         for name in cell.writes
-        if name in data_symbols and name not in import_names and name not in catalog_dataset_names
+        if name in context.data_symbols
+        and name not in context.import_names
+        and name not in context.catalog_dataset_names
     )
     if not outputs:
         return None
 
-    dependency_inputs = dependency_inputs_by_cell.get(cell.index, set())
+    dependency_inputs = context.dependency_inputs_by_cell.get(cell.index, set())
     inputs = tuple(
         name
         for name in cell.reads
         if name in dependency_inputs
-        or (name not in outputs and name in data_symbols and name not in import_names)
+        or (
+            name not in outputs
+            and name in context.data_symbols
+            and name not in context.import_names
+        )
     )
     return TaskCandidate(
         id=f"task-{cell.index:04d}",
@@ -100,6 +130,7 @@ def _task_candidate(
         inputs=_ordered_names(inputs),
         outputs=outputs,
         source=cell.source,
+        parameters=context.parameters_by_cell.get(cell.id, ()),
         diagnostic_codes=cell.diagnostic_codes,
     )
 
@@ -138,6 +169,47 @@ def _catalog_datasets(facts: NotebookFacts) -> tuple[CatalogDataset, ...]:
                     )
                 )
     return tuple(datasets)
+
+
+def _parameters(facts: NotebookFacts) -> tuple[ParameterValue, ...]:
+    parameters: list[ParameterValue] = []
+    for cell in facts.cells:
+        for call in cell.calls:
+            supported_keywords = SUPPORTED_PARAMETER_KEYWORDS.get(call.qualified_name)
+            if supported_keywords is None:
+                continue
+            for keyword in call.keyword_arguments:
+                if keyword.name not in supported_keywords:
+                    continue
+                value = _literal_parameter_value(keyword.source)
+                if value is None:
+                    continue
+                parameters.append(
+                    ParameterValue(
+                        name=f"cell_{cell.index:04d}.{keyword.name}",
+                        value=value,
+                        function_argument=f"cell_{cell.index:04d}_{keyword.name}",
+                        source_cell_id=cell.id,
+                    )
+                )
+    return tuple(parameters)
+
+
+def _literal_parameter_value(source: str) -> str | int | float | bool | None:
+    try:
+        value = ast.literal_eval(source)
+    except (ValueError, SyntaxError):
+        return None
+    if value is None or isinstance(value, str | int | float | bool):
+        return value
+    return None
+
+
+def _parameter_names_by_cell(parameters: tuple[ParameterValue, ...]) -> dict[str, tuple[str, ...]]:
+    names_by_cell: dict[str, list[str]] = {}
+    for parameter in parameters:
+        names_by_cell.setdefault(parameter.source_cell_id, []).append(parameter.name)
+    return {source_cell_id: tuple(names) for source_cell_id, names in names_by_cell.items()}
 
 
 def _is_csv_loader_call(call: CallFacts) -> bool:
