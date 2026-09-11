@@ -43,13 +43,18 @@ def test_generate_kedro_project_writes_importable_reference_project(
     assert "from sklearn.datasets import load_iris" in nodes_source
     assert "def load_data():" in nodes_source
     assert "return iris, df" in nodes_source
+    assert "columns=prepare_features_drop_columns" in nodes_source
     assert "test_size=split_data_test_size" in nodes_source
     assert "random_state=train_model_random_state" in nodes_source
     assert "'df__prepare_features'" in pipeline_source
+    assert (
+        "'prepare_features_drop_columns': 'params:prepare_features.drop_columns'" in pipeline_source
+    )
     assert "'split_data_test_size': 'params:split_data.test_size'" in pipeline_source
     parameters_source = (output_path / "conf" / "base" / "parameters.yml").read_text(
         encoding="utf-8"
     )
+    assert "prepare_features.drop_columns: ['target']" in parameters_source
     assert "split_data.test_size: 0.2" in parameters_source
     assert "train_model.n_estimators: 100" in parameters_source
 
@@ -250,6 +255,18 @@ def test_generate_kedro_project_writes_supported_parameter_values(tmp_path: Path
                 function_argument="cell_0000_none_value",
                 source_cell_id="cell-0000",
             ),
+            ParameterValue(
+                name="cell_0000.columns",
+                value=("target",),
+                function_argument="cell_0000_columns",
+                source_cell_id="cell-0000",
+            ),
+            ParameterValue(
+                name="cell_0000.fill_values",
+                value=(("feature", 0),),
+                function_argument="cell_0000_fill_values",
+                source_cell_id="cell-0000",
+            ),
         ),
         task_candidates=(
             TaskCandidate(
@@ -271,8 +288,53 @@ def test_generate_kedro_project_writes_supported_parameter_values(tmp_path: Path
         encoding="utf-8"
     )
     assert parameters_source == (
-        "cell_0000.flag: true\ncell_0000.name: 'demo'\ncell_0000.none_value: null\n"
+        "cell_0000.flag: true\n"
+        "cell_0000.name: 'demo'\n"
+        "cell_0000.none_value: null\n"
+        "cell_0000.columns: ['target']\n"
+        "cell_0000.fill_values: {'feature': 0}\n"
     )
+
+
+def test_generate_kedro_project_parameterizes_positional_fillna(tmp_path: Path) -> None:
+    plan = ConversionPlan(
+        schema_version="1.0",
+        planner_version="0.1.0",
+        notebook_path="notebooks/example.ipynb",
+        parameters=(
+            ParameterValue(
+                name="impute_missing_values.fillna_values",
+                value=(("feature", 0),),
+                function_argument="impute_missing_values_fillna_values",
+                source_cell_id="cell-0000",
+            ),
+        ),
+        task_candidates=(
+            TaskCandidate(
+                id="task-0000",
+                name="impute_missing_values",
+                source_cell_ids=("cell-0000",),
+                statement_ids=("cell-0000-stmt-0000",),
+                inputs=("df",),
+                outputs=("df",),
+                source='df = df.fillna({"feature": 0})',
+                parameters=("impute_missing_values.fillna_values",),
+            ),
+        ),
+    )
+
+    generate_kedro_project(plan, tmp_path / "generated")
+
+    nodes_source = (
+        tmp_path
+        / "generated"
+        / "src"
+        / "generated_notebook"
+        / "pipelines"
+        / "notebook_pipeline"
+        / "nodes.py"
+    ).read_text(encoding="utf-8")
+    assert "df = df.fillna(impute_missing_values_fillna_values)" in nodes_source
 
 
 def test_generate_kedro_project_rejects_missing_catalog_source(tmp_path: Path) -> None:
@@ -359,6 +421,17 @@ def test_generate_kedro_project_rejects_invalid_package_name(tmp_path: Path) -> 
 
 
 def test_generator_ast_helper_fallbacks_cover_uncommon_shapes() -> None:
+    fillna_statement = ast.parse("df.fillna(value=0)").body[0]
+    generic_statement = ast.parse("func(**kwargs)").body[0]
+    assert isinstance(fillna_statement, ast.Expr)
+    assert isinstance(generic_statement, ast.Expr)
+    fillna_call = fillna_statement.value
+    generic_call = generic_statement.value
+    assert isinstance(fillna_call, ast.Call)
+    assert isinstance(generic_call, ast.Call)
+
+    assert generator._keyword_parameter_suffix(fillna_call, "value", frozenset()) == "fillna_values"
+    assert generator._keyword_parameter_suffix(generic_call, None, frozenset()) is None
     assert generator._qualified_name(ast.Constant(value=1)) == "Constant"
     assert generator._offset("value = 1", None, 0) == 0
     assert generator._offset("value = 1", 1, None) == 0

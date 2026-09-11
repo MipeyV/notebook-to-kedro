@@ -25,6 +25,8 @@ from notebook_to_kedro.ir import (
 if TYPE_CHECKING:
     from collections.abc import Iterable
 
+    from notebook_to_kedro.ir import PlanParameterValue
+
 PLANNER_VERSION = "0.1.0"
 SUPPORTED_PARAMETER_KEYWORDS = {
     "RandomForestClassifier": frozenset({"n_estimators", "random_state"}),
@@ -359,34 +361,86 @@ def _parameters(
         if task_name is None:
             continue
         for call in cell.calls:
-            supported_keywords = SUPPORTED_PARAMETER_KEYWORDS.get(call.qualified_name)
-            if supported_keywords is None:
-                continue
-            for keyword in call.keyword_arguments:
-                if keyword.name not in supported_keywords:
-                    continue
-                value = _literal_parameter_value(keyword.source)
-                if value is None:
-                    continue
-                parameters.append(
-                    ParameterValue(
-                        name=f"{task_name}.{keyword.name}",
-                        value=value,
-                        function_argument=f"{task_name}_{keyword.name}",
-                        source_cell_id=cell.id,
-                    )
-                )
+            parameters.extend(_call_parameters(cell, call, task_name))
     return tuple(parameters)
 
 
-def _literal_parameter_value(source: str) -> str | int | float | bool | None:
+def _call_parameters(
+    cell: CellFacts, call: CallFacts, task_name: str
+) -> tuple[ParameterValue, ...]:
+    parameters: list[ParameterValue] = []
+    supported_keywords = SUPPORTED_PARAMETER_KEYWORDS.get(call.qualified_name, frozenset())
+    supported_keyword_names = supported_keywords | _pandas_supported_keyword_names(call)
+    for keyword in call.keyword_arguments:
+        parameter_name = _keyword_parameter_name(call, keyword.name)
+        if keyword.name not in supported_keyword_names or parameter_name is None:
+            continue
+        value = _literal_parameter_value(
+            keyword.source, allow_collections=keyword.name in _pandas_supported_keyword_names(call)
+        )
+        if value is not None:
+            parameters.append(_parameter_value(cell, task_name, parameter_name, value))
+    fillna_value = _fillna_positional_value(call)
+    if fillna_value is not None:
+        parameters.append(_parameter_value(cell, task_name, "fillna_values", fillna_value))
+    return tuple(parameters)
+
+
+def _pandas_supported_keyword_names(call: CallFacts) -> frozenset[str]:
+    if call.method == "drop":
+        return frozenset({"columns"})
+    if call.method == "fillna":
+        return frozenset({"value"})
+    return frozenset()
+
+
+def _keyword_parameter_name(call: CallFacts, keyword_name: str) -> str | None:
+    if call.method == "drop" and keyword_name == "columns":
+        return "drop_columns"
+    if call.method == "fillna" and keyword_name == "value":
+        return "fillna_values"
+    return keyword_name
+
+
+def _fillna_positional_value(call: CallFacts) -> PlanParameterValue | None:
+    if call.method != "fillna" or not call.positional_argument_sources:
+        return None
+    return _literal_parameter_value(call.positional_argument_sources[0], allow_collections=True)
+
+
+def _parameter_value(
+    cell: CellFacts, task_name: str, parameter_name: str, value: PlanParameterValue
+) -> ParameterValue:
+    return ParameterValue(
+        name=f"{task_name}.{parameter_name}",
+        value=value,
+        function_argument=f"{task_name}_{parameter_name}",
+        source_cell_id=cell.id,
+    )
+
+
+def _literal_parameter_value(
+    source: str, *, allow_collections: bool = False
+) -> PlanParameterValue | None:
     try:
         value = ast.literal_eval(source)
     except (ValueError, SyntaxError):
         return None
     if value is None or isinstance(value, str | int | float | bool):
         return value
+    if not allow_collections:
+        return None
+    if isinstance(value, list | tuple) and all(_is_json_primitive(item) for item in value):
+        return tuple(value)
+    if isinstance(value, dict) and all(
+        isinstance(key, str) and _is_json_primitive(item) for key, item in value.items()
+    ):
+        return tuple(value.items())
     return None
+
+
+def _is_json_primitive(value: object) -> bool:
+    return value is None or isinstance(value, str | int | float | bool)
 
 
 def _parameter_names_by_cell(parameters: tuple[ParameterValue, ...]) -> dict[str, tuple[str, ...]]:

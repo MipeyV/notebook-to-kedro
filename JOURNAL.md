@@ -40,6 +40,32 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-09-11 - Pandas preprocessing parameter extraction implemented
+
+### Completed
+
+- Extracted selected literal pandas preprocessing arguments into `ConversionPlan` parameters.
+- Supported `fillna(value=...)`, positional `fillna({...})`, and `drop(columns=[...])`.
+- Rewrote generated Kedro node code to consume those pandas arguments through `params:` inputs.
+- Extended generated `parameters.yml` rendering to preserve simple lists and string-keyed mappings.
+- Added planner, integration, generation, and end-to-end coverage for pandas parameterized preprocessing.
+
+### Decisions
+
+- Structured parameter values remain immutable in the planning IR and are rendered back to YAML lists or mappings during generation.
+- Sklearn parameter extraction remains limited to scalar JSON-compatible literals.
+- `assign` expressions are not parameterized yet because they often depend on dataframe columns or arbitrary expressions.
+
+### Open questions
+
+- Decide whether dataframe schema hints should validate extracted `drop(columns=...)` values.
+- Decide how to parameterize simple `assign` constants without obscuring column-expression logic.
+- Add support for more dataframe operations such as `rename`, `replace`, and joins.
+
+### Next step
+
+- Improve review/report rendering for structured parameter values, or add dataframe schema diagnostics around selected pandas operations.
+
 ## 2026-09-11 - Pandas preprocessing naming patterns implemented
 
 ### Completed

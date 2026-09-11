@@ -114,6 +114,7 @@ def test_public_api_plans_scaled_notebook_transform_step() -> None:
         "scale_features.with_std",
     )
     assert tuple(parameter.name for parameter in plan.parameters) == (
+        "prepare_features.drop_columns",
         "split_data.test_size",
         "split_data.random_state",
         "scale_features.with_mean",
@@ -139,5 +140,15 @@ def test_public_api_plans_pandas_preprocessing_steps() -> None:
     )
     assert plan.task_candidates[1].inputs == ("df",)
     assert plan.task_candidates[1].outputs == ("df",)
+    assert plan.task_candidates[1].parameters == ("impute_missing_values.fillna_values",)
     assert plan.task_candidates[2].inputs == ("df",)
     assert plan.task_candidates[2].outputs == ("df",)
+    assert plan.task_candidates[3].parameters == ("prepare_features.drop_columns",)
+    assert tuple(parameter.name for parameter in plan.parameters) == (
+        "impute_missing_values.fillna_values",
+        "prepare_features.drop_columns",
+        "split_data.test_size",
+        "split_data.random_state",
+        "train_model.n_estimators",
+        "train_model.random_state",
+    )

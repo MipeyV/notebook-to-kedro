@@ -7,14 +7,15 @@ import shutil
 from dataclasses import dataclass
 from pathlib import Path
 from textwrap import indent
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from notebook_to_kedro.exceptions import ProjectGenerationError
 
 if TYPE_CHECKING:
-    from notebook_to_kedro.ir import ConversionPlan, ParameterValue, TaskCandidate
+    from notebook_to_kedro.ir import ConversionPlan, JsonPrimitive, ParameterValue, TaskCandidate
 
 DEFAULT_PACKAGE_NAME = "generated_notebook"
+PARAMETER_MAPPING_ITEM_LENGTH = 2
 SUPPORTED_PARAMETER_KEYWORDS = {
     "RandomForestClassifier": frozenset({"n_estimators", "random_state"}),
     "StandardScaler": frozenset({"with_mean", "with_std"}),
@@ -158,7 +159,40 @@ def _parameter_value(value: object) -> str:
         return "null"
     if isinstance(value, str):
         return repr(value)
+    if _is_parameter_mapping(value):
+        return _parameter_mapping(value)
+    if _is_parameter_sequence(value):
+        return _parameter_sequence(value)
     return str(value)
+
+
+def _is_parameter_mapping(value: object) -> bool:
+    return isinstance(value, tuple) and all(
+        isinstance(item, tuple)
+        and len(item) == PARAMETER_MAPPING_ITEM_LENGTH
+        and isinstance(item[0], str)
+        for item in value
+    )
+
+
+def _parameter_mapping(value: object) -> str:
+    items = tuple(
+        cast("tuple[str, JsonPrimitive]", item) for item in cast("tuple[object, ...]", value)
+    )
+    return (
+        "{"
+        + ", ".join(f"{_parameter_value(key)}: {_parameter_value(item)}" for key, item in items)
+        + "}"
+    )
+
+
+def _is_parameter_sequence(value: object) -> bool:
+    return isinstance(value, tuple) and not _is_parameter_mapping(value)
+
+
+def _parameter_sequence(value: object) -> str:
+    items = cast("tuple[JsonPrimitive, ...]", value)
+    return "[" + ", ".join(_parameter_value(item) for item in items) + "]"
 
 
 def _catalog_file_copies(plan: ConversionPlan, root: Path) -> tuple[tuple[Path, Path], ...]:
@@ -292,24 +326,52 @@ def _parameterized_source(task: TaskCandidate) -> str:
     for node in ast.walk(module):
         if not isinstance(node, ast.Call):
             continue
-        supported_keywords = SUPPORTED_PARAMETER_KEYWORDS.get(_qualified_name(node.func))
-        if supported_keywords is None:
-            continue
+        supported_keywords = SUPPORTED_PARAMETER_KEYWORDS.get(
+            _qualified_name(node.func), frozenset()
+        )
         for keyword in node.keywords:
+            parameter_suffix = _keyword_parameter_suffix(node, keyword.arg, supported_keywords)
             if (
                 keyword.arg is None
-                or keyword.arg not in supported_keywords
-                or keyword.arg not in supported_parameter_names
+                or parameter_suffix is None
+                or parameter_suffix not in supported_parameter_names
             ):
                 continue
             replacements.append(
                 (
                     _offset(task.source, keyword.value.lineno, keyword.value.col_offset),
                     _offset(task.source, keyword.value.end_lineno, keyword.value.end_col_offset),
-                    f"{task.name}_{keyword.arg}",
+                    f"{task.name}_{parameter_suffix}",
+                )
+            )
+        if (
+            _call_method(node.func) == "fillna"
+            and "fillna_values" in supported_parameter_names
+            and node.args
+        ):
+            replacements.append(
+                (
+                    _offset(task.source, node.args[0].lineno, node.args[0].col_offset),
+                    _offset(task.source, node.args[0].end_lineno, node.args[0].end_col_offset),
+                    f"{task.name}_fillna_values",
                 )
             )
     return _replace_ranges(task.source, replacements)
+
+
+def _keyword_parameter_suffix(
+    node: ast.Call, keyword: str | None, supported_keywords: frozenset[str]
+) -> str | None:
+    if keyword is None:
+        return None
+    method = _call_method(node.func)
+    if method == "drop" and keyword == "columns":
+        return "drop_columns"
+    if method == "fillna" and keyword == "value":
+        return "fillna_values"
+    if keyword in supported_keywords:
+        return keyword
+    return None
 
 
 def _qualified_name(node: ast.expr) -> str:
@@ -319,6 +381,12 @@ def _qualified_name(node: ast.expr) -> str:
         parent = _qualified_name(node.value)
         return f"{parent}.{node.attr}" if parent else node.attr
     return type(node).__name__
+
+
+def _call_method(node: ast.expr) -> str | None:
+    if isinstance(node, ast.Attribute):
+        return node.attr
+    return None
 
 
 def _offset(source: str, line_number: int | None, column: int | None) -> int:
