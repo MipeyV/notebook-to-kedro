@@ -158,6 +158,7 @@ candidate nodes
 source fragments
 proposed inputs and outputs
 parameters
+conversion diagnostics
 confidence
 assumptions
 review status
@@ -180,6 +181,8 @@ The semantic layer may propose but cannot silently override static evidence.
 
 The deterministic planner assigns stable, valid Python identifiers to task candidates. It prefers recognized source patterns such as train/test split, model training, prediction, and evaluation, then falls back to the nearest preceding Markdown heading, and finally to a `cell_0000` style name when no semantic clue is available.
 
+It also emits `PlanDiagnostic` review notes for conversion risks that should be visible but not necessarily blocking, including fallback task names, inherited source diagnostics, unresolved external inputs, and tasks without data outputs.
+
 `semantic/validation.py` validates `ConversionPlan` invariants before generation. It rejects blocked plans, duplicate task or configuration names, invalid Python task identifiers, and task parameter references that do not resolve to extracted parameters.
 
 ### Kedro generation
@@ -196,7 +199,7 @@ Repetitive Kedro boilerplate is rendered deterministically. An optional code tra
 
 ### Reporting
 
-`reporting.py` renders review artifacts from `ConversionPlan` without importing Kedro or reading notebook files. The first report format is deterministic Markdown covering summary metadata, proposed tasks, catalog datasets, extracted parameters, and blocking diagnostics.
+`reporting.py` renders review artifacts from `ConversionPlan` without importing Kedro or reading notebook files. The first report format is deterministic Markdown covering summary metadata, proposed tasks, catalog datasets, extracted parameters, plan diagnostics, and blocking diagnostics.
 
 ### CLI
 

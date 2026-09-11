@@ -40,6 +40,33 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-09-11 - Reviewable plan diagnostics implemented
+
+### Completed
+
+- Added `PlanDiagnostic` records to `ConversionPlan`.
+- Emitted deterministic plan diagnostics for fallback task names, inherited source diagnostics, unresolved external inputs, and tasks without data outputs.
+- Added blocking plan diagnostics for source-level blockers that prevent task planning.
+- Rendered plan diagnostics in the Markdown conversion report.
+- Updated planner and reporting tests for the new review signals.
+- Reached 100% statement and branch coverage with 164 passing tests.
+
+### Decisions
+
+- Plan diagnostics are review notes, not validation failures by default.
+- Diagnostics use stable `PDxxx` codes so future CLI or UI surfaces can filter them.
+- The current diagnostic payload is intentionally small: code, severity, message, and optional task ID.
+
+### Open questions
+
+- Decide whether plan diagnostics should carry source cell IDs directly.
+- Decide whether warnings should be suppressible once reviewed.
+- Add richer diagnostic messages using source diagnostic details rather than only inherited codes.
+
+### Next step
+
+- Expand pandas and scikit-learn semantic patterns now that the review and validation surfaces can expose uncertainty.
+
 ## 2026-09-11 - Conversion plan validation implemented
 
 ### Completed

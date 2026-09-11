@@ -5,7 +5,13 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from notebook_to_kedro.ir import CatalogDataset, ConversionPlan, ParameterValue, TaskCandidate
+    from notebook_to_kedro.ir import (
+        CatalogDataset,
+        ConversionPlan,
+        ParameterValue,
+        PlanDiagnostic,
+        TaskCandidate,
+    )
 
 
 def render_conversion_report(plan: ConversionPlan) -> str:
@@ -16,6 +22,7 @@ def render_conversion_report(plan: ConversionPlan) -> str:
         _tasks(plan.task_candidates),
         _catalog_datasets(plan.catalog_datasets),
         _parameters(plan.parameters),
+        _plan_diagnostics(plan.diagnostics),
         _blocking_diagnostics(plan.blocking_diagnostic_codes),
     ]
     return "\n\n".join(section for section in sections if section).rstrip() + "\n"
@@ -32,6 +39,7 @@ def _summary(plan: ConversionPlan) -> str:
         f"- Task candidates: `{len(plan.task_candidates)}`",
         f"- Catalog datasets: `{len(plan.catalog_datasets)}`",
         f"- Parameters: `{len(plan.parameters)}`",
+        f"- Plan diagnostics: `{len(plan.diagnostics)}`",
     ]
     return "\n".join(lines)
 
@@ -111,6 +119,28 @@ def _blocking_diagnostics(codes: tuple[str, ...]) -> str:
         return "\n".join(lines)
     lines.extend(f"- `{_escape_table_text(code)}`" for code in codes)
     return "\n".join(lines)
+
+
+def _plan_diagnostics(diagnostics: tuple[PlanDiagnostic, ...]) -> str:
+    lines = [
+        "## Plan Diagnostics",
+        "| Code | Severity | Task | Message |",
+        "| --- | --- | --- | --- |",
+    ]
+    if not diagnostics:
+        lines.append("| None | None | None | None |")
+        return "\n".join(lines)
+    lines.extend(_plan_diagnostic_row(diagnostic) for diagnostic in diagnostics)
+    return "\n".join(lines)
+
+
+def _plan_diagnostic_row(diagnostic: PlanDiagnostic) -> str:
+    return (
+        f"| `{_escape_table_text(diagnostic.code)}` "
+        f"| `{_escape_table_text(diagnostic.severity)}` "
+        f"| {_optional_code(diagnostic.task_id)} "
+        f"| {_escape_table_text(diagnostic.message)} |"
+    )
 
 
 def _code_list(values: tuple[str, ...]) -> str:
