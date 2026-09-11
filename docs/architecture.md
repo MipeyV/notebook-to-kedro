@@ -199,6 +199,8 @@ Repetitive Kedro boilerplate is rendered deterministically. An optional code tra
 
 `cli.py` owns terminal argument parsing and delegates to the public API. It should remain thin: commands orchestrate existing use cases and write their results, while analysis, planning, reporting, and generation logic stay in their component modules. The initial commands render a review report and generate a minimal Kedro project from a notebook path.
 
+Expected notebook loading and project generation failures are formatted by the CLI as concise stderr messages with a non-zero exit code. Unexpected programming errors are not swallowed.
+
 ### Filesystem writing
 
 `generation/writer.py` handles side effects:

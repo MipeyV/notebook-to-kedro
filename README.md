@@ -236,6 +236,8 @@ After reviewing the plan, the CLI can generate the minimal Kedro project:
 notebook-to-kedro generate notebooks/model.ipynb generated/model_project
 ```
 
+Expected notebook loading and generation failures are reported as concise CLI errors on stderr with a non-zero exit code.
+
 The first Kedro generator writes an importable minimal project skeleton from a `ConversionPlan`:
 
 ```python
@@ -271,7 +273,8 @@ Progress and architectural decisions are recorded chronologically in [JOURNAL.md
 13. [x] Render a reviewable Markdown conversion report.
 14. [x] Add a minimal CLI for planning and reporting.
 15. [x] Add a CLI command for generating a Kedro project.
-16. [ ] Gradually add semantic planning, richer catalogs, and advanced diagnostics.
+16. [x] Report expected CLI failures without stack traces.
+17. [ ] Gradually add semantic planning, richer catalogs, and advanced diagnostics.
 
 ## Contributing
 
