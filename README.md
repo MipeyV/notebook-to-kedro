@@ -60,6 +60,42 @@ The intended conversion contract is:
 
 The generated project may improve structure, naming, configuration, and separation of responsibilities. It must not invent new business logic or silently optimize away behavior from the source notebook.
 
+## Installation
+
+Notebook to Kedro requires Python 3.11, 3.12, or 3.13. Until the package is published to PyPI,
+install the wheel attached to a GitHub Release:
+
+```bash
+python -m pip install notebook_to_kedro-0.1.0-py3-none-any.whl
+```
+
+For development from a source checkout:
+
+```bash
+uv sync --locked
+uv run notebook-to-kedro --help
+```
+
+## Quick start
+
+Review the deterministic conversion plan before generating files:
+
+```bash
+notebook-to-kedro plan notebooks/model.ipynb > conversion-report.md
+```
+
+Generate the Kedro project into a new destination directory:
+
+```bash
+notebook-to-kedro generate \
+  notebooks/model.ipynb \
+  generated/model_project \
+  --package-name model_project
+```
+
+Generation refuses to overwrite an existing destination. Review the generated project and report,
+install the generated project's dependencies, then use `kedro run` from its root.
+
 ## Positioning
 
 This project does not promise to turn any chaotic notebook into production-ready code automatically.
@@ -384,6 +420,9 @@ uv run pre-commit install
 ```
 
 The committed `uv.lock` file defines the reproducible development and CI environment. See [docs/decisions/0001-use-uv.md](docs/decisions/0001-use-uv.md) for the decision record.
+
+Release history is recorded in [CHANGELOG.md](CHANGELOG.md). Maintainers should follow the
+[release process](docs/releasing.md) when preparing tags and GitHub artifacts.
 
 ## Project name
 
