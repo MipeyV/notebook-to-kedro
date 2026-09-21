@@ -40,6 +40,34 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-09-22 - Deterministic MVP release prepared
+
+### Completed
+
+- Documented the `0.1.0` deterministic MVP capabilities and known limitations.
+- Added release installation and quick-start instructions.
+- Defined a reproducible annotated-tag and GitHub Release process.
+- Added a tag-triggered workflow that validates the version, runs deterministic checks, builds
+  distributions, and creates a draft GitHub Release.
+
+### Decisions
+
+- The deterministic V1 milestone is released as `0.1.0`, not `1.0.0`, while the public API and
+  supported notebook subset continue to evolve.
+- Git tags are immutable release snapshots; feature development continues from `main`.
+- GitHub releases remain pre-releases during the `0.x` series.
+- PyPI publication is deferred until package naming and publication policy are finalized.
+
+### Open questions
+
+- Decide when the package is ready for trusted publishing to PyPI.
+- Decide which compatibility guarantees begin with the first stable `1.0.0` release.
+
+### Next step
+
+- Tag the merged release commit as `v0.1.0`, publish the generated draft release, then begin the
+  provider-neutral semantic planner protocol for V2.
+
 ## 2026-09-22 - V2 hybrid planning roadmap defined
 
 ### Completed
