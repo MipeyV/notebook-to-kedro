@@ -40,6 +40,32 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-09-22 - V2 hybrid planning roadmap defined
+
+### Completed
+
+- Documented the conversion contract from notebook facts to explicit workflow steps and faithful Kedro nodes.
+- Replaced the hypothetical LLM section with a concrete hybrid-planning architecture.
+- Split the roadmap into the completed deterministic V1 foundation and four measurable V2 phases.
+- Updated the project status to reflect the working planner, report, validator, and Kedro generator.
+
+### Decisions
+
+- Static analysis remains authoritative and the deterministic mode remains the default.
+- LLM assistance is optional, provider-neutral, validated, traceable, and visible during review.
+- The LLM may propose semantic structure and node code but cannot write directly to the generated project.
+- Behavioral equivalence, not merely successful execution, remains the conversion target.
+
+### Open questions
+
+- Choose the first optional provider adapter after the provider-neutral contract is implemented.
+- Define the initial benchmark corpus and acceptable V2 preview thresholds.
+- Specify the redaction and consent policy for remote providers.
+
+### Next step
+
+- Introduce the provider-neutral `SemanticPlanner` protocol while preserving the current deterministic planner as the default implementation.
+
 ## 2026-09-21 - Structured parameters made readable in reports
 
 ### Completed

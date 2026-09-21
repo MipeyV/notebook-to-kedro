@@ -50,6 +50,16 @@ kedro run
 
 Success means more than generating syntactically valid code: the observable outputs of the generated project should be comparable to those of the source notebook.
 
+The intended conversion contract is:
+
+1. preserve the notebook cells, source code, and dependencies as traceable static facts;
+2. represent the workflow as explicit steps with inputs, outputs, parameters, diagnostics, and source provenance;
+3. propose code for each step as a Kedro node without silently changing the notebook's behavior;
+4. validate and expose the complete plan for human review before writing the project;
+5. compare observable notebook and Kedro outputs whenever the workflow can be executed safely.
+
+The generated project may improve structure, naming, configuration, and separation of responsibilities. It must not invent new business logic or silently optimize away behavior from the source notebook.
+
 ## Positioning
 
 This project does not promise to turn any chaotic notebook into production-ready code automatically.
@@ -164,24 +174,51 @@ The generator will consume only the intermediate representation. It will create 
 - **Testability**: analysis decisions and generated projects can be tested independently.
 - **Human review**: the conversion report is part of the product.
 
-## Possible future role for an LLM
+## V2: hybrid semantic planning
 
-The core MVP will remain deterministic. A later version could use an LLM to assist with:
+V2 will add an optional LLM-assisted planner around the deterministic core. The LLM will not parse notebooks, write directly to the destination, or replace validation. It will receive structured notebook facts and propose a structured plan that remains reviewable and traceable to the original cells.
 
-- domain-aware node naming;
-- block classification;
-- grouping multiple cells;
-- extracting ambiguous parameters;
-- refactoring complex imperative code;
-- suggesting tests.
+```text
+Notebook .ipynb
+      |
+      v
+Deterministic loading, AST analysis, and dependency resolution
+      |
+      v
+Versioned notebook facts + deterministic baseline plan
+      |
+      v
+Hybrid semantic planner
+  - deterministic rules
+  - optional LLM suggestions for ambiguous steps
+      |
+      v
+Validated ConversionPlan + human-readable report
+      |
+      v
+Deterministic Kedro generator
+      |
+      v
+Generated project + equivalence checks
+```
 
-Such suggestions would still pass through deterministic validation and be presented to the user before adoption.
+The hybrid planner may assist with:
+
+- domain-aware node naming and block classification;
+- grouping multiple related cells into coherent pipeline steps;
+- identifying inputs, outputs, datasets, and parameters when static evidence is ambiguous;
+- refactoring complex imperative code into focused node functions;
+- explaining conversion risks and suggesting tests.
+
+Static evidence remains authoritative. Every LLM proposal must use a versioned structured response, preserve source-cell provenance, pass deterministic validation, and appear in the conversion report before generation. Invalid or unavailable LLM output must produce an actionable diagnostic or fall back to the deterministic plan.
+
+The default mode remains fully local and deterministic. Hybrid mode will be explicit and opt-in because notebook code and metadata may be sensitive. Provider configuration, redaction rules, timeouts, cost visibility, and local-model support belong to the provider boundary rather than the core analyzer or generator.
 
 ## Project status
 
-The project is currently implementing its deterministic analysis frontend. No converter has been implemented yet.
+The deterministic V1 pipeline is operational for the supported notebook subset. It can analyze a notebook, build and validate a reviewable conversion plan, render a Markdown report, and generate a minimal Kedro project whose observable outputs are checked against reference notebooks.
 
-The first technical milestone is a notebook analyzer that produces an inspectable intermediate representation without generating a Kedro project.
+Development is now moving from the deterministic foundation toward V2 hybrid semantic planning and broader notebook coverage. The deterministic path will remain available as the default and as the fallback for every future provider integration.
 
 The initial deterministic analysis contract is documented in [docs/mvp-contract.md](docs/mvp-contract.md), and its interchange model is defined in [docs/notebook-facts-schema.md](docs/notebook-facts-schema.md).
 
@@ -272,7 +309,7 @@ The planner also emits conversion diagnostics for review risks such as fallback 
 
 Progress and architectural decisions are recorded chronologically in [JOURNAL.md](JOURNAL.md).
 
-## Initial roadmap
+## V1 roadmap: deterministic foundation
 
 1. [x] Formalize the supported notebook subset.
 2. [x] Initialize the Python package and quality tooling.
@@ -295,7 +332,42 @@ Progress and architectural decisions are recorded chronologically in [JOURNAL.md
 19. [x] Support a simple `StandardScaler` preprocessing pattern.
 20. [x] Support simple pandas preprocessing naming patterns.
 21. [x] Extract selected literal pandas preprocessing parameters.
-22. [ ] Gradually add semantic planning, richer catalogs, and advanced diagnostics.
+
+## V2 roadmap: LLM-assisted conversion
+
+### Phase 1: planner boundary
+
+1. [ ] Introduce a provider-neutral `SemanticPlanner` protocol.
+2. [ ] Keep the current deterministic planner as the default implementation.
+3. [ ] Define versioned request and response contracts for semantic suggestions.
+4. [ ] Add explicit planner selection to the Python API and CLI.
+
+### Phase 2: safe provider integration
+
+1. [ ] Implement a fake provider for deterministic prompt, parsing, and failure tests.
+2. [ ] Add an optional real LLM adapter without adding an SDK dependency to the core package.
+3. [ ] Require explicit consent before sending notebook content to a remote provider.
+4. [ ] Define redaction, credential, timeout, retry, cost, and error-reporting policies.
+5. [ ] Keep paid and nondeterministic provider tests outside the default CI workflow.
+
+### Phase 3: hybrid planning
+
+1. [ ] Use LLM suggestions for ambiguous naming, classification, and cell grouping.
+2. [ ] Propose node code, parameters, datasets, and tests for transformations not covered by deterministic patterns.
+3. [ ] Merge suggestions only when they are compatible with static dependencies and plan invariants.
+4. [ ] Preserve source provenance and identify LLM-assisted decisions in the conversion report.
+5. [ ] Fall back cleanly to deterministic planning when the provider is disabled or fails.
+
+### Phase 4: evaluation and broader coverage
+
+1. [ ] Build a versioned corpus of representative notebooks beyond controlled fixtures.
+2. [ ] Measure plan validity, generation success, behavioral equivalence, review corrections, latency, and cost.
+3. [ ] Compare deterministic and hybrid results on the same corpus.
+4. [ ] Expand deterministic pandas support for `rename`, `replace`, joins, and aggregations.
+5. [ ] Add richer catalog formats and schema-aware diagnostics.
+6. [ ] Define release thresholds for a supported V2 preview.
+
+V2 is successful when hybrid planning improves useful notebook coverage without weakening the deterministic guarantees: no unreviewed code reaches generation, invalid plans are rejected, generated nodes remain traceable to source cells, and equivalence checks continue to protect observable behavior.
 
 ## Contributing
 
