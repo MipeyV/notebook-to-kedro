@@ -40,6 +40,28 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-09-21 - Structured parameters made readable in reports
+
+### Completed
+
+- Rendered structured sequence parameters as readable list literals in Markdown reports.
+- Rendered structured mapping parameters as readable dictionary literals in Markdown reports.
+- Added unit coverage for pandas `drop(columns=...)` and `fillna({...})` parameter shapes.
+
+### Decisions
+
+- Report values use the same deterministic representation as generated Kedro configuration.
+- The immutable tuple representation remains an internal planning detail and is not exposed to reviewers.
+
+### Open questions
+
+- Decide whether dataframe schema hints should validate extracted column names.
+- Select the next pandas operations to support, starting with `rename` or `replace`.
+
+### Next step
+
+- Add schema-aware diagnostics for selected pandas operations or support another common pandas transformation pattern.
+
 ## 2026-09-11 - Pandas preprocessing parameter extraction implemented
 
 ### Completed
