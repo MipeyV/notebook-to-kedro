@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 if TYPE_CHECKING:
     from notebook_to_kedro.ir import (
@@ -12,6 +12,10 @@ if TYPE_CHECKING:
         PlanDiagnostic,
         TaskCandidate,
     )
+    from notebook_to_kedro.ir.facts import JsonPrimitive
+
+
+PARAMETER_MAPPING_ITEM_LENGTH = 2
 
 
 def render_conversion_report(plan: ConversionPlan) -> str:
@@ -160,7 +164,37 @@ def _parameter_value(value: object) -> str:
         return "true" if value else "false"
     if value is None:
         return "null"
+    if isinstance(value, str):
+        return repr(value)
+    if _is_parameter_mapping(value):
+        return _parameter_mapping(value)
+    if isinstance(value, tuple):
+        return _parameter_sequence(value)
     return str(value)
+
+
+def _is_parameter_mapping(value: object) -> bool:
+    return isinstance(value, tuple) and all(
+        isinstance(item, tuple)
+        and len(item) == PARAMETER_MAPPING_ITEM_LENGTH
+        and isinstance(item[0], str)
+        for item in value
+    )
+
+
+def _parameter_mapping(value: object) -> str:
+    items = tuple(
+        cast("tuple[str, JsonPrimitive]", item) for item in cast("tuple[object, ...]", value)
+    )
+    return (
+        "{"
+        + ", ".join(f"{_parameter_value(key)}: {_parameter_value(item)}" for key, item in items)
+        + "}"
+    )
+
+
+def _parameter_sequence(value: tuple[object, ...]) -> str:
+    return "[" + ", ".join(_parameter_value(item) for item in value) + "]"
 
 
 def _escape_table_text(value: str) -> str:

@@ -180,3 +180,38 @@ def test_render_conversion_report_escapes_markdown_table_values() -> None:
     assert "| `task.flag` | `true` | `task_flag` | `cell-0001 continued` |" in report
     assert "| `task.optional` | `null` | `task_optional` | `cell-0001` |" in report
     assert "| `PD\\|001` | `warning` | None | Needs review \\| fallback name. |" in report
+
+
+def test_render_conversion_report_formats_structured_parameter_values() -> None:
+    plan = ConversionPlan(
+        schema_version="1.0",
+        planner_version="0.1.0",
+        notebook_path="notebooks/preprocessing.ipynb",
+        parameters=(
+            ParameterValue(
+                name="drop_columns.drop_columns",
+                value=("target", "identifier"),
+                function_argument="drop_columns_drop_columns",
+                source_cell_id="cell-0002",
+            ),
+            ParameterValue(
+                name="impute_missing_values.fillna_values",
+                value=(("feature", 0), ("category", "unknown")),
+                function_argument="impute_missing_values_fillna_values",
+                source_cell_id="cell-0003",
+            ),
+        ),
+        task_candidates=(),
+    )
+
+    report = render_conversion_report(plan)
+
+    assert (
+        "| `drop_columns.drop_columns` | `['target', 'identifier']` "
+        "| `drop_columns_drop_columns` | `cell-0002` |"
+    ) in report
+    assert (
+        "| `impute_missing_values.fillna_values` "
+        "| `{'feature': 0, 'category': 'unknown'}` "
+        "| `impute_missing_values_fillna_values` | `cell-0003` |"
+    ) in report
