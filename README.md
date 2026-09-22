@@ -375,7 +375,7 @@ Progress and architectural decisions are recorded chronologically in [JOURNAL.md
 
 1. [x] Introduce a provider-neutral `SemanticPlanner` protocol.
 2. [x] Keep the current deterministic planner as the default implementation.
-3. [ ] Define versioned request and response contracts for semantic suggestions.
+3. [x] Define versioned request and response contracts for semantic suggestions.
 4. [ ] Add explicit planner selection to the Python API and CLI.
 5. [x] Seed a versioned planning evaluation corpus from the reviewed V1 fixtures.
 
@@ -405,6 +405,9 @@ Progress and architectural decisions are recorded chronologically in [JOURNAL.md
 6. [ ] Define release thresholds for a supported V2 preview.
 
 V2 is successful when hybrid planning improves useful notebook coverage without weakening the deterministic guarantees: no unreviewed code reaches generation, invalid plans are rejected, generated nodes remain traceable to source cells, and equivalence checks continue to protect observable behavior.
+
+The provider boundary and its trust rules are documented in
+[docs/semantic-planning-contract.md](docs/semantic-planning-contract.md).
 
 ## Contributing
 

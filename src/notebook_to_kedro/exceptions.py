@@ -17,3 +17,7 @@ class ProjectGenerationError(ValueError):
 
 class ConversionPlanValidationError(ValueError):
     """Raised when a conversion plan is not safe to generate."""
+
+
+class SemanticPlanningResponseError(ValueError):
+    """Raised when a semantic planning response violates its contract."""

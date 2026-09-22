@@ -12,6 +12,8 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Provider-neutral `SemanticPlanner` protocol with an injectable deterministic implementation.
 - Versioned planning evaluation contracts, dimension-level metrics, and a reviewed four-notebook
   V1 corpus.
+- Versioned semantic planning request and response contracts, a structured-output JSON schema,
+  invocation trace metadata, and strict validation against deterministic V1 evidence.
 
 ### Planned
 

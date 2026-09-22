@@ -40,6 +40,37 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-09-22 - Structured semantic suggestion contracts implemented
+
+### Completed
+
+- Added versioned, immutable request, response, task suggestion, invocation trace, and result
+  contracts for semantic planning.
+- Added deterministic request and response serialization plus a strict structured-output JSON
+  schema.
+- Added cross-validation against V1 facts and the deterministic baseline plan.
+- Added valid and invalid contract fixtures and documented the provider trust boundary.
+
+### Decisions
+
+- Static facts and the deterministic plan remain authoritative; a model can suggest grouping,
+  naming, interfaces, parameters, and pipeline assignment but cannot invent or drop source facts.
+- Provider and model metadata are attached by the orchestrator rather than trusted from model
+  output.
+- Planning response validation and generated-code review remain separate gates.
+- Contract fixtures test compatibility; the reviewed planning corpus measures planner quality.
+
+### Open questions
+
+- Define how accepted suggestions are converted into deterministic task IDs and a final
+  `ConversionPlan`.
+- Decide which prompt context can be reduced for small local models without losing provenance.
+
+### Next step
+
+- Implement a deterministic fake provider and orchestration path for prompt, parsing, trace,
+  failure, and fallback tests.
+
 ## 2026-09-22 - Versioned planning evaluation corpus implemented
 
 ### Completed

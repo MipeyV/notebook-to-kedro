@@ -1,7 +1,10 @@
 """Shared typed test fixtures."""
 
+from pathlib import Path
+
 import pytest
 
+from notebook_to_kedro import analyze_notebook_path, plan_notebook_path
 from notebook_to_kedro.ir import (
     CallFacts,
     CellFacts,
@@ -21,6 +24,14 @@ from notebook_to_kedro.ir import (
     SymbolFacts,
     SymbolKind,
 )
+from notebook_to_kedro.semantic import (
+    SEMANTIC_PLANNING_SCHEMA_VERSION,
+    SemanticPlanningRequest,
+    SemanticPlanningResponse,
+    SemanticTaskSuggestion,
+)
+
+REFERENCE_NOTEBOOK = Path(__file__).parent / "fixtures" / "notebooks" / "simple_training.ipynb"
 
 
 @pytest.fixture
@@ -139,4 +150,38 @@ def notebook_facts() -> NotebookFacts:
             ),
         ),
         diagnostics=(diagnostic,),
+    )
+
+
+@pytest.fixture
+def semantic_request() -> SemanticPlanningRequest:
+    """Return a request backed by the deterministic reference analysis."""
+    return SemanticPlanningRequest(
+        schema_version=SEMANTIC_PLANNING_SCHEMA_VERSION,
+        request_id="request-0001",
+        prompt_version="planning-v1",
+        facts=analyze_notebook_path(REFERENCE_NOTEBOOK),
+        baseline_plan=plan_notebook_path(REFERENCE_NOTEBOOK),
+    )
+
+
+@pytest.fixture
+def semantic_response(semantic_request: SemanticPlanningRequest) -> SemanticPlanningResponse:
+    """Return a response that preserves every deterministic task boundary."""
+    return SemanticPlanningResponse(
+        schema_version=SEMANTIC_PLANNING_SCHEMA_VERSION,
+        request_id=semantic_request.request_id,
+        tasks=tuple(
+            SemanticTaskSuggestion(
+                source_cell_ids=task.source_cell_ids,
+                statement_ids=task.statement_ids,
+                node_name=task.name,
+                inputs=task.inputs,
+                outputs=task.outputs,
+                parameter_names=task.parameters,
+                pipeline_id="notebook_pipeline",
+            )
+            for task in semantic_request.baseline_plan.task_candidates
+        ),
+        review_notes=("Deterministic task boundaries retained.",),
     )
