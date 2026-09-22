@@ -187,6 +187,12 @@ orchestrator. Suggestions must preserve the complete baseline statement set and 
 only known source cells, statements, interfaces, and parameters before they can be considered for
 conversion into a plan.
 
+Provider transports implement `SemanticPlanningProvider` and return raw JSON. Prompt rendering,
+strict parsing, static cross-validation, trace creation, and deterministic fallback are owned by
+the semantic orchestration layer. Expected provider failures fall back to the V1 plan; unexpected
+programming errors remain visible. The in-process fake provider tests this flow without network
+access or nondeterminism.
+
 The deterministic planner assigns stable, valid Python identifiers to task candidates. It prefers recognized source patterns such as train/test split, model training, prediction, and evaluation, then falls back to the nearest preceding Markdown heading, and finally to a `cell_0000` style name when no semantic clue is available.
 
 It also emits `PlanDiagnostic` review notes for conversion risks that should be visible but not necessarily blocking, including fallback task names, inherited source diagnostics, unresolved external inputs, and tasks without data outputs.
