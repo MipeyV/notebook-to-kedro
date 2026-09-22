@@ -22,6 +22,8 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   interface reconstruction, parameter preservation, report provenance, and deterministic fallback.
 - Explicit deterministic or local Ollama-backed hybrid planner selection in the Python API and both
   CLI workflows, with validated provider settings and deterministic defaults.
+- Versioned comparative planning benchmark reports with corpus source identities, structural
+  metrics, plan-validity and fallback rates, planner latency, and a deterministic CLI export.
 
 ### Planned
 

@@ -442,6 +442,20 @@ The local transport and its loopback-only safety policy are documented in
 Safe suggestion assembly and fallback behavior are documented in
 [docs/hybrid-planning.md](docs/hybrid-planning.md).
 
+Compare the deterministic planner with a downloaded local model on the reviewed corpus:
+
+```bash
+notebook-to-kedro benchmark tests/fixtures/evaluation/planning/v1 \
+  --project-root . \
+  --planners deterministic hybrid \
+  --ollama-model your-local-model > planning-benchmark.json
+```
+
+The versioned JSON report records corpus hashes, structural accuracy, deterministic plan validity,
+fallback usage, and wall-clock planning latency. Live Ollama benchmarking is opt-in and remains
+outside the default test suite. The report contract and current limitations are documented in
+[docs/planning-evaluation-corpus.md](docs/planning-evaluation-corpus.md).
+
 ## Contributing
 
 The project uses [uv](https://docs.astral.sh/uv/) for Python and dependency management.

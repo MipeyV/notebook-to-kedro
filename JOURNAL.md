@@ -40,6 +40,40 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-09-22 - Comparative planner benchmark runner implemented
+
+### Completed
+
+- Added a reusable runner that analyzes each corpus notebook once and evaluates named planners over
+  the same static facts.
+- Added per-case planning latency, deterministic validation status, semantic fallback detection,
+  and the existing structure-quality metrics.
+- Added aggregate exact-match, valid-plan, fallback, total-latency, and mean-latency statistics.
+- Added planning benchmark schema `1.0` with source paths and SHA-256 identities.
+- Added a CLI `benchmark` command that compares deterministic and local hybrid planners and emits
+  JSON to stdout.
+
+### Decisions
+
+- Timing covers planner execution only so notebook loading and static analysis do not distort model
+  comparisons.
+- Hybrid CLI runs include the local model name in the planner label.
+- Provider failures remain measured fallbacks rather than aborted benchmark runs.
+- Live Ollama execution stays opt-in and outside the default CI suite.
+- Generated-code behavior, reviewer corrections, tokens, energy, and cost require separate future
+  evaluation contracts.
+
+### Open questions
+
+- Select the first local models and hardware tiers for controlled measurements.
+- Decide which aggregate thresholds should gate a V2 preview.
+- Add broader, rights-cleared notebooks before treating results as representative.
+
+### Next step
+
+- Install Ollama locally, select an initial lightweight model, run the benchmark, and record the
+  first measured baseline without committing model weights or private notebook content.
+
 ## 2026-09-22 - Explicit planner selection exposed
 
 ### Completed

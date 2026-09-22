@@ -348,6 +348,12 @@ boundaries, names, raw code, inputs, outputs, parameters, diagnostics, pipeline 
 plan-level configuration. The deterministic planner is the first baseline. Future local and remote
 providers must be evaluated against the same reviewed cases before their results are compared.
 
+`evaluation/benchmark.py` runs named planners over facts analyzed once per corpus case and measures
+only planner execution. It records deterministic plan validity, semantic fallback, structural
+metrics, and wall-clock latency. `evaluation/benchmark_serialization.py` emits a versioned JSON
+report containing corpus hashes and per-model labels. Live model runs are manual or marked both
+`external` and `llm`; the default CI suite tests the runner with deterministic in-process planners.
+
 ## Delivery increments
 
 1. [x] Project tooling and package skeleton.
