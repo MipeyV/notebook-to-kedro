@@ -179,6 +179,14 @@ class SemanticPlanner(Protocol):
 
 The semantic layer may propose but cannot silently override static evidence.
 
+The versioned provider exchange is defined in
+[`semantic-planning-contract.md`](semantic-planning-contract.md). Requests contain canonical
+`NotebookFacts` and a projection of the deterministic baseline plan. Responses contain only
+structured task suggestions; provider and model metadata are recorded independently by the
+orchestrator. Suggestions must preserve the complete baseline statement set and can reference
+only known source cells, statements, interfaces, and parameters before they can be considered for
+conversion into a plan.
+
 The deterministic planner assigns stable, valid Python identifiers to task candidates. It prefers recognized source patterns such as train/test split, model training, prediction, and evaluation, then falls back to the nearest preceding Markdown heading, and finally to a `cell_0000` style name when no semantic clue is available.
 
 It also emits `PlanDiagnostic` review notes for conversion risks that should be visible but not necessarily blocking, including fallback task names, inherited source diagnostics, unresolved external inputs, and tasks without data outputs.

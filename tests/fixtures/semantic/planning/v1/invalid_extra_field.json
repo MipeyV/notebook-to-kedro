@@ -1,0 +1,9 @@
+{
+  "request_id": "fixture-request-0001",
+  "review_notes": [],
+  "schema_version": "1.0",
+  "tasks": [],
+  "untrusted_metadata": {
+    "model_name": "must-not-be-model-controlled"
+  }
+}
