@@ -46,21 +46,20 @@ Ollama envelopes, generation errors, and oversized responses are normalized as
 ## Python Usage
 
 ```python
-from notebook_to_kedro.semantic import (
-    OllamaSemanticPlanningProvider,
-    request_semantic_planning,
-)
+from notebook_to_kedro import PlannerMode, plan_notebook_path
 
-provider = OllamaSemanticPlanningProvider(
-    model_name="your-local-model",
-    timeout_seconds=120,
+plan = plan_notebook_path(
+    "notebooks/model.ipynb",
+    planner=PlannerMode.HYBRID,
+    ollama_model="your-local-model",
+    ollama_timeout_seconds=120,
 )
-outcome = request_semantic_planning(request, provider)
 ```
 
-The caller still owns creation of the versioned `SemanticPlanningRequest`. A successful outcome
-contains validated suggestions, not a generation-ready plan. Until hybrid assembly is
-implemented, only the deterministic baseline `ConversionPlan` can reach Kedro generation.
+Applications that manage planner instances separately can call `create_semantic_planner` or build
+`OllamaSemanticPlanningProvider` and `HybridSemanticPlanner` directly. The high-level API and CLI
+assemble accepted suggestions into a validated `ConversionPlan`; expected provider or response
+failures return a diagnostic-bearing deterministic fallback.
 
 ## Local Setup
 
@@ -71,7 +70,7 @@ an opt-in local inference test:
 2. Disable Ollama cloud features when notebook data must remain strictly local.
 3. Download a model supported by the available machine.
 4. Confirm the local server is available on port `11434`.
-5. Invoke the provider from Python with that model name.
+5. Select `hybrid` in the Python API or CLI and pass that model name.
 
 Model selection and live quality evaluation remain separate work. No external LLM test runs in
 the default test suite.

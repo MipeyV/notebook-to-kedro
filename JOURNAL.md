@@ -40,6 +40,37 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-09-22 - Explicit planner selection exposed
+
+### Completed
+
+- Added public deterministic and hybrid planner modes plus a planner construction helper.
+- Added explicit planner selection and local Ollama model, URL, and timeout settings to the Python
+  path-planning API.
+- Added the same options to the CLI `plan` and `generate` commands.
+- Added concise configuration errors for missing models, invalid local-provider settings, and
+  incompatible custom-planner options.
+- Documented deterministic defaults, hybrid opt-in, and fallback behavior.
+
+### Decisions
+
+- Deterministic planning remains the zero-configuration default in every public entrypoint.
+- Hybrid mode requires an explicit downloaded Ollama model name; the project does not silently
+  select or download a model.
+- Custom planner injection remains supported and cannot be mixed with built-in Ollama settings.
+- Provider availability is a planning outcome, not a CLI configuration error, so it continues to
+  produce a reportable deterministic fallback.
+
+### Open questions
+
+- Select candidate local models after benchmarking them on the versioned corpus.
+- Decide whether generation should write the conversion report beside the generated project.
+
+### Next step
+
+- Run controlled local-model benchmarks on the planning corpus and record semantic quality,
+  fallback rate, latency, memory requirements, and recommended hardware tiers.
+
 ## 2026-09-22 - Safe hybrid plan assembly implemented
 
 ### Completed

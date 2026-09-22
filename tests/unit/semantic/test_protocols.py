@@ -2,9 +2,17 @@
 
 from pathlib import Path
 
+import pytest
+
 from notebook_to_kedro import analyze_notebook_path, plan_notebook_path
+from notebook_to_kedro.exceptions import PlannerConfigurationError
 from notebook_to_kedro.ir import ConversionPlan, NotebookFacts
-from notebook_to_kedro.semantic import DeterministicSemanticPlanner, SemanticPlanner, plan_tasks
+from notebook_to_kedro.semantic import (
+    DeterministicSemanticPlanner,
+    PlannerMode,
+    SemanticPlanner,
+    plan_tasks,
+)
 
 REFERENCE_NOTEBOOK = Path(__file__).parents[2] / "fixtures" / "notebooks" / "simple_training.ipynb"
 
@@ -38,3 +46,23 @@ def test_plan_notebook_path_uses_injected_semantic_planner() -> None:
     assert plan.planner_version == "test-planner"
     assert planner.received_facts is not None
     assert planner.received_facts.notebook.path == plan.notebook_path
+
+
+def test_plan_notebook_path_accepts_explicit_deterministic_mode() -> None:
+    plan = plan_notebook_path(REFERENCE_NOTEBOOK, planner=PlannerMode.DETERMINISTIC)
+
+    assert plan.planner_version == "0.1.0"
+
+
+def test_plan_notebook_path_rejects_provider_settings_with_injected_planner() -> None:
+    with pytest.raises(PlannerConfigurationError, match="injected planner"):
+        plan_notebook_path(
+            REFERENCE_NOTEBOOK,
+            planner=_RecordingPlanner(),
+            ollama_model="local-model",
+        )
+
+
+def test_plan_notebook_path_rejects_implicit_ollama_configuration() -> None:
+    with pytest.raises(PlannerConfigurationError, match="require planner mode 'hybrid'"):
+        plan_notebook_path(REFERENCE_NOTEBOOK, ollama_timeout_seconds=10)

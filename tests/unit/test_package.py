@@ -1,8 +1,10 @@
 """Package metadata tests."""
 
 from notebook_to_kedro import (
+    PlannerMode,
     __version__,
     analyze_notebook_path,
+    create_semantic_planner,
     generate_kedro_project,
     plan_notebook_path,
     render_conversion_report,
@@ -43,3 +45,10 @@ def test_package_exposes_public_plan_validation_api() -> None:
     """The package root exposes the conversion plan validation entrypoint."""
     assert validate_conversion_plan.__name__ == "validate_conversion_plan"
     assert callable(validate_conversion_plan)
+
+
+def test_package_exposes_planner_selection_api() -> None:
+    """The package root exposes explicit planner construction."""
+    assert PlannerMode.DETERMINISTIC.value == "deterministic"
+    assert create_semantic_planner.__name__ == "create_semantic_planner"
+    assert callable(create_semantic_planner)

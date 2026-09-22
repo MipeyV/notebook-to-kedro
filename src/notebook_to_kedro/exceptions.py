@@ -39,3 +39,7 @@ class SemanticProviderError(RuntimeError):
 
 class HybridPlanAssemblyError(ValueError):
     """Raised when semantic suggestions cannot form a safe conversion plan."""
+
+
+class PlannerConfigurationError(ValueError):
+    """Raised when planner selection or provider settings are inconsistent."""
