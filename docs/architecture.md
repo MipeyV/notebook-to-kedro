@@ -200,6 +200,12 @@ target a remote host, and rejects known cloud-model tags. Strict isolation also 
 Ollama cloud features on the local server. Direct cloud integration remains outside this adapter
 and requires a separate consent and credential policy.
 
+Validated suggestions are assembled according to
+[`hybrid-planning.md`](hybrid-planning.md). The initial hybrid planner permits semantic naming and
+adjacent task grouping while recomputing interfaces, parameters, source, and diagnostics from V1
+evidence. Unsupported boundaries and provider failures return a reportable deterministic fallback
+instead of reaching generation.
+
 The deterministic planner assigns stable, valid Python identifiers to task candidates. It prefers recognized source patterns such as train/test split, model training, prediction, and evaluation, then falls back to the nearest preceding Markdown heading, and finally to a `cell_0000` style name when no semantic clue is available.
 
 It also emits `PlanDiagnostic` review notes for conversion risks that should be visible but not necessarily blocking, including fallback task names, inherited source diagnostics, unresolved external inputs, and tasks without data outputs.

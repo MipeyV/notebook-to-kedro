@@ -391,8 +391,8 @@ Progress and architectural decisions are recorded chronologically in [JOURNAL.md
 
 1. [ ] Use LLM suggestions for ambiguous naming, classification, and cell grouping.
 2. [ ] Propose node code, parameters, datasets, and tests for transformations not covered by deterministic patterns.
-3. [ ] Merge suggestions only when they are compatible with static dependencies and plan invariants.
-4. [ ] Preserve source provenance and identify LLM-assisted decisions in the conversion report.
+3. [x] Merge suggestions only when they are compatible with static dependencies and plan invariants.
+4. [x] Preserve source provenance and identify LLM-assisted decisions in the conversion report.
 5. [ ] Fall back cleanly to deterministic planning when the provider is disabled or fails.
 
 ### Phase 4: evaluation and broader coverage
@@ -410,6 +410,8 @@ The provider boundary and its trust rules are documented in
 [docs/semantic-planning-contract.md](docs/semantic-planning-contract.md).
 The local transport and its loopback-only safety policy are documented in
 [docs/ollama-provider.md](docs/ollama-provider.md).
+Safe suggestion assembly and fallback behavior are documented in
+[docs/hybrid-planning.md](docs/hybrid-planning.md).
 
 ## Contributing
 

@@ -8,6 +8,11 @@ from notebook_to_kedro.semantic.contracts import (
     SemanticPlanningTrace,
     SemanticTaskSuggestion,
 )
+from notebook_to_kedro.semantic.hybrid import (
+    HYBRID_PLANNER_VERSION,
+    HybridSemanticPlanner,
+    assemble_hybrid_plan,
+)
 from notebook_to_kedro.semantic.ollama import (
     DEFAULT_OLLAMA_BASE_URL,
     DEFAULT_OLLAMA_MAX_RESPONSE_BYTES,
@@ -47,11 +52,13 @@ __all__ = [
     "DEFAULT_OLLAMA_BASE_URL",
     "DEFAULT_OLLAMA_MAX_RESPONSE_BYTES",
     "DEFAULT_OLLAMA_TIMEOUT_SECONDS",
+    "HYBRID_PLANNER_VERSION",
     "SEMANTIC_PLANNING_PROMPT_VERSION",
     "SEMANTIC_PLANNING_RESPONSE_JSON_SCHEMA",
     "SEMANTIC_PLANNING_SCHEMA_VERSION",
     "DeterministicSemanticPlanner",
     "FakeSemanticPlanningProvider",
+    "HybridSemanticPlanner",
     "OllamaSemanticPlanningProvider",
     "SemanticPlanner",
     "SemanticPlanningFailure",
@@ -63,6 +70,7 @@ __all__ = [
     "SemanticPlanningTrace",
     "SemanticProviderRequest",
     "SemanticTaskSuggestion",
+    "assemble_hybrid_plan",
     "plan_tasks",
     "render_semantic_planning_prompt",
     "request_semantic_planning",

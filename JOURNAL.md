@@ -40,6 +40,41 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-09-22 - Safe hybrid plan assembly implemented
+
+### Completed
+
+- Added `HybridSemanticPlanner` as a provider-backed implementation of the planner protocol.
+- Added deterministic assembly for semantic task renaming and adjacent task grouping.
+- Recomputed task interfaces, source, diagnostics, and renamed parameters from V1 evidence rather
+  than trusting model-provided executable details.
+- Added provider, model, prompt, review-note, interface-adjustment, and fallback diagnostics to
+  conversion reports.
+- Added deterministic fallback for provider and assembly failures and bypassed providers for
+  statically blocked notebooks.
+- Verified renamed parameterized nodes through generated Kedro source.
+
+### Decisions
+
+- Semantic suggestions may change structure but cannot replace static facts.
+- The first assembler groups only complete, adjacent deterministic tasks to preserve execution
+  order and source provenance.
+- Suggested interfaces are evaluation signals; final executable interfaces are derived from V1.
+- Non-default pipeline IDs remain unsupported until generation and registry wiring support
+  multiple pipelines end to end.
+
+### Open questions
+
+- Define an open semantic intent field without introducing a closed task taxonomy.
+- Define safe statement-level splitting for transformations that contain several independent
+  operations in one notebook cell.
+- Add multi-pipeline generation before accepting arbitrary semantic pipeline assignments.
+
+### Next step
+
+- Add explicit deterministic or hybrid planner selection to the Python API and CLI while keeping
+  deterministic planning as the default.
+
 ## 2026-09-22 - Local Ollama semantic provider implemented
 
 ### Completed

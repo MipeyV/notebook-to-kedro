@@ -18,6 +18,8 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   provider, and explicit fallback to the V1 plan for expected provider or response failures.
 - Loopback-only Ollama structured-output transport using the standard library, with bounded
   responses, configurable timeouts, normalized failures, and no core SDK dependency.
+- Hybrid semantic planner assembly for safe task renaming and adjacent grouping, with static
+  interface reconstruction, parameter preservation, report provenance, and deterministic fallback.
 
 ### Planned
 
