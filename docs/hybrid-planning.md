@@ -67,5 +67,6 @@ The assembler accepts only the existing single `notebook_pipeline` target becaus
 does not yet materialize multiple pipeline packages. Multi-pipeline support must update the IR,
 registry generation, cross-pipeline dataset wiring, reports, and equivalence tests together.
 
-The next product integration is explicit deterministic or hybrid planner selection in the Python
-API and CLI, with deterministic planning remaining the default.
+The public Python API and both CLI commands expose explicit `deterministic` or `hybrid` selection,
+with deterministic planning remaining the default. Hybrid mode requires the name of a downloaded
+local Ollama model and accepts loopback URL and timeout overrides.

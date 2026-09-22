@@ -96,6 +96,19 @@ notebook-to-kedro generate \
 Generation refuses to overwrite an existing destination. Review the generated project and report,
 install the generated project's dependencies, then use `kedro run` from its root.
 
+Deterministic planning remains the default. After installing Ollama and downloading a local model,
+opt into hybrid semantic planning explicitly:
+
+```bash
+notebook-to-kedro plan notebooks/model.ipynb \
+  --planner hybrid \
+  --ollama-model your-local-model
+```
+
+The same planner options are accepted by `generate`. Hybrid planning uses only the loopback Ollama
+server; invalid responses, connection failures, and unsafe suggestions fall back to the reviewed
+deterministic plan and are identified in its diagnostics.
+
 ## Positioning
 
 This project does not promise to turn any chaotic notebook into production-ready code automatically.
@@ -281,13 +294,29 @@ from notebook_to_kedro import analyze_notebook_path
 facts = analyze_notebook_path("notebooks/model.ipynb")
 ```
 
-It also exposes a first deterministic planning entrypoint that proposes Kedro-oriented task candidates without writing project files:
+It also exposes a planning entrypoint that proposes Kedro-oriented task candidates without writing
+project files. Deterministic planning is the default:
 
 ```python
 from notebook_to_kedro import plan_notebook_path
 
 plan = plan_notebook_path("notebooks/model.ipynb")
 ```
+
+Hybrid planning must be selected explicitly and requires a downloaded local Ollama model:
+
+```python
+from notebook_to_kedro import PlannerMode, plan_notebook_path
+
+plan = plan_notebook_path(
+    "notebooks/model.ipynb",
+    planner=PlannerMode.HYBRID,
+    ollama_model="your-local-model",
+)
+```
+
+`create_semantic_planner` can be used separately when an application wants to construct and reuse
+a planner. A custom object implementing `SemanticPlanner` can still be injected directly.
 
 The package can render a deterministic Markdown report from a plan so reviewers can inspect the proposed nodes, catalog datasets, parameters, and blocking diagnostics before generation:
 
@@ -376,7 +405,7 @@ Progress and architectural decisions are recorded chronologically in [JOURNAL.md
 1. [x] Introduce a provider-neutral `SemanticPlanner` protocol.
 2. [x] Keep the current deterministic planner as the default implementation.
 3. [x] Define versioned request and response contracts for semantic suggestions.
-4. [ ] Add explicit planner selection to the Python API and CLI.
+4. [x] Add explicit planner selection to the Python API and CLI.
 5. [x] Seed a versioned planning evaluation corpus from the reviewed V1 fixtures.
 
 ### Phase 2: safe provider integration
@@ -393,7 +422,7 @@ Progress and architectural decisions are recorded chronologically in [JOURNAL.md
 2. [ ] Propose node code, parameters, datasets, and tests for transformations not covered by deterministic patterns.
 3. [x] Merge suggestions only when they are compatible with static dependencies and plan invariants.
 4. [x] Preserve source provenance and identify LLM-assisted decisions in the conversion report.
-5. [ ] Fall back cleanly to deterministic planning when the provider is disabled or fails.
+5. [x] Fall back cleanly to deterministic planning when the provider is disabled or fails.
 
 ### Phase 4: evaluation and broader coverage
 

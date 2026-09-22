@@ -35,6 +35,7 @@ from notebook_to_kedro.semantic.providers import (
     SemanticProviderRequest,
 )
 from notebook_to_kedro.semantic.schemas import SEMANTIC_PLANNING_RESPONSE_JSON_SCHEMA
+from notebook_to_kedro.semantic.selection import PlannerMode, create_semantic_planner
 from notebook_to_kedro.semantic.serialization import (
     semantic_planning_request_to_dict,
     semantic_planning_request_to_json,
@@ -60,6 +61,7 @@ __all__ = [
     "FakeSemanticPlanningProvider",
     "HybridSemanticPlanner",
     "OllamaSemanticPlanningProvider",
+    "PlannerMode",
     "SemanticPlanner",
     "SemanticPlanningFailure",
     "SemanticPlanningOutcome",
@@ -71,6 +73,7 @@ __all__ = [
     "SemanticProviderRequest",
     "SemanticTaskSuggestion",
     "assemble_hybrid_plan",
+    "create_semantic_planner",
     "plan_tasks",
     "render_semantic_planning_prompt",
     "request_semantic_planning",

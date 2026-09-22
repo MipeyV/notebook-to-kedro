@@ -20,6 +20,8 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   responses, configurable timeouts, normalized failures, and no core SDK dependency.
 - Hybrid semantic planner assembly for safe task renaming and adjacent grouping, with static
   interface reconstruction, parameter preservation, report provenance, and deterministic fallback.
+- Explicit deterministic or local Ollama-backed hybrid planner selection in the Python API and both
+  CLI workflows, with validated provider settings and deterministic defaults.
 
 ### Planned
 

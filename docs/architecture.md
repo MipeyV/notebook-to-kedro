@@ -175,7 +175,11 @@ class SemanticPlanner(Protocol):
     def create_plan(self, facts: NotebookFacts) -> ConversionPlan: ...
 ```
 
-`DeterministicSemanticPlanner` is the default implementation and preserves the V1 planning rules. The public Python API accepts any compatible `SemanticPlanner`, while the CLI remains deterministic until provider configuration and failure behavior are defined. Real LLM providers are optional adapters introduced behind this boundary.
+`DeterministicSemanticPlanner` is the default implementation and preserves the V1 planning rules.
+The public Python API accepts a `PlannerMode`, a supported mode name, or any compatible injected
+`SemanticPlanner`. Both CLI commands expose the same explicit planner selection. Hybrid mode builds
+a loopback-only Ollama provider from a required local model name and optional URL and timeout;
+provider failures remain subject to deterministic fallback.
 
 The semantic layer may propose but cannot silently override static evidence.
 
@@ -230,7 +234,11 @@ Repetitive Kedro boilerplate is rendered deterministically. An optional code tra
 
 ### CLI
 
-`cli.py` owns terminal argument parsing and delegates to the public API. It should remain thin: commands orchestrate existing use cases and write their results, while analysis, planning, reporting, and generation logic stay in their component modules. The initial commands render a review report and generate a minimal Kedro project from a notebook path.
+`cli.py` owns terminal argument parsing and delegates to the public API. It should remain thin:
+commands orchestrate existing use cases and write their results, while analysis, planning,
+reporting, planner selection, and generation logic stay in their component modules. The `plan` and
+`generate` commands share deterministic-by-default planner options and optional local Ollama
+settings.
 
 Expected notebook loading and project generation failures are formatted by the CLI as concise stderr messages with a non-zero exit code. Unexpected programming errors are not swallowed.
 

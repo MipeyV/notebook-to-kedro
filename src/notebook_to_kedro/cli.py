@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import sys
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from notebook_to_kedro.api import (
     generate_kedro_project,
@@ -15,8 +16,17 @@ from notebook_to_kedro.api import (
 from notebook_to_kedro.exceptions import (
     ConversionPlanValidationError,
     NotebookLoadError,
+    PlannerConfigurationError,
     ProjectGenerationError,
 )
+from notebook_to_kedro.semantic import (
+    DEFAULT_OLLAMA_BASE_URL,
+    DEFAULT_OLLAMA_TIMEOUT_SECONDS,
+    PlannerMode,
+)
+
+if TYPE_CHECKING:
+    from notebook_to_kedro.ir import ConversionPlan
 
 ERROR_EXIT_CODE = 1
 
@@ -30,7 +40,12 @@ def main(argv: list[str] | None = None) -> int:
             return _plan(args)
         if args.command == "generate":
             return _generate(args)
-    except (ConversionPlanValidationError, NotebookLoadError, ProjectGenerationError) as error:
+    except (
+        ConversionPlanValidationError,
+        NotebookLoadError,
+        PlannerConfigurationError,
+        ProjectGenerationError,
+    ) as error:
         sys.stderr.write(f"Error: {error}\n")
         return ERROR_EXIT_CODE
     parser.error("missing command")
@@ -53,6 +68,7 @@ def _parser() -> argparse.ArgumentParser:
         default=None,
         help="root used to normalize notebook-relative paths",
     )
+    _add_planner_arguments(plan_parser)
     generate_parser = subparsers.add_parser(
         "generate",
         help="generate a minimal Kedro project from a notebook",
@@ -70,17 +86,58 @@ def _parser() -> argparse.ArgumentParser:
         default="generated_notebook",
         help="Python package name for the generated Kedro project",
     )
+    _add_planner_arguments(generate_parser)
     return parser
 
 
+def _add_planner_arguments(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument(
+        "--planner",
+        type=PlannerMode,
+        choices=tuple(PlannerMode),
+        default=PlannerMode.DETERMINISTIC,
+        help="planning mode (default: deterministic)",
+    )
+    parser.add_argument(
+        "--ollama-model",
+        default=None,
+        metavar="MODEL",
+        help="downloaded local Ollama model required by the hybrid planner",
+    )
+    parser.add_argument(
+        "--ollama-base-url",
+        default=DEFAULT_OLLAMA_BASE_URL,
+        metavar="URL",
+        help="local Ollama server URL",
+    )
+    parser.add_argument(
+        "--ollama-timeout",
+        type=float,
+        default=DEFAULT_OLLAMA_TIMEOUT_SECONDS,
+        metavar="SECONDS",
+        help="Ollama request timeout in seconds",
+    )
+
+
+def _plan_from_args(args: argparse.Namespace) -> ConversionPlan:
+    return plan_notebook_path(
+        args.notebook,
+        project_root=args.project_root,
+        planner=args.planner,
+        ollama_model=args.ollama_model,
+        ollama_base_url=args.ollama_base_url,
+        ollama_timeout_seconds=args.ollama_timeout,
+    )
+
+
 def _plan(args: argparse.Namespace) -> int:
-    plan = plan_notebook_path(args.notebook, project_root=args.project_root)
+    plan = _plan_from_args(args)
     sys.stdout.write(render_conversion_report(plan))
     return 0
 
 
 def _generate(args: argparse.Namespace) -> int:
-    plan = plan_notebook_path(args.notebook, project_root=args.project_root)
+    plan = _plan_from_args(args)
     validate_conversion_plan(plan)
     created_files = generate_kedro_project(
         plan,

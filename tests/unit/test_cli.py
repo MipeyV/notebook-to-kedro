@@ -6,6 +6,7 @@ import pytest
 
 from notebook_to_kedro.cli import main
 from notebook_to_kedro.ir import ConversionPlan
+from notebook_to_kedro.semantic import PlannerMode
 
 REFERENCE_NOTEBOOK = Path(__file__).parents[1] / "fixtures" / "notebooks" / "simple_training.ipynb"
 
@@ -146,3 +147,64 @@ def test_cli_generate_reports_blocked_plans(
     assert captured.out == ""
     assert "Error: Invalid conversion plan: blocking diagnostics are present: PY002" in captured.err
     assert not output_dir.exists()
+
+
+def test_cli_forwards_hybrid_planner_settings(
+    capsys: pytest.CaptureFixture[str], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    received: dict[str, object] = {}
+
+    def recording_plan(*_args: object, **kwargs: object) -> ConversionPlan:
+        received.update(kwargs)
+        return ConversionPlan(
+            schema_version="1.0",
+            planner_version="test-hybrid",
+            notebook_path="notebooks/model.ipynb",
+            task_candidates=(),
+        )
+
+    monkeypatch.setattr("notebook_to_kedro.cli.plan_notebook_path", recording_plan)
+
+    exit_code = main(
+        [
+            "plan",
+            str(REFERENCE_NOTEBOOK),
+            "--planner",
+            "hybrid",
+            "--ollama-model",
+            "qwen2.5-coder:7b",
+            "--ollama-base-url",
+            "http://127.0.0.1:11435",
+            "--ollama-timeout",
+            "45",
+        ]
+    )
+
+    captured = capsys.readouterr()
+
+    assert exit_code == 0
+    assert captured.err == ""
+    assert received["planner"] is PlannerMode.HYBRID
+    assert received["ollama_model"] == "qwen2.5-coder:7b"
+    assert received["ollama_base_url"] == "http://127.0.0.1:11435"
+    assert received["ollama_timeout_seconds"] == 45
+
+
+def test_cli_reports_missing_hybrid_model(capsys: pytest.CaptureFixture[str]) -> None:
+    exit_code = main(["plan", str(REFERENCE_NOTEBOOK), "--planner", "hybrid"])
+
+    captured = capsys.readouterr()
+
+    assert exit_code == 1
+    assert captured.out == ""
+    assert "Error: Hybrid planner mode requires a downloaded local model" in captured.err
+
+
+def test_cli_rejects_unknown_planner(capsys: pytest.CaptureFixture[str]) -> None:
+    with pytest.raises(SystemExit) as exc_info:
+        main(["plan", str(REFERENCE_NOTEBOOK), "--planner", "remote"])
+
+    captured = capsys.readouterr()
+
+    assert exc_info.value.code == 2
+    assert "invalid PlannerMode value: 'remote'" in captured.err
