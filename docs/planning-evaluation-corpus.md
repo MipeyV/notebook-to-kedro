@@ -73,3 +73,44 @@ the plan-level expectations to match. A successful parse or plausible node name 
 
 Future real-world cases must also record provenance, usage rights, and any redaction applied before
 notebook code is committed or sent to a model provider.
+
+## Benchmark runner
+
+`run_planning_benchmark` analyzes every corpus notebook once, then executes each named planner over
+the same immutable facts. Timing covers `SemanticPlanner.create_plan` only; notebook loading and
+static analysis are intentionally excluded. Planner names are sorted before execution so result
+ordering is stable.
+
+The CLI exposes the same runner and writes a versioned JSON report to stdout:
+
+```bash
+notebook-to-kedro benchmark tests/fixtures/evaluation/planning/v1 \
+  --project-root . \
+  --planners deterministic hybrid \
+  --ollama-model your-local-model > planning-benchmark.json
+```
+
+`deterministic` is the default when `--planners` is omitted. Hybrid benchmarking requires an
+explicit downloaded local Ollama model. The report labels it as `hybrid:<model>` so comparisons do
+not lose model identity. Ollama URL and timeout overrides use the same loopback-only validation as
+planning and generation.
+
+## Benchmark report
+
+Planning benchmark schema `1.0` records:
+
+- ordered corpus case IDs, notebook paths, and source SHA-256 digests;
+- the planner label and planner version returned for every case;
+- complete dimension-level `PlanningEvaluation` metrics;
+- deterministic plan-validation success;
+- semantic fallback usage through diagnostic `SP005`;
+- wall-clock duration for every planning call;
+- aggregate exact-match, valid-plan, fallback, and latency statistics.
+
+JSON key ordering and planner/case ordering are stable. Measured durations and model responses are
+naturally nondeterministic.
+
+This first runner measures planning structure, not generated-code quality. It does not yet execute
+generated projects, compare observable outputs, collect reviewer corrections, inspect token usage,
+or estimate energy and monetary cost. Those dimensions require separate versioned evaluation
+contracts rather than being inferred from task-structure accuracy.

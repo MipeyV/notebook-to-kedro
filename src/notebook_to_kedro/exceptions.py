@@ -43,3 +43,7 @@ class HybridPlanAssemblyError(ValueError):
 
 class PlannerConfigurationError(ValueError):
     """Raised when planner selection or provider settings are inconsistent."""
+
+
+class PlanningBenchmarkError(ValueError):
+    """Raised when a planning benchmark corpus cannot be loaded."""

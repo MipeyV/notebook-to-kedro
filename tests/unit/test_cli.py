@@ -1,14 +1,17 @@
 """Unit tests for the command-line interface."""
 
+import json
 from pathlib import Path
 
 import pytest
 
 from notebook_to_kedro.cli import main
 from notebook_to_kedro.ir import ConversionPlan
-from notebook_to_kedro.semantic import PlannerMode
+from notebook_to_kedro.semantic import PlannerMode, plan_tasks
 
 REFERENCE_NOTEBOOK = Path(__file__).parents[1] / "fixtures" / "notebooks" / "simple_training.ipynb"
+ROOT = Path(__file__).parents[2]
+PLANNING_CORPUS = Path(__file__).parents[1] / "fixtures" / "evaluation" / "planning" / "v1"
 
 
 def _blocked_plan(*_args: object, **_kwargs: object) -> ConversionPlan:
@@ -208,3 +211,106 @@ def test_cli_rejects_unknown_planner(capsys: pytest.CaptureFixture[str]) -> None
 
     assert exc_info.value.code == 2
     assert "invalid PlannerMode value: 'remote'" in captured.err
+
+
+def test_cli_benchmark_writes_deterministic_report(capsys: pytest.CaptureFixture[str]) -> None:
+    exit_code = main(
+        [
+            "benchmark",
+            str(PLANNING_CORPUS),
+            "--project-root",
+            str(ROOT),
+            "--planners",
+            "deterministic",
+            "deterministic",
+        ]
+    )
+
+    captured = capsys.readouterr()
+    payload = json.loads(captured.out)
+
+    assert exit_code == 0
+    assert captured.err == ""
+    assert [case["case_id"] for case in payload["corpus_cases"]] == [
+        "file-backed-training",
+        "pandas-preprocessing-training",
+        "scaled-training",
+        "simple-training",
+    ]
+    assert len(payload["planners"]) == 1
+    assert payload["planners"][0]["planner_name"] == "deterministic"
+    assert payload["planners"][0]["summary"]["exact_match_rate"] == 1.0
+
+
+def test_cli_benchmark_builds_selected_hybrid_planner(
+    capsys: pytest.CaptureFixture[str], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    calls: list[tuple[PlannerMode | str, dict[str, object]]] = []
+
+    def recording_factory(
+        mode: PlannerMode | str = PlannerMode.DETERMINISTIC, **kwargs: object
+    ) -> object:
+        calls.append((mode, kwargs))
+        return _DeterministicPlanner()
+
+    class _DeterministicPlanner:
+        def create_plan(self, facts):  # type: ignore[no-untyped-def]
+            return plan_tasks(facts)
+
+    monkeypatch.setattr("notebook_to_kedro.cli.create_semantic_planner", recording_factory)
+
+    exit_code = main(
+        [
+            "benchmark",
+            str(PLANNING_CORPUS),
+            "--project-root",
+            str(ROOT),
+            "--planners",
+            "deterministic",
+            "hybrid",
+            "--ollama-model",
+            "local-model",
+        ]
+    )
+
+    captured = capsys.readouterr()
+
+    assert exit_code == 0
+    assert captured.err == ""
+    assert [call[0] for call in calls] == [PlannerMode.DETERMINISTIC, PlannerMode.HYBRID]
+    assert calls[0][1]["ollama_model"] is None
+    assert calls[1][1]["ollama_model"] == "local-model"
+    payload = json.loads(captured.out)
+    assert [planner["planner_name"] for planner in payload["planners"]] == [
+        "deterministic",
+        "hybrid:local-model",
+    ]
+
+
+def test_cli_benchmark_reports_invalid_corpus(capsys: pytest.CaptureFixture[str]) -> None:
+    exit_code = main(["benchmark", "missing-corpus"])
+
+    captured = capsys.readouterr()
+
+    assert exit_code == 1
+    assert captured.out == ""
+    assert "Error: planning corpus contains no JSON cases" in captured.err
+
+
+def test_cli_benchmark_rejects_ollama_settings_without_hybrid(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    exit_code = main(
+        [
+            "benchmark",
+            str(PLANNING_CORPUS),
+            "--ollama-model",
+            "local-model",
+        ]
+    )
+
+    captured = capsys.readouterr()
+
+    assert exit_code == 1
+    assert captured.out == ""
+    assert "Error: Ollama settings require planner mode 'hybrid'" in captured.err
