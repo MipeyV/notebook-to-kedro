@@ -382,7 +382,7 @@ Progress and architectural decisions are recorded chronologically in [JOURNAL.md
 ### Phase 2: safe provider integration
 
 1. [x] Implement a fake provider for deterministic prompt, parsing, and failure tests.
-2. [ ] Add an optional real LLM adapter without adding an SDK dependency to the core package.
+2. [x] Add an optional local Ollama adapter without adding an SDK dependency to the core package.
 3. [ ] Require explicit consent before sending notebook content to a remote provider.
 4. [ ] Define redaction, credential, timeout, retry, cost, and error-reporting policies.
 5. [ ] Keep paid and nondeterministic provider tests outside the default CI workflow.
@@ -408,6 +408,8 @@ V2 is successful when hybrid planning improves useful notebook coverage without 
 
 The provider boundary and its trust rules are documented in
 [docs/semantic-planning-contract.md](docs/semantic-planning-contract.md).
+The local transport and its loopback-only safety policy are documented in
+[docs/ollama-provider.md](docs/ollama-provider.md).
 
 ## Contributing
 

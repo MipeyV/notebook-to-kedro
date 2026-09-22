@@ -96,5 +96,7 @@ Versioned valid and invalid examples live under:
 tests/fixtures/semantic/planning/v1/
 ```
 
-The next provider step is an optional local adapter that exercises the same boundary without
-adding a provider SDK to the core package.
+The local Ollama implementation is documented in
+[`ollama-provider.md`](ollama-provider.md). The next semantic step is to convert accepted
+suggestions into a deterministic, fully validated `ConversionPlan` without weakening V1
+provenance.

@@ -8,6 +8,12 @@ from notebook_to_kedro.semantic.contracts import (
     SemanticPlanningTrace,
     SemanticTaskSuggestion,
 )
+from notebook_to_kedro.semantic.ollama import (
+    DEFAULT_OLLAMA_BASE_URL,
+    DEFAULT_OLLAMA_MAX_RESPONSE_BYTES,
+    DEFAULT_OLLAMA_TIMEOUT_SECONDS,
+    OllamaSemanticPlanningProvider,
+)
 from notebook_to_kedro.semantic.orchestration import (
     SemanticPlanningFailure,
     SemanticPlanningOutcome,
@@ -38,11 +44,15 @@ from notebook_to_kedro.semantic.suggestion_validation import (
 from notebook_to_kedro.semantic.validation import validate_conversion_plan
 
 __all__ = [
+    "DEFAULT_OLLAMA_BASE_URL",
+    "DEFAULT_OLLAMA_MAX_RESPONSE_BYTES",
+    "DEFAULT_OLLAMA_TIMEOUT_SECONDS",
     "SEMANTIC_PLANNING_PROMPT_VERSION",
     "SEMANTIC_PLANNING_RESPONSE_JSON_SCHEMA",
     "SEMANTIC_PLANNING_SCHEMA_VERSION",
     "DeterministicSemanticPlanner",
     "FakeSemanticPlanningProvider",
+    "OllamaSemanticPlanningProvider",
     "SemanticPlanner",
     "SemanticPlanningFailure",
     "SemanticPlanningOutcome",
