@@ -97,6 +97,5 @@ tests/fixtures/semantic/planning/v1/
 ```
 
 The local Ollama implementation is documented in
-[`ollama-provider.md`](ollama-provider.md). The next semantic step is to convert accepted
-suggestions into a deterministic, fully validated `ConversionPlan` without weakening V1
-provenance.
+[`ollama-provider.md`](ollama-provider.md). Accepted responses are converted into deterministic,
+validated plans according to [`hybrid-planning.md`](hybrid-planning.md).

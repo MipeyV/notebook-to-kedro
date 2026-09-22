@@ -35,3 +35,7 @@ class SemanticProviderError(RuntimeError):
         super().__init__(f"{code}: {message}")
         self.code = code
         self.message = message
+
+
+class HybridPlanAssemblyError(ValueError):
+    """Raised when semantic suggestions cannot form a safe conversion plan."""
