@@ -40,6 +40,36 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-09-22 - Versioned planning evaluation corpus implemented
+
+### Completed
+
+- Added immutable contracts and deterministic JSON serialization for reviewed planning cases.
+- Added four approved V1 cases covering 26 task structures across the existing notebook fixtures.
+- Preserved source hashes, cell and statement provenance, raw code, node names, inputs, outputs,
+  parameters, diagnostics, and expected pipeline assignments.
+- Added dimension-level planning metrics and exact-match evaluation.
+- Established the deterministic planner as an exact-match baseline on all four reviewed cases.
+
+### Decisions
+
+- Planning and generated-code evaluation use separate datasets so their failures remain
+  attributable.
+- Proposed tasks are matched to reviewed tasks by source boundaries, not by predicted names.
+- Controlled fixtures seed the evaluation system but do not constitute a representative accuracy
+  benchmark for real-world notebooks.
+- Only explicitly approved examples can enter the gold corpus.
+
+### Open questions
+
+- Define provenance, licensing, and redaction metadata for real-world notebook cases.
+- Decide the minimum corpus size and diversity required before fine-tuning a planner.
+- Define separate code-generation and reviewer datasets after the semantic response contract.
+
+### Next step
+
+- Define versioned request and response contracts for structured semantic planner suggestions.
+
 ## 2026-09-22 - Provider-neutral semantic planner boundary implemented
 
 ### Completed

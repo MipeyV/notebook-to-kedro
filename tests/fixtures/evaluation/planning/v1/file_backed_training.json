@@ -1,0 +1,81 @@
+{
+  "schema_version": "1.0",
+  "case_id": "file-backed-training",
+  "notebook_path": "tests/fixtures/notebooks/file_backed_training.ipynb",
+  "source_sha256": "57203391dc5ff83c8a591d6b9e87b92b80649ac5e38ea4173d38e527f295c972",
+  "review_status": "approved",
+  "tasks": [
+    {
+      "id": "task-0005",
+      "expected_pipeline_id": "notebook_pipeline",
+      "source_cell_ids": ["cell-0005"],
+      "statement_ids": ["cell-0005-stmt-0000", "cell-0005-stmt-0001"],
+      "raw_source": "X = df[[\"feature_a\", \"feature_b\"]]\ny = df[\"target\"]",
+      "expected_node_name": "prepare_features",
+      "expected_inputs": ["df"],
+      "expected_outputs": ["X", "y"],
+      "expected_parameters": [],
+      "expected_diagnostic_codes": []
+    },
+    {
+      "id": "task-0006",
+      "expected_pipeline_id": "notebook_pipeline",
+      "source_cell_ids": ["cell-0006"],
+      "statement_ids": ["cell-0006-stmt-0000"],
+      "raw_source": "X_train, X_test, y_train, y_test = train_test_split(\n    X,\n    y,\n    test_size=0.25,\n    random_state=42,\n    stratify=y,\n)",
+      "expected_node_name": "split_data",
+      "expected_inputs": ["X", "y"],
+      "expected_outputs": ["X_train", "X_test", "y_train", "y_test"],
+      "expected_parameters": ["split_data.test_size", "split_data.random_state"],
+      "expected_diagnostic_codes": []
+    },
+    {
+      "id": "task-0008",
+      "expected_pipeline_id": "notebook_pipeline",
+      "source_cell_ids": ["cell-0008"],
+      "statement_ids": ["cell-0008-stmt-0000", "cell-0008-stmt-0001"],
+      "raw_source": "model = RandomForestClassifier(\n    n_estimators=50,\n    random_state=42,\n)\nmodel.fit(X_train, y_train)",
+      "expected_node_name": "train_model",
+      "expected_inputs": ["X_train", "y_train"],
+      "expected_outputs": ["model"],
+      "expected_parameters": ["train_model.n_estimators", "train_model.random_state"],
+      "expected_diagnostic_codes": ["DF003"]
+    },
+    {
+      "id": "task-0009",
+      "expected_pipeline_id": "notebook_pipeline",
+      "source_cell_ids": ["cell-0009"],
+      "statement_ids": ["cell-0009-stmt-0000"],
+      "raw_source": "predictions = model.predict(X_test)",
+      "expected_node_name": "predict",
+      "expected_inputs": ["model", "X_test"],
+      "expected_outputs": ["predictions"],
+      "expected_parameters": [],
+      "expected_diagnostic_codes": []
+    },
+    {
+      "id": "task-0011",
+      "expected_pipeline_id": "notebook_pipeline",
+      "source_cell_ids": ["cell-0011"],
+      "statement_ids": [
+        "cell-0011-stmt-0000",
+        "cell-0011-stmt-0001",
+        "cell-0011-stmt-0002"
+      ],
+      "raw_source": "accuracy = accuracy_score(y_test, predictions)\nassert accuracy >= 1.0\naccuracy",
+      "expected_node_name": "evaluate_model",
+      "expected_inputs": ["y_test", "predictions"],
+      "expected_outputs": ["accuracy"],
+      "expected_parameters": [],
+      "expected_diagnostic_codes": []
+    }
+  ],
+  "expected_catalog_datasets": ["df"],
+  "expected_parameter_names": [
+    "split_data.test_size",
+    "split_data.random_state",
+    "train_model.n_estimators",
+    "train_model.random_state"
+  ],
+  "expected_blocking_diagnostic_codes": []
+}
