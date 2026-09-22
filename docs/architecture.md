@@ -305,6 +305,14 @@ External tests are opt-in and marked:
 
 They require explicit credentials and run only in a protected workflow or manually.
 
+### Planner evaluation
+
+The versioned planning corpus described in
+[`planning-evaluation-corpus.md`](planning-evaluation-corpus.md) compares planners by source
+boundaries, names, raw code, inputs, outputs, parameters, diagnostics, pipeline assignments, and
+plan-level configuration. The deterministic planner is the first baseline. Future local and remote
+providers must be evaluated against the same reviewed cases before their results are compared.
+
 ## Delivery increments
 
 1. [x] Project tooling and package skeleton.

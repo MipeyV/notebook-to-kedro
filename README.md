@@ -377,6 +377,7 @@ Progress and architectural decisions are recorded chronologically in [JOURNAL.md
 2. [x] Keep the current deterministic planner as the default implementation.
 3. [ ] Define versioned request and response contracts for semantic suggestions.
 4. [ ] Add explicit planner selection to the Python API and CLI.
+5. [x] Seed a versioned planning evaluation corpus from the reviewed V1 fixtures.
 
 ### Phase 2: safe provider integration
 
