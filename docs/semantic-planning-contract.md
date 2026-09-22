@@ -58,6 +58,34 @@ Passing this validation only establishes structural compatibility with V1 eviden
 yet approve generated node code or prove behavioral equivalence. Those remain separate review
 and execution stages.
 
+## Provider Orchestration
+
+`SemanticPlanningProvider` is the narrow transport boundary. It receives a
+`SemanticProviderRequest` containing:
+
+- the request ID;
+- a deterministic `planning-v1` prompt;
+- the structured-output response schema.
+
+The provider returns raw JSON. It does not parse, validate, or merge its own output. The
+orchestrator owns those steps and records provider and model identity independently.
+
+`FakeSemanticPlanningProvider` supports offline tests with either fixed JSON or a fixed
+`SemanticProviderError`. It performs no network or filesystem I/O and records each request for
+assertions.
+
+`request_semantic_planning` returns a `SemanticPlanningOutcome`:
+
+- a valid, statically compatible response produces an auditable `SemanticPlanningResult`;
+- an expected provider error or invalid response produces a `SemanticPlanningFailure` and exposes
+  the deterministic baseline plan as `fallback_plan`;
+- unsupported prompt versions and unexpected programming errors remain visible instead of being
+  silently converted into fallback.
+
+An accepted result is still a suggestion, not a generation-ready `ConversionPlan`. A later hybrid
+assembly step must assign deterministic IDs, merge the suggestion with static plan data, and run
+the existing conversion-plan validator before generation.
+
 ## Compatibility
 
 Additive or breaking response changes require an explicit schema decision. A breaking change
@@ -68,5 +96,5 @@ Versioned valid and invalid examples live under:
 tests/fixtures/semantic/planning/v1/
 ```
 
-The next integration step is a fake provider that exercises prompt construction, response
-parsing, trace creation, failures, and deterministic fallback without a network call.
+The next provider step is an optional local adapter that exercises the same boundary without
+adding a provider SDK to the core package.

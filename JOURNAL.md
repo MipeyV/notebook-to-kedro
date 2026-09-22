@@ -40,6 +40,39 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-09-22 - Deterministic fake semantic provider implemented
+
+### Completed
+
+- Added a provider-neutral raw completion protocol and provider request contract.
+- Added deterministic `planning-v1` prompt rendering with explicit static-evidence rules.
+- Added a configurable fake provider that records calls and returns fixed JSON or fixed expected
+  failures without I/O.
+- Added orchestration for parsing, static cross-validation, invocation traces, and explicit V1
+  fallback.
+- Tested valid output, provider timeout, malformed JSON, semantically invalid output, unsupported
+  prompt versions, and unexpected provider errors.
+
+### Decisions
+
+- Providers own transport only; they do not validate or merge their output.
+- Only expected `SemanticProviderError` and response-contract failures trigger fallback.
+- Configuration errors and programming errors are not hidden behind fallback.
+- A valid semantic response remains a suggestion until a separate hybrid assembly step produces
+  and validates a final `ConversionPlan`.
+
+### Open questions
+
+- Define HTTP timeout, retry, cancellation, and local endpoint configuration for the first real
+  adapter.
+- Decide whether the initial local adapter should target Ollama only or a small generic HTTP
+  interface shared by compatible runtimes.
+
+### Next step
+
+- Implement an optional local Ollama adapter through the standard library HTTP client, without a
+  provider SDK dependency.
+
 ## 2026-09-22 - Structured semantic suggestion contracts implemented
 
 ### Completed

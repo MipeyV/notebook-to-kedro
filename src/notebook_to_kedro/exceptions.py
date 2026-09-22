@@ -21,3 +21,17 @@ class ConversionPlanValidationError(ValueError):
 
 class SemanticPlanningResponseError(ValueError):
     """Raised when a semantic planning response violates its contract."""
+
+
+class SemanticProviderError(RuntimeError):
+    """Raised for an expected semantic provider failure."""
+
+    def __init__(self, code: str, message: str) -> None:
+        """Initialize the error with a stable provider failure code."""
+        if not code:
+            raise ValueError("code must not be empty")
+        if not message:
+            raise ValueError("message must not be empty")
+        super().__init__(f"{code}: {message}")
+        self.code = code
+        self.message = message

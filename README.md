@@ -381,7 +381,7 @@ Progress and architectural decisions are recorded chronologically in [JOURNAL.md
 
 ### Phase 2: safe provider integration
 
-1. [ ] Implement a fake provider for deterministic prompt, parsing, and failure tests.
+1. [x] Implement a fake provider for deterministic prompt, parsing, and failure tests.
 2. [ ] Add an optional real LLM adapter without adding an SDK dependency to the core package.
 3. [ ] Require explicit consent before sending notebook content to a remote provider.
 4. [ ] Define redaction, credential, timeout, retry, cost, and error-reporting policies.
