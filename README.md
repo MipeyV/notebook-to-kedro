@@ -373,8 +373,8 @@ Progress and architectural decisions are recorded chronologically in [JOURNAL.md
 
 ### Phase 1: planner boundary
 
-1. [ ] Introduce a provider-neutral `SemanticPlanner` protocol.
-2. [ ] Keep the current deterministic planner as the default implementation.
+1. [x] Introduce a provider-neutral `SemanticPlanner` protocol.
+2. [x] Keep the current deterministic planner as the default implementation.
 3. [ ] Define versioned request and response contracts for semantic suggestions.
 4. [ ] Add explicit planner selection to the Python API and CLI.
 

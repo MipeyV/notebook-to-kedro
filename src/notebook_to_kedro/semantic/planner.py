@@ -99,6 +99,14 @@ def plan_tasks(facts: NotebookFacts) -> ConversionPlan:
     )
 
 
+class DeterministicSemanticPlanner:
+    """Adapt the deterministic V1 planner to the semantic planner contract."""
+
+    def create_plan(self, facts: NotebookFacts) -> ConversionPlan:
+        """Create a conversion plan using deterministic rules."""
+        return plan_tasks(facts)
+
+
 @dataclass(frozen=True, slots=True)
 class _PlanningContext:
     import_names: set[str]

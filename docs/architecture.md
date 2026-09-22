@@ -175,7 +175,7 @@ class SemanticPlanner(Protocol):
     def create_plan(self, facts: NotebookFacts) -> ConversionPlan: ...
 ```
 
-The first implementation and default tests use a deterministic fake or fixture-backed planner. Real LLM providers are optional adapters introduced only after the plan schema and validation rules are stable.
+`DeterministicSemanticPlanner` is the default implementation and preserves the V1 planning rules. The public Python API accepts any compatible `SemanticPlanner`, while the CLI remains deterministic until provider configuration and failure behavior are defined. Real LLM providers are optional adapters introduced behind this boundary.
 
 The semantic layer may propose but cannot silently override static evidence.
 

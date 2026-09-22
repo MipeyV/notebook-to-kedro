@@ -7,9 +7,12 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- Provider-neutral `SemanticPlanner` protocol with an injectable deterministic implementation.
+
 ### Planned
 
-- Provider-neutral semantic planner protocol.
 - Optional local LLM providers and hybrid semantic planning.
 - Versioned planning, code-generation, and review datasets.
 

@@ -40,6 +40,34 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-09-22 - Provider-neutral semantic planner boundary implemented
+
+### Completed
+
+- Added the `SemanticPlanner` protocol for conversion planning from `NotebookFacts`.
+- Wrapped the V1 rules in `DeterministicSemanticPlanner` without changing their behavior.
+- Allowed callers to inject a planner into `plan_notebook_path`.
+- Kept deterministic planning as the default for the Python API and CLI.
+- Added tests for protocol conformance and planner injection.
+
+### Decisions
+
+- Planner implementations consume deterministic facts and return the existing validated
+  `ConversionPlan` contract.
+- Provider selection remains an orchestration concern and does not enter the analyzer or Kedro
+  generator.
+- The initial CLI remains deterministic until provider configuration and failure behavior are
+  explicitly defined.
+
+### Open questions
+
+- Define the versioned request and response contracts used by an LLM-assisted planner.
+- Decide how planner identity and model metadata should be recorded in conversion reports.
+
+### Next step
+
+- Build a versioned planning evaluation corpus from the reviewed V1 fixtures.
+
 ## 2026-09-22 - Deterministic MVP release prepared
 
 ### Completed
