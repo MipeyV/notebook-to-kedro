@@ -16,6 +16,8 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   invocation trace metadata, and strict validation against deterministic V1 evidence.
 - Deterministic semantic prompt rendering, a provider transport protocol, a configurable fake
   provider, and explicit fallback to the V1 plan for expected provider or response failures.
+- Loopback-only Ollama structured-output transport using the standard library, with bounded
+  responses, configurable timeouts, normalized failures, and no core SDK dependency.
 
 ### Planned
 

@@ -193,6 +193,13 @@ the semantic orchestration layer. Expected provider failures fall back to the V1
 programming errors remain visible. The in-process fake provider tests this flow without network
 access or nondeterminism.
 
+The first real transport is the loopback-only Ollama adapter documented in
+[`ollama-provider.md`](ollama-provider.md). It uses the native `/api/chat` endpoint with a JSON
+Schema, non-streaming output, and temperature zero. It has no provider SDK dependency, cannot
+target a remote host, and rejects known cloud-model tags. Strict isolation also requires disabling
+Ollama cloud features on the local server. Direct cloud integration remains outside this adapter
+and requires a separate consent and credential policy.
+
 The deterministic planner assigns stable, valid Python identifiers to task candidates. It prefers recognized source patterns such as train/test split, model training, prediction, and evaluation, then falls back to the nearest preceding Markdown heading, and finally to a `cell_0000` style name when no semantic clue is available.
 
 It also emits `PlanDiagnostic` review notes for conversion risks that should be visible but not necessarily blocking, including fallback task names, inherited source diagnostics, unresolved external inputs, and tasks without data outputs.

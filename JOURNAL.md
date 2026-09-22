@@ -40,6 +40,41 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-09-22 - Local Ollama semantic provider implemented
+
+### Completed
+
+- Added an Ollama provider for non-streaming structured chat completions through the standard
+  library HTTP client.
+- Passed the semantic response JSON Schema to Ollama and selected deterministic temperature-zero
+  generation.
+- Added configurable request timeout and maximum response size.
+- Normalized timeout, connection, HTTP, generation, malformed-envelope, and oversized-response
+  failures into stable provider errors.
+- Added offline tests for the exact HTTP request, orchestration integration, failure handling, and
+  local URL restrictions.
+
+### Decisions
+
+- The adapter accepts only loopback HTTP URLs and rejects known Ollama cloud-model tags.
+- Strict local isolation must also be enforced in Ollama with cloud features disabled because a
+  local server can proxy cloud inference.
+- Remote transmission requires a separate consent and credential design.
+- Ollama and model installation remain optional and are excluded from default CI.
+- Structured provider output still cannot reach Kedro generation before hybrid plan assembly and
+  deterministic validation.
+
+### Open questions
+
+- Select candidate local models only after measuring them on the reviewed planning corpus.
+- Define whether retries belong in the provider adapter or a provider-neutral policy wrapper.
+- Define the accepted-suggestion merge algorithm and deterministic task-ID assignment.
+
+### Next step
+
+- Assemble accepted semantic suggestions into a `ConversionPlan` while preserving static facts,
+  deterministic IDs, diagnostics, and fallback behavior.
+
 ## 2026-09-22 - Deterministic fake semantic provider implemented
 
 ### Completed
