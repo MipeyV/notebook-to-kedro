@@ -64,7 +64,7 @@ and execution stages.
 `SemanticProviderRequest` containing:
 
 - the request ID;
-- a deterministic `planning-v1` prompt;
+- a deterministic `planning-v2` prompt containing a valid baseline response scaffold;
 - the structured-output response schema.
 
 The provider returns raw JSON. It does not parse, validate, or merge its own output. The

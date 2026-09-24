@@ -49,7 +49,7 @@ def test_orchestration_accepts_and_traces_a_valid_response(
     assert provider_request.request_id == semantic_request.request_id
     assert provider_request.response_schema == SEMANTIC_PLANNING_RESPONSE_JSON_SCHEMA
     assert provider_request.response_schema is not SEMANTIC_PLANNING_RESPONSE_JSON_SCHEMA
-    assert provider_request.prompt.endswith(semantic_request.to_json(indent=2))
+    assert semantic_request.to_json(indent=2) in provider_request.prompt
 
 
 def test_orchestration_falls_back_on_provider_failure(
@@ -105,7 +105,7 @@ def test_orchestration_rejects_an_unsupported_prompt_before_provider_call(
     semantic_response: SemanticPlanningResponse,
 ) -> None:
     provider = FakeSemanticPlanningProvider(response_json=semantic_response.to_json())
-    request = replace(semantic_request, prompt_version="planning-v2")
+    request = replace(semantic_request, prompt_version="planning-unsupported")
 
     with pytest.raises(ValueError, match="unsupported semantic planning prompt version"):
         request_semantic_planning(request, provider)

@@ -77,6 +77,7 @@ class OllamaSemanticPlanningProvider:
                 "model": self.model_name,
                 "messages": [{"role": "user", "content": request.prompt}],
                 "stream": False,
+                "think": False,
                 "format": dict(request.response_schema),
                 "options": {"temperature": 0},
             },
