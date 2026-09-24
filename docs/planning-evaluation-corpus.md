@@ -10,12 +10,19 @@ review will use separate datasets so planning and implementation errors remain d
 The initial `v1` corpus contains four controlled notebooks and 26 expected tasks. It establishes a
 regression baseline but is not a representative benchmark of real-world notebook diversity.
 
+The `semantic-v1` corpus measures whether semantic assistance adds value over that baseline. It
+contains two negative controls whose deterministic boundaries must remain unchanged and one
+positive grouping challenge. In the challenge notebook, related statements are deliberately split
+across adjacent code cells under explicit Markdown headings; the reviewed plan reduces twelve
+deterministic tasks to six logical Kedro nodes.
+
 ## Storage
 
 Cases are stored as one reviewable JSON document per notebook under:
 
 ```text
 tests/fixtures/evaluation/planning/v1/
+tests/fixtures/evaluation/planning/semantic-v1/
 ```
 
 Each document is immutable for a released schema version. Incompatible field changes require a
@@ -71,6 +78,12 @@ the plan-level expectations to match. A successful parse or plausible node name 
 4. Add the approved JSON case to the current compatible schema directory.
 5. Run the corpus integration test and inspect every changed metric.
 
+Semantic cases must include both positive grouping examples and negative controls. A useful model
+must merge reviewed boundaries without over-merging already-correct tasks. The current semantic
+contract can only group statements represented by deterministic task candidates; code cells that
+produce no tracked output require a separate evidence-model change before they can enter this gold
+corpus.
+
 Future real-world cases must also record provenance, usage rights, and any redaction applied before
 notebook code is committed or sent to a model provider.
 
@@ -89,6 +102,9 @@ notebook-to-kedro benchmark tests/fixtures/evaluation/planning/v1 \
   --planners deterministic hybrid \
   --ollama-model your-local-model > planning-benchmark.json
 ```
+
+Use `tests/fixtures/evaluation/planning/semantic-v1` to measure semantic improvement rather than
+baseline reproduction.
 
 `deterministic` is the default when `--planners` is omitted. Hybrid benchmarking requires an
 explicit downloaded local Ollama model. The report labels it as `hybrid:<model>` so comparisons do
