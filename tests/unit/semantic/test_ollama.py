@@ -110,6 +110,7 @@ def test_provider_posts_non_streaming_structured_chat_request() -> None:
         "model": "qwen-test:latest",
         "messages": [{"role": "user", "content": provider_request.prompt}],
         "stream": False,
+        "think": False,
         "format": dict(provider_request.response_schema),
         "options": {"temperature": 0},
     }

@@ -12,15 +12,18 @@ The adapter uses Ollama's native chat endpoint:
 POST http://localhost:11434/api/chat
 ```
 
-It sends one user message, disables streaming, sets temperature to zero, and supplies the
-semantic response JSON Schema through Ollama's `format` field. It extracts the raw structured
-response from `message.content`; the existing orchestration layer then parses and validates it.
+It sends one user message, disables streaming and model thinking, sets temperature to zero, and
+supplies the semantic response JSON Schema through Ollama's `format` field. Disabling thinking
+keeps this constrained extraction task focused and avoids paying inference latency for a hidden
+reasoning trace. The adapter extracts the raw structured response from `message.content`; the
+existing orchestration layer then parses and validates it.
 
 Official references:
 
 - [Ollama API introduction](https://docs.ollama.com/api/introduction)
 - [Chat endpoint](https://docs.ollama.com/api/chat)
 - [Structured outputs](https://docs.ollama.com/capabilities/structured-outputs)
+- [Thinking controls](https://docs.ollama.com/capabilities/thinking)
 - [API errors](https://docs.ollama.com/api/errors)
 
 ## Safety Boundary

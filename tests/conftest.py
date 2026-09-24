@@ -25,6 +25,7 @@ from notebook_to_kedro.ir import (
     SymbolKind,
 )
 from notebook_to_kedro.semantic import (
+    SEMANTIC_PLANNING_PROMPT_VERSION,
     SEMANTIC_PLANNING_SCHEMA_VERSION,
     SemanticPlanningRequest,
     SemanticPlanningResponse,
@@ -159,7 +160,7 @@ def semantic_request() -> SemanticPlanningRequest:
     return SemanticPlanningRequest(
         schema_version=SEMANTIC_PLANNING_SCHEMA_VERSION,
         request_id="request-0001",
-        prompt_version="planning-v1",
+        prompt_version=SEMANTIC_PLANNING_PROMPT_VERSION,
         facts=analyze_notebook_path(REFERENCE_NOTEBOOK),
         baseline_plan=plan_notebook_path(REFERENCE_NOTEBOOK),
     )
