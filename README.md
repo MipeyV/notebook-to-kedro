@@ -107,7 +107,8 @@ notebook-to-kedro plan notebooks/model.ipynb \
 
 The same planner options are accepted by `generate`. Hybrid planning uses only the loopback Ollama
 server; invalid responses, connection failures, and unsafe suggestions fall back to the reviewed
-deterministic plan and are identified in its diagnostics.
+deterministic plan and are identified in its diagnostics. When static constraints permit no task
+merges, hybrid mode returns the deterministic plan without contacting Ollama.
 
 ## Positioning
 

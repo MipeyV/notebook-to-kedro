@@ -13,6 +13,7 @@ from notebook_to_kedro.semantic.grouping import (
     SemanticGroupingResponse,
     SemanticTaskGroup,
     expand_semantic_grouping,
+    has_semantic_merge_candidates,
     semantic_grouping_response_schema,
 )
 from notebook_to_kedro.semantic.hybrid import (
@@ -85,6 +86,7 @@ __all__ = [
     "assemble_hybrid_plan",
     "create_semantic_planner",
     "expand_semantic_grouping",
+    "has_semantic_merge_candidates",
     "plan_tasks",
     "render_semantic_planning_prompt",
     "request_semantic_planning",

@@ -83,6 +83,8 @@ def test_reviewed_semantic_boundaries_are_accepted_by_hybrid_assembly() -> None:
 
         plan = HybridSemanticPlanner(provider).create_plan(facts)
         evaluation = evaluate_planning_case(case, facts, plan)
+        requires_grouping = len(case.tasks) < len(baseline.task_candidates)
 
         assert evaluation.exact_match is True, case.case_id
-        assert plan.planner_version == "0.2.0-hybrid"
+        assert plan.planner_version == ("0.2.0-hybrid" if requires_grouping else "0.1.0")
+        assert len(provider.requests) == int(requires_grouping)
