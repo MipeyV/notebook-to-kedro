@@ -6,8 +6,8 @@ import pytest
 
 from notebook_to_kedro.exceptions import SemanticProviderError
 from notebook_to_kedro.semantic import (
-    SEMANTIC_PLANNING_RESPONSE_JSON_SCHEMA,
     FakeSemanticPlanningProvider,
+    SemanticGroupingResponse,
     SemanticPlanningFailure,
     SemanticPlanningOutcome,
     SemanticPlanningRequest,
@@ -16,6 +16,7 @@ from notebook_to_kedro.semantic import (
     SemanticPlanningTrace,
     SemanticProviderRequest,
     request_semantic_planning,
+    semantic_grouping_response_schema,
 )
 
 
@@ -30,15 +31,16 @@ class _UnexpectedFailureProvider:
 def test_orchestration_accepts_and_traces_a_valid_response(
     semantic_request: SemanticPlanningRequest,
     semantic_response: SemanticPlanningResponse,
+    semantic_grouping_response: SemanticGroupingResponse,
 ) -> None:
     provider = FakeSemanticPlanningProvider(
-        response_json=semantic_response.to_json(), model_name="semantic-fixture"
+        response_json=semantic_grouping_response.to_json(), model_name="semantic-fixture"
     )
 
     outcome = request_semantic_planning(semantic_request, provider)
 
     assert outcome.result is not None
-    assert outcome.result.response == semantic_response
+    assert outcome.result.response == replace(semantic_response, review_notes=())
     assert outcome.trace.provider_name == "fake"
     assert outcome.trace.model_name == "semantic-fixture"
     assert outcome.failure is None
@@ -47,9 +49,9 @@ def test_orchestration_accepts_and_traces_a_valid_response(
     assert len(provider.requests) == 1
     provider_request = provider.requests[0]
     assert provider_request.request_id == semantic_request.request_id
-    assert provider_request.response_schema == SEMANTIC_PLANNING_RESPONSE_JSON_SCHEMA
-    assert provider_request.response_schema is not SEMANTIC_PLANNING_RESPONSE_JSON_SCHEMA
-    assert semantic_request.to_json(indent=2) in provider_request.prompt
+    assert provider_request.response_schema == semantic_grouping_response_schema(semantic_request)
+    assert semantic_request.request_id in provider_request.prompt
+    assert "Compact planning evidence JSON:" in provider_request.prompt
 
 
 def test_orchestration_falls_back_on_provider_failure(
@@ -71,10 +73,10 @@ def test_orchestration_falls_back_on_provider_failure(
     "response_json",
     [
         "not-json",
-        SemanticPlanningResponse(
+        SemanticGroupingResponse(
             schema_version="1.0",
             request_id="another-request",
-            tasks=(),
+            groups=(),
         ).to_json(),
     ],
 )
@@ -89,7 +91,7 @@ def test_orchestration_falls_back_on_invalid_responses(
     assert outcome.result is None
     assert outcome.failure is not None
     assert outcome.failure.code == "invalid_response"
-    assert "Invalid semantic planning response" in outcome.failure.message
+    assert "grouping response" in outcome.failure.message
     assert outcome.fallback_plan == semantic_request.baseline_plan
 
 
@@ -102,9 +104,9 @@ def test_orchestration_does_not_mask_unexpected_provider_errors(
 
 def test_orchestration_rejects_an_unsupported_prompt_before_provider_call(
     semantic_request: SemanticPlanningRequest,
-    semantic_response: SemanticPlanningResponse,
+    semantic_grouping_response: SemanticGroupingResponse,
 ) -> None:
-    provider = FakeSemanticPlanningProvider(response_json=semantic_response.to_json())
+    provider = FakeSemanticPlanningProvider(response_json=semantic_grouping_response.to_json())
     request = replace(semantic_request, prompt_version="planning-unsupported")
 
     with pytest.raises(ValueError, match="unsupported semantic planning prompt version"):

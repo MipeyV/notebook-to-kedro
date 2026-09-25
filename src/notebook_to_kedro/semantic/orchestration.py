@@ -2,20 +2,22 @@
 
 from __future__ import annotations
 
-from copy import deepcopy
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from notebook_to_kedro.exceptions import SemanticPlanningResponseError, SemanticProviderError
 from notebook_to_kedro.semantic.contracts import (
     SemanticPlanningRequest,
-    SemanticPlanningResponse,
     SemanticPlanningResult,
     SemanticPlanningTrace,
 )
+from notebook_to_kedro.semantic.grouping import (
+    SemanticGroupingResponse,
+    expand_semantic_grouping,
+    semantic_grouping_response_schema,
+)
 from notebook_to_kedro.semantic.prompting import render_semantic_planning_prompt
 from notebook_to_kedro.semantic.providers import SemanticProviderRequest
-from notebook_to_kedro.semantic.schemas import SEMANTIC_PLANNING_RESPONSE_JSON_SCHEMA
 from notebook_to_kedro.semantic.suggestion_validation import (
     validate_semantic_planning_response,
 )
@@ -81,11 +83,12 @@ def request_semantic_planning(
     provider_request = SemanticProviderRequest(
         request_id=request.request_id,
         prompt=render_semantic_planning_prompt(request),
-        response_schema=deepcopy(SEMANTIC_PLANNING_RESPONSE_JSON_SCHEMA),
+        response_schema=semantic_grouping_response_schema(request),
     )
 
     try:
-        response = SemanticPlanningResponse.from_json(provider.complete(provider_request))
+        grouping = SemanticGroupingResponse.from_json(provider.complete(provider_request))
+        response = expand_semantic_grouping(request, grouping)
         validate_semantic_planning_response(request, response)
     except SemanticProviderError as error:
         return _fallback_outcome(request, trace, code=error.code, message=error.message)

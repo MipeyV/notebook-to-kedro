@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from dataclasses import replace
 from email.message import Message
 from io import BytesIO
 from math import inf, nan
@@ -17,6 +18,7 @@ from notebook_to_kedro.semantic import (
     DEFAULT_OLLAMA_MAX_RESPONSE_BYTES,
     DEFAULT_OLLAMA_TIMEOUT_SECONDS,
     OllamaSemanticPlanningProvider,
+    SemanticGroupingResponse,
     SemanticPlanningProvider,
     SemanticPlanningRequest,
     SemanticPlanningResponse,
@@ -207,9 +209,10 @@ def test_provider_uses_standard_library_transport_by_default(
 def test_provider_integrates_with_semantic_orchestration(
     semantic_request: SemanticPlanningRequest,
     semantic_response: SemanticPlanningResponse,
+    semantic_grouping_response: SemanticGroupingResponse,
 ) -> None:
     transport = _RecordingTransport(
-        response=_Response(_ollama_envelope(semantic_response.to_json(indent=None)))
+        response=_Response(_ollama_envelope(semantic_grouping_response.to_json(indent=None)))
     )
     provider = OllamaSemanticPlanningProvider(
         model_name="semantic-model",
@@ -220,7 +223,7 @@ def test_provider_integrates_with_semantic_orchestration(
 
     assert outcome.used_fallback is False
     assert outcome.result is not None
-    assert outcome.result.response == semantic_response
+    assert outcome.result.response == replace(semantic_response, review_notes=())
     assert outcome.trace.provider_name == "ollama"
     assert outcome.trace.model_name == "semantic-model"
 
