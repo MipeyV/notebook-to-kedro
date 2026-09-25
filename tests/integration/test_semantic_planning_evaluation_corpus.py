@@ -7,11 +7,11 @@ import pytest
 from notebook_to_kedro import analyze_notebook_path, plan_notebook_path
 from notebook_to_kedro.evaluation import evaluate_planning_case, load_planning_corpus
 from notebook_to_kedro.semantic import (
-    SEMANTIC_PLANNING_SCHEMA_VERSION,
+    SEMANTIC_GROUPING_SCHEMA_VERSION,
     FakeSemanticPlanningProvider,
     HybridSemanticPlanner,
-    SemanticPlanningResponse,
-    SemanticTaskSuggestion,
+    SemanticGroupingResponse,
+    SemanticTaskGroup,
 )
 
 CORPUS = Path(__file__).parents[1] / "fixtures" / "evaluation" / "planning" / "semantic-v1"
@@ -48,20 +48,19 @@ def test_deterministic_planner_exposes_the_semantic_grouping_gap() -> None:
 def test_reviewed_semantic_boundaries_are_accepted_by_hybrid_assembly() -> None:
     for case in load_planning_corpus(CORPUS):
         facts = analyze_notebook_path(case.notebook_path)
-        response = SemanticPlanningResponse(
-            schema_version=SEMANTIC_PLANNING_SCHEMA_VERSION,
+        baseline = plan_notebook_path(case.notebook_path)
+        response = SemanticGroupingResponse(
+            schema_version=SEMANTIC_GROUPING_SCHEMA_VERSION,
             request_id=f"planning-{facts.notebook.content_sha256[:16]}",
-            tasks=tuple(
-                SemanticTaskSuggestion(
-                    source_cell_ids=task.source_cell_ids,
-                    statement_ids=task.statement_ids,
-                    node_name=task.expected_node_name,
-                    inputs=task.expected_inputs,
-                    outputs=task.expected_outputs,
-                    parameter_names=task.expected_parameters,
-                    pipeline_id=task.expected_pipeline_id,
+            groups=tuple(
+                SemanticTaskGroup(
+                    tuple(
+                        task.id
+                        for task in baseline.task_candidates
+                        if set(task.statement_ids) <= set(expected.statement_ids)
+                    )
                 )
-                for task in case.tasks
+                for expected in case.tasks
             ),
         )
         provider = FakeSemanticPlanningProvider(response_json=response.to_json())

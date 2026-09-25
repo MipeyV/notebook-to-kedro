@@ -25,10 +25,13 @@ from notebook_to_kedro.ir import (
     SymbolKind,
 )
 from notebook_to_kedro.semantic import (
+    SEMANTIC_GROUPING_SCHEMA_VERSION,
     SEMANTIC_PLANNING_PROMPT_VERSION,
     SEMANTIC_PLANNING_SCHEMA_VERSION,
+    SemanticGroupingResponse,
     SemanticPlanningRequest,
     SemanticPlanningResponse,
+    SemanticTaskGroup,
     SemanticTaskSuggestion,
 )
 
@@ -185,4 +188,18 @@ def semantic_response(semantic_request: SemanticPlanningRequest) -> SemanticPlan
             for task in semantic_request.baseline_plan.task_candidates
         ),
         review_notes=("Deterministic task boundaries retained.",),
+    )
+
+
+@pytest.fixture
+def semantic_grouping_response(
+    semantic_request: SemanticPlanningRequest,
+) -> SemanticGroupingResponse:
+    """Return a grouping response that preserves deterministic task boundaries."""
+    return SemanticGroupingResponse(
+        schema_version=SEMANTIC_GROUPING_SCHEMA_VERSION,
+        request_id=semantic_request.request_id,
+        groups=tuple(
+            SemanticTaskGroup((task.id,)) for task in semantic_request.baseline_plan.task_candidates
+        ),
     )

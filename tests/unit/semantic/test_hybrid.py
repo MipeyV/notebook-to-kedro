@@ -13,6 +13,7 @@ from notebook_to_kedro.semantic import (
     HYBRID_PLANNER_VERSION,
     FakeSemanticPlanningProvider,
     HybridSemanticPlanner,
+    SemanticGroupingResponse,
     SemanticPlanner,
     SemanticPlanningRequest,
     SemanticPlanningResponse,
@@ -309,10 +310,10 @@ def test_assemble_hybrid_plan_rejects_blocked_baseline(
 
 def test_hybrid_planner_implements_protocol_and_returns_assembled_plan(
     semantic_request: SemanticPlanningRequest,
-    semantic_response: SemanticPlanningResponse,
+    semantic_grouping_response: SemanticGroupingResponse,
 ) -> None:
     request_id = f"planning-{semantic_request.facts.notebook.content_sha256[:16]}"
-    response = replace(semantic_response, request_id=request_id)
+    response = replace(semantic_grouping_response, request_id=request_id)
     provider = FakeSemanticPlanningProvider(response_json=response.to_json())
     planner: SemanticPlanner = HybridSemanticPlanner(provider)
 
@@ -340,18 +341,17 @@ def test_hybrid_planner_falls_back_on_provider_failure(
 
 def test_hybrid_planner_falls_back_on_assembly_failure(
     semantic_request: SemanticPlanningRequest,
-    semantic_response: SemanticPlanningResponse,
+    semantic_grouping_response: SemanticGroupingResponse,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     request_id = f"planning-{semantic_request.facts.notebook.content_sha256[:16]}"
-    unsupported = replace(
-        semantic_response,
-        request_id=request_id,
-        tasks=(
-            replace(semantic_response.tasks[0], pipeline_id="custom"),
-            *semantic_response.tasks[1:],
-        ),
-    )
-    provider = FakeSemanticPlanningProvider(response_json=unsupported.to_json())
+    response = replace(semantic_grouping_response, request_id=request_id)
+    provider = FakeSemanticPlanningProvider(response_json=response.to_json())
+
+    def fail_assembly(_result: SemanticPlanningResult) -> ConversionPlan:
+        raise HybridPlanAssemblyError("unsupported assembled plan")
+
+    monkeypatch.setattr(hybrid_module, "assemble_hybrid_plan", fail_assembly)
 
     plan = HybridSemanticPlanner(provider).create_plan(semantic_request.facts)
 
@@ -362,7 +362,7 @@ def test_hybrid_planner_falls_back_on_assembly_failure(
 
 def test_hybrid_planner_skips_provider_for_blocked_baseline(
     semantic_request: SemanticPlanningRequest,
-    semantic_response: SemanticPlanningResponse,
+    semantic_grouping_response: SemanticGroupingResponse,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     blocked = replace(
@@ -371,7 +371,7 @@ def test_hybrid_planner_skips_provider_for_blocked_baseline(
         blocking_diagnostic_codes=("PY002",),
     )
     monkeypatch.setattr(hybrid_module, "plan_tasks", lambda _facts: blocked)
-    provider = FakeSemanticPlanningProvider(response_json=semantic_response.to_json())
+    provider = FakeSemanticPlanningProvider(response_json=semantic_grouping_response.to_json())
 
     plan = HybridSemanticPlanner(provider).create_plan(semantic_request.facts)
 
