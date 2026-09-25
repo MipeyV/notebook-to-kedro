@@ -1,0 +1,127 @@
+{
+  "schema_version": "1.0",
+  "case_id": "statement-split-model-comparison",
+  "notebook_path": "tests/fixtures/notebooks/statement_split_model_comparison.ipynb",
+  "source_sha256": "e475545f42844521a38308a5555ef690bb7a6777d9ffd9df936d8655ebec6126",
+  "review_status": "approved",
+  "tasks": [
+    {
+      "id": "task-0003",
+      "expected_pipeline_id": "notebook_pipeline",
+      "source_cell_ids": ["cell-0003", "cell-0004"],
+      "statement_ids": ["cell-0003-stmt-0000", "cell-0004-stmt-0000"],
+      "raw_source": "iris = load_iris(as_frame=True)\ndf = iris.frame",
+      "expected_node_name": "load_data",
+      "expected_inputs": [],
+      "expected_outputs": ["iris", "df"],
+      "expected_parameters": [],
+      "expected_diagnostic_codes": []
+    },
+    {
+      "id": "task-0006",
+      "expected_pipeline_id": "notebook_pipeline",
+      "source_cell_ids": ["cell-0006", "cell-0007"],
+      "statement_ids": ["cell-0006-stmt-0000", "cell-0007-stmt-0000"],
+      "raw_source": "X = df.drop(columns=[\"target\"])\ny = df[\"target\"]",
+      "expected_node_name": "prepare_features",
+      "expected_inputs": ["df"],
+      "expected_outputs": ["X", "y"],
+      "expected_parameters": ["prepare_features.drop_columns"],
+      "expected_diagnostic_codes": []
+    },
+    {
+      "id": "task-0009",
+      "expected_pipeline_id": "notebook_pipeline",
+      "source_cell_ids": ["cell-0009"],
+      "statement_ids": ["cell-0009-stmt-0000"],
+      "raw_source": "X_train, X_test, y_train, y_test = train_test_split(\n    X,\n    y,\n    test_size=0.2,\n    random_state=42,\n    stratify=y,\n)",
+      "expected_node_name": "split_data",
+      "expected_inputs": ["X", "y"],
+      "expected_outputs": ["X_train", "X_test", "y_train", "y_test"],
+      "expected_parameters": ["split_data.test_size", "split_data.random_state"],
+      "expected_diagnostic_codes": []
+    },
+    {
+      "id": "task-0011",
+      "expected_pipeline_id": "notebook_pipeline",
+      "source_cell_ids": ["cell-0011", "cell-0012"],
+      "statement_ids": ["cell-0011-stmt-0000", "cell-0012-stmt-0000"],
+      "raw_source": "forest_model = RandomForestClassifier(\n    n_estimators=100,\n    random_state=42,\n)\nfitted_forest = forest_model.fit(X_train, y_train)",
+      "expected_node_name": "train_random_forest",
+      "expected_inputs": ["X_train", "y_train"],
+      "expected_outputs": ["forest_model", "fitted_forest"],
+      "expected_parameters": [
+        "train_random_forest.n_estimators",
+        "train_random_forest.random_state"
+      ],
+      "expected_diagnostic_codes": ["DF003"]
+    },
+    {
+      "id": "task-0014",
+      "expected_pipeline_id": "notebook_pipeline",
+      "source_cell_ids": ["cell-0014"],
+      "statement_ids": ["cell-0014-stmt-0000"],
+      "raw_source": "forest_predictions = fitted_forest.predict(X_test)",
+      "expected_node_name": "predict",
+      "expected_inputs": ["fitted_forest", "X_test"],
+      "expected_outputs": ["forest_predictions"],
+      "expected_parameters": [],
+      "expected_diagnostic_codes": []
+    },
+    {
+      "id": "task-0016",
+      "expected_pipeline_id": "notebook_pipeline",
+      "source_cell_ids": ["cell-0016", "cell-0017"],
+      "statement_ids": ["cell-0016-stmt-0000", "cell-0017-stmt-0000"],
+      "raw_source": "logistic_model = LogisticRegression(\n    max_iter=200,\n    random_state=42,\n)\nfitted_logistic = logistic_model.fit(X_train, y_train)",
+      "expected_node_name": "train_logistic_regression",
+      "expected_inputs": ["X_train", "y_train"],
+      "expected_outputs": ["logistic_model", "fitted_logistic"],
+      "expected_parameters": [],
+      "expected_diagnostic_codes": ["DF003"]
+    },
+    {
+      "id": "task-0019",
+      "expected_pipeline_id": "notebook_pipeline",
+      "source_cell_ids": ["cell-0019"],
+      "statement_ids": ["cell-0019-stmt-0000"],
+      "raw_source": "logistic_predictions = fitted_logistic.predict(X_test)",
+      "expected_node_name": "predict_2",
+      "expected_inputs": ["fitted_logistic", "X_test"],
+      "expected_outputs": ["logistic_predictions"],
+      "expected_parameters": [],
+      "expected_diagnostic_codes": []
+    },
+    {
+      "id": "task-0021",
+      "expected_pipeline_id": "notebook_pipeline",
+      "source_cell_ids": ["cell-0021", "cell-0022", "cell-0023", "cell-0024"],
+      "statement_ids": [
+        "cell-0021-stmt-0000",
+        "cell-0022-stmt-0000",
+        "cell-0023-stmt-0000",
+        "cell-0024-stmt-0000"
+      ],
+      "raw_source": "forest_accuracy = accuracy_score(y_test, forest_predictions)\nlogistic_accuracy = accuracy_score(y_test, logistic_predictions)\nbest_model_name = (\n    \"random_forest\"\n    if forest_accuracy >= logistic_accuracy\n    else \"logistic_regression\"\n)\ncomparison = {\n    \"random_forest_accuracy\": forest_accuracy,\n    \"logistic_regression_accuracy\": logistic_accuracy,\n    \"best_model\": best_model_name,\n}",
+      "expected_node_name": "compare_models",
+      "expected_inputs": ["y_test", "forest_predictions", "logistic_predictions"],
+      "expected_outputs": [
+        "forest_accuracy",
+        "logistic_accuracy",
+        "best_model_name",
+        "comparison"
+      ],
+      "expected_parameters": [],
+      "expected_diagnostic_codes": []
+    }
+  ],
+  "expected_catalog_datasets": [],
+  "expected_parameter_names": [
+    "prepare_features.drop_columns",
+    "split_data.test_size",
+    "split_data.random_state",
+    "train_random_forest.n_estimators",
+    "train_random_forest.random_state"
+  ],
+  "expected_blocking_diagnostic_codes": []
+}
