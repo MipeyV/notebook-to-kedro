@@ -11,10 +11,11 @@ The initial `v1` corpus contains four controlled notebooks and 26 expected tasks
 regression baseline but is not a representative benchmark of real-world notebook diversity.
 
 The `semantic-v1` corpus measures whether semantic assistance adds value over that baseline. It
-contains two negative controls whose deterministic boundaries must remain unchanged and one
-positive grouping challenge. In the challenge notebook, related statements are deliberately split
-across adjacent code cells under explicit Markdown headings; the reviewed plan reduces twelve
-deterministic tasks to six logical Kedro nodes.
+contains four negative controls whose deterministic boundaries must remain unchanged and three
+positive grouping challenges. Related statements in the challenge notebooks are deliberately
+split across adjacent code cells under explicit Markdown headings. The reviewed plans cover a
+basic training workflow, preprocessing with feature scaling, and comparison of two independent
+models. Together, the corpus contains seven cases and 47 reviewed logical Kedro nodes.
 
 ## Storage
 
