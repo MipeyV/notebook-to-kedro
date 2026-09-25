@@ -130,6 +130,11 @@ def semantic_grouping_response_schema(request: SemanticPlanningRequest) -> dict[
     }
 
 
+def has_semantic_merge_candidates(request: SemanticPlanningRequest) -> bool:
+    """Return whether the request permits at least one non-singleton task group."""
+    return any(len(group) > 1 for group in _allowed_task_id_groups(request))
+
+
 def expand_semantic_grouping(
     request: SemanticPlanningRequest, response: SemanticGroupingResponse
 ) -> SemanticPlanningResponse:
@@ -317,6 +322,7 @@ __all__ = [
     "SemanticGroupingResponse",
     "SemanticTaskGroup",
     "expand_semantic_grouping",
+    "has_semantic_merge_candidates",
     "section_contexts_by_cell_id",
     "semantic_grouping_response_schema",
     "task_section_contexts",

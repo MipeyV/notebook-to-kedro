@@ -311,11 +311,13 @@ def test_assemble_hybrid_plan_rejects_blocked_baseline(
 def test_hybrid_planner_implements_protocol_and_returns_assembled_plan(
     semantic_request: SemanticPlanningRequest,
     semantic_grouping_response: SemanticGroupingResponse,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     request_id = f"planning-{semantic_request.facts.notebook.content_sha256[:16]}"
     response = replace(semantic_grouping_response, request_id=request_id)
     provider = FakeSemanticPlanningProvider(response_json=response.to_json())
     planner: SemanticPlanner = HybridSemanticPlanner(provider)
+    monkeypatch.setattr(hybrid_module, "has_semantic_merge_candidates", lambda _request: True)
 
     plan = planner.create_plan(semantic_request.facts)
 
@@ -326,10 +328,12 @@ def test_hybrid_planner_implements_protocol_and_returns_assembled_plan(
 
 def test_hybrid_planner_falls_back_on_provider_failure(
     semantic_request: SemanticPlanningRequest,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     provider = FakeSemanticPlanningProvider(
         error=SemanticProviderError("provider_timeout", "request timed out")
     )
+    monkeypatch.setattr(hybrid_module, "has_semantic_merge_candidates", lambda _request: True)
 
     plan = HybridSemanticPlanner(provider).create_plan(semantic_request.facts)
 
@@ -347,6 +351,7 @@ def test_hybrid_planner_falls_back_on_assembly_failure(
     request_id = f"planning-{semantic_request.facts.notebook.content_sha256[:16]}"
     response = replace(semantic_grouping_response, request_id=request_id)
     provider = FakeSemanticPlanningProvider(response_json=response.to_json())
+    monkeypatch.setattr(hybrid_module, "has_semantic_merge_candidates", lambda _request: True)
 
     def fail_assembly(_result: SemanticPlanningResult) -> ConversionPlan:
         raise HybridPlanAssemblyError("unsupported assembled plan")
@@ -358,6 +363,18 @@ def test_hybrid_planner_falls_back_on_assembly_failure(
     assert plan.task_candidates == semantic_request.baseline_plan.task_candidates
     assert plan.planner_version == f"{HYBRID_PLANNER_VERSION}-fallback"
     assert "hybrid_assembly_failed" in plan.diagnostics[-1].message
+
+
+def test_hybrid_planner_skips_provider_without_merge_candidates(
+    semantic_request: SemanticPlanningRequest,
+    semantic_grouping_response: SemanticGroupingResponse,
+) -> None:
+    provider = FakeSemanticPlanningProvider(response_json=semantic_grouping_response.to_json())
+
+    plan = HybridSemanticPlanner(provider).create_plan(semantic_request.facts)
+
+    assert plan == semantic_request.baseline_plan
+    assert provider.requests == ()
 
 
 def test_hybrid_planner_skips_provider_for_blocked_baseline(

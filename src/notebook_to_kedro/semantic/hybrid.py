@@ -17,6 +17,7 @@ from notebook_to_kedro.semantic.contracts import (
     SemanticPlanningResult,
     SemanticTaskSuggestion,
 )
+from notebook_to_kedro.semantic.grouping import has_semantic_merge_candidates
 from notebook_to_kedro.semantic.orchestration import request_semantic_planning
 from notebook_to_kedro.semantic.planner import plan_tasks
 from notebook_to_kedro.semantic.prompting import SEMANTIC_PLANNING_PROMPT_VERSION
@@ -61,6 +62,8 @@ class HybridSemanticPlanner:
             facts=facts,
             baseline_plan=baseline,
         )
+        if not has_semantic_merge_candidates(request):
+            return baseline
         outcome = request_semantic_planning(request, self.provider)
         if outcome.result is None:
             failure = cast("SemanticPlanningFailure", outcome.failure)

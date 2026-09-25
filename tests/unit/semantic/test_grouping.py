@@ -17,6 +17,7 @@ from notebook_to_kedro.semantic import (
     SemanticPlanningResponse,
     SemanticTaskGroup,
     expand_semantic_grouping,
+    has_semantic_merge_candidates,
     semantic_grouping_response_schema,
 )
 from notebook_to_kedro.semantic import grouping as grouping_module
@@ -132,6 +133,13 @@ def test_grouping_schema_allows_adjacent_single_statement_fragments() -> None:
 
     assert ["task-0006", "task-0007", "task-0008"] in allowed
     assert ["task-0008", "task-0010"] not in allowed
+
+
+def test_merge_candidate_detection_distinguishes_cohesive_and_fragmented_plans(
+    semantic_request: SemanticPlanningRequest,
+) -> None:
+    assert has_semantic_merge_candidates(semantic_request) is False
+    assert has_semantic_merge_candidates(_challenge_request()) is True
 
 
 def test_allowed_groups_do_not_absorb_a_following_cohesive_task() -> None:

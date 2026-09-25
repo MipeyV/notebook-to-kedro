@@ -7,8 +7,9 @@ Hybrid assembly converts a validated `SemanticPlanningResult` into the existing
 the deterministic V1 plan remains authoritative for executable details.
 
 `HybridSemanticPlanner` implements the same `SemanticPlanner` protocol as the deterministic
-planner. It builds the V1 baseline, requests semantic suggestions, assembles a safe hybrid plan,
-and returns a structurally unchanged V1 fallback whenever the provider or assembly fails.
+planner. It builds the V1 baseline, requests semantic suggestions only when the grouping schema
+permits at least one merge, assembles a safe hybrid plan, and returns a structurally unchanged V1
+fallback whenever the provider or assembly fails.
 
 ## Supported Decisions
 
@@ -59,7 +60,9 @@ Hybrid plans use planner version `0.2.0-hybrid` and add reportable diagnostics:
 | `SP005` | Provider or assembly failure caused deterministic fallback. |
 
 Fallback plans retain the V1 tasks and use planner version `0.2.0-hybrid-fallback`. Blocking
-source diagnostics bypass the provider entirely.
+source diagnostics bypass the provider entirely. The provider is also skipped when every valid
+group is a singleton. That no-op path returns the original V1 plan and version `0.1.0`; it does
+not add provider provenance or a fallback diagnostic because no provider call was attempted.
 
 ## Remaining Limitation
 
