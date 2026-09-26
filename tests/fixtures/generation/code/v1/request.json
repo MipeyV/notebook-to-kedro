@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0",
+  "request_id": "code-prepare",
+  "task_id": "task-0005",
+  "node_name": "prepare_features",
+  "raw_source": "X = df.drop(columns=[\"target\"])\ny = df[\"target\"]",
+  "source_cell_ids": ["cell-0005"],
+  "statement_ids": ["cell-0005-stmt-0000", "cell-0005-stmt-0001"],
+  "inputs": ["df"],
+  "outputs": ["X", "y"],
+  "parameter_names": ["prepare_features.drop_columns"],
+  "parameter_arguments": ["prepare_features_drop_columns"],
+  "allowed_imports": []
+}
