@@ -270,11 +270,11 @@ The deterministic V1 pipeline is operational for the supported notebook subset. 
 
 Development is now moving from the deterministic foundation toward V2 hybrid semantic planning and broader notebook coverage. The deterministic path will remain available as the default and as the fallback for every future provider integration.
 
-The first [node code generation contract](docs/node-code-contract.md) is available as an offline
-Python API: versioned task requests, strict JSON responses, a provider protocol, a fake provider,
-and static validation of function signatures, imports, global references, and returns. Accepted
-proposals are not yet executed or written into generated projects; behavioral equivalence and
-the Ollama code-generation adapter are subsequent steps.
+The [node code generation API](docs/node-code-contract.md) provides versioned task requests,
+strict JSON responses, a fake provider for offline tests, and an opt-in local Ollama code provider
+with a versioned fidelity prompt. Function signatures, imports, global references, and returns
+are statically validated. Accepted proposals are not executed or written into generated projects;
+real-model corpus evaluation and behavioral equivalence remain subsequent steps.
 
 The initial deterministic analysis contract is documented in [docs/mvp-contract.md](docs/mvp-contract.md), and its interchange model is defined in [docs/notebook-facts-schema.md](docs/notebook-facts-schema.md).
 

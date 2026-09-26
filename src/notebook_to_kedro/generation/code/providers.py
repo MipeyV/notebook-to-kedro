@@ -12,7 +12,11 @@ class NodeCodeProvider(Protocol):
     """Return raw response JSON; validation belongs to the application."""
 
     provider_name: str
-    model_name: str
+
+    @property
+    def model_name(self) -> str:
+        """Return model provenance; callers need not be able to modify it."""
+        ...
 
     def complete(self, request: NodeCodeRequest) -> str:
         """Propose code for exactly one task without writing a project."""

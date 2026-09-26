@@ -37,6 +37,16 @@ class SemanticProviderError(RuntimeError):
         self.message = message
 
 
+class NodeCodeProviderError(RuntimeError):
+    """Raised for an expected node code provider transport or generation failure."""
+
+    def __init__(self, code: str, message: str) -> None:
+        """Preserve the transport diagnostic without leaking semantic-planner errors."""
+        super().__init__(f"{code}: {message}")
+        self.code = code
+        self.message = message
+
+
 class HybridPlanAssemblyError(ValueError):
     """Raised when semantic suggestions cannot form a safe conversion plan."""
 
