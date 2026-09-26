@@ -142,5 +142,6 @@ raises `ValueError`; neither failure silently falls back to accepted code.
 The request currently gives parameter names and function arguments, not an exact literal-to-
 parameter substitution map. Ambiguities must be reviewed; parameter fidelity is not established
 by the static validator. Tests use mocked HTTP responses and establish adapter behavior, not real
-model accuracy. Corpus evaluation, behavioral equivalence and isolated execution remain separate
-milestones before proposals can be included in generated projects.
+model accuracy. The [code benchmark](node-code-benchmark.md) records corpus-wide static acceptance,
+V1 AST matches and missing parameter reads. Behavioral equivalence and isolated execution remain
+separate milestones before proposals can be included in generated projects.
