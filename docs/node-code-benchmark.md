@@ -24,11 +24,17 @@ by the V1 generator. References are checked against the node-code contract befor
 The reference code is retained in the report but is **not sent to the provider**: the provider
 receives only the ordinary `NodeCodeRequest` with original source and interface evidence.
 
-Report schema version `1.0` records provider/model identity, the caller-supplied prompt version,
+Report schema version `1.1` records provider/model identity, the caller-supplied prompt version,
+and the application-owned `validator_version`, as well as
 notebook hash, source-cell and statement provenance, request, raw response, parsed proposal,
 reference function, diagnostic, and elapsed time for each task. It contains source code and
 untrusted model output and may therefore contain secrets. Keep reports private unless reviewed;
 never execute or import their contents automatically.
+
+Schema `1.0` reports did not record a validator version. Comparing acceptance rates across
+validator changes requires replaying the old raw responses through the current validator,
+not treating stricter rejection as a model regression. Replay durations measure validation,
+not model latency, and must not be compared with live-call timings.
 
 Each task has one status:
 
@@ -124,7 +130,8 @@ Review of the seven nonmatching or rejected proposals found:
 - Three `train_model` proposals placed an import inside the function and were rejected.
 - All four `evaluate_model` proposals omitted the standalone notebook expression `accuracy`.
   Two retained the assertion; two also removed `assert accuracy >= 0.90`, changing the failure
-  behavior despite passing static validation.
+  behavior despite passing the original static validation. The version-2 assertion guard now
+  rejects these two proposals.
 - Two review notes incorrectly suggested that requiring accuracy >= 1.0 was invalid. Achieving
   exactly 1.0 is possible: generated review prose must not be treated as a reliable judgment.
 
@@ -132,6 +139,42 @@ The full local report is `generated/node-code-qwen3-8b-v1.json` (ignored by Git)
 run development observations on a small synthetic corpus, not an accuracy guarantee. None of the
 proposed functions were executed. The next improvement should target import placement and source
 statement preservation, particularly assertions, while continuing to measure parameter fidelity.
+
+## Assertion Guard And Prompt Experiments
+
+On 2026-09-26, `node-code-validation-v2` added conservative assertion-block preservation checks.
+The original 26 raw responses were replayed with identical request evidence and this validator:
+**21/26 accepted, 19/26 exact V1 AST matches**. The two missing-assertion proposals are now rejected;
+the three local-import failures remain rejected. This is stricter detection, not improved model
+generation. The replay made no model calls; its timing is not a latency benchmark.
+
+Two exploratory prompts were then tried on the same corpus, model digest, Ollama version and
+Python runtime as the initial observation, using the new validator. Both were rejected for
+release; the shipped prompt remains `node-code-v1`.
+
+| Prompt / run | Accepted | V1 AST matches | Missing parameter reads | Live duration |
+| --- | --- | --- | --- | --- |
+| Original v1 responses, replayed with validator v2 | 21/26 | 19/26 | 0/10 parameterized accepted tasks | Not applicable |
+| Experimental v2, stronger textual rules | 23/26 | 18/26 | 3/13 | 117.09 s |
+| Experimental v3, rules plus a worked example | 22/26 | 19/26 | 0/13 | 111.04 s |
+
+V2 fixed the training-node imports but introduced a malformed function indentation and three
+ignored parameters. Two assertion messages were also added and rejected by the new guard.
+V3 again fixed training-node imports, but all four evaluation nodes lacked the terminal return
+and added assertion messages. Three accepted preparation nodes wrapped a list parameter in an
+extra list; two also replaced the target-column selection with that parameter. These errors show
+why reading every parameter is not proof of correct substitution. No proposed code was executed.
+
+The observations are from development iterations on the same small corpus, not held-out or
+statistically controlled experiments. No positive accuracy or latency trend is established.
+Local reports are preserved under `generated/` as `node-code-qwen3-8b-v1-revalidated.json`,
+`node-code-qwen3-8b-v2.json` and `node-code-qwen3-8b-v3.json`. Experimental prompt identifiers v2/v3
+describe these local trials, not released prompt options. The implementation is based on commit
+`c9d5e76` on `feature/node-code-fidelity`.
+
+The next priority is explicit parameter-substitution evidence: original expression, expected
+value type and exact replacement location. This must distinguish replacing the entire list in
+`drop(columns=["target"])` from replacing an unrelated `df["target"]` expression.
 
 ## Next Validation Stage
 

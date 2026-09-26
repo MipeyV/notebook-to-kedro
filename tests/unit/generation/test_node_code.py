@@ -4,6 +4,7 @@ import ast
 import json
 from dataclasses import replace
 from pathlib import Path
+from textwrap import indent
 
 import pytest
 
@@ -246,6 +247,114 @@ def test_validator_rejects_invalid_function(
 ) -> None:
     with pytest.raises(ValueError, match=message):
         validate_node_code(node_request, replace(response, function_code=code))
+
+
+@pytest.mark.parametrize(
+    ("original", "proposed"),
+    [
+        ("scaled = values * 2\nassert scaled > 0", "scaled = values * 2"),
+        ("scaled = values * 2\nassert scaled > 0", "scaled = values * 2\nassert scaled >= 0"),
+        ("scaled = values * 2\nassert scaled > 0", "scaled = values * 2\nassert True"),
+        (
+            "scaled = values * 2\nassert scaled > 0, 'positive'",
+            "scaled = values * 2\nassert scaled > 0, 'different'",
+        ),
+        (
+            "scaled = values * 2\nassert scaled > 0, 'positive'",
+            "scaled = values * 2\nassert scaled > 0",
+        ),
+        (
+            "scaled = values * 2\nassert scaled > 0\nscaled",
+            "scaled = values * 2\nscaled\nassert scaled > 0",
+        ),
+        (
+            "scaled = values * 2\nassert scaled > 0",
+            "scaled = values * 2\nassert scaled > 0\nassert scaled > 0",
+        ),
+        (
+            "scaled = values * 2\nassert scaled > 0",
+            "scaled = values * 2\nif False:\n    assert scaled > 0",
+        ),
+        (
+            "scaled = values * 2\nif values:\n    assert scaled > 0",
+            "scaled = values * 2\nif not values:\n    assert scaled > 0",
+        ),
+        (
+            "scaled = values * 2\nassert scaled > 0",
+            "scaled = values * 2\ntry:\n    assert scaled > 0\nexcept AssertionError:\n    pass",
+        ),
+        (
+            "scaled = values * 2\nassert scaled > 0\nassert values > 0",
+            "scaled = values * 2\nassert values > 0\nassert scaled > 0",
+        ),
+        ("scaled = values * 2", "scaled = values * 2\nassert scaled > 0"),
+        (
+            "scaled = values\nif values:\n    scaled = values * 2\n    assert scaled > 0",
+            "scaled = values\nif values:\n"
+            "    scaled = values * scale_factor\n    assert scaled > 0",
+        ),
+    ],
+)
+def test_validator_rejects_changed_assertion_blocks(
+    node_request: NodeCodeRequest, response: NodeCodeResponse, original: str, proposed: str
+) -> None:
+    code = "def scale(values, scale_factor):\n" + indent(proposed, "    ") + "\n    return scaled"
+    with pytest.raises(ValueError, match="assertions and their enclosing statements"):
+        validate_node_code(
+            replace(node_request, raw_source=original), replace(response, function_code=code)
+        )
+
+
+@pytest.mark.parametrize(
+    "body",
+    [
+        "scaled = values * 2\nassert scaled > 0, 'positive'",
+        "scaled = values\nif values:\n    assert values > 0\n    scaled = values * 2",
+        "scaled = values\nfor value in values:\n    assert value > 0",
+        "scaled = values\nassert values >= 1.0\nvalues",
+    ],
+)
+def test_validator_preserves_assertions_without_executing_them(
+    node_request: NodeCodeRequest, response: NodeCodeResponse, body: str
+) -> None:
+    code = "def scale(values, scale_factor):\n" + indent(body, "    ") + "\n    return scaled"
+    validate_node_code(
+        replace(node_request, raw_source=body), replace(response, function_code=code)
+    )
+
+
+def test_assertion_comparison_ignores_comments_and_formatting(
+    node_request: NodeCodeRequest, response: NodeCodeResponse
+) -> None:
+    original = "scaled = values * 2\nassert scaled > 0, 'positive'"
+    code = (
+        "def scale(values, scale_factor):\n"
+        "    scaled = values * 2\n"
+        '    assert (scaled > 0), "positive"  # preserved check\n'
+        "    return scaled\n"
+    )
+    validate_node_code(
+        replace(node_request, raw_source=original), replace(response, function_code=code)
+    )
+
+
+def test_invalid_original_source_is_rejected(
+    node_request: NodeCodeRequest, response: NodeCodeResponse
+) -> None:
+    with pytest.raises(ValueError, match="Invalid node code"):
+        validate_node_code(replace(node_request, raw_source="assert ("), response)
+
+
+def test_allowed_import_cannot_be_duplicated_inside_function(
+    node_request: NodeCodeRequest, response: NodeCodeResponse
+) -> None:
+    code = (
+        "def scale(values, scale_factor):\n    import math\n    scaled = values\n    return scaled"
+    )
+    with pytest.raises(ValueError, match="unsupported nested scope, import"):
+        validate_node_code(
+            node_request, replace(response, imports=("import math",), function_code=code)
+        )
 
 
 @pytest.mark.parametrize(

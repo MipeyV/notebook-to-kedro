@@ -10,6 +10,8 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from notebook_to_kedro.generation.code.contracts import NodeCodeRequest, NodeCodeResponse
 
+NODE_CODE_VALIDATOR_VERSION = "node-code-validation-v2"
+
 
 def _import_tree(source: str) -> ast.Import | ast.ImportFrom:
     body = ast.parse(source).body
@@ -99,6 +101,23 @@ def _validate_return(function: ast.FunctionDef, outputs: tuple[str, ...]) -> Non
         raise ValueError("return must match the ordered output names")
 
 
+def _assertion_blocks(statements: list[ast.stmt]) -> list[tuple[int, str]]:
+    # Preserve whole enclosing statements so moving an assert under a false guard cannot pass.
+    return [
+        (index, ast.dump(statement))
+        for index, statement in enumerate(statements)
+        if any(isinstance(node, ast.Assert) for node in ast.walk(statement))
+    ]
+
+
+def _validate_assertions(request: NodeCodeRequest, function: ast.FunctionDef) -> None:
+    original = _assertion_blocks(ast.parse(request.raw_source).body)
+    if original != _assertion_blocks(function.body):
+        raise ValueError(
+            "assertions and their enclosing statements must retain source AST and position"
+        )
+
+
 def _validate_globals(table: symtable.SymbolTable, allowed: set[str]) -> None:
     unknown = sorted(
         symbol.get_name()
@@ -112,13 +131,14 @@ def _validate_globals(table: symtable.SymbolTable, allowed: set[str]) -> None:
 
 
 def validate_node_code(request: NodeCodeRequest, response: NodeCodeResponse) -> None:
-    """Check identity, imports, signature, lexical names, returns and compilation."""
+    """Check identity, imports, signature, assertions, names, returns and compilation."""
     if (response.request_id, response.task_id) != (request.request_id, request.task_id):
         raise ValueError("response identity does not match the requested node")
     try:
         bindings = _validate_imports(request, response)
         function = _function(request, response.function_code)
         _validate_return(function, request.outputs)
+        _validate_assertions(request, function)
         source = "\n".join((*response.imports, response.function_code))
         compile(source, "<node-code>", "exec", dont_inherit=True)
         table = symtable.symtable(source, "<node-code>", "exec")
