@@ -7,7 +7,7 @@ One request describes one task from a validated conversion plan, including a pla
 the hybrid structureur. A provider proposes a Python function; the application parses and
 validates it before returning a reviewable result. This API performs no code execution, imports
 of proposed modules, or project writes. The existing deterministic generator remains the CLI's
-generation path. Ollama code generation will be a separate adapter.
+generation path. An opt-in local Ollama adapter is available through this Python API.
 
 Both request and response use schema version `1.0`. Fixtures live in
 `tests/fixtures/generation/code/v1/`. Breaking contract changes require a new version.
@@ -41,7 +41,7 @@ must consume their function arguments. Requests reject invalid identifiers and a
 - `imports`, containing the required subset of allowed import statements;
 - `review_notes`, containing review observations, possibly empty.
 
-`NODE_CODE_RESPONSE_JSON_SCHEMA` describes the structured output for future adapters. The JSON
+`NODE_CODE_RESPONSE_JSON_SCHEMA` describes the structured output for adapters. The JSON
 decoder rejects missing or unknown fields, duplicate object keys, incorrect field types, duplicate
 array entries, and unsupported versions. Parsing alone does not validate the Python code.
 
@@ -103,3 +103,44 @@ result = request_node_code(request, FakeNodeCodeProvider(response_json=response.
 
 The result is a proposal ready for further review. This example does not run the function or
 alter a generated project.
+
+## Local Ollama Proposals
+
+`OllamaNodeCodeProvider` implements the same contract using the existing local Ollama chat
+transport. It introduces no SDK dependency. Construction performs no network I/O; only an explicit
+call sends the task source, provenance, interfaces, and allowed imports to the configured server.
+It does not send the notebook's outputs or read datasets. Source code can still contain secrets;
+review what you send, even to a local model.
+
+With Ollama running and an already downloaded local model:
+
+```python
+from notebook_to_kedro.generation.code import OllamaNodeCodeProvider, request_node_code
+
+provider = OllamaNodeCodeProvider(model_name="qwen3:8b", timeout_seconds=120)
+result = request_node_code(request, provider)
+proposal = result.response.function_code
+```
+
+The `request` above is the task request from the offline example. The model name is explicit;
+this example is not an accuracy recommendation. There is no download, retry, cloud fallback, code
+execution, or project write. Only local HTTP loopback URLs are accepted, cloud model tags are
+rejected, and the transport uses a timeout and bounded response size (4 MiB by default). Keep
+Ollama configured with `OLLAMA_NO_CLOUD=1` for a local-only deployment.
+
+`render_node_code_prompt` is deterministic and versioned by `NODE_CODE_PROMPT_VERSION`
+(`node-code-v1`). It supplies original task evidence and the exact signature and return order,
+asks for faithful operations rather than repairs, and treats notebook contents as untrusted data.
+The request uses the response JSON schema, non-streaming chat, temperature zero, and `think=false`.
+These settings do not guarantee deterministic or correct model output.
+
+`complete` returns raw assistant JSON; use `request_node_code` to parse and statically validate it.
+Transport failures raise `NodeCodeProviderError` from `notebook_to_kedro.exceptions`, with stable
+`code` and `message` fields inherited from the transport diagnostic. Invalid model JSON or code
+raises `ValueError`; neither failure silently falls back to accepted code.
+
+The request currently gives parameter names and function arguments, not an exact literal-to-
+parameter substitution map. Ambiguities must be reviewed; parameter fidelity is not established
+by the static validator. Tests use mocked HTTP responses and establish adapter behavior, not real
+model accuracy. Corpus evaluation, behavioral equivalence and isolated execution remain separate
+milestones before proposals can be included in generated projects.
