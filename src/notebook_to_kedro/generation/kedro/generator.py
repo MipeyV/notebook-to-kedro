@@ -123,7 +123,7 @@ __all__ = ["create_pipeline"]
 
 def _nodes(plan: ConversionPlan) -> str:
     sections = [*plan.imports, ""]
-    sections.extend(_node_function(task) for task in plan.task_candidates)
+    sections.extend(render_node_function(task) for task in plan.task_candidates)
     return "\n\n".join(section for section in sections if section).rstrip() + "\n"
 
 
@@ -208,7 +208,8 @@ def _catalog_file_copies(plan: ConversionPlan, root: Path) -> tuple[tuple[Path, 
     return tuple(copies)
 
 
-def _node_function(task: TaskCandidate) -> str:
+def render_node_function(task: TaskCandidate) -> str:
+    """Render one validated plan task using V1 rules, without execution or file I/O."""
     function_parameters = ", ".join((*task.inputs, *_parameter_arguments(task)))
     body = indent(_parameterized_source(task).rstrip(), "    ")
     return_statement = _return_statement(task.outputs)

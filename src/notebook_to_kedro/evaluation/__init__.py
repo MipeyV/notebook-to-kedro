@@ -19,6 +19,14 @@ from notebook_to_kedro.evaluation.models import (
     PlanningCase,
     PlanningEvaluation,
 )
+from notebook_to_kedro.evaluation.node_code import (
+    NODE_CODE_BENCHMARK_SCHEMA_VERSION,
+    NodeCodeBenchmarkReport,
+    NodeCodeBenchmarkTask,
+    node_code_benchmark_to_dict,
+    node_code_benchmark_to_json,
+    run_node_code_benchmark,
+)
 from notebook_to_kedro.evaluation.planning import DEFAULT_PIPELINE_ID, evaluate_planning_case
 from notebook_to_kedro.evaluation.serialization import (
     load_planning_case,
@@ -32,9 +40,12 @@ from notebook_to_kedro.evaluation.serialization import (
 __all__ = [
     "DEFAULT_PIPELINE_ID",
     "FALLBACK_DIAGNOSTIC_CODE",
+    "NODE_CODE_BENCHMARK_SCHEMA_VERSION",
     "PLANNING_BENCHMARK_SCHEMA_VERSION",
     "PLANNING_CASE_SCHEMA_VERSION",
     "ExpectedTask",
+    "NodeCodeBenchmarkReport",
+    "NodeCodeBenchmarkTask",
     "PlannerBenchmark",
     "PlanningBenchmarkCaseResult",
     "PlanningBenchmarkCorpusCase",
@@ -44,11 +55,14 @@ __all__ = [
     "evaluate_planning_case",
     "load_planning_case",
     "load_planning_corpus",
+    "node_code_benchmark_to_dict",
+    "node_code_benchmark_to_json",
     "planning_benchmark_to_dict",
     "planning_benchmark_to_json",
     "planning_case_from_dict",
     "planning_case_from_json",
     "planning_case_to_dict",
     "planning_case_to_json",
+    "run_node_code_benchmark",
     "run_planning_benchmark",
 ]
