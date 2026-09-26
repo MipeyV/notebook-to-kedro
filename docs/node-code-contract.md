@@ -64,7 +64,10 @@ propagate. No automatic retry or fallback is introduced at this boundary.
    imports, `global`, `nonlocal`, or generator yields in this initial subset.
 5. Exactly one terminal return: `None` (or bare `return`) for no outputs, the variable for one
    output, or the ordered tuple of variables for multiple outputs.
-6. Successful compilation without execution, and no unknown global references according to
+6. Assertion preservation: each top-level source statement containing an assertion must retain
+   the same AST and statement index in the function. Conditions, messages, assertion ordering,
+   and whole enclosing control-flow statements are compared. Added assertions are rejected too.
+7. Successful compilation without execution, and no unknown global references according to
    Python's symbol table, including comprehension scopes. Declared imports and Python builtins
    are available; notebook globals must be passed as inputs.
 
@@ -74,6 +77,13 @@ the original notebook, or that imported packages are installed. A structurally v
 can still perform I/O or produce incorrect results. This validator is not an execution sandbox.
 Behavioral equivalence, isolated execution and review are subsequent stages before generated
 proposals can be included in a project.
+
+`NODE_CODE_VALIDATOR_VERSION` identifies these rules (`node-code-validation-v2`). Assertion
+comparison ignores comments and formatting but deliberately rejects any rewrite of an enclosing
+statement containing an assertion, including potentially valid parameter substitutions in that
+block. Until explicit transformation evidence is available, such cases require review. The check
+does not prove that earlier assignments preserve the values being asserted or that unrelated
+statements are faithful. Assertions being present does not make the proposal safe to execute.
 
 ## Offline Example
 
@@ -133,6 +143,11 @@ Ollama configured with `OLLAMA_NO_CLOUD=1` for a local-only deployment.
 asks for faithful operations rather than repairs, and treats notebook contents as untrusted data.
 The request uses the response JSON schema, non-streaming chat, temperature zero, and `think=false`.
 These settings do not guarantee deterministic or correct model output.
+
+The original prompt remains in use: two prompt-only experiments did not improve fidelity enough
+to replace it; their results are recorded in the benchmark documentation. Assertion preservation
+is enforced by the validator, not by trusting instructions to the model. Request and response
+JSON schemas remain at version `1.0`; prompt and validator versions evolve independently.
 
 `complete` returns raw assistant JSON; use `request_node_code` to parse and statically validate it.
 Transport failures raise `NodeCodeProviderError` from `notebook_to_kedro.exceptions`, with stable

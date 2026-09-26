@@ -19,7 +19,11 @@ from notebook_to_kedro.evaluation import (
     run_node_code_benchmark,
 )
 from notebook_to_kedro.exceptions import NodeCodeProviderError
-from notebook_to_kedro.generation.code import NodeCodeRequest, NodeCodeResponse
+from notebook_to_kedro.generation.code import (
+    NODE_CODE_VALIDATOR_VERSION,
+    NodeCodeRequest,
+    NodeCodeResponse,
+)
 from notebook_to_kedro.generation.kedro import render_node_function
 
 if TYPE_CHECKING:
@@ -79,6 +83,7 @@ def test_benchmark_checks_all_v1_nodes_and_serializes_provenance(
     )
 
     assert report.schema_version == NODE_CODE_BENCHMARK_SCHEMA_VERSION
+    assert report.validator_version == NODE_CODE_VALIDATOR_VERSION
     assert (report.provider_name, report.model_name, report.prompt_version) == (
         "fake-reference",
         "v1",
@@ -96,6 +101,7 @@ def test_benchmark_checks_all_v1_nodes_and_serializes_provenance(
     )
     payload = json.loads(node_code_benchmark_to_json(report))
     assert payload["behavioral_equivalence"] == "not_evaluated"
+    assert payload["validator_version"] == "node-code-validation-v2"
     assert payload["reference"] == "deterministic-v1-function-ast"
     assert payload["tasks"][0]["request"]["source_cell_ids"]
     summary = payload["summary"]
@@ -200,7 +206,7 @@ def test_ast_comparison_ignores_formatting_and_comments(cases: tuple[PlanningCas
     assert all(task.reference_ast_match is True for task in report.tasks)
 
 
-def test_dropped_assertion_is_not_counted_as_a_reference_match(
+def test_dropped_assertion_is_rejected_before_reference_comparison(
     cases: tuple[PlanningCase, ...],
 ) -> None:
     case = cases[-1]
@@ -217,9 +223,11 @@ def test_dropped_assertion_is_not_counted_as_a_reference_match(
     )
     task = next(task for task in report.tasks if task.request.node_name == "evaluate_model")
 
-    assert task.status == "accepted"
-    assert task.reference_ast_match is False
-    assert task.missing_parameter_reads == ()
+    assert task.status == "invalid_code"
+    assert task.reference_ast_match is None
+    assert task.missing_parameter_reads is None
+    assert task.diagnostic_message is not None
+    assert "assertions" in task.diagnostic_message
 
 
 def test_benchmark_does_not_execute_valid_proposals(

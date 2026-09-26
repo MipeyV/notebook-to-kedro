@@ -14,12 +14,16 @@ from notebook_to_kedro.generation.code.prompting import (
 from notebook_to_kedro.generation.code.providers import FakeNodeCodeProvider, NodeCodeProvider
 from notebook_to_kedro.generation.code.schemas import NODE_CODE_RESPONSE_JSON_SCHEMA
 from notebook_to_kedro.generation.code.service import NodeCodeResult, request_node_code
-from notebook_to_kedro.generation.code.validation import validate_node_code
+from notebook_to_kedro.generation.code.validation import (
+    NODE_CODE_VALIDATOR_VERSION,
+    validate_node_code,
+)
 
 __all__ = [
     "NODE_CODE_PROMPT_VERSION",
     "NODE_CODE_RESPONSE_JSON_SCHEMA",
     "NODE_CODE_SCHEMA_VERSION",
+    "NODE_CODE_VALIDATOR_VERSION",
     "FakeNodeCodeProvider",
     "NodeCodeProvider",
     "NodeCodeRequest",

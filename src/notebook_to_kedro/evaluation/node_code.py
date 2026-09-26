@@ -14,6 +14,7 @@ from notebook_to_kedro.api import analyze_notebook_path
 from notebook_to_kedro.evaluation.planning import evaluate_planning_case
 from notebook_to_kedro.exceptions import NodeCodeProviderError
 from notebook_to_kedro.generation.code import (
+    NODE_CODE_VALIDATOR_VERSION,
     NodeCodeRequest,
     NodeCodeResponse,
     build_node_code_request,
@@ -28,7 +29,7 @@ if TYPE_CHECKING:
     from notebook_to_kedro.evaluation.models import PlanningCase
     from notebook_to_kedro.generation.code import NodeCodeProvider
 
-NODE_CODE_BENCHMARK_SCHEMA_VERSION = "1.0"
+NODE_CODE_BENCHMARK_SCHEMA_VERSION = "1.1"
 NodeCodeStatus = Literal["accepted", "provider_error", "invalid_response", "invalid_code"]
 
 
@@ -59,6 +60,7 @@ class NodeCodeBenchmarkReport:
     provider_name: str
     model_name: str
     prompt_version: str | None
+    validator_version: str
     tasks: tuple[NodeCodeBenchmarkTask, ...]
 
 
@@ -84,6 +86,7 @@ def run_node_code_benchmark(
         provider_name=provider_name,
         model_name=model_name,
         prompt_version=prompt_version,
+        validator_version=NODE_CODE_VALIDATOR_VERSION,
         tasks=results,
     )
 
