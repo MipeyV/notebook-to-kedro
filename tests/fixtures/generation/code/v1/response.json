@@ -1,0 +1,8 @@
+{
+  "schema_version": "1.0",
+  "request_id": "code-prepare",
+  "task_id": "task-0005",
+  "function_code": "def prepare_features(df, prepare_features_drop_columns):\n    X = df.drop(columns=prepare_features_drop_columns)\n    y = df[\"target\"]\n    return X, y\n",
+  "imports": [],
+  "review_notes": ["Behavioral equivalence still requires execution tests."]
+}

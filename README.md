@@ -270,6 +270,12 @@ The deterministic V1 pipeline is operational for the supported notebook subset. 
 
 Development is now moving from the deterministic foundation toward V2 hybrid semantic planning and broader notebook coverage. The deterministic path will remain available as the default and as the fallback for every future provider integration.
 
+The first [node code generation contract](docs/node-code-contract.md) is available as an offline
+Python API: versioned task requests, strict JSON responses, a provider protocol, a fake provider,
+and static validation of function signatures, imports, global references, and returns. Accepted
+proposals are not yet executed or written into generated projects; behavioral equivalence and
+the Ollama code-generation adapter are subsequent steps.
+
 The initial deterministic analysis contract is documented in [docs/mvp-contract.md](docs/mvp-contract.md), and its interchange model is defined in [docs/notebook-facts-schema.md](docs/notebook-facts-schema.md).
 
 The first reference fixture runs a deterministic Iris classification workflow. It provides a known-good baseline whose predictions and accuracy can later be compared with the generated Kedro pipeline.
