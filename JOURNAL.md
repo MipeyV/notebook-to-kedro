@@ -40,6 +40,37 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-09-28 - Approved behavioral references execute in isolated workers
+
+### Completed
+
+- Added execution result schema `1.0` for typed outputs, raised exceptions, bounded captures,
+  duration and explicit setup, timeout, process and serialization failures.
+- Added a fresh-interpreter worker for approved reference functions with `-I`, static revalidation,
+  temporary working directories, filtered environments and bounded request/result transport.
+- Added configurable deadlines, new process groups and process-tree termination on timeout.
+- Executed all five reviewed behavioral scenarios across the independent node-code corpus,
+  including the expected missing-column exception.
+
+### Decisions
+
+- Execute only source-controlled, human-approved references in this milestone; model proposals
+  remain non-executable until their isolation policy is explicit.
+- Treat process separation as fault containment, not an OS sandbox: filesystem and network access,
+  plus portable CPU and memory limits, remain unresolved.
+- Reuse the tagged behavioral values for subprocess transport and continue to reject pickle,
+  arbitrary objects and non-finite runtime outputs.
+
+### Open questions
+
+- Choose the isolation boundary required before executing model-proposed functions.
+- Decide whether non-finite arrays/tables and richer data types require a behavioral schema update.
+
+### Next step
+
+- Implement deterministic exact, numeric, array and table comparators for approved reference
+  results before enabling execution of any model proposal.
+
 ## 2026-09-27 - Behavioral comparison evidence contract defined
 
 ### Completed

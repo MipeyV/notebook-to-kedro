@@ -29,7 +29,11 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   detected-error counts and explicit false-rejection counts.
 - Versioned behavioral-comparison contracts with five reviewed scenarios, immutable scalar/JSON,
   array and table values, expected exceptions, explicit comparator policies, strict JSON parsing
-  and validation against independent node interfaces. No code execution is introduced.
+  and validation against independent node interfaces.
+- Isolated execution of approved behavioral references with static revalidation, temporary working
+  directories, filtered environments, timeouts, process-group termination, bounded JSON and text
+  output, typed execution reports, and explicit failure categories. Model proposals remain
+  non-executable.
 
 ### Planned
 

@@ -275,13 +275,13 @@ def behavioral_case_to_dict(case: BehavioralCase) -> dict[str, object]:
         "node_code_case_id": case.node_code_case_id,
         "review_status": case.review_status,
         "inputs": [
-            {"argument_name": item.argument_name, "value": _value_to_dict(item.value)}
+            {"argument_name": item.argument_name, "value": behavior_value_to_dict(item.value)}
             for item in case.inputs
         ],
         "expected_outputs": [
             {
                 "output_name": item.output_name,
-                "value": _value_to_dict(item.value),
+                "value": behavior_value_to_dict(item.value),
                 "comparison": _comparison_to_dict(item.comparison),
             }
             for item in case.expected_outputs
@@ -374,15 +374,21 @@ def load_behavioral_corpus(directory: str | Path) -> tuple[BehavioralCase, ...]:
     return cases
 
 
-def _value_to_dict(value: BehaviorValue) -> dict[str, object]:
+def behavior_value_to_dict(value: BehaviorValue) -> dict[str, object]:
+    """Return one behavior value as a canonical JSON-compatible dictionary."""
     if isinstance(value, ScalarBehaviorValue):
         return {"kind": value.kind, "value": value.value}
     if isinstance(value, ListBehaviorValue):
-        return {"kind": value.kind, "items": [_value_to_dict(item) for item in value.items]}
+        return {
+            "kind": value.kind,
+            "items": [behavior_value_to_dict(item) for item in value.items],
+        }
     if isinstance(value, ObjectBehaviorValue):
         return {
             "kind": value.kind,
-            "entries": [{"key": key, "value": _value_to_dict(item)} for key, item in value.entries],
+            "entries": [
+                {"key": key, "value": behavior_value_to_dict(item)} for key, item in value.entries
+            ],
         }
     if isinstance(value, ArrayBehaviorValue):
         return {
@@ -400,7 +406,8 @@ def _value_to_dict(value: BehaviorValue) -> dict[str, object]:
     }
 
 
-def _value(payload: object) -> BehaviorValue:
+def behavior_value_from_dict(payload: object) -> BehaviorValue:
+    """Strictly reconstruct one behavior value from decoded JSON."""
     data = _object(payload, "behavior value")
     kind = _string(data.get("kind"), "behavior value kind")
     if kind == "scalar":
@@ -410,14 +417,21 @@ def _value(payload: object) -> BehaviorValue:
         return ScalarBehaviorValue(cast("JsonPrimitive", value))
     if kind == "list":
         _exact_keys(data, {"kind", "items"}, "list behavior value")
-        return ListBehaviorValue(tuple(_value(item) for item in _array(data["items"], "items")))
+        return ListBehaviorValue(
+            tuple(behavior_value_from_dict(item) for item in _array(data["items"], "items"))
+        )
     if kind == "object":
         _exact_keys(data, {"kind", "entries"}, "object behavior value")
         entries = []
         for payload_entry in _array(data["entries"], "entries"):
             entry = _object(payload_entry, "object entry")
             _exact_keys(entry, {"key", "value"}, "object entry")
-            entries.append((_string(entry["key"], "object key"), _value(entry["value"])))
+            entries.append(
+                (
+                    _string(entry["key"], "object key"),
+                    behavior_value_from_dict(entry["value"]),
+                )
+            )
         return ObjectBehaviorValue(tuple(entries))
     if kind == "array":
         _exact_keys(data, {"kind", "dtype", "shape", "values"}, "array behavior value")
@@ -486,7 +500,10 @@ def _comparison(payload: object) -> ComparisonSpec:
 def _input(payload: object) -> BehaviorInput:
     data = _object(payload, "behavior input")
     _exact_keys(data, {"argument_name", "value"}, "behavior input")
-    return BehaviorInput(_string(data["argument_name"], "argument_name"), _value(data["value"]))
+    return BehaviorInput(
+        _string(data["argument_name"], "argument_name"),
+        behavior_value_from_dict(data["value"]),
+    )
 
 
 def _output(payload: object) -> ExpectedBehaviorOutput:
@@ -494,7 +511,7 @@ def _output(payload: object) -> ExpectedBehaviorOutput:
     _exact_keys(data, {"output_name", "value", "comparison"}, "expected behavior output")
     return ExpectedBehaviorOutput(
         _string(data["output_name"], "output_name"),
-        _value(data["value"]),
+        behavior_value_from_dict(data["value"]),
         _comparison(data["comparison"]),
     )
 
