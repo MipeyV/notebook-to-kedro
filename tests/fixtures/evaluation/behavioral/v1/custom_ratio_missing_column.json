@@ -1,0 +1,23 @@
+{
+  "schema_version": "1.0",
+  "case_id": "custom-ratio-missing-column",
+  "node_code_case_id": "custom-ratio",
+  "review_status": "approved",
+  "inputs": [
+    {
+      "argument_name": "sales",
+      "value": {
+        "kind": "table",
+        "columns": ["margin"],
+        "dtypes": ["int64"],
+        "rows": [[20], [15]],
+        "index": [0, 1]
+      }
+    }
+  ],
+  "expected_outputs": [],
+  "expected_exception": {
+    "type_name": "KeyError",
+    "message_contains": "revenue"
+  }
+}

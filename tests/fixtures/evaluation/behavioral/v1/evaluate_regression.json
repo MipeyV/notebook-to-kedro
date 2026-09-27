@@ -1,0 +1,45 @@
+{
+  "schema_version": "1.0",
+  "case_id": "evaluate-regression-standard",
+  "node_code_case_id": "evaluate-regression",
+  "review_status": "approved",
+  "inputs": [
+    {
+      "argument_name": "y_true",
+      "value": {
+        "kind": "array",
+        "dtype": "float64",
+        "shape": [3],
+        "values": [2.0, 4.0, 6.0]
+      }
+    },
+    {
+      "argument_name": "predictions",
+      "value": {
+        "kind": "array",
+        "dtype": "float64",
+        "shape": [3],
+        "values": [2.5, 3.5, 5.0]
+      }
+    }
+  ],
+  "expected_outputs": [
+    {
+      "output_name": "mae",
+      "value": {
+        "kind": "scalar",
+        "value": 0.6666666666666666
+      },
+      "comparison": {
+        "kind": "numeric",
+        "absolute_tolerance": 1e-12,
+        "relative_tolerance": 1e-09,
+        "equal_nan": false,
+        "check_dtype": null,
+        "check_order": null,
+        "check_index": null
+      }
+    }
+  ],
+  "expected_exception": null
+}

@@ -288,6 +288,11 @@ static validation, AST fidelity, detected errors and false rejections without us
 as ground truth or calling a model. This remains a small synthetic validator corpus, not an accuracy
 claim or behavioral-equivalence result.
 
+A versioned [behavioral comparison contract](docs/behavioral-comparison-contract.md) now links five
+reviewed runtime scenarios to that independent corpus. It represents finite scalars, nested JSON,
+typed arrays and tables, plus exact, numeric, array and table comparison policies or expected
+exceptions. The contract is data only: proposed code is still not executed.
+
 An opt-in provider mode supplies [exact parameter substitutions](docs/node-parameter-evidence.md):
 original expressions, literal types, source ranges and corresponding function arguments derived
 from V1 rules. Ambiguous mappings fail before model I/O in this experimental mode. The static validator
@@ -454,6 +459,8 @@ Progress and architectural decisions are recorded chronologically in [JOURNAL.md
    An initial independent four-task node-code corpus now establishes the schema and review process;
    broader real-world coverage is still required.
 2. [ ] Measure plan validity, generation success, behavioral equivalence, review corrections, latency, and cost.
+   Behavioral input/output and comparator contracts are defined; isolated execution and comparison
+   reporting remain outstanding.
 3. [ ] Compare deterministic and hybrid results on the same corpus.
 4. [ ] Expand deterministic pandas support for `rename`, `replace`, joins, and aggregations.
 5. [ ] Add richer catalog formats and schema-aware diagnostics.
