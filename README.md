@@ -282,6 +282,12 @@ V1 function AST matches, missing parameter reads, failures and latency over 26 t
 reviewed notebooks. Accepted proposals are not executed or written into generated projects;
 behavioral equivalence remains a subsequent step, distinct from static benchmark scores.
 
+An [independent node-code corpus](docs/node-code-evaluation-corpus.md) adds four held-out notebook
+tasks with manually reviewed references and nine known-invalid proposals. It measures compilation,
+static validation, AST fidelity, detected errors and false rejections without using the V1 generator
+as ground truth or calling a model. This remains a small synthetic validator corpus, not an accuracy
+claim or behavioral-equivalence result.
+
 An opt-in provider mode supplies [exact parameter substitutions](docs/node-parameter-evidence.md):
 original expressions, literal types, source ranges and corresponding function arguments derived
 from V1 rules. Ambiguous mappings fail before model I/O in this experimental mode. The static validator
@@ -445,6 +451,8 @@ Progress and architectural decisions are recorded chronologically in [JOURNAL.md
 ### Phase 4: evaluation and broader coverage
 
 1. [ ] Build a versioned corpus of representative notebooks beyond controlled fixtures.
+   An initial independent four-task node-code corpus now establishes the schema and review process;
+   broader real-world coverage is still required.
 2. [ ] Measure plan validity, generation success, behavioral equivalence, review corrections, latency, and cost.
 3. [ ] Compare deterministic and hybrid results on the same corpus.
 4. [ ] Expand deterministic pandas support for `rename`, `replace`, joins, and aggregations.

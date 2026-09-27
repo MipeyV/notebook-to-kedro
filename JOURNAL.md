@@ -40,6 +40,38 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-09-27 - Independent node-code evaluation corpus established
+
+### Completed
+
+- Added a strict versioned schema and deterministic loader for reviewed node-code cases.
+- Added four held-out task notebooks covering custom feature engineering, regression evaluation,
+  mixed-type imputation and a two-parameter holdout split.
+- Authored four reference functions independently of the planner and V1 generator, plus nine
+  reviewed invalid proposals covering omissions, changed operations, malformed syntax, missing or
+  local imports, ignored parameters, nested mappings and swapped arguments.
+- Added SHA-256 and exact-code-cell provenance checks for every case.
+- Added separate compilation, static validation, reference AST, expected-diagnostic, detected-error
+  and false-rejection metrics. All four references pass and all nine invalid examples are detected.
+
+### Decisions
+
+- Keep this corpus provider-free: it evaluates stored reviewed responses and makes no Ollama call.
+- Require explicit approval and at least one invalid example per case.
+- Keep source provenance independent from planning and generation so implementation output cannot
+  silently become its own ground truth.
+- Treat the initial corpus as a validator regression baseline, not representative model accuracy.
+
+### Open questions
+
+- Select rights-cleared real-world notebooks to expand beyond small synthetic tasks.
+- Define serializable runtime inputs and output comparators for isolated behavioral evaluation.
+
+### Next step
+
+- Specify and implement an isolated behavioral-comparison contract before executing any proposed
+  node code or integrating it into generated projects.
+
 ## 2026-09-27 - Source fidelity checked for all proposed node bodies
 
 ### Completed

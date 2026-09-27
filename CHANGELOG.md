@@ -24,6 +24,9 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   CLI workflows, with validated provider settings and deterministic defaults.
 - Versioned comparative planning benchmark reports with corpus source identities, structural
   metrics, plan-validity and fallback rates, planner latency, and a deterministic CLI export.
+- Independent node-code corpus schema and loader with four held-out notebook tasks, manually
+  reviewed references, nine known-invalid proposals, source hashes, static dimension metrics,
+  detected-error counts and explicit false-rejection counts.
 
 ### Planned
 
