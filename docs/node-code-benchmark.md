@@ -288,8 +288,12 @@ about held-out notebooks, isolated execution or the safety of source code.
 
 ## Next Validation Stage
 
-Use independent reviewed references and held-out notebooks to measure useful coverage rather than
-only tightening acceptance on the existing corpus. Import placement remains a recorded generation
-failure. Isolated behavioral comparisons are required before claiming runtime equivalence or
-allowing model proposals to enter generated projects; equivalent refactorings need separate rules
-and evidence before the strict AST requirement can be relaxed.
+The first [independent node-code corpus](node-code-evaluation-corpus.md) now provides four held-out
+task references and nine reviewed invalid proposals without using the V1 generator as ground truth.
+It is a validator corpus, not a new live-model benchmark, and is still too small and synthetic for
+accuracy claims. Import placement remains a recorded generation failure.
+
+The next stage is isolated behavioral comparison with explicit inputs and outputs. Broader,
+rights-cleared notebooks are also required before estimating useful coverage. Equivalent
+refactorings need behavioral evidence and separate acceptance rules before the strict AST
+requirement can be relaxed or model proposals can enter generated projects.
