@@ -5,7 +5,11 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from notebook_to_kedro.exceptions import NodeCodeProviderError, SemanticProviderError
-from notebook_to_kedro.generation.code.prompting import render_node_code_prompt
+from notebook_to_kedro.generation.code.prompting import (
+    NODE_CODE_PARAMETER_PROMPT_VERSION,
+    NODE_CODE_PROMPT_VERSION,
+    render_node_code_prompt,
+)
 from notebook_to_kedro.generation.code.schemas import NODE_CODE_RESPONSE_JSON_SCHEMA
 from notebook_to_kedro.semantic.ollama import (
     DEFAULT_OLLAMA_BASE_URL,
@@ -32,11 +36,13 @@ class OllamaNodeCodeProvider:
         base_url: str = DEFAULT_OLLAMA_BASE_URL,
         timeout_seconds: float = DEFAULT_OLLAMA_TIMEOUT_SECONDS,
         max_response_bytes: int = DEFAULT_OLLAMA_MAX_RESPONSE_BYTES,
+        include_parameter_evidence: bool = False,
         _transport: OllamaHttpTransport | None = None,
     ) -> None:
         """Configure one explicit local model with no automatic pull or fallback."""
         if not model_name.strip():
             raise ValueError("model_name must not be empty")
+        self._include_parameter_evidence = include_parameter_evidence
         self._client = OllamaSemanticPlanningProvider(
             model_name=model_name,
             base_url=base_url,
@@ -51,11 +57,22 @@ class OllamaNodeCodeProvider:
         """Return the configured model for application-owned provenance."""
         return self._client.model_name
 
+    @property
+    def prompt_version(self) -> str:
+        """Identify the selected prompt for benchmark provenance."""
+        return (
+            NODE_CODE_PARAMETER_PROMPT_VERSION
+            if self._include_parameter_evidence
+            else NODE_CODE_PROMPT_VERSION
+        )
+
     def complete(self, request: NodeCodeRequest) -> str:
         """Return raw assistant JSON; use request_node_code for static validation."""
         provider_request = SemanticProviderRequest(
             request_id=request.request_id,
-            prompt=render_node_code_prompt(request),
+            prompt=render_node_code_prompt(
+                request, include_parameter_evidence=self._include_parameter_evidence
+            ),
             response_schema=NODE_CODE_RESPONSE_JSON_SCHEMA,
         )
         try:
