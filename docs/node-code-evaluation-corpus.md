@@ -73,8 +73,9 @@ assert evaluation.missed_invalid_count == 0
 These are validator regression results over stored reviewed examples, not model scores. The
 reference functions and invalid proposals are compiled but never imported or executed. The corpus
 does not establish data-dependent behavior, package availability, side-effect safety or semantic
-equivalence. Those require a separate isolated-execution contract with explicit inputs, expected
-outputs, resource limits and serialization rules.
+equivalence. A separate [behavioral comparison contract](behavioral-comparison-contract.md) now
+defines explicit inputs, expected outputs or exceptions and comparator policies. Execution,
+resource limits and result comparison remain the next milestone.
 
 ## Extension Rules
 

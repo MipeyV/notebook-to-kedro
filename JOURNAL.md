@@ -40,6 +40,37 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-09-27 - Behavioral comparison evidence contract defined
+
+### Completed
+
+- Added schema `1.0` for reviewed runtime inputs, outputs, expected exceptions and comparator rules.
+- Added immutable tagged values for finite scalars, nested lists/objects, typed arrays and tables.
+- Added exact, numeric, array and table comparison specifications with explicit tolerance, dtype,
+  ordering and index policies.
+- Added five scenarios linked to the independent node-code corpus: four successful workflows and
+  one expected missing-column exception.
+- Added strict deterministic serialization, duplicate-key and non-finite-value rejection, corpus
+  loading, and interface validation against node arguments and outputs.
+
+### Decisions
+
+- Do not use pickle or accept arbitrary Python objects as behavioral evidence.
+- Keep comparison intent separate from execution; this milestone imports and runs no proposed code.
+- Require array and table outputs to select dedicated comparators so shape, dtype and ordering
+  policies stay explicit during review.
+- Permit multiple behavioral scenarios for one node-code case, including expected exceptions.
+
+### Open questions
+
+- Define process isolation and resource controls that work consistently on supported platforms.
+- Decide how future schemas represent fitted models, sparse data, timestamps and extension dtypes.
+
+### Next step
+
+- Implement a subprocess worker for reviewed reference functions with timeout, temporary-directory,
+  environment and output-size controls before comparing any model proposal.
+
 ## 2026-09-27 - Independent node-code evaluation corpus established
 
 ### Completed

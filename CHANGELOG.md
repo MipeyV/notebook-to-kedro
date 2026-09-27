@@ -27,6 +27,9 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Independent node-code corpus schema and loader with four held-out notebook tasks, manually
   reviewed references, nine known-invalid proposals, source hashes, static dimension metrics,
   detected-error counts and explicit false-rejection counts.
+- Versioned behavioral-comparison contracts with five reviewed scenarios, immutable scalar/JSON,
+  array and table values, expected exceptions, explicit comparator policies, strict JSON parsing
+  and validation against independent node interfaces. No code execution is introduced.
 
 ### Planned
 
