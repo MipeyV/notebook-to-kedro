@@ -619,7 +619,7 @@ def test_start_worker_posix_path(monkeypatch: pytest.MonkeyPatch, tmp_path: Path
         received.update(kwargs)
         return cast("subprocess.Popen[bytes]", _FakeProcess())
 
-    monkeypatch.setattr(os, "name", "posix")
+    monkeypatch.setattr(sys, "platform", "linux")
     monkeypatch.setattr(subprocess, "Popen", fake_popen)
 
     execution._start_worker(("python",), tmp_path)
@@ -627,10 +627,26 @@ def test_start_worker_posix_path(monkeypatch: pytest.MonkeyPatch, tmp_path: Path
     assert received["start_new_session"] is True
 
 
+def test_start_worker_windows_path(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    received: dict[str, object] = {}
+
+    def fake_popen(*_args: object, **kwargs: object) -> subprocess.Popen[bytes]:
+        received.update(kwargs)
+        return cast("subprocess.Popen[bytes]", _FakeProcess())
+
+    monkeypatch.setattr(sys, "platform", "win32")
+    monkeypatch.setattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 512, raising=False)
+    monkeypatch.setattr(subprocess, "Popen", fake_popen)
+
+    execution._start_worker(("python",), tmp_path)
+
+    assert received["creationflags"] == 512
+
+
 def test_terminate_process_tree_posix_paths(monkeypatch: pytest.MonkeyPatch) -> None:
     process = _FakeProcess()
     calls: list[int] = []
-    monkeypatch.setattr(os, "name", "posix")
+    monkeypatch.setattr(sys, "platform", "linux")
     monkeypatch.setattr(
         os,
         "killpg",
@@ -647,7 +663,7 @@ def test_terminate_process_tree_ignores_missing_posix_group(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     process = _FakeProcess()
-    monkeypatch.setattr(os, "name", "posix")
+    monkeypatch.setattr(sys, "platform", "linux")
 
     def missing_group(_pid: int, _signal: object) -> None:
         raise ProcessLookupError
@@ -665,7 +681,7 @@ def test_terminate_process_tree_windows_path(monkeypatch: pytest.MonkeyPatch) ->
         commands.append(command)
         return subprocess.CompletedProcess([], 0)
 
-    monkeypatch.setattr(os, "name", "nt")
+    monkeypatch.setattr(sys, "platform", "win32")
     monkeypatch.setattr(subprocess, "run", fake_run)
 
     execution._terminate_process_tree(cast("subprocess.Popen[bytes]", process))
@@ -688,7 +704,7 @@ def test_terminate_process_tree_forces_direct_process_after_second_timeout(
             return 0
 
     process = SecondTimeoutProcess()
-    monkeypatch.setattr(os, "name", "posix")
+    monkeypatch.setattr(sys, "platform", "linux")
     monkeypatch.setattr(os, "killpg", lambda _pid, _sig: None, raising=False)
 
     execution._terminate_process_tree(cast("subprocess.Popen[bytes]", process))

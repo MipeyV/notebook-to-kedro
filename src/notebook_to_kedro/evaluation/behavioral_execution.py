@@ -365,7 +365,8 @@ def _filtered_environment(directory: Path) -> dict[str, str]:
 
 def _start_worker(command: tuple[str, ...], directory: Path) -> subprocess.Popen[bytes]:
     environment = _filtered_environment(directory)
-    if os.name == "nt":
+    if _is_windows():
+        creation_flags = cast("int", vars(subprocess)["CREATE_NEW_PROCESS_GROUP"])
         return subprocess.Popen(
             command,
             cwd=directory,
@@ -373,7 +374,7 @@ def _start_worker(command: tuple[str, ...], directory: Path) -> subprocess.Popen
             stdin=subprocess.DEVNULL,
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
-            creationflags=subprocess.CREATE_NEW_PROCESS_GROUP,
+            creationflags=creation_flags,
         )
     return subprocess.Popen(
         command,
@@ -387,7 +388,7 @@ def _start_worker(command: tuple[str, ...], directory: Path) -> subprocess.Popen
 
 
 def _terminate_process_tree(process: subprocess.Popen[bytes]) -> None:
-    if os.name == "nt":
+    if _is_windows():
         subprocess.run(
             ("taskkill", "/PID", str(process.pid), "/T", "/F"),
             check=False,
@@ -397,16 +398,17 @@ def _terminate_process_tree(process: subprocess.Popen[bytes]) -> None:
         )
     else:
         with suppress(ProcessLookupError):
-            kill_process_group = cast(
-                "Callable[[int, object], None]",
-                os.killpg,  # type: ignore[attr-defined]
-            )
+            kill_process_group = cast("Callable[[int, object], None]", vars(os)["killpg"])
             kill_process_group(process.pid, _KILL_SIGNAL)
     try:
         process.wait(timeout=5)
     except subprocess.TimeoutExpired:
         process.kill()
         process.wait()
+
+
+def _is_windows() -> bool:
+    return sys.platform == "win32"
 
 
 def _execution_output(payload: object) -> BehavioralExecutionOutput:
