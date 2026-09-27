@@ -95,7 +95,7 @@ can be recomputed using the corresponding code revision.
 
 ## Static Enforcement
 
-`node-code-validation-v3` independently derives this evidence for every parameterized request,
+`node-code-validation-v4` independently derives this evidence for every parameterized request,
 regardless of provider or prompt mode. It applies replacements in reverse source order in memory,
 then compares the resulting AST against the entire proposed body, excluding the already validated
 terminal return. Comments, whitespace and equivalent quote styles are ignored; all other changes
@@ -107,8 +107,9 @@ the request satisfies the JSON schema. The opt-in prompt still fails before HTTP
 the default provider does not add a preflight and validation occurs after its response. These rules
 also apply to fake or third-party providers through `validate_node_code` / `request_node_code`.
 
-Tasks without parameters retain the previous rules, not whole-body fidelity checking. The existing
-assertion guard also remains conservative: a substitution inside an assertion-containing compound
+Since validator v4, tasks without parameters also undergo whole-body fidelity checking, directly
+against their original source AST. The existing assertion guard remains conservative:
+a substitution inside an assertion-containing compound
 statement is still rejected. Preserving AST operations does not validate configuration overrides,
 third-party library behavior or runtime outputs, and does not establish execution safety. Independent
 review and subsequent behavioral validation remain necessary before proposals enter a project.

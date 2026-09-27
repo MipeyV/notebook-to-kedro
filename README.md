@@ -274,8 +274,9 @@ The [node code generation API](docs/node-code-contract.md) provides versioned ta
 strict JSON responses, a fake provider for offline tests, and an opt-in local Ollama code provider
 with a versioned fidelity prompt. Function signatures, imports, global references, and returns
 are statically validated, with versioned guards against changed or missing assertion blocks and
-incorrect parameter substitutions. Parameterized bodies must preserve the source AST except for
-the exact planned substitutions; other refactorings are deliberately rejected in this initial scope.
+incorrect parameter substitutions. All node bodies, with or without parameters, must preserve the
+source AST except for the exact planned substitutions and the required terminal return. Deleted,
+added or rewritten instructions are rejected, even for potentially equivalent refactorings.
 A [node code benchmark](docs/node-code-benchmark.md) measures acceptance,
 V1 function AST matches, missing parameter reads, failures and latency over 26 tasks in four
 reviewed notebooks. Accepted proposals are not executed or written into generated projects;

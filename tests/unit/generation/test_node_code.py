@@ -403,7 +403,7 @@ def test_validator_accepts_imports_builtins_and_comprehension_scopes(
 ) -> None:
     code = f"def scale(values, scale_factor):\n    scaled = {expression}\n    return scaled"
     validate_node_code(
-        replace(node_request, allowed_imports=imports),
+        replace(node_request, allowed_imports=imports, raw_source=f"scaled = {expression}"),
         replace(response, imports=imports, function_code=code),
     )
 
@@ -431,11 +431,11 @@ def test_contract_accepts_existing_v1_generated_nodes(tmp_path: Path) -> None:
 @pytest.mark.parametrize(
     ("outputs", "code"),
     [
-        ((), "def scale(values, scale_factor):\n    return None"),
-        ((), "def scale(values, scale_factor):\n    return"),
+        ((), "def scale(values, scale_factor):\n    values\n    return None"),
+        ((), "def scale(values, scale_factor):\n    values\n    return"),
         (
             ("values", "scale_factor"),
-            "def scale(values, scale_factor):\n    return values, scale_factor",
+            "def scale(values, scale_factor):\n    values\n    return values, scale_factor",
         ),
     ],
 )
@@ -443,7 +443,8 @@ def test_validator_accepts_zero_or_multiple_outputs(
     node_request: NodeCodeRequest, response: NodeCodeResponse, outputs: tuple[str, ...], code: str
 ) -> None:
     validate_node_code(
-        replace(node_request, outputs=outputs), replace(response, function_code=code)
+        replace(node_request, raw_source="values", outputs=outputs),
+        replace(response, function_code=code),
     )
 
 
@@ -451,12 +452,82 @@ def test_validation_does_not_import_or_execute_code(
     node_request: NodeCodeRequest, response: NodeCodeResponse, tmp_path: Path
 ) -> None:
     target = tmp_path / "must-not-exist"
-    code = (
-        f"def scale(values, scale_factor):\n    open({str(target)!r}, 'w')\n"
-        "    scaled = values\n    return scaled"
-    )
+    body = f"open({str(target)!r}, 'w')\nscaled = values"
+    code = "def scale(values, scale_factor):\n" + indent(body, "    ") + "\n    return scaled"
     request_node_code(
-        node_request,
+        replace(node_request, raw_source=body),
         FakeNodeCodeProvider(response_json=replace(response, function_code=code).to_json()),
     )
+    assert not target.exists()
+
+
+@pytest.mark.parametrize(
+    ("original", "proposed"),
+    [
+        ("scaled = values\nscaled", "scaled = values"),
+        ("scaled = values", "scaled = values\nscaled"),
+        ("values\nscaled = values", "scaled = values\nvalues"),
+        ("values\nscaled = values", "values\nvalues\nscaled = values"),
+        ("scaled = values * 2", "scaled = values * 3"),
+        ("scaled = values * 2", "scaled = values + 2"),
+        ("scaled = values * 2", "scaled = 2 * values"),
+        ("scaled = values", "'new docstring'\nscaled = values"),
+        ("'original docstring'\nscaled = values", "scaled = values"),
+        ("scaled = values\nprint(scaled)", "scaled = values"),
+        ("scaled = values", "if False:\n    scaled = values"),
+        ("scaled = [x * 2 for x in values]", "scaled = [x + 2 for x in values]"),
+        (
+            "scaled = values\nfor value in values:\n    scaled += value",
+            "scaled = values\nfor value in values:\n    scaled -= value",
+        ),
+        ("scaled = values\nassert scaled > 0", "scaled = 1\nassert scaled > 0"),
+    ],
+)
+def test_parameter_free_body_rejects_unplanned_changes(
+    node_request: NodeCodeRequest, response: NodeCodeResponse, original: str, proposed: str
+) -> None:
+    assert not node_request.parameter_names
+    code = "def scale(values, scale_factor):\n" + indent(proposed, "    ") + "\n    return scaled"
+    with pytest.raises(ValueError, match="function body must preserve source AST"):
+        request_node_code(
+            replace(node_request, raw_source=original),
+            FakeNodeCodeProvider(response_json=replace(response, function_code=code).to_json()),
+        )
+
+
+@pytest.mark.parametrize(
+    ("original", "proposed"),
+    [
+        ("scaled = values * 2\nscaled", "# same operations\nscaled=(values * 2); scaled"),
+        (
+            'note = "caf\u00e9"\r\nscaled = values["cibl\u00e9"]',
+            "note = 'caf\u00e9'\nscaled = values['cibl\u00e9']  # same key",
+        ),
+        (
+            "scaled = values\nif values:\n    scaled = sum(values)",
+            "scaled = (values)\nif (values):\n    scaled = sum(\n        values,\n    )",
+        ),
+    ],
+)
+def test_parameter_free_body_accepts_same_ast_with_different_formatting(
+    node_request: NodeCodeRequest, response: NodeCodeResponse, original: str, proposed: str
+) -> None:
+    code = "def scale(values, scale_factor):\n" + indent(proposed, "    ") + "\n    return scaled"
+    validate_node_code(
+        replace(node_request, raw_source=original), replace(response, function_code=code)
+    )
+
+
+def test_rejected_parameter_free_proposal_is_not_executed(
+    node_request: NodeCodeRequest, response: NodeCodeResponse, tmp_path: Path
+) -> None:
+    target = tmp_path / "must-not-exist"
+    code = response.function_code.replace(
+        "    return scaled", f"    open({str(target)!r}, 'w').close()\n    return scaled"
+    )
+    with pytest.raises(ValueError, match="function body must preserve source AST"):
+        request_node_code(
+            node_request,
+            FakeNodeCodeProvider(response_json=replace(response, function_code=code).to_json()),
+        )
     assert not target.exists()

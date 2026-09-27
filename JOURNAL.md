@@ -40,6 +40,38 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-09-27 - Source fidelity checked for all proposed node bodies
+
+### Completed
+
+- Extended the existing source-derived AST check to parameter-free tasks in validator v4.
+- Added regressions for deleted, added, reordered and modified instructions, including standalone
+  expressions, nested operations, docstrings and assignments preceding unchanged assertions.
+- Kept formatting and comments flexible and verified that validation does not execute accepted
+  source effects or rejected proposal effects.
+- Replayed the same 104 stored model responses without calling Ollama. Six proposals are newly
+  rejected for omitting `accuracy`; no previously matching function is rejected. The default
+  prompt now has 19 accepted and V1-matching functions out of 26. All 26 V1 references still pass.
+
+### Decisions
+
+- Reuse one full-body comparison rather than adding a second rule set for parameter-free tasks.
+- Preserve parameter-substitution evidence and the stricter assertion-block guard unchanged.
+- Keep prompts, JSON schemas and deterministic project generation unchanged. Model proposals
+  remain non-executed review artifacts, not an alternative project-writing path.
+- Treat the convergence of acceptance and AST-match counts as a consequence of the strict
+  validator, not proof of runtime correctness or improved model accuracy.
+
+### Open questions
+
+- Strict AST fidelity also rejects equivalent rewrites and cannot justify arbitrary refactorings.
+- Independent references and held-out notebooks are needed beyond this small synthetic corpus.
+
+### Next step
+
+- Build independent reviewed evaluation examples and specify isolated behavioral checks before
+  widening the accepted transformations or integrating model proposals into project generation.
+
 ## 2026-09-27 - Exact parameter substitutions enforced in node proposals
 
 ### Completed

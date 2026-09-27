@@ -251,9 +251,45 @@ Local reports are `generated/node-code-qwen3-8b-v{1,2,3,4}-validator-v3.json`, i
 Their provider identity is `recorded-response-replay`; the model and prompt identify the saved
 responses. Durations measure replay and validation only, not inference latency.
 
+## Full-Body Fidelity Replay
+
+On 2026-09-27, `node-code-validation-v4` extended the same body comparison to tasks without
+parameters. This change was developed on `feature/node-body-fidelity`, based on `de09068`.
+The request/response and report schemas and all prompts remain unchanged. The assertion guard
+and parameter evidence rules are retained, with no new notebook patterns or automatic repairs.
+
+The same 104 raw responses were replayed without contacting Ollama. Requests, notebook hashes,
+raw responses and reference functions were verified unchanged against the original reports.
+All previously rejected proposals remain rejected and all previously matching functions remain
+accepted. All 26 deterministic reference functions also still pass validation.
+
+| Recorded prompt | Accepted with validator v3 | Accepted with validator v4 | V1 AST matches with v4 | Newly rejected |
+| --- | --- | --- | --- | --- |
+| v1 (default) | 21/26 | 19/26 | 19/26 | 2 |
+| v2 (rejected experiment) | 20/26 | 18/26 | 18/26 | 2 |
+| v3 (rejected experiment) | 19/26 | 19/26 | 19/26 | 0 |
+| v4 (opt-in evidence) | 20/26 | 18/26 | 18/26 | 2 |
+
+The six newly rejected proposals omit the standalone `accuracy` expression in the file-backed
+and pandas-preprocessing evaluation nodes, across prompts v1, v2 and v4. This is an unplanned
+source change, not evidence that their numerical result would differ. Each replay still has ten
+accepted parameterized tasks, all with zero missing reads. No proposed function was executed.
+
+All accepted proposals now match the V1 function AST on this corpus. This is expected under the
+stricter body contract, not independent evidence of behavioral accuracy or an improvement in the
+model. The match rate retains all 26 requests as its denominator, rather than reporting 100%
+accuracy from only the accepted subset. Prompt v1 remains the default at 19/26 accepted and
+matching (73.1%). Import failures and earlier assertion/parameter failures remain visible.
+
+Local reports are `generated/node-code-qwen3-8b-v{1,2,3,4}-validator-v4.json`, ignored by Git.
+Provider identity is `recorded-response-replay`, with original model and prompt metadata.
+Durations measure replay and static validation, not inference latency. This run adds no evidence
+about held-out notebooks, isolated execution or the safety of source code.
+
 ## Next Validation Stage
 
-Use the recorded mismatches to prioritize source-statement preservation and import placement,
-while keeping strict rejection distinct from model improvement. Subsequent work must introduce
-independent reviewed code references, held-out notebooks, and isolated behavioral comparisons before claiming fidelity
-or allowing model proposals to enter generated projects.
+Use independent reviewed references and held-out notebooks to measure useful coverage rather than
+only tightening acceptance on the existing corpus. Import placement remains a recorded generation
+failure. Isolated behavioral comparisons are required before claiming runtime equivalence or
+allowing model proposals to enter generated projects; equivalent refactorings need separate rules
+and evidence before the strict AST requirement can be relaxed.
