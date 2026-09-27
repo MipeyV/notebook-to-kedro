@@ -30,13 +30,11 @@ def node_request() -> NodeCodeRequest:
         request_id="code-1",
         task_id="task-1",
         node_name="scale",
-        raw_source="scaled = values * 2",
+        raw_source="scaled = values * scale_factor",
         source_cell_ids=("cell-1",),
         statement_ids=("cell-1-stmt-0",),
-        inputs=("values",),
+        inputs=("values", "scale_factor"),
         outputs=("scaled",),
-        parameter_names=("scale.factor",),
-        parameter_arguments=("scale_factor",),
         allowed_imports=("import math", "from math import sqrt as root"),
     )
 
@@ -80,7 +78,7 @@ def test_contract_round_trips_and_response_schema(
         ("node_name", "_private", "public"),
         ("inputs", ("not-valid",), "identifiers"),
         ("parameter_arguments", ("values",), "function arguments"),
-        ("parameter_arguments", (), "matching lengths"),
+        ("parameter_names", ("scale.factor",), "matching lengths"),
     ],
 )
 def test_request_rejects_invalid_contract(

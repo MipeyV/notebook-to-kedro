@@ -70,18 +70,29 @@ propagate. No automatic retry or fallback is introduced at this boundary.
 7. Successful compilation without execution, and no unknown global references according to
    Python's symbol table, including comprehension scopes. Declared imports and Python builtins
    are available; notebook globals must be passed as inputs.
+8. For tasks with parameters, derive unambiguous [substitution evidence](node-parameter-evidence.md),
+   replace each complete source expression with its exact request argument, and compare the
+   resulting body AST with the proposed body excluding its validated terminal return. All other
+   statements must remain unchanged. Missing, ambiguous or unsupported mappings fail validation.
 
 These checks establish structural compatibility only. They do not prove that every local variable
-is assigned on every execution path, that parameters are used correctly, that computations match
-the original notebook, or that imported packages are installed. A structurally valid function
+is assigned on every execution path, that runtime parameter values have the correct type, that
+computations match the original notebook, or that imported packages are installed. A valid function
 can still perform I/O or produce incorrect results. This validator is not an execution sandbox.
 Behavioral equivalence, isolated execution and review are subsequent stages before generated
 proposals can be included in a project.
 
-`NODE_CODE_VALIDATOR_VERSION` identifies these rules (`node-code-validation-v2`). Assertion
-comparison ignores comments and formatting but deliberately rejects any rewrite of an enclosing
+`NODE_CODE_VALIDATOR_VERSION` identifies these rules (`node-code-validation-v3`). Parameterized
+bodies allow only the planned substitutions, ignoring comments and formatting. This deliberately
+rejects other rewrites, even potentially equivalent refactorings, docstrings and reordered keywords.
+It catches ignored arguments, extra list wrapping, argument swaps, new argument overwrites and
+changes to non-target expressions. Tasks without parameters retain the previous validation rules;
+their entire body is not compared against source. The new check applies to every provider,
+independently of whether its prompt includes parameter evidence, and does not repair proposals.
+
+Assertion comparison ignores comments and formatting but deliberately rejects any rewrite of an enclosing
 statement containing an assertion, including potentially valid parameter substitutions in that
-block. Until explicit transformation evidence is available, such cases require review. The check
+block. This conservative restriction remains in place; such cases require review. The assertion check
 does not prove that earlier assignments preserve the values being asserted or that unrelated
 statements are faithful. Assertions being present does not make the proposal safe to execute.
 
@@ -160,8 +171,10 @@ raises `ValueError`; neither failure silently falls back to accepted code.
 The serialized request gives parameter names and function arguments; `build_parameter_evidence`
 derives exact expression ranges, literal types and argument mappings for the provider. Ambiguous
 or unsupported mappings are rejected before HTTP when the evidence option is enabled.
-Parameter fidelity is still not established
-by the static validator. Tests use mocked HTTP responses and establish adapter behavior, not real
-model accuracy. The [code benchmark](node-code-benchmark.md) records corpus-wide static acceptance,
+The validator independently enforces the exact substitutions and preservation of parameterized
+bodies after any provider response. Unsupported manually constructed parameter requests may still
+satisfy the JSON schema but now fail code validation. Tests use mocked HTTP responses and establish
+adapter behavior, not real model accuracy. The [code benchmark](node-code-benchmark.md) records
+corpus-wide static acceptance,
 V1 AST matches and missing parameter reads. Behavioral equivalence and isolated execution remain
 separate milestones before proposals can be included in generated projects.

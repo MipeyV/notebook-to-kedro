@@ -7,10 +7,12 @@ import builtins
 import symtable
 from typing import TYPE_CHECKING
 
+from notebook_to_kedro.generation.code.evidence import build_parameter_evidence
+
 if TYPE_CHECKING:
     from notebook_to_kedro.generation.code.contracts import NodeCodeRequest, NodeCodeResponse
 
-NODE_CODE_VALIDATOR_VERSION = "node-code-validation-v2"
+NODE_CODE_VALIDATOR_VERSION = "node-code-validation-v3"
 
 
 def _import_tree(source: str) -> ast.Import | ast.ImportFrom:
@@ -130,8 +132,24 @@ def _validate_globals(table: symtable.SymbolTable, allowed: set[str]) -> None:
         _validate_globals(child, allowed)
 
 
+def _validate_parameter_substitutions(request: NodeCodeRequest, function: ast.FunctionDef) -> None:
+    if not request.parameter_names:
+        return
+    source = request.raw_source
+    for item in reversed(build_parameter_evidence(request)):
+        source = source[: item.start_offset] + item.function_argument + source[item.end_offset :]
+    # Exact body comparison also protects non-target literals and argument uses from rewrites.
+    expected = ast.parse(source)
+    proposed = ast.Module(body=function.body[:-1], type_ignores=[])
+    if ast.dump(expected) != ast.dump(proposed):
+        raise ValueError(
+            "parameterized body must preserve source AST "
+            "with only the exact parameter substitutions"
+        )
+
+
 def validate_node_code(request: NodeCodeRequest, response: NodeCodeResponse) -> None:
-    """Check identity, imports, signature, assertions, names, returns and compilation."""
+    """Check structure, assertions and exact parameterized bodies, without execution."""
     if (response.request_id, response.task_id) != (request.request_id, request.task_id):
         raise ValueError("response identity does not match the requested node")
     try:
@@ -143,5 +161,6 @@ def validate_node_code(request: NodeCodeRequest, response: NodeCodeResponse) -> 
         compile(source, "<node-code>", "exec", dont_inherit=True)
         table = symtable.symtable(source, "<node-code>", "exec")
         _validate_globals(table, bindings | set(vars(builtins)))
+        _validate_parameter_substitutions(request, function)
     except (SyntaxError, ValueError) as error:
         raise ValueError(f"Invalid node code: {error}") from error

@@ -101,7 +101,7 @@ def test_benchmark_checks_all_v1_nodes_and_serializes_provenance(
     )
     payload = json.loads(node_code_benchmark_to_json(report))
     assert payload["behavioral_equivalence"] == "not_evaluated"
-    assert payload["validator_version"] == "node-code-validation-v2"
+    assert payload["validator_version"] == "node-code-validation-v3"
     assert payload["reference"] == "deterministic-v1-function-ast"
     assert payload["tasks"][0]["request"]["source_cell_ids"]
     summary = payload["summary"]
@@ -166,7 +166,9 @@ def test_expected_failures_are_recorded_without_retry_or_dropping_tasks(
     assert summary["reference_ast_match_rate"] == (len(case.tasks) - 3) / len(case.tasks)
 
 
-def test_accepted_code_can_diverge_and_ignore_parameters(cases: tuple[PlanningCase, ...]) -> None:
+def test_ignored_parameter_is_rejected_before_reference_comparison(
+    cases: tuple[PlanningCase, ...],
+) -> None:
     case = cases[-1]
 
     def mutate(request: NodeCodeRequest, response: NodeCodeResponse) -> str:
@@ -181,14 +183,17 @@ def test_accepted_code_can_diverge_and_ignore_parameters(cases: tuple[PlanningCa
     )
     task = next(task for task in report.tasks if task.request.node_name == "split_data")
 
-    assert task.status == "accepted"
-    assert task.reference_ast_match is False
-    assert task.missing_parameter_reads == ("split_data_test_size",)
+    assert task.status == "invalid_code"
+    assert task.reference_ast_match is None
+    assert task.missing_parameter_reads is None
+    assert task.diagnostic_message is not None
+    assert "exact parameter substitutions" in task.diagnostic_message
     summary = node_code_benchmark_to_dict(report)["summary"]
     assert isinstance(summary, dict)
-    assert summary["accepted_rate"] == 1.0
+    assert summary["accepted_rate"] == (len(case.tasks) - 1) / len(case.tasks)
     assert summary["reference_ast_match_count"] == len(case.tasks) - 1
-    assert summary["tasks_missing_parameter_reads"] == 1
+    assert summary["tasks_missing_parameter_reads"] == 0
+    assert summary["invalid_code_count"] == 1
 
 
 def test_ast_comparison_ignores_formatting_and_comments(cases: tuple[PlanningCase, ...]) -> None:
@@ -230,7 +235,7 @@ def test_dropped_assertion_is_rejected_before_reference_comparison(
     assert "assertions" in task.diagnostic_message
 
 
-def test_benchmark_does_not_execute_valid_proposals(
+def test_benchmark_does_not_execute_accepted_or_rejected_proposals(
     cases: tuple[PlanningCase, ...], tmp_path: Path
 ) -> None:
     case = cases[-1]
@@ -248,7 +253,15 @@ def test_benchmark_does_not_execute_valid_proposals(
         (case,), _ReferenceProvider((case,), mutate), project_root=ROOT
     )
 
-    assert all(task.status == "accepted" and not task.reference_ast_match for task in report.tasks)
+    assert any(task.status == "accepted" for task in report.tasks)
+    assert any(task.status == "invalid_code" for task in report.tasks)
+    for task in report.tasks:
+        if task.request.parameter_names:
+            assert task.status == "invalid_code"
+            assert task.reference_ast_match is None
+        else:
+            assert task.status == "accepted"
+            assert task.reference_ast_match is False
     assert not marker.exists()
 
 

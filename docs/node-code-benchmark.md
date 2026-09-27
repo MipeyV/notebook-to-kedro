@@ -211,12 +211,49 @@ report = run_node_code_benchmark(cases, provider, prompt_version=provider.prompt
 
 The full local report is `generated/node-code-qwen3-8b-v4.json`. See
 [exact parameter evidence](node-parameter-evidence.md) for its scope and failure conditions.
-The next useful validation step is checking the exact application of these substitutions in
-proposed code, not assuming that providing the evidence guarantees it will be followed.
+This experiment motivated checking the exact application of these substitutions in proposed code,
+not assuming that providing the evidence guarantees it will be followed.
+
+## Exact Parameter Validation Replay
+
+On 2026-09-27, `node-code-validation-v3` introduced conservative whole-body AST comparison for
+parameterized tasks after applying the V1-derived substitutions. Parameter-free tasks retain the
+previous rules. The change was developed on `feature/node-parameter-validation`, based on `2e0b680`.
+Request/response schema `1.0`, report schema `1.1` and the default `node-code-v1` prompt are unchanged.
+
+All 104 saved raw responses from the four experiments above were replayed offline. Each request,
+notebook hash and reference function was verified unchanged against its original report. No new
+model calls, notebook execution, proposal execution or project generation occurred.
+
+| Recorded prompt | Accepted with validator v2 | Accepted with validator v3 | V1 AST matches with v3 | Newly rejected |
+| --- | --- | --- | --- | --- |
+| v1 (default) | 21/26 | 21/26 | 19/26 | 0 |
+| v2 (rejected experiment) | 23/26 | 20/26 | 18/26 | 3 |
+| v3 (rejected experiment) | 22/26 | 19/26 | 19/26 | 3 |
+| v4 (opt-in evidence) | 20/26 | 20/26 | 18/26 | 0 |
+
+The six newly rejected proposals are the three ignored `drop` parameters from prompt v2 and the
+three nested-list substitutions from prompt v3. Two of the latter also changed an unrelated
+target-column selection. The 26 deterministic V1 reference functions still pass. All prior
+rejections remain rejected, and no previously matching function is lost.
+
+Each replay has ten accepted parameterized tasks and zero missing reads. Under the new validator,
+this read metric is only a compatibility statistic, not independent evidence of fidelity. The
+remaining accepted nonmatching functions are parameter-free evaluation nodes that omit the
+standalone `accuracy` expression; the new guard does not address those differences.
+
+This is better detection of known errors, not an improvement in model generation or measured
+behavioral accuracy. The guard deliberately rejects every other AST rewrite in parameterized
+bodies, including potentially equivalent ones. Acceptance can therefore decrease without a model
+regression. Runtime configuration types, source bugs and library behavior remain outside its scope.
+
+Local reports are `generated/node-code-qwen3-8b-v{1,2,3,4}-validator-v3.json`, ignored by Git.
+Their provider identity is `recorded-response-replay`; the model and prompt identify the saved
+responses. Durations measure replay and validation only, not inference latency.
 
 ## Next Validation Stage
 
-Use the recorded mismatches to prioritize prompt or request-contract changes, especially exact
-parameter substitution evidence. Subsequent work must introduce independent reviewed code
-references, held-out notebooks, and isolated behavioral comparisons before claiming fidelity
+Use the recorded mismatches to prioritize source-statement preservation and import placement,
+while keeping strict rejection distinct from model improvement. Subsequent work must introduce
+independent reviewed code references, held-out notebooks, and isolated behavioral comparisons before claiming fidelity
 or allowing model proposals to enter generated projects.
