@@ -70,10 +70,12 @@ propagate. No automatic retry or fallback is introduced at this boundary.
 7. Successful compilation without execution, and no unknown global references according to
    Python's symbol table, including comprehension scopes. Declared imports and Python builtins
    are available; notebook globals must be passed as inputs.
-8. For tasks with parameters, derive unambiguous [substitution evidence](node-parameter-evidence.md),
-   replace each complete source expression with its exact request argument, and compare the
-   resulting body AST with the proposed body excluding its validated terminal return. All other
-   statements must remain unchanged. Missing, ambiguous or unsupported mappings fail validation.
+8. Compare every proposed body against its source AST, excluding the validated terminal return.
+   For tasks with parameters, first derive unambiguous
+   [substitution evidence](node-parameter-evidence.md) and replace each complete source expression
+   with its exact request argument. Missing, ambiguous or unsupported mappings fail validation.
+   Without parameters, compare directly against the original source. In both cases, every other
+   statement must retain its AST and order, including standalone expressions such as `accuracy`.
 
 These checks establish structural compatibility only. They do not prove that every local variable
 is assigned on every execution path, that runtime parameter values have the correct type, that
@@ -82,19 +84,20 @@ can still perform I/O or produce incorrect results. This validator is not an exe
 Behavioral equivalence, isolated execution and review are subsequent stages before generated
 proposals can be included in a project.
 
-`NODE_CODE_VALIDATOR_VERSION` identifies these rules (`node-code-validation-v3`). Parameterized
-bodies allow only the planned substitutions, ignoring comments and formatting. This deliberately
-rejects other rewrites, even potentially equivalent refactorings, docstrings and reordered keywords.
-It catches ignored arguments, extra list wrapping, argument swaps, new argument overwrites and
-changes to non-target expressions. Tasks without parameters retain the previous validation rules;
-their entire body is not compared against source. The new check applies to every provider,
-independently of whether its prompt includes parameter evidence, and does not repair proposals.
+`NODE_CODE_VALIDATOR_VERSION` identifies these rules (`node-code-validation-v4`). All bodies allow
+only the planned substitutions, ignoring comments and formatting. This deliberately rejects other
+rewrites, even potentially equivalent refactorings, added or removed docstrings and reordered
+keywords. It catches deleted, added, modified or reordered instructions, ignored arguments, extra
+list wrapping, argument swaps, new argument overwrites and changes to non-target expressions.
+Unlike validator v3, the full-body check now also covers tasks without parameters. It applies to
+every provider independently of its prompt, and does not repair proposals.
 
-Assertion comparison ignores comments and formatting but deliberately rejects any rewrite of an enclosing
-statement containing an assertion, including potentially valid parameter substitutions in that
-block. This conservative restriction remains in place; such cases require review. The assertion check
-does not prove that earlier assignments preserve the values being asserted or that unrelated
-statements are faithful. Assertions being present does not make the proposal safe to execute.
+The earlier assertion-block guard is retained for its targeted diagnostic and conservative scope:
+even a planned parameter substitution inside an assertion-containing compound statement is still
+rejected. Such cases require review. The whole-body check also protects earlier assignments and
+unrelated statements from AST changes, but neither check proves runtime equivalence or execution
+safety. Source code itself may contain errors or side effects, and moving it into a function
+changes its execution context. The LLM cannot silently fix or optimize it in this strict subset.
 
 ## Offline Example
 
@@ -171,10 +174,10 @@ raises `ValueError`; neither failure silently falls back to accepted code.
 The serialized request gives parameter names and function arguments; `build_parameter_evidence`
 derives exact expression ranges, literal types and argument mappings for the provider. Ambiguous
 or unsupported mappings are rejected before HTTP when the evidence option is enabled.
-The validator independently enforces the exact substitutions and preservation of parameterized
-bodies after any provider response. Unsupported manually constructed parameter requests may still
+The validator independently enforces the exact substitutions and preservation of all task bodies
+after any provider response. Unsupported manually constructed parameter requests may still
 satisfy the JSON schema but now fail code validation. Tests use mocked HTTP responses and establish
 adapter behavior, not real model accuracy. The [code benchmark](node-code-benchmark.md) records
-corpus-wide static acceptance,
-V1 AST matches and missing parameter reads. Behavioral equivalence and isolated execution remain
+corpus-wide static acceptance, V1 AST matches and missing parameter reads. Behavioral equivalence
+and isolated execution remain
 separate milestones before proposals can be included in generated projects.

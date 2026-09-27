@@ -32,6 +32,9 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
+- Node-code validator `node-code-validation-v4` extends whole-body AST preservation to tasks
+  without parameters, rejecting unplanned statement additions, omissions, changes and reordering.
+  Formatting and comments remain flexible; equivalent refactorings require later behavioral review.
 - Node-code validator `node-code-validation-v3` now requires exact planned substitutions and
   unchanged remaining body AST for parameterized tasks, independently of the provider prompt.
   Ambiguous or unsupported parameter mappings fail closed. This is static fidelity checking,

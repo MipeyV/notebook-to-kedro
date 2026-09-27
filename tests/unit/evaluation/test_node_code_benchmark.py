@@ -101,7 +101,7 @@ def test_benchmark_checks_all_v1_nodes_and_serializes_provenance(
     )
     payload = json.loads(node_code_benchmark_to_json(report))
     assert payload["behavioral_equivalence"] == "not_evaluated"
-    assert payload["validator_version"] == "node-code-validation-v3"
+    assert payload["validator_version"] == "node-code-validation-v4"
     assert payload["reference"] == "deterministic-v1-function-ast"
     assert payload["tasks"][0]["request"]["source_cell_ids"]
     summary = payload["summary"]
@@ -211,14 +211,16 @@ def test_ast_comparison_ignores_formatting_and_comments(cases: tuple[PlanningCas
     assert all(task.reference_ast_match is True for task in report.tasks)
 
 
-def test_dropped_assertion_is_rejected_before_reference_comparison(
-    cases: tuple[PlanningCase, ...],
+@pytest.mark.parametrize("removed", ["assert accuracy >= 0.90", "accuracy"])
+def test_deleted_evaluation_statement_is_rejected(
+    cases: tuple[PlanningCase, ...], removed: str
 ) -> None:
     case = cases[-1]
 
     def mutate(request: NodeCodeRequest, response: NodeCodeResponse) -> str:
         if request.node_name == "evaluate_model":
-            code = response.function_code.replace("    assert accuracy >= 0.90\n", "")
+            assert not request.parameter_names
+            code = response.function_code.replace(f"    {removed}\n", "")
             assert code != response.function_code
             return replace(response, function_code=code).to_json()
         return response.to_json()
@@ -227,12 +229,17 @@ def test_dropped_assertion_is_rejected_before_reference_comparison(
         (case,), _ReferenceProvider((case,), mutate), project_root=ROOT
     )
     task = next(task for task in report.tasks if task.request.node_name == "evaluate_model")
-
     assert task.status == "invalid_code"
     assert task.reference_ast_match is None
     assert task.missing_parameter_reads is None
     assert task.diagnostic_message is not None
-    assert "assertions" in task.diagnostic_message
+    assert (
+        "assertions" if removed.startswith("assert") else "function body"
+    ) in task.diagnostic_message
+    summary = node_code_benchmark_to_dict(report)["summary"]
+    assert isinstance(summary, dict)
+    assert summary["accepted_count"] == summary["reference_ast_match_count"] == len(case.tasks) - 1
+    assert summary["invalid_code_count"] == 1
 
 
 def test_benchmark_does_not_execute_accepted_or_rejected_proposals(
@@ -241,7 +248,9 @@ def test_benchmark_does_not_execute_accepted_or_rejected_proposals(
     case = cases[-1]
     marker = tmp_path / "never-created"
 
-    def mutate(_request: NodeCodeRequest, response: NodeCodeResponse) -> str:
+    def mutate(request: NodeCodeRequest, response: NodeCodeResponse) -> str:
+        if request.node_name == "predict":
+            return response.to_json()
         return replace(
             response,
             function_code=response.function_code.replace(
@@ -256,12 +265,12 @@ def test_benchmark_does_not_execute_accepted_or_rejected_proposals(
     assert any(task.status == "accepted" for task in report.tasks)
     assert any(task.status == "invalid_code" for task in report.tasks)
     for task in report.tasks:
-        if task.request.parameter_names:
+        if task.request.node_name == "predict":
+            assert task.status == "accepted"
+            assert task.reference_ast_match is True
+        else:
             assert task.status == "invalid_code"
             assert task.reference_ast_match is None
-        else:
-            assert task.status == "accepted"
-            assert task.reference_ast_match is False
     assert not marker.exists()
 
 
