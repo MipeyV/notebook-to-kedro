@@ -139,23 +139,28 @@ rejected, and the transport uses a timeout and bounded response size (4 MiB by d
 Ollama configured with `OLLAMA_NO_CLOUD=1` for a local-only deployment.
 
 `render_node_code_prompt` is deterministic and versioned by `NODE_CODE_PROMPT_VERSION`
-(`node-code-v1`). It supplies original task evidence and the exact signature and return order,
+(`node-code-v1` by default). It supplies original task evidence and the exact signature and return order,
 asks for faithful operations rather than repairs, and treats notebook contents as untrusted data.
 The request uses the response JSON schema, non-streaming chat, temperature zero, and `think=false`.
 These settings do not guarantee deterministic or correct model output.
 
-The original prompt remains in use: two prompt-only experiments did not improve fidelity enough
-to replace it; their results are recorded in the benchmark documentation. Assertion preservation
-is enforced by the validator, not by trusting instructions to the model. Request and response
-JSON schemas remain at version `1.0`; prompt and validator versions evolve independently.
+The opt-in `include_parameter_evidence=True` mode (`node-code-v4`) supplements the original
+instructions with [exact parameter evidence](node-parameter-evidence.md) derived using V1's
+replacement rules. It remains experimental after a non-improving first benchmark run.
+Two earlier prompt-only experiments were not retained;
+their results are recorded in the benchmark documentation. Assertion preservation is enforced by
+the validator, not by trusting instructions to the model. Request and response JSON schemas
+remain at version `1.0`; prompt, derived evidence and validator versions evolve independently.
 
 `complete` returns raw assistant JSON; use `request_node_code` to parse and statically validate it.
 Transport failures raise `NodeCodeProviderError` from `notebook_to_kedro.exceptions`, with stable
 `code` and `message` fields inherited from the transport diagnostic. Invalid model JSON or code
 raises `ValueError`; neither failure silently falls back to accepted code.
 
-The request currently gives parameter names and function arguments, not an exact literal-to-
-parameter substitution map. Ambiguities must be reviewed; parameter fidelity is not established
+The serialized request gives parameter names and function arguments; `build_parameter_evidence`
+derives exact expression ranges, literal types and argument mappings for the provider. Ambiguous
+or unsupported mappings are rejected before HTTP when the evidence option is enabled.
+Parameter fidelity is still not established
 by the static validator. Tests use mocked HTTP responses and establish adapter behavior, not real
 model accuracy. The [code benchmark](node-code-benchmark.md) records corpus-wide static acceptance,
 V1 AST matches and missing parameter reads. Behavioral equivalence and isolated execution remain

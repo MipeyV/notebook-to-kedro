@@ -279,6 +279,11 @@ V1 function AST matches, missing parameter reads, failures and latency over 26 t
 reviewed notebooks. Accepted proposals are not executed or written into generated projects;
 behavioral equivalence remains a subsequent step, distinct from static benchmark scores.
 
+An opt-in provider mode supplies [exact parameter substitutions](docs/node-parameter-evidence.md):
+original expressions, literal types, source ranges and corresponding function arguments derived
+from V1 rules. Ambiguous mappings fail before model I/O in this experimental mode; code is reviewed rather
+than assumed to use those parameters correctly.
+
 The initial deterministic analysis contract is documented in [docs/mvp-contract.md](docs/mvp-contract.md), and its interchange model is defined in [docs/notebook-facts-schema.md](docs/notebook-facts-schema.md).
 
 The first reference fixture runs a deterministic Iris classification workflow. It provides a known-good baseline whose predictions and accuracy can later be compared with the generated Kedro pipeline.

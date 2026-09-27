@@ -172,9 +172,47 @@ Local reports are preserved under `generated/` as `node-code-qwen3-8b-v1-revalid
 describe these local trials, not released prompt options. The implementation is based on commit
 `c9d5e76` on `feature/node-code-fidelity`.
 
-The next priority is explicit parameter-substitution evidence: original expression, expected
+The next priority identified at that stage was explicit parameter-substitution evidence:
+original expression, expected
 value type and exact replacement location. This must distinguish replacing the entire list in
 `drop(columns=["target"])` from replacing an unrelated `df["target"]` expression.
+
+## Opt-In Parameter Evidence
+
+On 2026-09-27, the `node-code-v4` experiment added exact substitutions derived from the same V1
+replacement rules used for generation. The run used the same `qwen3:8b` digest, Ollama `0.34.4`,
+Python `3.12.14`, corpus and validator `node-code-validation-v2`. All 26 reference functions were
+checked to be text-identical to those in the original report. The implementation is based on
+commit `36e6e94` on `feature/node-parameter-evidence`.
+
+| Measure | V4 observation |
+| --- | --- |
+| Accepted by the unchanged validator | 20/26 (76.9%) |
+| Exact V1 function AST matches | 18/26 (69.2%) |
+| Provider / response-contract errors | 0 / 0 |
+| Rejected code proposals | 6 |
+| Accepted parameterized tasks missing parameter reads | 0/10 |
+| Total / mean live duration | 164.55 s / 6.33 s |
+
+All ten accepted parameterized nodes matched the V1 function AST, including all four feature-
+preparation nodes. However, three training nodes still contained local imports, one data-loading
+proposal had malformed source escaping, and two evaluation nodes omitted a required import.
+Two accepted evaluation functions omitted the standalone `accuracy` expression. No proposal was
+executed and this small single run establishes neither a general accuracy gain nor a latency trend.
+
+Since this did not improve the overall 21 accepted / 19 matching baseline under the same validator,
+the default remains `node-code-v1`. The new evidence API is available independently, and the
+provider mode is explicitly experimental:
+
+```python
+provider = OllamaNodeCodeProvider("qwen3:8b", include_parameter_evidence=True)
+report = run_node_code_benchmark(cases, provider, prompt_version=provider.prompt_version)
+```
+
+The full local report is `generated/node-code-qwen3-8b-v4.json`. See
+[exact parameter evidence](node-parameter-evidence.md) for its scope and failure conditions.
+The next useful validation step is checking the exact application of these substitutions in
+proposed code, not assuming that providing the evidence guarantees it will be followed.
 
 ## Next Validation Stage
 

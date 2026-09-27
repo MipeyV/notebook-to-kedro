@@ -10,6 +10,7 @@ from textwrap import indent
 from typing import TYPE_CHECKING, cast
 
 from notebook_to_kedro.exceptions import ProjectGenerationError
+from notebook_to_kedro.generation.parameters import ParameterReplacement
 
 if TYPE_CHECKING:
     from notebook_to_kedro.ir import ConversionPlan, JsonPrimitive, ParameterValue, TaskCandidate
@@ -317,13 +318,25 @@ def _parameter_arguments(task: TaskCandidate) -> tuple[str, ...]:
 
 
 def _parameterized_source(task: TaskCandidate) -> str:
+    replacements = parameter_replacements(task)
+    return _replace_ranges(
+        task.source,
+        [(item.start_offset, item.end_offset, item.function_argument) for item in replacements],
+    )
+
+
+def parameter_replacements(task: TaskCandidate) -> tuple[ParameterReplacement, ...]:
+    """Locate V1 parameter expressions without guessing from equal literal values."""
     if not task.parameters:
-        return task.source
+        return ()
     module = ast.parse(task.source)
-    replacements: list[tuple[int, int, str]] = []
-    supported_parameter_names = {
-        parameter_name.rsplit(".", maxsplit=1)[1] for parameter_name in task.parameters
+    replacements: list[ParameterReplacement] = []
+    names_by_suffix = {
+        parameter_name.rsplit(".", maxsplit=1)[-1]: parameter_name
+        for parameter_name in task.parameters
     }
+    if len(names_by_suffix) != len(task.parameters):
+        raise ValueError("ambiguous parameter suffixes in task")
     for node in ast.walk(module):
         if not isinstance(node, ast.Call):
             continue
@@ -335,29 +348,33 @@ def _parameterized_source(task: TaskCandidate) -> str:
             if (
                 keyword.arg is None
                 or parameter_suffix is None
-                or parameter_suffix not in supported_parameter_names
+                or parameter_suffix not in names_by_suffix
             ):
                 continue
             replacements.append(
-                (
-                    _offset(task.source, keyword.value.lineno, keyword.value.col_offset),
-                    _offset(task.source, keyword.value.end_lineno, keyword.value.end_col_offset),
-                    f"{task.name}_{parameter_suffix}",
+                _parameter_replacement(
+                    task.source, keyword.value, names_by_suffix[parameter_suffix]
                 )
             )
-        if (
-            _call_method(node.func) == "fillna"
-            and "fillna_values" in supported_parameter_names
-            and node.args
-        ):
+        if _call_method(node.func) == "fillna" and "fillna_values" in names_by_suffix and node.args:
             replacements.append(
-                (
-                    _offset(task.source, node.args[0].lineno, node.args[0].col_offset),
-                    _offset(task.source, node.args[0].end_lineno, node.args[0].end_col_offset),
-                    f"{task.name}_fillna_values",
-                )
+                _parameter_replacement(task.source, node.args[0], names_by_suffix["fillna_values"])
             )
-    return _replace_ranges(task.source, replacements)
+    return tuple(sorted(replacements, key=lambda item: item.start_offset))
+
+
+def _parameter_replacement(source: str, node: ast.expr, name: str) -> ParameterReplacement:
+    start = _offset(source, node.lineno, node.col_offset)
+    end = _offset(source, node.end_lineno, node.end_col_offset)
+    expression = source[start:end]
+    return ParameterReplacement(
+        parameter_name=name,
+        function_argument=name.replace(".", "_"),
+        source_expression=expression,
+        value_type=type(ast.literal_eval(expression)).__name__,
+        start_offset=start,
+        end_offset=end,
+    )
 
 
 def _keyword_parameter_suffix(
@@ -393,7 +410,10 @@ def _call_method(node: ast.expr) -> str | None:
 def _offset(source: str, line_number: int | None, column: int | None) -> int:
     if line_number is None or column is None:
         return 0
-    return sum(len(line) for line in source.splitlines(keepends=True)[: line_number - 1]) + column
+    lines = source.splitlines(keepends=True)
+    # Python AST columns count UTF-8 bytes; string slicing counts Unicode characters.
+    prefix = lines[line_number - 1].encode("utf-8")[:column].decode("utf-8")
+    return sum(len(line) for line in lines[: line_number - 1]) + len(prefix)
 
 
 def _replace_ranges(source: str, replacements: list[tuple[int, int, str]]) -> str:
