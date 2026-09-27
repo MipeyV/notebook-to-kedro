@@ -273,7 +273,9 @@ Development is now moving from the deterministic foundation toward V2 hybrid sem
 The [node code generation API](docs/node-code-contract.md) provides versioned task requests,
 strict JSON responses, a fake provider for offline tests, and an opt-in local Ollama code provider
 with a versioned fidelity prompt. Function signatures, imports, global references, and returns
-are statically validated, with a versioned guard against changed or missing assertion blocks.
+are statically validated, with versioned guards against changed or missing assertion blocks and
+incorrect parameter substitutions. Parameterized bodies must preserve the source AST except for
+the exact planned substitutions; other refactorings are deliberately rejected in this initial scope.
 A [node code benchmark](docs/node-code-benchmark.md) measures acceptance,
 V1 function AST matches, missing parameter reads, failures and latency over 26 tasks in four
 reviewed notebooks. Accepted proposals are not executed or written into generated projects;
@@ -281,8 +283,8 @@ behavioral equivalence remains a subsequent step, distinct from static benchmark
 
 An opt-in provider mode supplies [exact parameter substitutions](docs/node-parameter-evidence.md):
 original expressions, literal types, source ranges and corresponding function arguments derived
-from V1 rules. Ambiguous mappings fail before model I/O in this experimental mode; code is reviewed rather
-than assumed to use those parameters correctly.
+from V1 rules. Ambiguous mappings fail before model I/O in this experimental mode. The static validator
+independently checks these substitutions for every provider; it does not prove runtime equivalence.
 
 The initial deterministic analysis contract is documented in [docs/mvp-contract.md](docs/mvp-contract.md), and its interchange model is defined in [docs/notebook-facts-schema.md](docs/notebook-facts-schema.md).
 

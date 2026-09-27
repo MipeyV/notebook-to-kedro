@@ -40,6 +40,41 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-09-27 - Exact parameter substitutions enforced in node proposals
+
+### Completed
+
+- Added validator v3: parameterized function bodies must match original source after the exact
+  V1-derived substitutions, excluding the already validated terminal return.
+- Added adversarial checks for nested lists, ignored and swapped arguments, argument overwrites,
+  non-target changes, missing or ambiguous evidence, and non-execution of untrusted expressions.
+- Replayed 104 recorded responses from prompt experiments v1 through v4 with unchanged requests,
+  notebook hashes and reference functions, without contacting Ollama.
+- Detected six formerly accepted invalid proposals: three ignored parameters in v2 responses and
+  three nested-list substitutions in v3 responses. Default v1 stays at 21 accepted / 19 matching
+  functions out of 26; v4 stays at 20 / 18. All 26 V1 reference functions still pass.
+
+### Decisions
+
+- Require whole-body AST preservation for parameterized tasks rather than allowing arbitrary
+  rewrites around a correctly placed argument. Potentially equivalent refactorings also fail.
+- Keep parameter-free tasks and the conservative assertion-block guard unchanged. The validator
+  does not patch, execute, or write proposals into projects.
+- Retain prompt v1 by default, optional evidence prompt v4, request/response schema `1.0` and
+  benchmark schema `1.1`; record the changed validator identity in every new report.
+- Store raw replay reports locally under ignored `generated/`, not in the public repository.
+
+### Open questions
+
+- Broader parameter patterns and substitutions inside assertion-containing blocks need explicit
+  transformation rules before widening acceptance.
+- Static acceptance does not establish runtime configuration validity or behavioral equivalence.
+
+### Next step
+
+- Address remaining source-statement and import-placement deviations using reviewed examples,
+  then broaden independent evaluation and design isolated behavioral comparisons.
+
 ## 2026-09-22 - Comparative planner benchmark runner implemented
 
 ### Completed

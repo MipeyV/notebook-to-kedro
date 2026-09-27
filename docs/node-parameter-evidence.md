@@ -93,7 +93,22 @@ all providers through the Python helper rather than stored as an independently e
 source facts. The benchmark retains source requests and records the prompt version; evidence
 can be recomputed using the corresponding code revision.
 
-The validator remains `node-code-validation-v2`. It still checks structure and assertion blocks,
-not exact parameter-substitution semantics. A model can ignore this evidence or introduce other
-changes; AST comparison and subsequent behavioral validation remain necessary. The application
-does not patch or execute a proposed function automatically.
+## Static Enforcement
+
+`node-code-validation-v3` independently derives this evidence for every parameterized request,
+regardless of provider or prompt mode. It applies replacements in reverse source order in memory,
+then compares the resulting AST against the entire proposed body, excluding the already validated
+terminal return. Comments, whitespace and equivalent quote styles are ignored; all other changes
+are rejected, including nested lists, swapped arguments, ignored parameters, added assignments,
+changed non-target literals and potentially valid refactorings. No proposed code is patched.
+
+Missing or ambiguous sites and unsupported expressions fail closed during validation, even when
+the request satisfies the JSON schema. The opt-in prompt still fails before HTTP for such evidence;
+the default provider does not add a preflight and validation occurs after its response. These rules
+also apply to fake or third-party providers through `validate_node_code` / `request_node_code`.
+
+Tasks without parameters retain the previous rules, not whole-body fidelity checking. The existing
+assertion guard also remains conservative: a substitution inside an assertion-containing compound
+statement is still rejected. Preserving AST operations does not validate configuration overrides,
+third-party library behavior or runtime outputs, and does not establish execution safety. Independent
+review and subsequent behavioral validation remain necessary before proposals enter a project.

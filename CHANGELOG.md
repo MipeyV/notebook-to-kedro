@@ -30,6 +30,13 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Optional local LLM providers and hybrid semantic planning.
 - Versioned code-generation and review datasets.
 
+### Changed
+
+- Node-code validator `node-code-validation-v3` now requires exact planned substitutions and
+  unchanged remaining body AST for parameterized tasks, independently of the provider prompt.
+  Ambiguous or unsupported parameter mappings fail closed. This is static fidelity checking,
+  not runtime equivalence; request and response schemas remain `1.0`.
+
 ## [0.1.0] - 2026-09-22
 
 ### Added
