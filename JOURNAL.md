@@ -40,6 +40,36 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-09-28 - Real provider outputs receive end-to-end behavioral metrics
+
+### Completed
+
+- Added behavioral code benchmark schema `1.0` over four independent nodes and five scenarios.
+- Added complete corpus preflight before provider I/O and one provider call per shared node.
+- Added explicit static acceptance, evaluated-match and end-to-end scenario denominators.
+- Kept provider, parsing, static-validation, mismatch and execution failures separate.
+- Ran local `qwen3:8b` with prompt `node-code-v4`: 2/4 nodes accepted and 3/5 scenarios matched
+  end to end, with no mismatch or runtime failure among accepted proposals.
+
+### Decisions
+
+- Use end-to-end scenario match rate as the primary model-development measure so rejected nodes are
+  not hidden by a conditional success rate.
+- Reuse one accepted proposal for every reviewed scenario linked to that node.
+- Keep real Ollama calls outside default CI and require explicit untrusted-code execution consent.
+- Treat the initial 60% result as one small development observation, not an accuracy guarantee.
+
+### Open questions
+
+- Determine whether prompt changes can fix omitted standalone expressions and function-local imports
+  without regressing parameter fidelity.
+- Expand the independent corpus before selecting a default local model or release threshold.
+
+### Next step
+
+- Preserve raw real-model benchmark reports and compare prompt/model variants on identical evidence,
+  then expand the held-out corpus with representative notebooks and reviewed behavioral scenarios.
+
 ## 2026-09-28 - Validated proposal execution connected to behavioral comparison
 
 ### Completed

@@ -297,7 +297,10 @@ working directories, filtered environments, timeouts and bounded transport. Dete
 comparators produce per-output diagnostics and aggregate reports; all five approved references
 match their reviewed expectations. Statically valid proposals can now be executed through an
 explicit opt-in subprocess path and compared with an auditable response hash. This is fault
-containment rather than an OS sandbox, and real model outputs have not yet been benchmarked.
+containment rather than an OS sandbox. A
+[behavioral code benchmark](docs/behavioral-code-benchmark.md) now measures real provider outputs
+without dropping rejected nodes. The first local `qwen3:8b` run accepted 2/4 nodes and matched 3/5
+reviewed scenarios end to end; this small single run is not a general accuracy claim.
 
 An opt-in provider mode supplies [exact parameter substitutions](docs/node-parameter-evidence.md):
 original expressions, literal types, source ranges and corresponding function arguments derived
@@ -467,7 +470,8 @@ Progress and architectural decisions are recorded chronologically in [JOURNAL.md
 2. [ ] Measure plan validity, generation success, behavioral equivalence, review corrections, latency, and cost.
    Behavioral input/output contracts, deterministic comparison reports and approved-reference
    execution are implemented. Statically validated proposal execution is available behind explicit
-   consent; comparative measurements on real provider outputs remain outstanding.
+   consent. An initial local benchmark now reports static acceptance, end-to-end behavioral results
+   and latency; broader repeated measurements, review corrections and cost remain outstanding.
 3. [ ] Compare deterministic and hybrid results on the same corpus.
 4. [ ] Expand deterministic pandas support for `rename`, `replace`, joins, and aggregations.
 5. [ ] Add richer catalog formats and schema-aware diagnostics.

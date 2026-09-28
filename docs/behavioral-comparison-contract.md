@@ -7,6 +7,8 @@ comparisons between a reviewed notebook task and a proposed node. It describes r
 expected outputs or an expected exception, and explicit comparison policies. The separate
 `behavioral_execution` module executes approved references and explicitly authorized, statically
 validated proposals. `behavioral_proposal` joins proposal execution with deterministic comparison.
+The provider-level [behavioral code benchmark](behavioral-code-benchmark.md) aggregates these
+outcomes without hiding proposals that never reach execution.
 
 Behavioral schema `1.0` is linked to the
 [independent node-code corpus](node-code-evaluation-corpus.md) by `node_code_case_id`.
