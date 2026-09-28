@@ -25,6 +25,16 @@ from notebook_to_kedro.evaluation.behavioral import (
     validate_behavioral_case,
     validate_behavioral_corpus,
 )
+from notebook_to_kedro.evaluation.behavioral_benchmark import (
+    BEHAVIORAL_CODE_BENCHMARK_SCHEMA_VERSION,
+    BEHAVIORAL_PROPOSAL_EXECUTION_POLICY,
+    BehavioralCodeBenchmarkProposal,
+    BehavioralCodeBenchmarkReport,
+    BehavioralCodeProposalStatus,
+    behavioral_code_benchmark_to_dict,
+    behavioral_code_benchmark_to_json,
+    run_behavioral_code_benchmark,
+)
 from notebook_to_kedro.evaluation.behavioral_comparison import (
     BEHAVIORAL_COMPARISON_SCHEMA_VERSION,
     BehavioralCaseComparison,
@@ -113,9 +123,11 @@ from notebook_to_kedro.evaluation.serialization import (
 
 __all__ = [
     "BEHAVIORAL_CASE_SCHEMA_VERSION",
+    "BEHAVIORAL_CODE_BENCHMARK_SCHEMA_VERSION",
     "BEHAVIORAL_COMPARISON_SCHEMA_VERSION",
     "BEHAVIORAL_EXECUTION_SCHEMA_VERSION",
     "BEHAVIORAL_PROPOSAL_EVALUATION_SCHEMA_VERSION",
+    "BEHAVIORAL_PROPOSAL_EXECUTION_POLICY",
     "DEFAULT_PIPELINE_ID",
     "FALLBACK_DIAGNOSTIC_CODE",
     "NODE_CODE_BENCHMARK_SCHEMA_VERSION",
@@ -127,6 +139,9 @@ __all__ = [
     "BehaviorValue",
     "BehavioralCase",
     "BehavioralCaseComparison",
+    "BehavioralCodeBenchmarkProposal",
+    "BehavioralCodeBenchmarkReport",
+    "BehavioralCodeProposalStatus",
     "BehavioralComparisonStatus",
     "BehavioralCorpusComparison",
     "BehavioralExecutionConfig",
@@ -166,6 +181,8 @@ __all__ = [
     "behavioral_case_from_json",
     "behavioral_case_to_dict",
     "behavioral_case_to_json",
+    "behavioral_code_benchmark_to_dict",
+    "behavioral_code_benchmark_to_json",
     "behavioral_corpus_comparison_to_dict",
     "behavioral_corpus_comparison_to_json",
     "behavioral_execution_result_to_dict",
@@ -198,6 +215,7 @@ __all__ = [
     "planning_case_from_json",
     "planning_case_to_dict",
     "planning_case_to_json",
+    "run_behavioral_code_benchmark",
     "run_node_code_benchmark",
     "run_planning_benchmark",
     "validate_behavioral_case",

@@ -40,6 +40,9 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   bounded subprocess path, followed by deterministic comparison and a versioned evaluation report
   containing the exact response SHA-256. Process separation remains fault containment, not an OS
   sandbox.
+- Versioned provider-to-behavior benchmark reports with separate node acceptance, evaluated-match
+  and end-to-end scenario rates, explicit not-evaluated counts, failure categories and provider and
+  execution durations. An initial local `qwen3:8b` run matched 3/5 scenarios end to end.
 
 ### Planned
 
