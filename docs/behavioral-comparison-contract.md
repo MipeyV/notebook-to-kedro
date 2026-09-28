@@ -5,8 +5,8 @@
 `notebook_to_kedro.evaluation.behavioral` defines versioned, deterministic evidence for isolated
 comparisons between a reviewed notebook task and a proposed node. It describes runtime inputs,
 expected outputs or an expected exception, and explicit comparison policies. The separate
-`behavioral_execution` module can execute an approved reference function; it does not execute model
-proposals or decide equivalence yet.
+`behavioral_execution` module executes approved references and explicitly authorized, statically
+validated proposals. `behavioral_proposal` joins proposal execution with deterministic comparison.
 
 Behavioral schema `1.0` is linked to the
 [independent node-code corpus](node-code-evaluation-corpus.md) by `node_code_case_id`.
@@ -103,6 +103,31 @@ or the expected-exception outcome. Corpus reports preserve reviewed case order a
 count, matches, mismatches, execution errors, match rate and whole-corpus exact match. Reports have
 canonical dictionary and JSON serializers.
 
+## Validated Proposal Execution
+
+`execute_behavioral_proposal` refuses execution unless the response passes the same request-specific
+static validator used before generation. Invalid identities, imports, signatures, assertions,
+parameter substitutions, bodies or returns fail before a subprocess is started. Every accepted
+call starts a fresh worker, so inputs are materialized independently from reference execution and
+cannot retain mutations from another run.
+
+Because process separation is not an OS sandbox, proposal execution is disabled by default. The
+caller must pass `allow_untrusted_code_execution=True` explicitly. `evaluate_behavioral_proposal`
+then combines the typed execution result with its deterministic comparison and records a SHA-256
+digest of the complete proposal response in proposal-evaluation report schema `1.0`.
+
+```python
+from notebook_to_kedro.evaluation import evaluate_behavioral_proposal
+
+evaluation = evaluate_behavioral_proposal(
+    behavior,
+    nodes[behavior.node_code_case_id],
+    proposal,
+    allow_untrusted_code_execution=True,
+)
+assert evaluation.comparison.status in {"matched", "mismatch", "execution_error"}
+```
+
 ## API
 
 ```python
@@ -133,12 +158,14 @@ Dictionary and JSON round trips are available through `behavioral_case_to_*` and
 ## Trust Boundary
 
 Process separation is fault containment, not an operating-system sandbox. The worker does not
-disable filesystem or network access and does not impose portable CPU or memory limits. This
-milestone therefore executes only source-controlled, human-approved references. Running a model
-proposal requires an additional isolation decision and must use a fresh process with independently
-materialized inputs so one run cannot mutate evidence observed by the other.
+disable filesystem or network access and does not impose portable CPU or memory limits. Proposal
+execution therefore requires explicit caller consent and is intended for controlled evaluation
+environments. Static validation constrains a proposal to the reviewed source-derived body, but it
+does not make the original notebook code safe. Stronger production isolation still requires a
+container or operating-system sandbox with filesystem, network, CPU and memory policies.
 
 The five approved corpus references now execute and compare successfully, including the reviewed
 exception case. This validates the execution and comparison harness against reviewed references;
-it is not a model-accuracy result. Proposal execution is still absent, so behavioral equivalence
-for generated code remains `not_evaluated`.
+it is not a model-accuracy result. The same four reviewed responses also pass through the proposal
+path across all five scenarios. Real provider outputs have not yet been measured, so generated-code
+accuracy remains `not_evaluated`.

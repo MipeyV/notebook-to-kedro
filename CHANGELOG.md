@@ -32,11 +32,14 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   and validation against independent node interfaces.
 - Isolated execution of approved behavioral references with static revalidation, temporary working
   directories, filtered environments, timeouts, process-group termination, bounded JSON and text
-  output, typed execution reports, and explicit failure categories. Model proposals remain
-  non-executable.
+  output, typed execution reports, and explicit failure categories.
 - Deterministic exact, numeric, array and table behavioral comparators with expected-exception
   matching, actionable per-output diagnostics, versioned case reports and aggregate corpus metrics.
-  All five approved reference scenarios match; model proposals remain non-executable.
+  All five approved reference scenarios match.
+- Explicitly authorized execution of statically validated node-code proposals through the same
+  bounded subprocess path, followed by deterministic comparison and a versioned evaluation report
+  containing the exact response SHA-256. Process separation remains fault containment, not an OS
+  sandbox.
 
 ### Planned
 

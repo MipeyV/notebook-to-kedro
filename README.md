@@ -279,8 +279,9 @@ source AST except for the exact planned substitutions and the required terminal 
 added or rewritten instructions are rejected, even for potentially equivalent refactorings.
 A [node code benchmark](docs/node-code-benchmark.md) measures acceptance,
 V1 function AST matches, missing parameter reads, failures and latency over 26 tasks in four
-reviewed notebooks. Accepted proposals are not executed or written into generated projects;
-behavioral equivalence remains a subsequent step, distinct from static benchmark scores.
+reviewed notebooks. Accepted proposals are never written into generated projects automatically.
+An explicit evaluation API can execute them after static validation and caller consent;
+behavioral results remain distinct from static benchmark scores.
 
 An [independent node-code corpus](docs/node-code-evaluation-corpus.md) adds four held-out notebook
 tasks with manually reviewed references and nine known-invalid proposals. It measures compilation,
@@ -294,8 +295,9 @@ typed arrays and tables, plus exact, numeric, array and table comparison policie
 exceptions. Approved reference functions now run in isolated Python subprocesses with temporary
 working directories, filtered environments, timeouts and bounded transport. Deterministic
 comparators produce per-output diagnostics and aggregate reports; all five approved references
-match their reviewed expectations. This validates the harness, not model accuracy. Proposed code
-is still not executed or compared.
+match their reviewed expectations. Statically valid proposals can now be executed through an
+explicit opt-in subprocess path and compared with an auditable response hash. This is fault
+containment rather than an OS sandbox, and real model outputs have not yet been benchmarked.
 
 An opt-in provider mode supplies [exact parameter substitutions](docs/node-parameter-evidence.md):
 original expressions, literal types, source ranges and corresponding function arguments derived
@@ -464,8 +466,8 @@ Progress and architectural decisions are recorded chronologically in [JOURNAL.md
    broader real-world coverage is still required.
 2. [ ] Measure plan validity, generation success, behavioral equivalence, review corrections, latency, and cost.
    Behavioral input/output contracts, deterministic comparison reports and approved-reference
-   execution are implemented; isolated proposal execution and comparative model measurements
-   remain outstanding.
+   execution are implemented. Statically validated proposal execution is available behind explicit
+   consent; comparative measurements on real provider outputs remain outstanding.
 3. [ ] Compare deterministic and hybrid results on the same corpus.
 4. [ ] Expand deterministic pandas support for `rename`, `replace`, joins, and aggregations.
 5. [ ] Add richer catalog formats and schema-aware diagnostics.

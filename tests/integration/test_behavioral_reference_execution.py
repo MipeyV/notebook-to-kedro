@@ -5,6 +5,7 @@ import pytest
 from notebook_to_kedro.evaluation import (
     behavioral_corpus_comparison_to_dict,
     compare_behavioral_corpus,
+    evaluate_behavioral_proposal,
     execute_behavioral_reference,
     load_behavioral_corpus,
     load_node_code_corpus,
@@ -44,3 +45,16 @@ def test_all_reviewed_behavioral_references_execute_in_isolated_workers() -> Non
     assert report.mismatch_count == 0
     assert report.execution_error_count == 0
     assert payload["match_rate"] == 1.0
+
+    proposal_evaluations = tuple(
+        evaluate_behavioral_proposal(
+            case,
+            nodes[case.node_code_case_id],
+            nodes[case.node_code_case_id].reference_response,
+            allow_untrusted_code_execution=True,
+        )
+        for case in behaviors
+    )
+
+    assert all(evaluation.matched for evaluation in proposal_evaluations)
+    assert len({evaluation.response_sha256 for evaluation in proposal_evaluations}) == 4
