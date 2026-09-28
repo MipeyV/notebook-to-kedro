@@ -40,6 +40,37 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-09-28 - Validated proposal execution connected to behavioral comparison
+
+### Completed
+
+- Added `execute_behavioral_proposal` on the same bounded subprocess path as approved references.
+- Required request-specific static validation before any proposal process can start.
+- Added explicit `allow_untrusted_code_execution=True` consent because the worker is not an OS
+  sandbox.
+- Added proposal-evaluation report schema `1.0`, combining execution, comparison and the exact
+  response SHA-256.
+- Passed the four reviewed responses through the proposal path across all five behavioral scenarios.
+
+### Decisions
+
+- Reuse one worker protocol for references and proposals to prevent security and behavior drift.
+- Materialize inputs inside every fresh worker so reference and proposal runs never share mutable
+  runtime values.
+- Keep proposal execution outside automatic generation and require explicit caller authorization.
+- Do not claim model accuracy from reviewed reference responses routed through the proposal API.
+
+### Open questions
+
+- Choose a container or OS sandbox before positioning proposal execution for untrusted production
+  workloads.
+- Decide which local Ollama models and prompts should form the first measured behavioral benchmark.
+
+### Next step
+
+- Run real local-provider proposals against the reviewed cases and add aggregate behavioral,
+  latency and failure metrics without weakening deterministic fallback behavior.
+
 ## 2026-09-28 - Deterministic behavioral comparison reports implemented
 
 ### Completed

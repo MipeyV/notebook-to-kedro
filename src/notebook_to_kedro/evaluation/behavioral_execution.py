@@ -1,4 +1,4 @@
-"""Isolated execution of approved behavioral reference functions."""
+"""Isolated execution of statically validated behavioral functions."""
 
 from __future__ import annotations
 
@@ -33,6 +33,7 @@ if TYPE_CHECKING:
 
     from notebook_to_kedro.evaluation.behavioral import BehavioralCase
     from notebook_to_kedro.evaluation.node_code_corpus import NodeCodeCase
+    from notebook_to_kedro.generation.code import NodeCodeRequest, NodeCodeResponse
 
 BEHAVIORAL_EXECUTION_SCHEMA_VERSION = "1.0"
 BehavioralExecutionStatus: TypeAlias = Literal[
@@ -72,7 +73,7 @@ _ALLOWED_ENVIRONMENT = frozenset(
 
 @dataclass(frozen=True, slots=True)
 class BehavioralExecutionConfig:
-    """Resource and output bounds for one reference subprocess."""
+    """Resource and output bounds for one behavioral subprocess."""
 
     timeout_seconds: float = 10.0
     max_request_bytes: int = 1_000_000
@@ -125,7 +126,7 @@ class BehavioralExecutionException:
 
 @dataclass(frozen=True, slots=True)
 class BehavioralExecutionResult:
-    """Versioned observation from one isolated reviewed-reference execution."""
+    """Versioned observation from one isolated behavioral execution."""
 
     schema_version: str
     case_id: str
@@ -179,10 +180,50 @@ def execute_behavioral_reference(
     config: BehavioralExecutionConfig | None = None,
 ) -> BehavioralExecutionResult:
     """Execute one approved reference in a fresh isolated Python subprocess."""
+    return _execute_behavioral_response(
+        case,
+        node_code_case,
+        node_code_case.reference_response,
+        target="reference",
+        config=config,
+    )
+
+
+def execute_behavioral_proposal(
+    case: BehavioralCase,
+    node_code_case: NodeCodeCase,
+    proposal: NodeCodeResponse,
+    *,
+    allow_untrusted_code_execution: bool = False,
+    config: BehavioralExecutionConfig | None = None,
+) -> BehavioralExecutionResult:
+    """Validate and execute one proposal in a fresh isolated Python subprocess."""
+    if allow_untrusted_code_execution is not True:
+        raise ValueError(
+            "proposal execution requires allow_untrusted_code_execution=True because "
+            "process isolation is not an OS sandbox"
+        )
+    return _execute_behavioral_response(
+        case,
+        node_code_case,
+        proposal,
+        target="proposal",
+        config=config,
+    )
+
+
+def _execute_behavioral_response(
+    case: BehavioralCase,
+    node_code_case: NodeCodeCase,
+    response: NodeCodeResponse,
+    *,
+    target: Literal["reference", "proposal"],
+    config: BehavioralExecutionConfig | None,
+) -> BehavioralExecutionResult:
     validate_behavioral_case(case, node_code_case)
-    validate_node_code(node_code_case.request, node_code_case.reference_response)
+    validate_node_code(node_code_case.request, response)
     settings = config or BehavioralExecutionConfig()
-    request = _worker_request(case, node_code_case, settings)
+    request = _worker_request(case, node_code_case.request, response, settings)
     encoded_request = json.dumps(request, ensure_ascii=True, allow_nan=False).encode("utf-8")
     if len(encoded_request) > settings.max_request_bytes:
         raise ValueError("behavioral execution request exceeds max_request_bytes")
@@ -211,7 +252,7 @@ def execute_behavioral_reference(
                 case,
                 "timeout",
                 time.perf_counter() - started,
-                f"reference execution exceeded {settings.timeout_seconds:g} seconds",
+                f"{target} execution exceeded {settings.timeout_seconds:g} seconds",
             )
         duration = time.perf_counter() - started
         if return_code != 0:
@@ -219,18 +260,18 @@ def execute_behavioral_reference(
                 case,
                 "process_failure",
                 duration,
-                f"reference worker exited with code {return_code}",
+                f"{target} worker exited with code {return_code}",
             )
         try:
             if result_path.stat().st_size > settings.max_result_bytes:
-                raise ValueError("reference worker result exceeds max_result_bytes")
+                raise ValueError(f"{target} worker result exceeds max_result_bytes")
             payload = json.loads(result_path.read_text(encoding="utf-8"))
             result = _result_from_worker(payload, duration)
             if (result.case_id, result.node_code_case_id) != (
                 case.case_id,
                 case.node_code_case_id,
             ):
-                raise ValueError("reference worker result identity does not match request")
+                raise ValueError(f"{target} worker result identity does not match request")
             return result
         except (OSError, json.JSONDecodeError, ValueError) as error:
             return _failed_result(case, "process_failure", duration, str(error))
@@ -284,19 +325,19 @@ def behavioral_execution_result_to_json(
 
 def _worker_request(
     case: BehavioralCase,
-    node_code_case: NodeCodeCase,
+    request: NodeCodeRequest,
+    response: NodeCodeResponse,
     config: BehavioralExecutionConfig,
 ) -> dict[str, object]:
-    response = node_code_case.reference_response
     return {
         "schema_version": BEHAVIORAL_EXECUTION_SCHEMA_VERSION,
         "case_id": case.case_id,
         "node_code_case_id": case.node_code_case_id,
-        "function_name": node_code_case.request.node_name,
+        "function_name": request.node_name,
         "function_code": response.function_code,
         "imports": list(response.imports),
         "inputs": [behavior_value_to_dict(item.value) for item in case.inputs],
-        "output_names": list(node_code_case.request.outputs),
+        "output_names": list(request.outputs),
         "max_capture_bytes": config.max_capture_bytes,
     }
 

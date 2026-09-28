@@ -1,4 +1,4 @@
-"""Private subprocess worker for reviewed behavioral reference execution."""
+"""Private subprocess worker for validated behavioral function execution."""
 
 from __future__ import annotations
 
@@ -107,14 +107,14 @@ def run_worker_payload(payload: object) -> dict[str, object]:
     except Exception as error:
         return _failure_result(result, "setup_failure", error, stdout, stderr)
 
-    namespace: dict[str, object] = {"__name__": "__behavioral_reference__"}
+    namespace: dict[str, object] = {"__name__": "__behavioral_candidate__"}
     source = "\n".join((*imports, function_code))
     try:
         with redirect_stdout(stdout), redirect_stderr(stderr):
-            exec(compile(source, "<reviewed-reference>", "exec"), namespace)
+            exec(compile(source, "<behavioral-candidate>", "exec"), namespace)
         function = namespace.get(function_name)
         if not callable(function):
-            raise ValueError(f"reference function is not callable: {function_name}")
+            raise ValueError(f"behavioral function is not callable: {function_name}")
     except BaseException as error:
         return _failure_result(result, "setup_failure", error, stdout, stderr)
 
