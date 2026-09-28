@@ -292,8 +292,10 @@ A versioned [behavioral comparison contract](docs/behavioral-comparison-contract
 reviewed runtime scenarios to that independent corpus. It represents finite scalars, nested JSON,
 typed arrays and tables, plus exact, numeric, array and table comparison policies or expected
 exceptions. Approved reference functions now run in isolated Python subprocesses with temporary
-working directories, filtered environments, timeouts and bounded transport. Proposed code is still
-not executed or compared.
+working directories, filtered environments, timeouts and bounded transport. Deterministic
+comparators produce per-output diagnostics and aggregate reports; all five approved references
+match their reviewed expectations. This validates the harness, not model accuracy. Proposed code
+is still not executed or compared.
 
 An opt-in provider mode supplies [exact parameter substitutions](docs/node-parameter-evidence.md):
 original expressions, literal types, source ranges and corresponding function arguments derived
@@ -461,8 +463,9 @@ Progress and architectural decisions are recorded chronologically in [JOURNAL.md
    An initial independent four-task node-code corpus now establishes the schema and review process;
    broader real-world coverage is still required.
 2. [ ] Measure plan validity, generation success, behavioral equivalence, review corrections, latency, and cost.
-   Behavioral input/output and comparator contracts are defined, and approved references execute
-   in controlled subprocesses; proposal execution and comparison reporting remain outstanding.
+   Behavioral input/output contracts, deterministic comparison reports and approved-reference
+   execution are implemented; isolated proposal execution and comparative model measurements
+   remain outstanding.
 3. [ ] Compare deterministic and hybrid results on the same corpus.
 4. [ ] Expand deterministic pandas support for `rename`, `replace`, joins, and aggregations.
 5. [ ] Add richer catalog formats and schema-aware diagnostics.

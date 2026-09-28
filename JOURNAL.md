@@ -40,6 +40,34 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-09-28 - Deterministic behavioral comparison reports implemented
+
+### Completed
+
+- Added comparison report schema `1.0` with distinct matched, mismatch and execution-error states.
+- Implemented type-sensitive exact comparison, tolerant numeric comparison, structural array
+  comparison and policy-driven table comparison.
+- Added exact exception-type and stable message-fragment matching with actionable diagnostics.
+- Added deterministic corpus aggregation and canonical dictionary and JSON serialization.
+- Compared all five approved reference scenarios successfully, including the expected exception.
+
+### Decisions
+
+- Keep shape and value order structural for arrays; make dtype checking explicit.
+- Keep table row order structural while allowing explicit column-order, dtype and index policies.
+- Treat worker and serialization failures separately from completed behavioral mismatches.
+- Interpret the current `5/5` result as harness validation, not generated-code or model accuracy.
+
+### Open questions
+
+- Choose the isolation boundary required before executing model-proposed functions.
+- Decide whether non-finite arrays/tables and richer data types require a behavioral schema update.
+
+### Next step
+
+- Define and implement the isolated proposal-execution boundary, using independently materialized
+  inputs before comparing generated code with the approved reference expectations.
+
 ## 2026-09-28 - Approved behavioral references execute in isolated workers
 
 ### Completed

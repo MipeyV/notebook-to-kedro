@@ -34,6 +34,9 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   directories, filtered environments, timeouts, process-group termination, bounded JSON and text
   output, typed execution reports, and explicit failure categories. Model proposals remain
   non-executable.
+- Deterministic exact, numeric, array and table behavioral comparators with expected-exception
+  matching, actionable per-output diagnostics, versioned case reports and aggregate corpus metrics.
+  All five approved reference scenarios match; model proposals remain non-executable.
 
 ### Planned
 

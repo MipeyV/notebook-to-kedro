@@ -16,7 +16,8 @@ expected outputs and instead record an exception type plus an optional stable me
 
 The initial corpus in `tests/fixtures/evaluation/behavioral/v1/` contains five reviewed scenarios:
 four successful cases for the independent node references and one missing-column exception case.
-These fixtures specify future execution expectations; this milestone does not execute them.
+The approved references execute in isolated workers and all five currently match their reviewed
+expectations.
 
 ## Serializable Values
 
@@ -52,8 +53,18 @@ Every successful output selects one comparator and all of its settings explicitl
 | `table` | Typed table | Tolerances, `equal_nan`, dtype, column-order and index checks. |
 
 Tolerance values must be finite and non-negative. Array and table values cannot select the generic
-exact comparator because their shape, dtype and ordering policies must remain visible. The contract
-defines comparison intent only; comparator implementation remains a separate milestone.
+exact comparator because their shape, dtype and ordering policies must remain visible.
+
+`compare_behavioral_result` implements these policies deterministically. Exact comparison is
+type-sensitive and recursive. Numeric comparison uses explicit absolute and relative tolerances.
+Array comparison always checks shape and flattened order, optionally checks dtype, and applies
+tolerances to numeric values. Table comparison always checks row count and cell values, can align
+columns by name when column order is ignored, and applies the explicit dtype and index policies.
+Non-numeric values remain type-sensitive under array and table comparison.
+
+Expected exceptions match an exact exception type name and, when configured, require the stable
+message fragment to be present. Reports distinguish a completed behavioral `mismatch` from an
+`execution_error` such as setup failure, timeout, worker failure or serialization failure.
 
 ## Approved Reference Execution
 
@@ -87,10 +98,17 @@ The worker uses the current interpreter environment. References that need NumPy,
 scikit-learn or another package require that package to be installed explicitly. A missing package
 is reported as a setup failure rather than triggering installation or network access.
 
+Comparison report schema `1.0` records each output comparator and its first actionable difference,
+or the expected-exception outcome. Corpus reports preserve reviewed case order and aggregate case
+count, matches, mismatches, execution errors, match rate and whole-corpus exact match. Reports have
+canonical dictionary and JSON serializers.
+
 ## API
 
 ```python
 from notebook_to_kedro.evaluation import (
+    compare_behavioral_corpus,
+    execute_behavioral_reference,
     load_behavioral_corpus,
     load_node_code_corpus,
     validate_behavioral_corpus,
@@ -99,6 +117,12 @@ from notebook_to_kedro.evaluation import (
 behavior_cases = load_behavioral_corpus("tests/fixtures/evaluation/behavioral/v1")
 node_cases = load_node_code_corpus("tests/fixtures/evaluation/node_code/v1")
 validate_behavioral_corpus(behavior_cases, node_cases)
+nodes_by_id = {case.case_id: case for case in node_cases}
+results = tuple(
+    execute_behavioral_reference(case, nodes_by_id[case.node_code_case_id])
+    for case in behavior_cases
+)
+report = compare_behavioral_corpus(behavior_cases, results)
 ```
 
 Both loaders use deterministic filename order. Cases must be explicitly approved and case IDs must
@@ -114,6 +138,7 @@ milestone therefore executes only source-controlled, human-approved references. 
 proposal requires an additional isolation decision and must use a fresh process with independently
 materialized inputs so one run cannot mutate evidence observed by the other.
 
-The five approved corpus references now execute successfully, including the reviewed exception
-case. Comparator evaluation and proposal execution are still absent, so behavioral equivalence
-remains `not_evaluated`.
+The five approved corpus references now execute and compare successfully, including the reviewed
+exception case. This validates the execution and comparison harness against reviewed references;
+it is not a model-accuracy result. Proposal execution is still absent, so behavioral equivalence
+for generated code remains `not_evaluated`.
