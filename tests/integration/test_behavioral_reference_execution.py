@@ -3,6 +3,8 @@ from pathlib import Path
 import pytest
 
 from notebook_to_kedro.evaluation import (
+    behavioral_corpus_comparison_to_dict,
+    compare_behavioral_corpus,
     execute_behavioral_reference,
     load_behavioral_corpus,
     load_node_code_corpus,
@@ -33,3 +35,12 @@ def test_all_reviewed_behavioral_references_execute_in_isolated_workers() -> Non
     assert exception is not None
     assert exception.type_name == "KeyError"
     assert "revenue" in exception.message
+
+    report = compare_behavioral_corpus(behaviors, results)
+    payload = behavioral_corpus_comparison_to_dict(report)
+
+    assert report.exact_match
+    assert report.matched_count == 5
+    assert report.mismatch_count == 0
+    assert report.execution_error_count == 0
+    assert payload["match_rate"] == 1.0
