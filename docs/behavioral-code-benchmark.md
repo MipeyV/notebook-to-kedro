@@ -136,3 +136,30 @@ split-holdout proposal introduced a function-local import; both were rejected be
 This is one run over a very small synthetic corpus. The 100% evaluated match rate means that static
 validation was effective for the accepted subset; it does not erase the two rejected nodes. The
 honest current end-to-end observation is 60%, not a general model-accuracy claim.
+
+## Repeated Local Baseline
+
+Three consecutive runs on 2026-10-02 used the same `qwen3:8b` digest, Ollama `0.35.0`, Python
+`3.12.14`, prompt `node-code-v4` and validator `node-code-validation-v4`. The model was
+already loaded locally; the first run includes a larger warm-up cost.
+
+| Run | Accepted nodes | End-to-end matches | Provider duration | Execution duration |
+| --- | --- | --- | --- | --- |
+| 1 | 2/4 | 3/5 (60%) | 29.56 s | 3.67 s |
+| 2 | 2/4 | 3/5 (60%) | 16.01 s | 3.19 s |
+| 3 | 2/4 | 3/5 (60%) | 15.59 s | 3.19 s |
+
+All proposal and scenario statuses were identical across the three runs. Three of four raw responses
+were byte-identical. The `split-holdout` response varied only by one explanatory word in
+`review_notes`; its generated function remained identical and was rejected every time for the same
+function-local import.
+
+The two static failures were systematic:
+
+- `evaluate-regression` omitted the source cell's final standalone `mae` expression;
+- `split-holdout` duplicated the top-level import inside the generated function.
+
+An offline replay of run 1 reproduced 2/4 accepted nodes and 3/5 end-to-end matches without Ollama.
+The comparison correctly treated replay provider latency as non-comparable. These repeated results
+show deterministic outcome stability for this model and configuration, but the corpus remains too
+small to justify prompt tuning or a general accuracy claim.
