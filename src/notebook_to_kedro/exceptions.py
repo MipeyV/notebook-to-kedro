@@ -57,3 +57,7 @@ class PlannerConfigurationError(ValueError):
 
 class PlanningBenchmarkError(ValueError):
     """Raised when a planning benchmark corpus cannot be loaded."""
+
+
+class BehavioralBenchmarkArtifactError(ValueError):
+    """Raised when a behavioral benchmark artifact cannot be handled safely."""

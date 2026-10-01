@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -15,17 +16,32 @@ from notebook_to_kedro.api import (
     validate_conversion_plan,
 )
 from notebook_to_kedro.evaluation import (
+    BehavioralBenchmarkConfiguration,
+    BehavioralExecutionConfig,
+    behavioral_benchmark_artifact_sha256,
+    collect_environment_provenance,
+    compare_behavioral_benchmark_artifacts,
+    create_behavioral_benchmark_artifact,
+    load_behavioral_benchmark_artifact,
+    load_behavioral_corpus,
+    load_node_code_corpus,
     load_planning_corpus,
     planning_benchmark_to_json,
+    replay_behavioral_benchmark,
+    run_behavioral_code_benchmark,
     run_planning_benchmark,
+    write_behavioral_benchmark_artifact,
+    write_json_exclusive,
 )
 from notebook_to_kedro.exceptions import (
+    BehavioralBenchmarkArtifactError,
     ConversionPlanValidationError,
     NotebookLoadError,
     PlannerConfigurationError,
     PlanningBenchmarkError,
     ProjectGenerationError,
 )
+from notebook_to_kedro.generation.code import OllamaNodeCodeProvider
 from notebook_to_kedro.semantic import (
     DEFAULT_OLLAMA_BASE_URL,
     DEFAULT_OLLAMA_TIMEOUT_SECONDS,
@@ -49,7 +65,10 @@ def main(argv: list[str] | None = None) -> int:
             return _generate(args)
         if args.command == "benchmark":
             return _benchmark(args)
+        if args.command == "behavioral-benchmark":
+            return _behavioral_benchmark(args)
     except (
+        BehavioralBenchmarkArtifactError,
         ConversionPlanValidationError,
         NotebookLoadError,
         PlannerConfigurationError,
@@ -121,7 +140,80 @@ def _parser() -> argparse.ArgumentParser:
         help="planning modes to compare (default: deterministic)",
     )
     _add_ollama_arguments(benchmark_parser)
+    behavioral_parser = subparsers.add_parser(
+        "behavioral-benchmark",
+        help="run, replay or compare behavioral node-code benchmark artifacts",
+    )
+    behavioral_actions = behavioral_parser.add_subparsers(dest="behavioral_action", required=True)
+    behavioral_run = behavioral_actions.add_parser(
+        "run", help="run a local Ollama model and write a reproducible artifact"
+    )
+    _add_behavioral_corpus_arguments(behavioral_run)
+    behavioral_run.add_argument("output", type=Path, help="new artifact path to create")
+    behavioral_run.add_argument(
+        "--ollama-model", required=True, metavar="MODEL", help="downloaded local Ollama model"
+    )
+    behavioral_run.add_argument(
+        "--ollama-base-url",
+        default=DEFAULT_OLLAMA_BASE_URL,
+        metavar="URL",
+        help="local Ollama server URL",
+    )
+    behavioral_run.add_argument(
+        "--ollama-timeout",
+        type=float,
+        default=DEFAULT_OLLAMA_TIMEOUT_SECONDS,
+        metavar="SECONDS",
+        help="Ollama request timeout in seconds",
+    )
+    behavioral_run.add_argument(
+        "--include-parameter-evidence",
+        action="store_true",
+        help="include deterministic parameter evidence in node-code prompts",
+    )
+    _add_behavioral_execution_arguments(behavioral_run)
+    behavioral_replay = behavioral_actions.add_parser(
+        "replay", help="revalidate and re-execute recorded responses without Ollama"
+    )
+    behavioral_replay.add_argument("artifact", type=Path, help="source artifact to replay")
+    _add_behavioral_corpus_arguments(behavioral_replay)
+    behavioral_replay.add_argument("output", type=Path, help="new replay artifact path to create")
+    _add_behavioral_execution_arguments(behavioral_replay)
+    behavioral_compare = behavioral_actions.add_parser(
+        "compare", help="compare acceptance, behavior and latency across two artifacts"
+    )
+    behavioral_compare.add_argument("baseline", type=Path, help="baseline artifact")
+    behavioral_compare.add_argument("candidate", type=Path, help="candidate artifact")
+    behavioral_compare.add_argument(
+        "--output", type=Path, default=None, help="new comparison JSON path to create"
+    )
     return parser
+
+
+def _add_behavioral_corpus_arguments(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument("behavioral_corpus", type=Path, help="reviewed behavioral case directory")
+    parser.add_argument("node_code_corpus", type=Path, help="reviewed node-code case directory")
+    parser.add_argument(
+        "--project-root",
+        type=Path,
+        default=Path(),
+        help="root used to resolve reviewed notebook paths",
+    )
+
+
+def _add_behavioral_execution_arguments(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument(
+        "--allow-untrusted-code-execution",
+        action="store_true",
+        help="explicitly authorize validated proposal execution in local subprocesses",
+    )
+    parser.add_argument(
+        "--execution-timeout",
+        type=float,
+        default=10.0,
+        metavar="SECONDS",
+        help="timeout for each isolated behavioral scenario",
+    )
 
 
 def _add_planner_arguments(parser: argparse.ArgumentParser) -> None:
@@ -213,6 +305,122 @@ def _benchmark(args: argparse.Namespace) -> int:
         raise PlanningBenchmarkError(str(error)) from error
     report = run_planning_benchmark(cases, planners, project_root=args.project_root)
     sys.stdout.write(planning_benchmark_to_json(report))
+    return 0
+
+
+def _behavioral_benchmark(args: argparse.Namespace) -> int:
+    try:
+        if args.behavioral_action == "run":
+            return _run_behavioral_benchmark(args)
+        if args.behavioral_action == "replay":
+            return _replay_behavioral_benchmark(args)
+        if args.behavioral_action == "compare":
+            return _compare_behavioral_benchmarks(args)
+    except ValueError as error:
+        if isinstance(error, BehavioralBenchmarkArtifactError):
+            raise
+        raise BehavioralBenchmarkArtifactError(str(error)) from error
+    raise BehavioralBenchmarkArtifactError(
+        f"unsupported behavioral benchmark action: {args.behavioral_action!r}"
+    )
+
+
+def _run_behavioral_benchmark(args: argparse.Namespace) -> int:
+    behaviors = load_behavioral_corpus(args.behavioral_corpus)
+    nodes = load_node_code_corpus(args.node_code_corpus)
+    execution = BehavioralExecutionConfig(timeout_seconds=args.execution_timeout)
+    provider = OllamaNodeCodeProvider(
+        args.ollama_model,
+        base_url=args.ollama_base_url,
+        timeout_seconds=args.ollama_timeout,
+        include_parameter_evidence=args.include_parameter_evidence,
+    )
+    report = run_behavioral_code_benchmark(
+        behaviors,
+        nodes,
+        provider,
+        allow_untrusted_code_execution=args.allow_untrusted_code_execution,
+        project_root=args.project_root,
+        prompt_version=provider.prompt_version,
+        execution_config=execution,
+    )
+    configuration = BehavioralBenchmarkConfiguration(
+        ollama_base_url=args.ollama_base_url,
+        provider_timeout_seconds=args.ollama_timeout,
+        include_parameter_evidence=args.include_parameter_evidence,
+        execution=execution,
+    )
+    provenance = collect_environment_provenance(
+        project_root=args.project_root,
+        ollama_base_url=args.ollama_base_url,
+        model_name=args.ollama_model,
+    )
+    artifact = create_behavioral_benchmark_artifact(report, provenance, configuration)
+    write_behavioral_benchmark_artifact(args.output, artifact)
+    sys.stdout.write(
+        f"Created behavioral benchmark artifact `{args.output}` "
+        f"({behavioral_benchmark_artifact_sha256(artifact)})\n"
+    )
+    return 0
+
+
+def _replay_behavioral_benchmark(args: argparse.Namespace) -> int:
+    source = load_behavioral_benchmark_artifact(args.artifact)
+    behaviors = load_behavioral_corpus(args.behavioral_corpus)
+    nodes = load_node_code_corpus(args.node_code_corpus)
+    execution = BehavioralExecutionConfig(
+        timeout_seconds=args.execution_timeout,
+        max_request_bytes=source.configuration.execution.max_request_bytes,
+        max_result_bytes=source.configuration.execution.max_result_bytes,
+        max_capture_bytes=source.configuration.execution.max_capture_bytes,
+    )
+    configuration = BehavioralBenchmarkConfiguration(
+        ollama_base_url=source.configuration.ollama_base_url,
+        provider_timeout_seconds=source.configuration.provider_timeout_seconds,
+        include_parameter_evidence=source.configuration.include_parameter_evidence,
+        execution=execution,
+    )
+    report = replay_behavioral_benchmark(
+        source,
+        behaviors,
+        nodes,
+        allow_untrusted_code_execution=args.allow_untrusted_code_execution,
+        project_root=args.project_root,
+        execution_config=execution,
+    )
+    artifact = create_behavioral_benchmark_artifact(
+        report,
+        collect_environment_provenance(project_root=args.project_root),
+        configuration,
+        mode="replay",
+        source_artifact_sha256=behavioral_benchmark_artifact_sha256(source),
+    )
+    write_behavioral_benchmark_artifact(args.output, artifact)
+    sys.stdout.write(
+        f"Created behavioral benchmark replay `{args.output}` "
+        f"({behavioral_benchmark_artifact_sha256(artifact)})\n"
+    )
+    return 0
+
+
+def _compare_behavioral_benchmarks(args: argparse.Namespace) -> int:
+    baseline = load_behavioral_benchmark_artifact(args.baseline)
+    candidate = load_behavioral_benchmark_artifact(args.candidate)
+    comparison = compare_behavioral_benchmark_artifacts(baseline, candidate)
+    if args.output is not None:
+        write_json_exclusive(args.output, comparison)
+        sys.stdout.write(f"Created behavioral benchmark comparison `{args.output}`\n")
+    else:
+        sys.stdout.write(
+            json.dumps(
+                comparison,
+                indent=2,
+                sort_keys=True,
+                ensure_ascii=True,
+                allow_nan=False,
+            )
+            + "\n"
+        )
     return 0
 
 

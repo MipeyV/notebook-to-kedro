@@ -40,6 +40,40 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-10-02 - Behavioral benchmarks become replayable evidence
+
+### Completed
+
+- Added artifact schema `1.0` around complete behavioral benchmark reports, including raw model
+  responses, canonical report hashes, execution configuration and environment provenance.
+- Added atomic exclusive JSON publication so benchmark evidence is never partially written or
+  silently replaced.
+- Added offline replay through the current parser, static validator and behavioral worker without
+  contacting Ollama.
+- Added artifact comparison for acceptance, per-node and per-scenario changes, end-to-end behavior,
+  execution duration and comparable live-provider latency.
+- Added `behavioral-benchmark run`, `replay` and `compare` CLI workflows with deterministic tests.
+
+### Decisions
+
+- Keep the existing benchmark report schema unchanged and place reproducibility metadata in a
+  separate versioned envelope.
+- Preserve every raw response as the replay input; parsed output alone is insufficient to audit a
+  future parser or validator change.
+- Set replay provider duration to zero and refuse to present it as comparable live-model latency.
+- Continue requiring explicit untrusted-code execution consent for both live runs and replay.
+
+### Open questions
+
+- Define the first larger representative notebook corpus and its review process.
+- Decide which prompt and local-model variants should be measured repeatedly before setting a V2
+  release threshold.
+
+### Next step
+
+- Capture repeated live artifacts for baseline prompt/model variants, compare their failure modes,
+  then expand the held-out corpus before tuning prompts against the current five scenarios.
+
 ## 2026-09-28 - Real provider outputs receive end-to-end behavioral metrics
 
 ### Completed

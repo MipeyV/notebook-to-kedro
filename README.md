@@ -300,7 +300,10 @@ explicit opt-in subprocess path and compared with an auditable response hash. Th
 containment rather than an OS sandbox. A
 [behavioral code benchmark](docs/behavioral-code-benchmark.md) now measures real provider outputs
 without dropping rejected nodes. The first local `qwen3:8b` run accepted 2/4 nodes and matched 3/5
-reviewed scenarios end to end; this small single run is not a general accuracy claim.
+reviewed scenarios end to end; this small single run is not a general accuracy claim. Versioned
+benchmark artifacts now preserve raw responses, model and runtime provenance, configuration and
+integrity hashes. They can be replayed without Ollama and compared for static, behavioral and
+latency regressions through the CLI.
 
 An opt-in provider mode supplies [exact parameter substitutions](docs/node-parameter-evidence.md):
 original expressions, literal types, source ranges and corresponding function arguments derived
@@ -473,6 +476,8 @@ Progress and architectural decisions are recorded chronologically in [JOURNAL.md
    consent. An initial local benchmark now reports static acceptance, end-to-end behavioral results
    and latency; broader repeated measurements, review corrections and cost remain outstanding.
 3. [ ] Compare deterministic and hybrid results on the same corpus.
+   Behavioral code artifacts can now compare two provider runs and replay identical raw responses;
+   broader planning and generation comparisons remain outstanding.
 4. [ ] Expand deterministic pandas support for `rename`, `replace`, joins, and aggregations.
 5. [ ] Add richer catalog formats and schema-aware diagnostics.
 6. [ ] Define release thresholds for a supported V2 preview.

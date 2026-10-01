@@ -53,44 +53,62 @@ Proposal execution is opt-in because a subprocess is fault containment, not an O
 validation constrains the response to the source-derived node body, but the original notebook code
 can still access the filesystem or network. Run only in a controlled environment.
 
-```python
-from pathlib import Path
-
-from notebook_to_kedro.evaluation import (
-    behavioral_code_benchmark_to_dict,
-    behavioral_code_benchmark_to_json,
-    load_behavioral_corpus,
-    load_node_code_corpus,
-    run_behavioral_code_benchmark,
-)
-from notebook_to_kedro.generation.code import OllamaNodeCodeProvider
-
-behaviors = load_behavioral_corpus("tests/fixtures/evaluation/behavioral/v1")
-nodes = load_node_code_corpus("tests/fixtures/evaluation/node_code/v1")
-provider = OllamaNodeCodeProvider(
-    "qwen3:8b",
-    timeout_seconds=120,
-    include_parameter_evidence=True,
-)
-report = run_behavioral_code_benchmark(
-    behaviors,
-    nodes,
-    provider,
-    allow_untrusted_code_execution=True,
-    project_root=".",
-    prompt_version=provider.prompt_version,
-)
-print(behavioral_code_benchmark_to_dict(report)["summary"])
-
-output = Path("generated/behavioral-code-qwen3-8b-v1.json")
-output.parent.mkdir(parents=True, exist_ok=True)
-with output.open("x", encoding="utf-8") as stream:
-    stream.write(behavioral_code_benchmark_to_json(report))
+```bash
+uv run notebook-to-kedro behavioral-benchmark run \
+  tests/fixtures/evaluation/behavioral/v1 \
+  tests/fixtures/evaluation/node_code/v1 \
+  generated/behavioral-code-qwen3-8b-v1.json \
+  --project-root . \
+  --ollama-model qwen3:8b \
+  --include-parameter-evidence \
+  --allow-untrusted-code-execution
 ```
 
 The default test suite uses deterministic fake providers and workers. It does not contact Ollama or
 execute model output. Real runs require an already downloaded local model; the benchmark never pulls
-a model automatically.
+a model automatically. The command also reads the local `/api/version` and `/api/tags` endpoints to
+record the exact Ollama version and full model digest.
+
+## Reproducible Artifacts
+
+Artifact schema `1.0` wraps the complete benchmark report without dropping raw model responses. It
+records:
+
+- the canonical report SHA-256;
+- live or replay mode and, for replay, the complete source-artifact SHA-256;
+- repository revision, Python version, platform, Ollama version and model digest;
+- prompt and validator versions from the embedded report;
+- provider, parameter-evidence and bounded execution settings.
+
+Artifact and comparison writes are atomic and exclusive. Parent directories are created, but an
+existing output is never replaced. Reports contain notebook source and model output and must be
+treated as potentially sensitive evidence.
+
+Replay parses and statically validates every stored raw response again, then re-executes only the
+responses accepted by the current validator. It makes no Ollama request:
+
+```bash
+uv run notebook-to-kedro behavioral-benchmark replay \
+  generated/behavioral-code-qwen3-8b-v1.json \
+  tests/fixtures/evaluation/behavioral/v1 \
+  tests/fixtures/evaluation/node_code/v1 \
+  generated/behavioral-code-qwen3-8b-v1-replay.json \
+  --project-root . \
+  --allow-untrusted-code-execution
+```
+
+Compare two artifacts on static acceptance, end-to-end behavior, per-node and per-scenario changes,
+execution duration and live-provider latency:
+
+```bash
+uv run notebook-to-kedro behavioral-benchmark compare \
+  generated/baseline.json \
+  generated/candidate.json \
+  --output generated/comparison.json
+```
+
+Provider latency is comparable only between two live artifacts. Replay proposal durations are zero
+by definition and are never presented as a model-latency delta.
 
 ## Initial Local Observation
 
