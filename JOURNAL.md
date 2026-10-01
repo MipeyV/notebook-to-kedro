@@ -40,6 +40,39 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-10-02 - Repeated qwen3 baseline confirms stable failure modes
+
+### Completed
+
+- Captured three independent live `qwen3:8b` artifacts with Ollama `0.35.0` and complete model,
+  runtime and repository provenance.
+- Replayed the first artifact offline through the current parser, validator and behavioral worker.
+- Compared run 1 against runs 2 and 3 and against its replay.
+- Reproduced 2/4 statically accepted nodes and 3/5 end-to-end scenario matches in every live run and
+  in replay, with no proposal or scenario regression.
+- Confirmed byte-identical raw responses for three tasks; the fourth changed only one explanatory
+  word while preserving the same rejected function.
+
+### Decisions
+
+- Do not commit raw artifacts because they contain source and model output; keep only aggregate,
+  reviewable measurements in project documentation.
+- Treat the first-run provider duration as warm-up affected and retain all three durations rather
+  than reporting only the fastest run.
+- Classify both failures as systematic prompt/model behavior: one omitted standalone expression and
+  one duplicated import inside the function.
+
+### Open questions
+
+- Determine whether these failure modes persist on a broader corpus and another lightweight local
+  code model.
+- Define representative notebook categories and review criteria for the next held-out cases.
+
+### Next step
+
+- Expand the independent corpus before modifying the prompt, then compare the unchanged baseline
+  against at least one other local model on the same reviewed evidence.
+
 ## 2026-10-02 - Behavioral benchmarks become replayable evidence
 
 ### Completed

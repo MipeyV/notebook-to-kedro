@@ -303,7 +303,9 @@ without dropping rejected nodes. The first local `qwen3:8b` run accepted 2/4 nod
 reviewed scenarios end to end; this small single run is not a general accuracy claim. Versioned
 benchmark artifacts now preserve raw responses, model and runtime provenance, configuration and
 integrity hashes. They can be replayed without Ollama and compared for static, behavioral and
-latency regressions through the CLI.
+latency regressions through the CLI. A three-run `qwen3:8b` baseline reproduced the same 2/4 static
+acceptance and 3/5 end-to-end matches every time; the corpus is still too small for a general
+accuracy claim.
 
 An opt-in provider mode supplies [exact parameter substitutions](docs/node-parameter-evidence.md):
 original expressions, literal types, source ranges and corresponding function arguments derived
