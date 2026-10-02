@@ -315,6 +315,12 @@ scenarios, while the same two original nodes remained statically rejected. The h
 reflects the added passing cases, not a model improvement; these synthetic task-cell measurements
 do not establish full-notebook conversion accuracy.
 
+A [controlled local code-model comparison](docs/local-code-model-comparison.md) kept the same
+`v2` inputs, prompt and validator. Three `qwen2.5-coder:7b` runs and an offline replay each accepted
+7/8 nodes and matched 16/17 scenarios (94.12%). The split node improved without observed regressions;
+the source-expression omission remained rejected. This is a pilot-model signal, not a general
+accuracy claim, a fine-tuned model or an automatic change to conversion defaults.
+
 An opt-in provider mode supplies [exact parameter substitutions](docs/node-parameter-evidence.md):
 original expressions, literal types, source ranges and corresponding function arguments derived
 from V1 rules. Ambiguous mappings fail before model I/O in this experimental mode. The static validator

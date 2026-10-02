@@ -241,3 +241,8 @@ This is a repeated local development observation over eight synthetic task cells
 accuracy estimate, a complete-notebook conversion result or an assessment of structure-planner
 quality. The next comparison should evaluate another local code model on exactly the same dataset,
 prompt and validator before tuning prompts or considering fine-tuning.
+
+That [controlled comparison](local-code-model-comparison.md) now records three `qwen2.5-coder:7b`
+runs and an offline replay at 7/8 accepted nodes and 16/17 end-to-end matches. The split node passed
+without a regression on the remaining cases; the metric node's source-expression omission remained
+statically rejected. The comparison documents exact provenance, unchanged inputs, timings and limits.

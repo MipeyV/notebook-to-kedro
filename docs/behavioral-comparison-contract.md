@@ -184,3 +184,7 @@ both the frozen `v1` and expanded `v2` corpora are documented in the
 replay each matched fifteen of seventeen scenarios end to end; two scenarios were not executed
 because their node proposals failed static validation. These are synthetic corpus observations,
 not proof of equivalence for arbitrary notebooks.
+
+A [same-contract code-model comparison](local-code-model-comparison.md) subsequently evaluated
+`qwen2.5-coder:7b`: three live runs and a replay each matched sixteen of seventeen scenarios, with
+one scenario blocked by static rejection and no observed regression against the baseline.
