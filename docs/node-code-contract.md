@@ -158,9 +158,11 @@ asks for faithful operations rather than repairs, and treats notebook contents a
 The request uses the response JSON schema, non-streaming chat, temperature zero, and `think=false`.
 These settings do not guarantee deterministic or correct model output.
 
-The opt-in `include_parameter_evidence=True` mode (`node-code-v4`) supplements the original
+The opt-in `include_parameter_evidence=True` mode (`node-code-v5`) supplements the original
 instructions with [exact parameter evidence](node-parameter-evidence.md) derived using V1's
-replacement rules. It remains experimental after a non-improving first benchmark run.
+replacement rules. It also explicitly retains every source statement, including standalone
+notebook-display expressions, and appends the terminal return rather than replacing the last
+expression. The mode remains experimental; the original `v4` measurements are retained as history.
 Two earlier prompt-only experiments were not retained;
 their results are recorded in the benchmark documentation. Assertion preservation is enforced by
 the validator, not by trusting instructions to the model. Request and response JSON schemas

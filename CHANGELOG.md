@@ -9,6 +9,9 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Experimental prompt `node-code-v5` explicitly retains all source statements and notebook-display
+  expressions, appending the required return rather than replacing the last expression. The default
+  `node-code-v1`, parameter evidence, schemas and strict validator remain unchanged.
 - Controlled local `qwen2.5-coder:7b` comparison on the unchanged `v2` corpus, prompt and validator:
   three runs and an offline replay each accepted 7/8 nodes and matched 16/17 scenarios. The split
   node improved over `qwen3:8b` without observed regressions; conversion defaults remain unchanged.
