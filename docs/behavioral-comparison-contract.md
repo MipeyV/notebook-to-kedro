@@ -179,5 +179,8 @@ container or operating-system sandbox with filesystem, network, CPU and memory p
 
 Approved references execute and compare successfully across both dataset revisions, including all
 expected exceptions. This validates the execution and comparison harness. Real provider runs on
-the frozen `v1` corpus are documented in the [benchmark](behavioral-code-benchmark.md); provider
-results on the expanded `v2` corpus remain unmeasured.
+both the frozen `v1` and expanded `v2` corpora are documented in the
+[benchmark](behavioral-code-benchmark.md). Three unchanged `qwen3:8b` runs on `v2` and one offline
+replay each matched fifteen of seventeen scenarios end to end; two scenarios were not executed
+because their node proposals failed static validation. These are synthetic corpus observations,
+not proof of equivalence for arbitrary notebooks.

@@ -9,6 +9,9 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Repeated local `qwen3:8b` measurements on independent dataset `v2`: three runs and an offline
+  replay each accepted 6/8 nodes and matched 15/17 scenarios end to end. Published per-task results,
+  timings and provenance without committing raw model artifacts or changing prompts and validators.
 - Expanded independent dataset `v2` with eight node references, seventeen behavioral scenarios and
   seventeen static negative controls. New cases cover aggregation, joins, categorical encoding and
   date features; the measured `v1` baseline is preserved unchanged.

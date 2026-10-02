@@ -40,6 +40,45 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-10-02 - Expanded qwen3 baseline passes the four new tasks
+
+### Completed
+
+- Captured three live artifacts on dataset `v2` at repository revision
+  `4aaf9da417e444aac9dcbe274f274d865e46e357`, using the unchanged `qwen3:8b` model digest,
+  Ollama `0.35.0`, Python `3.12.14`, prompt `node-code-v4` and validator `node-code-validation-v4`.
+- Reproduced 6/8 statically accepted nodes and 15/17 end-to-end scenario matches in all three runs.
+- Verified all twelve scenarios linked to aggregation, joins, categorical encoding and date features,
+  including their expected exceptions, with no behavioral mismatch or execution error.
+- Confirmed the original two rejection causes: an omitted standalone `mae` expression and a
+  duplicated function-local import in the split node. Their two scenarios were not executed.
+- Replayed the first artifact offline with the same outcomes and compared it with both later runs
+  and the replay; all proposal statuses and evaluated scenario statuses remained unchanged.
+- Confirmed byte-identical raw responses for seven tasks and identical function code for all eight;
+  the split node varied only by one word in its review note.
+- Documented per-task results, provider/execution durations, configuration and artifact identities.
+- Passed all 880 tests on Python `3.12.14` with 100% line and branch coverage, plus Ruff lint and
+  formatting checks, mypy and distribution builds. No production code or test fixtures changed.
+
+### Decisions
+
+- Preserve the existing prompt, validator and reviewed corpus during this measurement.
+- Treat 88.24% on `v2` as a dataset-specific observation, not an improvement over 60% on `v1`:
+  the original subset still matches only three of five scenarios.
+- Keep raw artifacts private in ignored `generated/`; commit only aggregate, reviewable evidence.
+- Distinguish strict static-contract failures from observed behavioral mismatches; rejected proposals
+  were not executed and their semantic equivalence remains unmeasured.
+
+### Open questions
+
+- Determine whether another lightweight local code model meets the unchanged fidelity contract.
+- Extend evaluation beyond synthetic task cells to representative complete notebooks.
+
+### Next step
+
+- Compare a second local code model on the same eight nodes and seventeen scenarios, retaining the
+  same prompt and validator before considering prompt tuning or fine-tuning.
+
 ## 2026-10-02 - Independent evaluation expands to eight tasks
 
 ### Completed

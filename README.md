@@ -308,8 +308,12 @@ integrity hashes. They can be replayed without Ollama and compared for static, b
 latency regressions through the CLI. A three-run `qwen3:8b` baseline reproduced the same 2/4 static
 acceptance and 3/5 end-to-end matches every time; the corpus is still too small for a general
 accuracy claim.
-The measured 60% result applies to the frozen `v1` dataset. Model performance on the expanded `v2`
-dataset has not yet been measured.
+The measured 60% result applies to the frozen `v1` dataset. Three unchanged `qwen3:8b` runs on the
+expanded `v2` dataset each accepted 6/8 nodes (75%) and matched 15/17 scenarios end to end (88.24%);
+an offline replay reproduced the same outcomes. All four new tasks passed all twelve linked
+scenarios, while the same two original nodes remained statically rejected. The higher percentage
+reflects the added passing cases, not a model improvement; these synthetic task-cell measurements
+do not establish full-notebook conversion accuracy.
 
 An opt-in provider mode supplies [exact parameter substitutions](docs/node-parameter-evidence.md):
 original expressions, literal types, source ranges and corresponding function arguments derived
