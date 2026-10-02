@@ -9,6 +9,11 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Archived statement-retention prompt experiment with a reproducible candidate revision, live
+  measurements and offline replays for both local models. The regressive `v5` candidate was not
+  retained; active prompts `v1`/`v4`, parameter evidence, schemas and the strict validator are unchanged.
+- Prompt regression digests and source-data checks covering standalone expressions, calls and
+  assertions in both provider modes.
 - Controlled local `qwen2.5-coder:7b` comparison on the unchanged `v2` corpus, prompt and validator:
   three runs and an offline replay each accepted 7/8 nodes and matched 16/17 scenarios. The split
   node improved over `qwen3:8b` without observed regressions; conversion defaults remain unchanged.

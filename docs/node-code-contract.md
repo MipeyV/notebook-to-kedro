@@ -166,6 +166,10 @@ their results are recorded in the benchmark documentation. Assertion preservatio
 the validator, not by trusting instructions to the model. Request and response JSON schemas
 remain at version `1.0`; prompt, derived evidence and validator versions evolve independently.
 
+An archived [statement-retention `v5` candidate](node-code-statement-retention.md) corrected one
+omission but caused other strict-contract regressions on both local models. It was not retained;
+the active opt-in mode remains `v4`, with no automatic code repair or validator relaxation.
+
 `complete` returns raw assistant JSON; use `request_node_code` to parse and statically validate it.
 Transport failures raise `NodeCodeProviderError` from `notebook_to_kedro.exceptions`, with stable
 `code` and `message` fields inherited from the transport diagnostic. Invalid model JSON or code

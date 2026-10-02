@@ -246,3 +246,7 @@ That [controlled comparison](local-code-model-comparison.md) now records three `
 runs and an offline replay at 7/8 accepted nodes and 16/17 end-to-end matches. The split node passed
 without a regression on the remaining cases; the metric node's source-expression omission remained
 statically rejected. The comparison documents exact provenance, unchanged inputs, timings and limits.
+
+The subsequent [statement-retention prompt experiment](node-code-statement-retention.md) corrected
+the metric omission but regressed end-to-end results on both models. Its archived `v5` candidate
+is not active; opt-in prompt `v4` and the original comparison results remain the current baseline.

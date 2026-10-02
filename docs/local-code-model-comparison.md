@@ -179,3 +179,8 @@ the validator unchanged. Once these observed cases guide prompt changes, treat t
 regressions rather than untouched held-out evidence, and add fresh independently reviewed tasks
 before claiming broader generalization. Complete notebooks and the structure-planner role still
 require separate evaluation.
+
+The subsequent [statement-retention prompt experiment](node-code-statement-retention.md) was
+rejected after cross-task regressions on both models. Active prompt selection remains `v4` when
+parameter evidence is enabled; the next investigation is deterministic shell assembly under an
+explicit contract, without weakening validation or silently repairing rejected responses.

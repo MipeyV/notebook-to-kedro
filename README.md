@@ -321,6 +321,11 @@ A [controlled local code-model comparison](docs/local-code-model-comparison.md) 
 the source-expression omission remained rejected. This is a pilot-model signal, not a general
 accuracy claim, a fine-tuned model or an automatic change to conversion defaults.
 
+A later [statement-retention prompt experiment](docs/node-code-statement-retention.md) retained the
+omitted metric expression but regressed other tasks on both models. The `v5` candidate was rejected;
+active prompts remain default `v1` and opt-in `v4`, with the strict validator unchanged. Current
+measured `v4` results therefore remain 15/17 for `qwen3:8b` and 16/17 for `qwen2.5-coder:7b`.
+
 An opt-in provider mode supplies [exact parameter substitutions](docs/node-parameter-evidence.md):
 original expressions, literal types, source ranges and corresponding function arguments derived
 from V1 rules. Ambiguous mappings fail before model I/O in this experimental mode. The static validator
