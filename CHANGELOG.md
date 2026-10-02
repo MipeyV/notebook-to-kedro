@@ -9,6 +9,9 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Controlled local `qwen2.5-coder:7b` comparison on the unchanged `v2` corpus, prompt and validator:
+  three runs and an offline replay each accepted 7/8 nodes and matched 16/17 scenarios. The split
+  node improved over `qwen3:8b` without observed regressions; conversion defaults remain unchanged.
 - Repeated local `qwen3:8b` measurements on independent dataset `v2`: three runs and an offline
   replay each accepted 6/8 nodes and matched 15/17 scenarios end to end. Published per-task results,
   timings and provenance without committing raw model artifacts or changing prompts and validators.

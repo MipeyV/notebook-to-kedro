@@ -40,6 +40,47 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-10-02 - Local code model improves split fidelity without validator changes
+
+### Completed
+
+- Installed `qwen2.5-coder:7b` locally in Ollama, verifying Q4_K_M model digest
+  `dae161e27b0e90dd1856c8bb3209201fd6736d8eb66298e75ed87571486f4364`.
+- Captured three live candidate artifacts at revision `0a259927d0db954fdadb4b9d4d1b18afc29543f3`
+  using Ollama `0.35.0`, Python `3.12.14`, prompt `node-code-v4` and validator
+  `node-code-validation-v4`, then replayed the first artifact without model calls.
+- Reproduced 7/8 accepted nodes and 16/17 end-to-end scenario matches in all three runs and replay,
+  compared with 6/8 accepted nodes and 15/17 matches for the unchanged `qwen3:8b` baseline.
+- Verified identical source hashes, request objects, prompt/validator versions and configuration
+  between models; the measured repository revisions differ only in documentation.
+- Confirmed the split node keeps its import at module level and matches the reviewed output arrays.
+  The metric node still omits the final standalone `mae` expression and is rejected before execution.
+- Compared every live candidate with baseline run 1 and compared candidate run 1 with later runs
+  and replay. Cross-model comparisons each found one improved proposal and scenario, with no
+  proposal or evaluated-scenario regressions. All eight candidate raw responses were byte-identical.
+- Documented the protocol, artifact identities, per-task outcomes and all timings, retaining raw
+  artifacts in ignored `generated/` rather than publishing notebook source and model responses.
+- Passed all 880 tests on Python `3.12.14` with 100% line and branch coverage, Ruff checks, mypy and
+  distribution builds. Production code, prompt, validator, corpus and defaults remain unchanged.
+
+### Decisions
+
+- Treat the code-specialized model as a candidate for the next pilot, not a general accuracy claim.
+- Keep strict static rejection and separate it from runtime mismatches; the rejected metric
+  proposal's behavioral equivalence remains unmeasured.
+- Do not infer a speed advantage from the variable live timings or compare replay model latency.
+- Retain the deterministic conversion default and explicit opt-in model selection.
+
+### Open questions
+
+- Can a general statement-retention instruction resolve the remaining rejection for both models?
+- How does the candidate perform on fresh task families and complete notebooks?
+
+### Next step
+
+- Introduce a versioned prompt clarification without relaxing validation, using the current corpus
+  as development regressions and fresh independent cases for later generalization measurements.
+
 ## 2026-10-02 - Expanded qwen3 baseline passes the four new tasks
 
 ### Completed
