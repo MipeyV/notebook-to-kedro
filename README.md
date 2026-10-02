@@ -283,18 +283,20 @@ reviewed notebooks. Accepted proposals are never written into generated projects
 An explicit evaluation API can execute them after static validation and caller consent;
 behavioral results remain distinct from static benchmark scores.
 
-An [independent node-code corpus](docs/node-code-evaluation-corpus.md) adds four held-out notebook
-tasks with manually reviewed references and nine known-invalid proposals. It measures compilation,
+An [independent node-code corpus](docs/node-code-evaluation-corpus.md) now contains eight notebook
+tasks with hand-authored references and seventeen known-invalid proposals. The expanded `v2`
+dataset preserves the four-case `v1` baseline and adds aggregation, joins, categorical encoding and
+calendar features. It measures compilation,
 static validation, AST fidelity, detected errors and false rejections without using the V1 generator
 as ground truth or calling a model. This remains a small synthetic validator corpus, not an accuracy
 claim or behavioral-equivalence result.
 
-A versioned [behavioral comparison contract](docs/behavioral-comparison-contract.md) now links five
+A versioned [behavioral comparison contract](docs/behavioral-comparison-contract.md) now links seventeen
 reviewed runtime scenarios to that independent corpus. It represents finite scalars, nested JSON,
 typed arrays and tables, plus exact, numeric, array and table comparison policies or expected
 exceptions. Approved reference functions now run in isolated Python subprocesses with temporary
 working directories, filtered environments, timeouts and bounded transport. Deterministic
-comparators produce per-output diagnostics and aggregate reports; all five approved references
+comparators produce per-output diagnostics and aggregate reports; all seventeen reference scenarios
 match their reviewed expectations. Statically valid proposals can now be executed through an
 explicit opt-in subprocess path and compared with an auditable response hash. This is fault
 containment rather than an OS sandbox. A
@@ -306,6 +308,8 @@ integrity hashes. They can be replayed without Ollama and compared for static, b
 latency regressions through the CLI. A three-run `qwen3:8b` baseline reproduced the same 2/4 static
 acceptance and 3/5 end-to-end matches every time; the corpus is still too small for a general
 accuracy claim.
+The measured 60% result applies to the frozen `v1` dataset. Model performance on the expanded `v2`
+dataset has not yet been measured.
 
 An opt-in provider mode supplies [exact parameter substitutions](docs/node-parameter-evidence.md):
 original expressions, literal types, source ranges and corresponding function arguments derived
@@ -470,7 +474,7 @@ Progress and architectural decisions are recorded chronologically in [JOURNAL.md
 ### Phase 4: evaluation and broader coverage
 
 1. [ ] Build a versioned corpus of representative notebooks beyond controlled fixtures.
-   An initial independent four-task node-code corpus now establishes the schema and review process;
+   An independent eight-task node-code corpus now provides seventeen behavioral scenarios;
    broader real-world coverage is still required.
 2. [ ] Measure plan validity, generation success, behavioral equivalence, review corrections, latency, and cost.
    Behavioral input/output contracts, deterministic comparison reports and approved-reference

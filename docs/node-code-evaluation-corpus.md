@@ -20,6 +20,35 @@ The initial corpus has four references and nine invalid examples. It is intentio
 synthetic. It establishes an independent contract and test mechanism, not representative model
 accuracy or a release threshold.
 
+## Expanded Corpus
+
+The dataset revision in `tests/fixtures/evaluation/node_code/v2/` preserves the four original cases
+and adds four independent source tasks. Its JSON schema remains `1.0`; `v2` identifies the expanded
+dataset, not a change to the case format or an application release.
+
+| Task | Source behavior | Negative controls |
+| --- | --- | --- |
+| `aggregate-orders` | Sorted customer totals and order counts, including missing amounts and refunds. | Count non-null amounts instead of orders; change group ordering. |
+| `join-customers` | Left enrichment, unmatched-region fallback and many-to-one key validation. | Drop unmatched orders with an inner join; omit duplicate-key validation. |
+| `encode-categories` | Integer indicators for every observed segment, with zero indicators for missing values. | Drop the baseline category; change indicator dtypes. |
+| `date-features` | Strict ISO date parsing, month strings and Monday-based integer weekdays. | Coerce invalid dates; change weekday numbering. |
+
+The complete dataset has eight references and seventeen invalid examples. Every reference passes
+static validation and every invalid example is rejected with its expected diagnostic. Corpus tests
+also require the copied baseline cases to equal their original `v1` contracts.
+
+The associated [behavioral corpus](behavioral-comparison-contract.md) has seventeen scenarios. Each
+new task has a nominal scenario, a boundary scenario and an expected exception. Its expected results
+are hand-authored; they are checked by executing approved references and never derived from the V1
+generator. Integer and object casts in the source make observable table dtypes explicit across
+pandas versions. Dates are inputs as strings and outputs as month strings and integer weekdays, so
+the behavioral schema does not need timestamp support.
+
+These are small synthetic task cells with explicit external inputs. They broaden the operations
+under evaluation but do not establish performance on full, real-world notebooks or add those
+operations to deterministic project generation. The new cases were authored before running models
+on them, with the existing prompt and validator unchanged.
+
 ## Loading And Integrity
 
 `load_node_code_corpus` reads strict JSON in deterministic filename order. Unknown or missing
@@ -74,13 +103,15 @@ These are validator regression results over stored reviewed examples, not model 
 reference functions and invalid proposals are compiled but never imported or executed. The corpus
 does not establish data-dependent behavior, package availability, side-effect safety or semantic
 equivalence. A separate [behavioral comparison contract](behavioral-comparison-contract.md) now
-defines explicit inputs, expected outputs or exceptions and comparator policies. Execution,
-resource limits and result comparison remain the next milestone.
+defines explicit inputs, expected outputs or exceptions and comparator policies. Approved references
+and explicitly authorized proposals now execute through the bounded worker and deterministic
+comparators. This validates the harness; model performance requires separate provider runs.
 
 ## Extension Rules
 
 New cases should come from notebooks not used to tune the prompt or validator under evaluation.
 References must be manually reviewed rather than copied from generated output. Each invalid example
 should represent one documented failure mode and use the narrowest stable diagnostic fragment.
-Notebook hashes and exact code-cell source must be updated together. Breaking case-format changes
-require a new corpus schema directory and version.
+Notebook hashes and exact code-cell source must be updated together. Keep measured dataset revisions
+immutable and publish expanded datasets in a new directory. Breaking case-format changes also
+require a new schema version.

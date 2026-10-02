@@ -1,0 +1,66 @@
+{
+  "schema_version": "1.0",
+  "case_id": "aggregate-orders",
+  "notebook_path": "tests/fixtures/notebooks/node_code_eval/aggregate_orders.ipynb",
+  "source_sha256": "d1bf6a093494da8c2c255f31acae6b44290d8069645d4cb5250d675d1d1bb8e1",
+  "review_status": "approved",
+  "request": {
+    "schema_version": "1.0",
+    "request_id": "independent-aggregate-orders",
+    "task_id": "reviewed-task-0005",
+    "node_name": "aggregate_customer_orders",
+    "raw_source": "summary = transactions.groupby(\"customer_id\", as_index=False, sort=True).agg(\n    total_amount=(\"amount\", \"sum\"), order_count=(\"amount\", \"size\")\n)\nsummary = summary.astype({\"customer_id\": \"object\"})",
+    "source_cell_ids": [
+      "aggregation-code"
+    ],
+    "statement_ids": [
+      "aggregation-code-stmt-0000",
+      "aggregation-code-stmt-0001"
+    ],
+    "inputs": [
+      "transactions"
+    ],
+    "outputs": [
+      "summary"
+    ],
+    "parameter_names": [],
+    "parameter_arguments": [],
+    "allowed_imports": []
+  },
+  "reference_response": {
+    "schema_version": "1.0",
+    "request_id": "independent-aggregate-orders",
+    "task_id": "reviewed-task-0005",
+    "function_code": "def aggregate_customer_orders(transactions):\n    summary = transactions.groupby(\"customer_id\", as_index=False, sort=True).agg(\n        total_amount=(\"amount\", \"sum\"), order_count=(\"amount\", \"size\")\n    )\n    summary = summary.astype({\"customer_id\": \"object\"})\n    return summary\n",
+    "imports": [],
+    "review_notes": [
+      "Totals and row counts are computed independently; missing amounts still count as orders."
+    ]
+  },
+  "invalid_examples": [
+    {
+      "id": "count-drops-missing-amounts",
+      "response": {
+        "schema_version": "1.0",
+        "request_id": "independent-aggregate-orders",
+        "task_id": "reviewed-task-0005",
+        "function_code": "def aggregate_customer_orders(transactions):\n    summary = transactions.groupby(\"customer_id\", as_index=False, sort=True).agg(\n        total_amount=(\"amount\", \"sum\"), order_count=(\"amount\", \"count\")\n    )\n    summary = summary.astype({\"customer_id\": \"object\"})\n    return summary\n",
+        "imports": [],
+        "review_notes": []
+      },
+      "expected_error_contains": "function body must preserve source AST"
+    },
+    {
+      "id": "changed-group-order",
+      "response": {
+        "schema_version": "1.0",
+        "request_id": "independent-aggregate-orders",
+        "task_id": "reviewed-task-0005",
+        "function_code": "def aggregate_customer_orders(transactions):\n    summary = transactions.groupby(\"customer_id\", as_index=False, sort=False).agg(\n        total_amount=(\"amount\", \"sum\"), order_count=(\"amount\", \"size\")\n    )\n    summary = summary.astype({\"customer_id\": \"object\"})\n    return summary\n",
+        "imports": [],
+        "review_notes": []
+      },
+      "expected_error_contains": "function body must preserve source AST"
+    }
+  ]
+}

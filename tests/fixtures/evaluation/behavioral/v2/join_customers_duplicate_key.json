@@ -1,0 +1,67 @@
+{
+  "schema_version": "1.0",
+  "case_id": "join-customers-duplicate-key",
+  "node_code_case_id": "join-customers",
+  "review_status": "approved",
+  "inputs": [
+    {
+      "argument_name": "orders",
+      "value": {
+        "kind": "table",
+        "columns": [
+          "order_id",
+          "customer_id",
+          "amount"
+        ],
+        "dtypes": [
+          "int64",
+          "object",
+          "int64"
+        ],
+        "rows": [
+          [
+            1,
+            "a",
+            4
+          ]
+        ],
+        "index": [
+          0
+        ]
+      }
+    },
+    {
+      "argument_name": "customers",
+      "value": {
+        "kind": "table",
+        "columns": [
+          "customer_id",
+          "region"
+        ],
+        "dtypes": [
+          "object",
+          "object"
+        ],
+        "rows": [
+          [
+            "a",
+            "north"
+          ],
+          [
+            "a",
+            "south"
+          ]
+        ],
+        "index": [
+          0,
+          1
+        ]
+      }
+    }
+  ],
+  "expected_outputs": [],
+  "expected_exception": {
+    "type_name": "MergeError",
+    "message_contains": "not a many-to-one merge"
+  }
+}

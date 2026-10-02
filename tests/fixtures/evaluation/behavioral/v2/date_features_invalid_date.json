@@ -1,0 +1,36 @@
+{
+  "schema_version": "1.0",
+  "case_id": "date-features-invalid-date",
+  "node_code_case_id": "date-features",
+  "review_status": "approved",
+  "inputs": [
+    {
+      "argument_name": "events",
+      "value": {
+        "kind": "table",
+        "columns": [
+          "event_id",
+          "occurred_at"
+        ],
+        "dtypes": [
+          "int64",
+          "object"
+        ],
+        "rows": [
+          [
+            1,
+            "2023-02-29"
+          ]
+        ],
+        "index": [
+          0
+        ]
+      }
+    }
+  ],
+  "expected_outputs": [],
+  "expected_exception": {
+    "type_name": "ValueError",
+    "message_contains": null
+  }
+}

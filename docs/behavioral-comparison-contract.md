@@ -21,6 +21,17 @@ four successful cases for the independent node references and one missing-column
 The approved references execute in isolated workers and all five currently match their reviewed
 expectations.
 
+The expanded `tests/fixtures/evaluation/behavioral/v2/` dataset preserves these five scenarios and
+adds twelve for aggregation, customer joins, categorical encoding and calendar features. It has
+seventeen scenarios for eight nodes: twelve successful cases and five expected exceptions. Every
+new node has nominal, boundary and exception evidence with explicit dtype, order and index checks.
+The case schema remains `1.0`.
+
+All seventeen approved scenarios pass through both reference and proposal execution. Eight
+checked-in semantic negative controls also produce behavioral mismatches when executed directly in
+the test worker. This verifies that the new expectations detect the documented logic changes, in
+addition to their rejection by the static validator.
+
 ## Serializable Values
 
 Runtime evidence uses immutable tagged values rather than Python pickle or arbitrary object
@@ -166,8 +177,7 @@ environments. Static validation constrains a proposal to the reviewed source-der
 does not make the original notebook code safe. Stronger production isolation still requires a
 container or operating-system sandbox with filesystem, network, CPU and memory policies.
 
-The five approved corpus references now execute and compare successfully, including the reviewed
-exception case. This validates the execution and comparison harness against reviewed references;
-it is not a model-accuracy result. The same four reviewed responses also pass through the proposal
-path across all five scenarios. Real provider outputs have not yet been measured, so generated-code
-accuracy remains `not_evaluated`.
+Approved references execute and compare successfully across both dataset revisions, including all
+expected exceptions. This validates the execution and comparison harness. Real provider runs on
+the frozen `v1` corpus are documented in the [benchmark](behavioral-code-benchmark.md); provider
+results on the expanded `v2` corpus remain unmeasured.

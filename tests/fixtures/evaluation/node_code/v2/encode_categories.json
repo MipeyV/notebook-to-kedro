@@ -1,0 +1,73 @@
+{
+  "schema_version": "1.0",
+  "case_id": "encode-categories",
+  "notebook_path": "tests/fixtures/notebooks/node_code_eval/encode_categories.ipynb",
+  "source_sha256": "9c15ad130c61abf4aeff14a3c0e1d7f3d71c872885e4378a629fcd4771d077bd",
+  "review_status": "approved",
+  "request": {
+    "schema_version": "1.0",
+    "request_id": "independent-encode-categories",
+    "task_id": "reviewed-task-0007",
+    "node_name": "encode_customer_segments",
+    "raw_source": "encoded = pd.get_dummies(frame, columns=[\"segment\"], dtype=\"int64\")",
+    "source_cell_ids": [
+      "encoding-code"
+    ],
+    "statement_ids": [
+      "encoding-code-stmt-0000"
+    ],
+    "inputs": [
+      "frame"
+    ],
+    "outputs": [
+      "encoded"
+    ],
+    "parameter_names": [],
+    "parameter_arguments": [],
+    "allowed_imports": [
+      "import pandas as pd"
+    ]
+  },
+  "reference_response": {
+    "schema_version": "1.0",
+    "request_id": "independent-encode-categories",
+    "task_id": "reviewed-task-0007",
+    "function_code": "def encode_customer_segments(frame):\n    encoded = pd.get_dummies(frame, columns=[\"segment\"], dtype=\"int64\")\n    return encoded\n",
+    "imports": [
+      "import pandas as pd"
+    ],
+    "review_notes": [
+      "All observed categories receive explicit integer indicators; missing values receive zero indicators."
+    ]
+  },
+  "invalid_examples": [
+    {
+      "id": "dropped-baseline-category",
+      "response": {
+        "schema_version": "1.0",
+        "request_id": "independent-encode-categories",
+        "task_id": "reviewed-task-0007",
+        "function_code": "def encode_customer_segments(frame):\n    encoded = pd.get_dummies(frame, columns=[\"segment\"], dtype=\"int64\", drop_first=True)\n    return encoded\n",
+        "imports": [
+          "import pandas as pd"
+        ],
+        "review_notes": []
+      },
+      "expected_error_contains": "function body must preserve source AST"
+    },
+    {
+      "id": "changed-indicator-dtype",
+      "response": {
+        "schema_version": "1.0",
+        "request_id": "independent-encode-categories",
+        "task_id": "reviewed-task-0007",
+        "function_code": "def encode_customer_segments(frame):\n    encoded = pd.get_dummies(frame, columns=[\"segment\"], dtype=\"float64\")\n    return encoded\n",
+        "imports": [
+          "import pandas as pd"
+        ],
+        "review_notes": []
+      },
+      "expected_error_contains": "function body must preserve source AST"
+    }
+  ]
+}

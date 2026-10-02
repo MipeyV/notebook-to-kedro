@@ -1,0 +1,76 @@
+{
+  "schema_version": "1.0",
+  "case_id": "encode-categories-missing-value",
+  "node_code_case_id": "encode-categories",
+  "review_status": "approved",
+  "inputs": [
+    {
+      "argument_name": "frame",
+      "value": {
+        "kind": "table",
+        "columns": [
+          "units",
+          "segment"
+        ],
+        "dtypes": [
+          "int64",
+          "object"
+        ],
+        "rows": [
+          [
+            1,
+            null
+          ],
+          [
+            2,
+            "basic"
+          ]
+        ],
+        "index": [
+          6,
+          3
+        ]
+      }
+    }
+  ],
+  "expected_outputs": [
+    {
+      "output_name": "encoded",
+      "value": {
+        "kind": "table",
+        "columns": [
+          "units",
+          "segment_basic"
+        ],
+        "dtypes": [
+          "int64",
+          "int64"
+        ],
+        "rows": [
+          [
+            1,
+            0
+          ],
+          [
+            2,
+            1
+          ]
+        ],
+        "index": [
+          6,
+          3
+        ]
+      },
+      "comparison": {
+        "kind": "table",
+        "absolute_tolerance": 1e-12,
+        "relative_tolerance": 1e-9,
+        "equal_nan": true,
+        "check_dtype": true,
+        "check_order": true,
+        "check_index": true
+      }
+    }
+  ],
+  "expected_exception": null
+}

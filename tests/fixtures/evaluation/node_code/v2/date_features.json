@@ -1,0 +1,74 @@
+{
+  "schema_version": "1.0",
+  "case_id": "date-features",
+  "notebook_path": "tests/fixtures/notebooks/node_code_eval/date_features.ipynb",
+  "source_sha256": "76fdc9b0c20bc67c2f9ad49792a352da381adb20e217b2a7290fccec74ce32e0",
+  "review_status": "approved",
+  "request": {
+    "schema_version": "1.0",
+    "request_id": "independent-date-features",
+    "task_id": "reviewed-task-0008",
+    "node_name": "extract_calendar_features",
+    "raw_source": "parsed = pd.to_datetime(events[\"occurred_at\"], format=\"%Y-%m-%d\", errors=\"raise\")\ncalendar = events.assign(\n    month=parsed.dt.strftime(\"%Y-%m\").astype(\"object\"),\n    weekday=parsed.dt.dayofweek.astype(\"int64\"),\n)",
+    "source_cell_ids": [
+      "calendar-code"
+    ],
+    "statement_ids": [
+      "calendar-code-stmt-0000",
+      "calendar-code-stmt-0001"
+    ],
+    "inputs": [
+      "events"
+    ],
+    "outputs": [
+      "calendar"
+    ],
+    "parameter_names": [],
+    "parameter_arguments": [],
+    "allowed_imports": [
+      "import pandas as pd"
+    ]
+  },
+  "reference_response": {
+    "schema_version": "1.0",
+    "request_id": "independent-date-features",
+    "task_id": "reviewed-task-0008",
+    "function_code": "def extract_calendar_features(events):\n    parsed = pd.to_datetime(events[\"occurred_at\"], format=\"%Y-%m-%d\", errors=\"raise\")\n    calendar = events.assign(\n        month=parsed.dt.strftime(\"%Y-%m\").astype(\"object\"),\n        weekday=parsed.dt.dayofweek.astype(\"int64\"),\n    )\n    return calendar\n",
+    "imports": [
+      "import pandas as pd"
+    ],
+    "review_notes": [
+      "Dates parse strictly; month strings and Monday-based integer weekdays fit the existing behavioral value schema."
+    ]
+  },
+  "invalid_examples": [
+    {
+      "id": "silently-coerced-invalid-dates",
+      "response": {
+        "schema_version": "1.0",
+        "request_id": "independent-date-features",
+        "task_id": "reviewed-task-0008",
+        "function_code": "def extract_calendar_features(events):\n    parsed = pd.to_datetime(events[\"occurred_at\"], format=\"%Y-%m-%d\", errors=\"coerce\")\n    calendar = events.assign(\n        month=parsed.dt.strftime(\"%Y-%m\").astype(\"object\"),\n        weekday=parsed.dt.dayofweek.astype(\"int64\"),\n    )\n    return calendar\n",
+        "imports": [
+          "import pandas as pd"
+        ],
+        "review_notes": []
+      },
+      "expected_error_contains": "function body must preserve source AST"
+    },
+    {
+      "id": "changed-weekday-origin",
+      "response": {
+        "schema_version": "1.0",
+        "request_id": "independent-date-features",
+        "task_id": "reviewed-task-0008",
+        "function_code": "def extract_calendar_features(events):\n    parsed = pd.to_datetime(events[\"occurred_at\"], format=\"%Y-%m-%d\", errors=\"raise\")\n    calendar = events.assign(\n        month=parsed.dt.strftime(\"%Y-%m\").astype(\"object\"),\n        weekday=parsed.dt.dayofweek.astype(\"int64\") + 1,\n    )\n    return calendar\n",
+        "imports": [
+          "import pandas as pd"
+        ],
+        "review_notes": []
+      },
+      "expected_error_contains": "function body must preserve source AST"
+    }
+  ]
+}

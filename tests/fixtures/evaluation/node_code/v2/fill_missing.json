@@ -1,0 +1,55 @@
+{
+  "schema_version": "1.0",
+  "case_id": "fill-missing",
+  "notebook_path": "tests/fixtures/notebooks/node_code_eval/fill_missing.ipynb",
+  "source_sha256": "43d64b504525eb8ce6f1ee22646bb8a996af15e1024079d6d78e040ce52eacaf",
+  "review_status": "approved",
+  "request": {
+    "schema_version": "1.0",
+    "request_id": "independent-fill-missing",
+    "task_id": "reviewed-task-0003",
+    "node_name": "impute_missing_values",
+    "raw_source": "clean = frame.fillna(value={\"score\": 0.0, \"label\": \"unknown\"})",
+    "source_cell_ids": ["imputation-code"],
+    "statement_ids": ["imputation-code-stmt-0000"],
+    "inputs": ["frame"],
+    "outputs": ["clean"],
+    "parameter_names": ["impute_missing_values.fillna_values"],
+    "parameter_arguments": ["missing_values"],
+    "allowed_imports": []
+  },
+  "reference_response": {
+    "schema_version": "1.0",
+    "request_id": "independent-fill-missing",
+    "task_id": "reviewed-task-0003",
+    "function_code": "def impute_missing_values(frame, missing_values):\n    clean = frame.fillna(value=missing_values)\n    return clean\n",
+    "imports": [],
+    "review_notes": ["The whole dictionary literal becomes one Kedro parameter argument."]
+  },
+  "invalid_examples": [
+    {
+      "id": "ignored-parameter",
+      "response": {
+        "schema_version": "1.0",
+        "request_id": "independent-fill-missing",
+        "task_id": "reviewed-task-0003",
+        "function_code": "def impute_missing_values(frame, missing_values):\n    clean = frame.fillna(value={\"score\": 0.0, \"label\": \"unknown\"})\n    return clean\n",
+        "imports": [],
+        "review_notes": []
+      },
+      "expected_error_contains": "function body must preserve source AST"
+    },
+    {
+      "id": "nested-parameter-dictionary",
+      "response": {
+        "schema_version": "1.0",
+        "request_id": "independent-fill-missing",
+        "task_id": "reviewed-task-0003",
+        "function_code": "def impute_missing_values(frame, missing_values):\n    clean = frame.fillna(value={\"values\": missing_values})\n    return clean\n",
+        "imports": [],
+        "review_notes": []
+      },
+      "expected_error_contains": "function body must preserve source AST"
+    }
+  ]
+}
