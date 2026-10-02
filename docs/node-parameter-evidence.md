@@ -68,14 +68,11 @@ for malformed source) instead of asking the model to invent a mapping.
 ## Provider Integration
 
 The default prompt remains `node-code-v1`. Explicitly enabling `include_parameter_evidence=True`
-on `OllamaNodeCodeProvider` or `render_node_code_prompt` selects experimental `node-code-v5`,
+on `OllamaNodeCodeProvider` or `render_node_code_prompt` selects experimental `node-code-v4`,
 identified by `NODE_CODE_PARAMETER_PROMPT_VERSION`. It includes the versioned substitutions as a
 separate JSON block alongside the unchanged original task evidence. It instructs the provider to
 replace the entire indicated expression with the bare argument name and leave other occurrences
-alone. Version `v5` adds explicit retention of every source statement, including final
-notebook-display expressions, followed by an appended terminal return. The source evidence and
-substitution derivation are unchanged from `v4`; no benchmark-specific example is embedded.
-This option supplements the original prompt; the rejected prompts v2/v3 are not enabled.
+alone. This option supplements the original prompt; the rejected prompts v2/v3 are not enabled.
 
 ```python
 from notebook_to_kedro.generation.code import OllamaNodeCodeProvider, build_parameter_evidence
@@ -87,10 +84,12 @@ provider = OllamaNodeCodeProvider("qwen3:8b", include_parameter_evidence=True)
 
 Here `request` is a `NodeCodeRequest`, for example from the node-code contract documentation.
 The provider's read-only `prompt_version` reports the selected mode for benchmark provenance.
-The option remains experimental and is not the default. The earlier `v4` measurements did not
-establish general accuracy, and changing the instructions does not prove correct model output.
-Default adapter calls preserve the previous prompt and behavior; a pinned prompt digest tests
-that the fixture's default `v1` prompt remains byte-identical.
+The option is not the default because the first measured corpus run did not improve overall
+acceptance or AST matching. Default adapter calls preserve the previous prompt and behavior.
+
+The later [statement-retention `v5` experiment](node-code-statement-retention.md) was rejected after
+cross-task regressions. Both active fixture prompts are pinned by regression digests; source
+expressions and assertions remain unchanged JSON data in both modes, rather than trusted commands.
 
 Request and response JSON schemas remain at `1.0`: no new serialized request field is required,
 and existing fixtures and fake providers remain compatible. Derived evidence is available to

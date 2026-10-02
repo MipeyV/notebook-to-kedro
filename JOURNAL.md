@@ -40,6 +40,50 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-10-03 - Statement-retention prompt rejected after cross-task regressions
+
+### Completed
+
+- Tested generic source-statement retention instructions and assembly examples without changing
+  source requests, parameter derivation, schemas, corpus references or validator policy.
+- Archived the complete `node-code-v5` candidate at clean revision
+  `f5252ce230f92137328f1058d8fbe934d418c9e6` before capturing one live run per local model.
+- Evaluated the same eight nodes and seventeen scenarios with the existing model digests,
+  Ollama `0.35.0`, Python `3.12.14` and validator `node-code-validation-v4`.
+- Observed 6/8 accepted nodes and 13/17 matches for `qwen3:8b`, versus 6/8 and 15/17 on `v4`.
+  The code model accepted 3/8 and matched 6/17, versus 7/8 and 16/17 on `v4`.
+- Confirmed the metric node retains its final expression and matches its reviewed scenario on
+  both models, but other proposals add source-absent expressions, lose parameter arguments or
+  put imports outside the requested function structure.
+- Compared each candidate with its `v4` baseline and replayed both offline. Replays reproduced
+  the same statuses; the validator blocked every rejected proposal before execution.
+- Restored production code exactly to `main`: active prompts remain default `v1` and opt-in `v4`.
+- Added pinned fixture digests for both active prompts and six source-data regression cases for
+  standalone expressions, calls and assertions without invoking a provider.
+- Passed 886 tests on Python `3.12.14` and 870 deterministic tests on each of Python `3.11.16` and
+  `3.13.14`, all with 100% line and branch coverage, plus Ruff, mypy and distribution builds.
+
+### Decisions
+
+- Do not promote a prompt based on one corrected task when other reviewed tasks regress.
+- Preserve the archived candidate revision and private raw artifacts, but keep only aggregate
+  reviewable evidence in documentation. Uncommitted exploratory drafts are not reproducible baselines.
+- Stop the candidate experiment after observed regressions rather than claim three-run stability.
+- Treat the inspected corpus as development regressions for later prompt work; new generalization
+  measurements require fresh independently reviewed cases.
+- Keep strict validation and avoid silent repair or execution of rejected code.
+
+### Open questions
+
+- Can a deterministic function shell eliminate structural failures while leaving useful source-body
+  reasoning to the model under an explicit contract?
+- What fresh task families and complete notebooks should validate that approach?
+
+### Next step
+
+- Specify and test a versioned source-body proposal contract with deterministic signature, import
+  boundaries and terminal-return assembly, retaining validation and explicit execution consent.
+
 ## 2026-10-02 - Local code model improves split fidelity without validator changes
 
 ### Completed

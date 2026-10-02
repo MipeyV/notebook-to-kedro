@@ -158,15 +158,17 @@ asks for faithful operations rather than repairs, and treats notebook contents a
 The request uses the response JSON schema, non-streaming chat, temperature zero, and `think=false`.
 These settings do not guarantee deterministic or correct model output.
 
-The opt-in `include_parameter_evidence=True` mode (`node-code-v5`) supplements the original
+The opt-in `include_parameter_evidence=True` mode (`node-code-v4`) supplements the original
 instructions with [exact parameter evidence](node-parameter-evidence.md) derived using V1's
-replacement rules. It also explicitly retains every source statement, including standalone
-notebook-display expressions, and appends the terminal return rather than replacing the last
-expression. The mode remains experimental; the original `v4` measurements are retained as history.
+replacement rules. It remains experimental after a non-improving first benchmark run.
 Two earlier prompt-only experiments were not retained;
 their results are recorded in the benchmark documentation. Assertion preservation is enforced by
 the validator, not by trusting instructions to the model. Request and response JSON schemas
 remain at version `1.0`; prompt, derived evidence and validator versions evolve independently.
+
+An archived [statement-retention `v5` candidate](node-code-statement-retention.md) corrected one
+omission but caused other strict-contract regressions on both local models. It was not retained;
+the active opt-in mode remains `v4`, with no automatic code repair or validator relaxation.
 
 `complete` returns raw assistant JSON; use `request_node_code` to parse and statically validate it.
 Transport failures raise `NodeCodeProviderError` from `notebook_to_kedro.exceptions`, with stable

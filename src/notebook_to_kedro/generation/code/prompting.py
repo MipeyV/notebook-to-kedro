@@ -10,7 +10,7 @@ from notebook_to_kedro.generation.code.evidence import (
 )
 
 NODE_CODE_PROMPT_VERSION = "node-code-v1"
-NODE_CODE_PARAMETER_PROMPT_VERSION = "node-code-v5"
+NODE_CODE_PARAMETER_PROMPT_VERSION = "node-code-v4"
 
 
 def render_node_code_prompt(
@@ -22,7 +22,6 @@ def render_node_code_prompt(
     version = NODE_CODE_PROMPT_VERSION
     parameter_rules: tuple[str, ...] = ()
     parameter_block: tuple[str, ...] = ()
-    assembly_example: tuple[str, ...] = ()
     if include_parameter_evidence:
         version = NODE_CODE_PARAMETER_PROMPT_VERSION
         parameter_evidence = {
@@ -30,12 +29,6 @@ def render_node_code_prompt(
             "substitutions": [asdict(item) for item in build_parameter_evidence(request)],
         }
         parameter_rules = (
-            "- Retain every raw_source statement in its original order, "
-            "including standalone expressions.",
-            "- Keep final notebook-display expressions even when they repeat an output variable.",
-            "- Indent the retained source body and apply only the listed parameter substitutions.",
-            "- APPEND the required terminal return after the source body; "
-            "never replace a source expression.",
             "- Apply each parameter substitution at its exact source range only.",
             "- Replace the WHOLE source_expression with the bare function_argument name.",
             "- value_type describes the entire parameter value, not an element inside it.",
@@ -44,18 +37,6 @@ def render_node_code_prompt(
         parameter_block = (
             "Parameter substitutions JSON (zero-based character offsets in raw_source):",
             json.dumps(parameter_evidence, indent=2, ensure_ascii=True, sort_keys=True),
-            "",
-        )
-        assembly_example = (
-            "Assembly example (structure only; use the task evidence, not these names):",
-            "For raw_source 'value = sum(items)\\nvalue', signature 'def compute_total(items):'",
-            "and output 'value', function_code is the COMPLETE function:",
-            "def compute_total(items):",
-            "    value = sum(items)",
-            "    value",
-            "    return value",
-            "The standalone 'value' remains; the return is an additional statement.",
-            "Allowed imports belong only in the separate imports array, never in function_code.",
             "",
         )
     return "\n".join(
@@ -87,7 +68,6 @@ def render_node_code_prompt(
             "- Keep exactly one return, at the end, using the ordered output names below.",
             "- review_notes is an array of unique nonempty strings; use [] when none apply.",
             "",
-            *assembly_example,
             "Required signature:",
             signature,
             "Required terminal return:",

@@ -72,7 +72,7 @@ def test_prompt_preserves_all_evidence_and_exact_interface(code_request: NodeCod
 
 def test_opt_in_prompt_includes_parameter_evidence(code_request: NodeCodeRequest) -> None:
     prompt = render_node_code_prompt(code_request, include_parameter_evidence=True)
-    assert NODE_CODE_PARAMETER_PROMPT_VERSION == "node-code-v5"
+    assert NODE_CODE_PARAMETER_PROMPT_VERSION == "node-code-v4"
     assert prompt.startswith(f"Node code prompt version: {NODE_CODE_PARAMETER_PROMPT_VERSION}\n")
     assert "Replace the WHOLE source_expression" in prompt
     parameter_json = prompt.split(
@@ -81,6 +81,9 @@ def test_opt_in_prompt_includes_parameter_evidence(code_request: NodeCodeRequest
     substitution = json.loads(parameter_json)["substitutions"][0]
     assert substitution["function_argument"] == "prepare_features_drop_columns"
     assert substitution["value_type"] == "list"
+    assert hashlib.sha256(prompt.encode("utf-8")).hexdigest() == (
+        "abc9244ff2ce1080ae1044b5e7bebc05b3822d856b58978ccf1bf6f5d51e6562"
+    )
 
 
 @pytest.mark.parametrize("include_parameter_evidence", [False, True])
@@ -92,7 +95,7 @@ def test_opt_in_prompt_includes_parameter_evidence(code_request: NodeCodeRequest
         "result = sum(items)\nassert result >= 0\nresult",
     ],
 )
-def test_statement_retention_rules_are_opt_in_and_keep_source_as_data(
+def test_prompts_keep_standalone_source_as_data(
     code_request: NodeCodeRequest, source: str, *, include_parameter_evidence: bool
 ) -> None:
     request = replace(
@@ -106,18 +109,8 @@ def test_statement_retention_rules_are_opt_in_and_keep_source_as_data(
     )
     prompt = render_node_code_prompt(request, include_parameter_evidence=include_parameter_evidence)
 
-    for rule in (
-        "Retain every raw_source statement in its original order, including standalone expressions",
-        "Keep final notebook-display expressions even when they repeat an output variable",
-        "Indent the retained source body and apply only the listed parameter substitutions",
-        "APPEND the required terminal return after the source body; "
-        "never replace a source expression",
-        "Assembly example (structure only; use the task evidence, not these names)",
-        "function_code is the COMPLETE function",
-        "The standalone 'value' remains; the return is an additional statement",
-        "Allowed imports belong only in the separate imports array, never in function_code",
-    ):
-        assert (rule in prompt) is include_parameter_evidence
+    assert ("Parameter substitutions JSON" in prompt) is include_parameter_evidence
+    assert "Assembly example" not in prompt
     assert prompt == render_node_code_prompt(
         request, include_parameter_evidence=include_parameter_evidence
     )
