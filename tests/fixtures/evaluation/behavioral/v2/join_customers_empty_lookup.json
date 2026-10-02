@@ -1,0 +1,104 @@
+{
+  "schema_version": "1.0",
+  "case_id": "join-customers-empty-lookup",
+  "node_code_case_id": "join-customers",
+  "review_status": "approved",
+  "inputs": [
+    {
+      "argument_name": "orders",
+      "value": {
+        "kind": "table",
+        "columns": [
+          "order_id",
+          "customer_id",
+          "amount"
+        ],
+        "dtypes": [
+          "int64",
+          "object",
+          "int64"
+        ],
+        "rows": [
+          [
+            1,
+            "a",
+            4
+          ],
+          [
+            2,
+            "b",
+            8
+          ]
+        ],
+        "index": [
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "argument_name": "customers",
+      "value": {
+        "kind": "table",
+        "columns": [
+          "customer_id",
+          "region"
+        ],
+        "dtypes": [
+          "object",
+          "object"
+        ],
+        "rows": [],
+        "index": []
+      }
+    }
+  ],
+  "expected_outputs": [
+    {
+      "output_name": "enriched",
+      "value": {
+        "kind": "table",
+        "columns": [
+          "order_id",
+          "customer_id",
+          "amount",
+          "region"
+        ],
+        "dtypes": [
+          "int64",
+          "object",
+          "int64",
+          "object"
+        ],
+        "rows": [
+          [
+            1,
+            "a",
+            4,
+            "unknown"
+          ],
+          [
+            2,
+            "b",
+            8,
+            "unknown"
+          ]
+        ],
+        "index": [
+          0,
+          1
+        ]
+      },
+      "comparison": {
+        "kind": "table",
+        "absolute_tolerance": 1e-12,
+        "relative_tolerance": 1e-9,
+        "equal_nan": true,
+        "check_dtype": true,
+        "check_order": true,
+        "check_index": true
+      }
+    }
+  ],
+  "expected_exception": null
+}

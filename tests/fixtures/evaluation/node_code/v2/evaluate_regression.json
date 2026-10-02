@@ -1,0 +1,67 @@
+{
+  "schema_version": "1.0",
+  "case_id": "evaluate-regression",
+  "notebook_path": "tests/fixtures/notebooks/node_code_eval/evaluate_regression.ipynb",
+  "source_sha256": "b522ca45494c505b06e1522a9147b7bb2cce3fecd142adebd601a656eaad87fc",
+  "review_status": "approved",
+  "request": {
+    "schema_version": "1.0",
+    "request_id": "independent-evaluate-regression",
+    "task_id": "reviewed-task-0002",
+    "node_name": "evaluate_regression",
+    "raw_source": "mae = mean_absolute_error(y_true, predictions)\nmae",
+    "source_cell_ids": ["evaluation-code"],
+    "statement_ids": ["evaluation-code-stmt-0000", "evaluation-code-stmt-0001"],
+    "inputs": ["y_true", "predictions"],
+    "outputs": ["mae"],
+    "parameter_names": [],
+    "parameter_arguments": [],
+    "allowed_imports": ["from sklearn.metrics import mean_absolute_error"]
+  },
+  "reference_response": {
+    "schema_version": "1.0",
+    "request_id": "independent-evaluate-regression",
+    "task_id": "reviewed-task-0002",
+    "function_code": "def evaluate_regression(y_true, predictions):\n    mae = mean_absolute_error(y_true, predictions)\n    mae\n    return mae\n",
+    "imports": ["from sklearn.metrics import mean_absolute_error"],
+    "review_notes": ["The standalone metric expression is intentionally preserved."]
+  },
+  "invalid_examples": [
+    {
+      "id": "omitted-standalone-expression",
+      "response": {
+        "schema_version": "1.0",
+        "request_id": "independent-evaluate-regression",
+        "task_id": "reviewed-task-0002",
+        "function_code": "def evaluate_regression(y_true, predictions):\n    mae = mean_absolute_error(y_true, predictions)\n    return mae\n",
+        "imports": ["from sklearn.metrics import mean_absolute_error"],
+        "review_notes": []
+      },
+      "expected_error_contains": "function body must preserve source AST"
+    },
+    {
+      "id": "missing-required-import",
+      "response": {
+        "schema_version": "1.0",
+        "request_id": "independent-evaluate-regression",
+        "task_id": "reviewed-task-0002",
+        "function_code": "def evaluate_regression(y_true, predictions):\n    mae = mean_absolute_error(y_true, predictions)\n    mae\n    return mae\n",
+        "imports": [],
+        "review_notes": []
+      },
+      "expected_error_contains": "unknown global names: mean_absolute_error"
+    },
+    {
+      "id": "malformed-function",
+      "response": {
+        "schema_version": "1.0",
+        "request_id": "independent-evaluate-regression",
+        "task_id": "reviewed-task-0002",
+        "function_code": "def evaluate_regression(y_true, predictions(:\n    return mae\n",
+        "imports": [],
+        "review_notes": []
+      },
+      "expected_error_contains": "Invalid node code"
+    }
+  ]
+}

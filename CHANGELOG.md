@@ -9,6 +9,9 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Expanded independent dataset `v2` with eight node references, seventeen behavioral scenarios and
+  seventeen static negative controls. New cases cover aggregation, joins, categorical encoding and
+  date features; the measured `v1` baseline is preserved unchanged.
 - Provider-neutral `SemanticPlanner` protocol with an injectable deterministic implementation.
 - Versioned planning evaluation contracts, dimension-level metrics, and a reviewed four-notebook
   V1 corpus.

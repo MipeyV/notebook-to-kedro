@@ -1,0 +1,50 @@
+{
+  "schema_version": "1.0",
+  "case_id": "fill-missing-standard",
+  "node_code_case_id": "fill-missing",
+  "review_status": "approved",
+  "inputs": [
+    {
+      "argument_name": "frame",
+      "value": {
+        "kind": "table",
+        "columns": ["score", "label"],
+        "dtypes": ["float64", "object"],
+        "rows": [[1.5, "a"], [null, null]],
+        "index": [0, 1]
+      }
+    },
+    {
+      "argument_name": "missing_values",
+      "value": {
+        "kind": "object",
+        "entries": [
+          {"key": "score", "value": {"kind": "scalar", "value": 0.0}},
+          {"key": "label", "value": {"kind": "scalar", "value": "unknown"}}
+        ]
+      }
+    }
+  ],
+  "expected_outputs": [
+    {
+      "output_name": "clean",
+      "value": {
+        "kind": "table",
+        "columns": ["score", "label"],
+        "dtypes": ["float64", "object"],
+        "rows": [[1.5, "a"], [0.0, "unknown"]],
+        "index": [0, 1]
+      },
+      "comparison": {
+        "kind": "table",
+        "absolute_tolerance": 0.0,
+        "relative_tolerance": 0.0,
+        "equal_nan": true,
+        "check_dtype": true,
+        "check_order": true,
+        "check_index": true
+      }
+    }
+  ],
+  "expected_exception": null
+}

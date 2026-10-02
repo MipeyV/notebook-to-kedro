@@ -1,0 +1,67 @@
+{
+  "schema_version": "1.0",
+  "case_id": "join-customers",
+  "notebook_path": "tests/fixtures/notebooks/node_code_eval/join_customers.ipynb",
+  "source_sha256": "33c8dfb26c72389b223d5178880511655c23ad850d904c98747c6e5ef0fa252e",
+  "review_status": "approved",
+  "request": {
+    "schema_version": "1.0",
+    "request_id": "independent-join-customers",
+    "task_id": "reviewed-task-0006",
+    "node_name": "join_customer_regions",
+    "raw_source": "enriched = orders.merge(\n    customers, on=\"customer_id\", how=\"left\", validate=\"many_to_one\"\n)\nenriched = enriched.fillna(value={\"region\": \"unknown\"})",
+    "source_cell_ids": [
+      "join-code"
+    ],
+    "statement_ids": [
+      "join-code-stmt-0000",
+      "join-code-stmt-0001"
+    ],
+    "inputs": [
+      "orders",
+      "customers"
+    ],
+    "outputs": [
+      "enriched"
+    ],
+    "parameter_names": [],
+    "parameter_arguments": [],
+    "allowed_imports": []
+  },
+  "reference_response": {
+    "schema_version": "1.0",
+    "request_id": "independent-join-customers",
+    "task_id": "reviewed-task-0006",
+    "function_code": "def join_customer_regions(orders, customers):\n    enriched = orders.merge(\n        customers, on=\"customer_id\", how=\"left\", validate=\"many_to_one\"\n    )\n    enriched = enriched.fillna(value={\"region\": \"unknown\"})\n    return enriched\n",
+    "imports": [],
+    "review_notes": [
+      "The left join retains unmatched orders and rejects duplicate customer keys."
+    ]
+  },
+  "invalid_examples": [
+    {
+      "id": "inner-join-drops-orders",
+      "response": {
+        "schema_version": "1.0",
+        "request_id": "independent-join-customers",
+        "task_id": "reviewed-task-0006",
+        "function_code": "def join_customer_regions(orders, customers):\n    enriched = orders.merge(\n        customers, on=\"customer_id\", how=\"inner\", validate=\"many_to_one\"\n    )\n    enriched = enriched.fillna(value={\"region\": \"unknown\"})\n    return enriched\n",
+        "imports": [],
+        "review_notes": []
+      },
+      "expected_error_contains": "function body must preserve source AST"
+    },
+    {
+      "id": "omitted-key-validation",
+      "response": {
+        "schema_version": "1.0",
+        "request_id": "independent-join-customers",
+        "task_id": "reviewed-task-0006",
+        "function_code": "def join_customer_regions(orders, customers):\n    enriched = orders.merge(\n        customers, on=\"customer_id\", how=\"left\"\n    )\n    enriched = enriched.fillna(value={\"region\": \"unknown\"})\n    return enriched\n",
+        "imports": [],
+        "review_notes": []
+      },
+      "expected_error_contains": "function body must preserve source AST"
+    }
+  ]
+}

@@ -1,0 +1,55 @@
+{
+  "schema_version": "1.0",
+  "case_id": "split-holdout",
+  "notebook_path": "tests/fixtures/notebooks/node_code_eval/split_holdout.ipynb",
+  "source_sha256": "eec8c9910d8051bce200188889e260443e1f94a712c4038a4825a8caa4b201bf",
+  "review_status": "approved",
+  "request": {
+    "schema_version": "1.0",
+    "request_id": "independent-split-holdout",
+    "task_id": "reviewed-task-0004",
+    "node_name": "split_holdout",
+    "raw_source": "X_train, X_test, y_train, y_test = train_test_split(\n    X, y, test_size=0.25, random_state=17\n)",
+    "source_cell_ids": ["split-code"],
+    "statement_ids": ["split-code-stmt-0000"],
+    "inputs": ["X", "y"],
+    "outputs": ["X_train", "X_test", "y_train", "y_test"],
+    "parameter_names": ["split_holdout.test_size", "split_holdout.random_state"],
+    "parameter_arguments": ["test_size", "seed"],
+    "allowed_imports": ["from sklearn.model_selection import train_test_split"]
+  },
+  "reference_response": {
+    "schema_version": "1.0",
+    "request_id": "independent-split-holdout",
+    "task_id": "reviewed-task-0004",
+    "function_code": "def split_holdout(X, y, test_size, seed):\n    X_train, X_test, y_train, y_test = train_test_split(\n        X, y, test_size=test_size, random_state=seed\n    )\n    return X_train, X_test, y_train, y_test\n",
+    "imports": ["from sklearn.model_selection import train_test_split"],
+    "review_notes": ["Both equal-looking literals map to their exact call arguments."]
+  },
+  "invalid_examples": [
+    {
+      "id": "swapped-parameter-arguments",
+      "response": {
+        "schema_version": "1.0",
+        "request_id": "independent-split-holdout",
+        "task_id": "reviewed-task-0004",
+        "function_code": "def split_holdout(X, y, test_size, seed):\n    X_train, X_test, y_train, y_test = train_test_split(\n        X, y, test_size=seed, random_state=test_size\n    )\n    return X_train, X_test, y_train, y_test\n",
+        "imports": ["from sklearn.model_selection import train_test_split"],
+        "review_notes": []
+      },
+      "expected_error_contains": "function body must preserve source AST"
+    },
+    {
+      "id": "local-import",
+      "response": {
+        "schema_version": "1.0",
+        "request_id": "independent-split-holdout",
+        "task_id": "reviewed-task-0004",
+        "function_code": "def split_holdout(X, y, test_size, seed):\n    from sklearn.model_selection import train_test_split\n    X_train, X_test, y_train, y_test = train_test_split(\n        X, y, test_size=test_size, random_state=seed\n    )\n    return X_train, X_test, y_train, y_test\n",
+        "imports": [],
+        "review_notes": []
+      },
+      "expected_error_contains": "unsupported nested scope, import"
+    }
+  ]
+}

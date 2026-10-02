@@ -1,0 +1,33 @@
+{
+  "schema_version": "1.0",
+  "case_id": "aggregate-orders-missing-column",
+  "node_code_case_id": "aggregate-orders",
+  "review_status": "approved",
+  "inputs": [
+    {
+      "argument_name": "transactions",
+      "value": {
+        "kind": "table",
+        "columns": [
+          "customer_id"
+        ],
+        "dtypes": [
+          "object"
+        ],
+        "rows": [
+          [
+            "a"
+          ]
+        ],
+        "index": [
+          0
+        ]
+      }
+    }
+  ],
+  "expected_outputs": [],
+  "expected_exception": {
+    "type_name": "KeyError",
+    "message_contains": "amount"
+  }
+}

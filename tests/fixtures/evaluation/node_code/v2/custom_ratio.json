@@ -1,0 +1,55 @@
+{
+  "schema_version": "1.0",
+  "case_id": "custom-ratio",
+  "notebook_path": "tests/fixtures/notebooks/node_code_eval/custom_ratio.ipynb",
+  "source_sha256": "bf853cf7f78daeac0bc648f857848e3e048572ed8983d53f09bd6b5bbdd6bbed",
+  "review_status": "approved",
+  "request": {
+    "schema_version": "1.0",
+    "request_id": "independent-custom-ratio",
+    "task_id": "reviewed-task-0001",
+    "node_name": "engineer_margin_ratio",
+    "raw_source": "adjusted = sales.assign(\n    margin_ratio=sales[\"margin\"] / sales[\"revenue\"]\n)\nadjusted = adjusted.replace([float(\"inf\")], 0.0)",
+    "source_cell_ids": ["ratio-code"],
+    "statement_ids": ["ratio-code-stmt-0000", "ratio-code-stmt-0001"],
+    "inputs": ["sales"],
+    "outputs": ["adjusted"],
+    "parameter_names": [],
+    "parameter_arguments": [],
+    "allowed_imports": []
+  },
+  "reference_response": {
+    "schema_version": "1.0",
+    "request_id": "independent-custom-ratio",
+    "task_id": "reviewed-task-0001",
+    "function_code": "def engineer_margin_ratio(sales):\n    adjusted = sales.assign(\n        margin_ratio=sales[\"margin\"] / sales[\"revenue\"]\n    )\n    adjusted = adjusted.replace([float(\"inf\")], 0.0)\n    return adjusted\n",
+    "imports": [],
+    "review_notes": ["Reference reviewed independently from the V1 generator."]
+  },
+  "invalid_examples": [
+    {
+      "id": "omitted-infinity-cleanup",
+      "response": {
+        "schema_version": "1.0",
+        "request_id": "independent-custom-ratio",
+        "task_id": "reviewed-task-0001",
+        "function_code": "def engineer_margin_ratio(sales):\n    adjusted = sales.assign(\n        margin_ratio=sales[\"margin\"] / sales[\"revenue\"]\n    )\n    return adjusted\n",
+        "imports": [],
+        "review_notes": []
+      },
+      "expected_error_contains": "function body must preserve source AST"
+    },
+    {
+      "id": "changed-ratio-denominator",
+      "response": {
+        "schema_version": "1.0",
+        "request_id": "independent-custom-ratio",
+        "task_id": "reviewed-task-0001",
+        "function_code": "def engineer_margin_ratio(sales):\n    adjusted = sales.assign(\n        margin_ratio=sales[\"margin\"] / sales[\"cost\"]\n    )\n    adjusted = adjusted.replace([float(\"inf\")], 0.0)\n    return adjusted\n",
+        "imports": [],
+        "review_notes": []
+      },
+      "expected_error_contains": "function body must preserve source AST"
+    }
+  ]
+}

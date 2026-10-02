@@ -1,0 +1,84 @@
+{
+  "schema_version": "1.0",
+  "case_id": "date-features-standard",
+  "node_code_case_id": "date-features",
+  "review_status": "approved",
+  "inputs": [
+    {
+      "argument_name": "events",
+      "value": {
+        "kind": "table",
+        "columns": [
+          "event_id",
+          "occurred_at"
+        ],
+        "dtypes": [
+          "int64",
+          "object"
+        ],
+        "rows": [
+          [
+            2,
+            "2024-02-29"
+          ],
+          [
+            1,
+            "2025-01-01"
+          ]
+        ],
+        "index": [
+          11,
+          4
+        ]
+      }
+    }
+  ],
+  "expected_outputs": [
+    {
+      "output_name": "calendar",
+      "value": {
+        "kind": "table",
+        "columns": [
+          "event_id",
+          "occurred_at",
+          "month",
+          "weekday"
+        ],
+        "dtypes": [
+          "int64",
+          "object",
+          "object",
+          "int64"
+        ],
+        "rows": [
+          [
+            2,
+            "2024-02-29",
+            "2024-02",
+            3
+          ],
+          [
+            1,
+            "2025-01-01",
+            "2025-01",
+            2
+          ]
+        ],
+        "index": [
+          11,
+          4
+        ]
+      },
+      "comparison": {
+        "kind": "table",
+        "absolute_tolerance": 1e-12,
+        "relative_tolerance": 1e-9,
+        "equal_nan": true,
+        "check_dtype": true,
+        "check_order": true,
+        "check_index": true
+      }
+    }
+  ],
+  "expected_exception": null
+}

@@ -1,0 +1,33 @@
+{
+  "schema_version": "1.0",
+  "case_id": "encode-categories-missing-column",
+  "node_code_case_id": "encode-categories",
+  "review_status": "approved",
+  "inputs": [
+    {
+      "argument_name": "frame",
+      "value": {
+        "kind": "table",
+        "columns": [
+          "units"
+        ],
+        "dtypes": [
+          "int64"
+        ],
+        "rows": [
+          [
+            1
+          ]
+        ],
+        "index": [
+          0
+        ]
+      }
+    }
+  ],
+  "expected_outputs": [],
+  "expected_exception": {
+    "type_name": "KeyError",
+    "message_contains": "segment"
+  }
+}

@@ -3,10 +3,10 @@
 ## Scope
 
 `run_behavioral_code_benchmark` measures one node-code provider against the independent reviewed
-node and behavioral corpora. It requests each of the four nodes exactly once, validates every raw
-response, and executes only accepted proposals over their linked behavioral scenarios. The current
-corpus contains four nodes and five scenarios because the custom-ratio node has both a successful
-case and an expected missing-column exception.
+node and behavioral corpora. It requests each node exactly once, validates every raw response, and
+executes accepted proposals over their linked behavioral scenarios. The frozen `v1` dataset contains
+four nodes and five scenarios. The expanded `v2` dataset contains eight nodes and seventeen scenarios
+and preserves every `v1` case. These dataset revisions use the same case schema `1.0`.
 
 All corpus links, notebook hashes, reviewed source cells, reference responses and interfaces are
 preflighted before the first provider call. Empty corpora, duplicate identities, stale notebooks,
@@ -55,9 +55,9 @@ can still access the filesystem or network. Run only in a controlled environment
 
 ```bash
 uv run notebook-to-kedro behavioral-benchmark run \
-  tests/fixtures/evaluation/behavioral/v1 \
-  tests/fixtures/evaluation/node_code/v1 \
-  generated/behavioral-code-qwen3-8b-v1.json \
+  tests/fixtures/evaluation/behavioral/v2 \
+  tests/fixtures/evaluation/node_code/v2 \
+  generated/behavioral-code-qwen3-8b-v2.json \
   --project-root . \
   --ollama-model qwen3:8b \
   --include-parameter-evidence \
@@ -68,6 +68,11 @@ The default test suite uses deterministic fake providers and workers. It does no
 execute model output. Real runs require an already downloaded local model; the benchmark never pulls
 a model automatically. The command also reads the local `/api/version` and `/api/tags` endpoints to
 record the exact Ollama version and full model digest.
+
+Use matching node and behavioral dataset revisions. Use `v1` to reproduce the measurements below
+and `v2` for the expanded evaluation. Compare model or prompt variants on the same dataset; the
+comparison CLI rejects artifacts containing different node IDs. The historical `v1` score cannot
+be treated as a baseline percentage for the larger `v2` dataset without a new run.
 
 ## Reproducible Artifacts
 
@@ -89,10 +94,10 @@ responses accepted by the current validator. It makes no Ollama request:
 
 ```bash
 uv run notebook-to-kedro behavioral-benchmark replay \
-  generated/behavioral-code-qwen3-8b-v1.json \
-  tests/fixtures/evaluation/behavioral/v1 \
-  tests/fixtures/evaluation/node_code/v1 \
-  generated/behavioral-code-qwen3-8b-v1-replay.json \
+  generated/behavioral-code-qwen3-8b-v2.json \
+  tests/fixtures/evaluation/behavioral/v2 \
+  tests/fixtures/evaluation/node_code/v2 \
+  generated/behavioral-code-qwen3-8b-v2-replay.json \
   --project-root . \
   --allow-untrusted-code-execution
 ```

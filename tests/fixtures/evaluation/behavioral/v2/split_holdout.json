@@ -1,0 +1,109 @@
+{
+  "schema_version": "1.0",
+  "case_id": "split-holdout-standard",
+  "node_code_case_id": "split-holdout",
+  "review_status": "approved",
+  "inputs": [
+    {
+      "argument_name": "X",
+      "value": {
+        "kind": "array",
+        "dtype": "int64",
+        "shape": [8, 2],
+        "values": [0, 0, 1, 10, 2, 20, 3, 30, 4, 40, 5, 50, 6, 60, 7, 70]
+      }
+    },
+    {
+      "argument_name": "y",
+      "value": {
+        "kind": "array",
+        "dtype": "int64",
+        "shape": [8],
+        "values": [100, 101, 102, 103, 104, 105, 106, 107]
+      }
+    },
+    {
+      "argument_name": "test_size",
+      "value": {"kind": "scalar", "value": 0.25}
+    },
+    {
+      "argument_name": "seed",
+      "value": {"kind": "scalar", "value": 17}
+    }
+  ],
+  "expected_outputs": [
+    {
+      "output_name": "X_train",
+      "value": {
+        "kind": "array",
+        "dtype": "int64",
+        "shape": [6, 2],
+        "values": [2, 20, 5, 50, 0, 0, 6, 60, 1, 10, 7, 70]
+      },
+      "comparison": {
+        "kind": "array",
+        "absolute_tolerance": 0.0,
+        "relative_tolerance": 0.0,
+        "equal_nan": false,
+        "check_dtype": true,
+        "check_order": null,
+        "check_index": null
+      }
+    },
+    {
+      "output_name": "X_test",
+      "value": {
+        "kind": "array",
+        "dtype": "int64",
+        "shape": [2, 2],
+        "values": [4, 40, 3, 30]
+      },
+      "comparison": {
+        "kind": "array",
+        "absolute_tolerance": 0.0,
+        "relative_tolerance": 0.0,
+        "equal_nan": false,
+        "check_dtype": true,
+        "check_order": null,
+        "check_index": null
+      }
+    },
+    {
+      "output_name": "y_train",
+      "value": {
+        "kind": "array",
+        "dtype": "int64",
+        "shape": [6],
+        "values": [102, 105, 100, 106, 101, 107]
+      },
+      "comparison": {
+        "kind": "array",
+        "absolute_tolerance": 0.0,
+        "relative_tolerance": 0.0,
+        "equal_nan": false,
+        "check_dtype": true,
+        "check_order": null,
+        "check_index": null
+      }
+    },
+    {
+      "output_name": "y_test",
+      "value": {
+        "kind": "array",
+        "dtype": "int64",
+        "shape": [2],
+        "values": [104, 103]
+      },
+      "comparison": {
+        "kind": "array",
+        "absolute_tolerance": 0.0,
+        "relative_tolerance": 0.0,
+        "equal_nan": false,
+        "check_dtype": true,
+        "check_order": null,
+        "check_index": null
+      }
+    }
+  ],
+  "expected_exception": null
+}

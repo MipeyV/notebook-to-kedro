@@ -40,6 +40,40 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-10-02 - Independent evaluation expands to eight tasks
+
+### Completed
+
+- Added dataset revision `v2` with eight node references, seventeen behavioral scenarios and
+  seventeen invalid code examples, preserving all measured `v1` contracts.
+- Added source notebooks for sorted aggregation, validated customer joins, categorical indicators
+  and strict date parsing with calendar features.
+- Added nominal, boundary and exception scenarios for each new task, including refunds and missing
+  amounts, unmatched keys and duplicate customer keys, missing categories, leap days and empty input.
+- Verified source hashes, static reference acceptance and rejection of all invalid proposals.
+- Executed all seventeen reference scenarios and reviewed proposals successfully, and verified that
+  eight semantic negative controls produce behavioral mismatches.
+- Verified that the benchmark requests each of the eight nodes once and evaluates all seventeen
+  linked scenarios with an offline reference provider.
+
+### Decisions
+
+- Publish an expanded dataset directory while keeping the case schemas at `1.0` and freezing `v1`.
+- Author references and expected outputs independently from the V1 generator and model responses.
+- Keep string and integer output dtypes explicit, including aggregation keys across pandas versions.
+- Keep date values within the existing JSON transport by using date-string inputs and calendar
+  string/integer outputs.
+
+### Open questions
+
+- Measure how the current local model generalizes to the new tasks.
+- Add complete real-world notebooks and further task families beyond the synthetic task cells.
+
+### Next step
+
+- Run the unchanged `qwen3:8b` prompt and validator on dataset `v2`, then compare another local code
+  model on exactly the same evidence before tuning the prompt.
+
 ## 2026-10-02 - Repeated qwen3 baseline confirms stable failure modes
 
 ### Completed
