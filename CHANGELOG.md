@@ -9,6 +9,12 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Body-only benchmark/replay Python API with a distinct versioned artifact envelope, raw and
+  parsed bodies, accepted assembled responses, explicit rejection statuses, corpus identity,
+  prompt/assembly/evidence provenance and exclusive atomic publication. Replays regenerate
+  assemblies and behavioral outcomes without Ollama; full-code artifact formats remain unchanged.
+- Body benchmark regressions and real subprocess benchmark/replay verification for all eight
+  approved reference nodes and seventeen scenarios, without live model calls.
 - Opt-in `OllamaNodeBodyProvider`, separate `node-body-v1` prompt and provider-neutral
   `request_node_body` service with mandatory exact parameter evidence and strict deterministic
   assembly. Accepted results retain raw JSON, parsed bodies, full responses and prompt/assembly
