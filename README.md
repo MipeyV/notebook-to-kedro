@@ -331,7 +331,10 @@ for proposing only body statements. Deterministic AST assembly supplies the exac
 necessary permitted imports and terminal return, then applies the unchanged strict validator.
 It does not repair omissions or execute proposals. All eight approved reference bodies assemble
 correctly and match seventeen scenarios with explicit test consent; this is not a model-accuracy
-measurement. Body-only Ollama transport and benchmarking remain the next integration steps.
+measurement. An opt-in [body-only Ollama provider](docs/ollama-node-body.md) now exposes
+`request_node_body`, with mandatory parameter evidence, strict assembly and exact raw-response
+provenance. Offline transport tests pass for all eight references; body-only benchmark/replay
+integration and live model measurements remain the next steps. Conversion defaults are unchanged.
 
 An opt-in provider mode supplies [exact parameter substitutions](docs/node-parameter-evidence.md):
 original expressions, literal types, source ranges and corresponding function arguments derived

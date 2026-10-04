@@ -40,6 +40,42 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-10-04 - Opt-in Ollama body-only provider and service
+
+### Completed
+
+- Added a separate local `OllamaNodeBodyProvider` using the existing bounded chat transport.
+- Added prompt `node-body-v1`, always supplying exact parameter evidence and preserving raw
+  source as untrusted JSON data without function-shell examples.
+- Added provider-neutral `NodeBodyProvider`, `request_node_body` and immutable `NodeBodyResult`.
+- Retained exact raw assistant JSON, parsed body, assembled full-code response and application-owned
+  provider, model, prompt and assembly versions for accepted proposals.
+- Added simulated transport checks for all eight reviewed reference bodies, schema separation,
+  lazy construction, error boundaries, preflight failures and absence of execution.
+- Pinned the new prompt digest without changing the existing full-code prompt digests.
+- Passed 990 tests on Python `3.12.14` and 973 deterministic tests on `3.13.14`, both with 100%
+  line and branch coverage, plus Ruff, mypy and distribution builds.
+- On Python `3.11.16`, 969 deterministic tests passed, including every new test. The same four
+  existing worker tests failed because Windows application control blocked pandas' `indexing`
+  DLL; the Linux CI check remains required. No tests or coverage requirements were weakened.
+
+### Decisions
+
+- Keep this integration opt-in through the Python API, with no CLI/default changes or live calls.
+- Require exact parameter evidence before provider I/O; do not provide a weaker body-only mode.
+- Preserve strict validation, execution consent and the prohibition on automatic proposal writing.
+- Build this branch on the body-contract branch while its merge into `main` remains pending.
+
+### Open questions
+
+- Does this body-only mode improve model acceptance without cross-task regressions?
+- How should benchmark artifacts retain both raw body and assembled response for rejected cases?
+
+### Next step
+
+- Add a versioned body-only benchmark/replay adapter and then measure both local models on the
+  unchanged corpus, with explicit behavioral-execution consent and complete provenance.
+
 ## 2026-10-04 - Body-only contract and deterministic function assembly
 
 ### Completed

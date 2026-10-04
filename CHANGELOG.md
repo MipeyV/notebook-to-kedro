@@ -9,6 +9,12 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Opt-in `OllamaNodeBodyProvider`, separate `node-body-v1` prompt and provider-neutral
+  `request_node_body` service with mandatory exact parameter evidence and strict deterministic
+  assembly. Accepted results retain raw JSON, parsed bodies, full responses and prompt/assembly
+  provenance; full-code modes and conversion defaults remain unchanged.
+- Offline body-provider transport, preflight, fidelity and failure tests, including all eight
+  approved reference bodies and a pinned prompt digest, without live model calls.
 - Separate versioned `NodeBodyResponse` contract and JSON schema, with an offline AST assembler
   that supplies exact signatures, referenced permitted imports and terminal returns before
   unchanged strict validation. No repair, execution, provider call or automatic project writing.

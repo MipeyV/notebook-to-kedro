@@ -6,8 +6,10 @@
 It reuses the immutable `NodeCodeRequest`: source cells, statement IDs, original source,
 ordered inputs and outputs, parameter arguments and allowed imports remain trusted evidence.
 
-This step implements an offline Python API, not an Ollama mode, CLI command, benchmark adapter
-or automatic project writer. Existing full-code providers, prompts `v1`/`v4`, contracts and
+The assembler implements an offline Python API. A separate opt-in
+[local body-only provider](ollama-node-body.md) now connects it to Ollama through
+`request_node_body`; there is no body-only CLI, benchmark adapter or automatic project writer.
+Existing full-code providers, prompts `v1`/`v4`, contracts and
 validator `node-code-validation-v4` are unchanged. No new model-accuracy result is claimed.
 
 ## Response
@@ -106,9 +108,10 @@ absence of execution. All eight manually reviewed `v2` reference bodies reconstr
 reference function ASTs. With explicit test consent, their assembled responses match all
 seventeen reviewed behavioral scenarios, including expected exceptions.
 
-These are reference-compatibility tests, not outputs sampled from a model. The next step is a
-separate opt-in body-only local provider and prompt, then a provenance-aware benchmark/replay
-adapter recording the body schema, assembly version, exact body and assembled response.
+These are reference-compatibility tests, not outputs sampled from a model. The separate body-only
+local provider and prompt are implemented with offline transport tests. The next step is a
+provenance-aware benchmark/replay adapter recording the body schema, assembly version, exact body
+and assembled response, including rejected proposals.
 Compare both local models on the unchanged corpus before considering promotion, and use fresh
 independent tasks before claiming generalization. See the
 [rejected statement-retention experiment](node-code-statement-retention.md) for motivation.
