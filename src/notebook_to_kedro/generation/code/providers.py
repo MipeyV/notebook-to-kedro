@@ -23,6 +23,26 @@ class NodeCodeProvider(Protocol):
         ...
 
 
+class NodeBodyProvider(Protocol):
+    """Return body-only JSON with explicit prompt provenance, without assembly."""
+
+    provider_name: str
+
+    @property
+    def model_name(self) -> str:
+        """Identify the model used for the proposed body."""
+        ...
+
+    @property
+    def prompt_version(self) -> str:
+        """Identify the body-only instructions used by the provider."""
+        ...
+
+    def complete(self, request: NodeCodeRequest) -> str:
+        """Propose one body without executing code or writing a project."""
+        ...
+
+
 class FakeNodeCodeProvider:
     """Record requests and return fixed JSON or raise a configured failure."""
 

@@ -40,6 +40,76 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-10-04 - Opt-in Ollama body-only provider and service
+
+### Completed
+
+- Added a separate local `OllamaNodeBodyProvider` using the existing bounded chat transport.
+- Added prompt `node-body-v1`, always supplying exact parameter evidence and preserving raw
+  source as untrusted JSON data without function-shell examples.
+- Added provider-neutral `NodeBodyProvider`, `request_node_body` and immutable `NodeBodyResult`.
+- Retained exact raw assistant JSON, parsed body, assembled full-code response and application-owned
+  provider, model, prompt and assembly versions for accepted proposals.
+- Added simulated transport checks for all eight reviewed reference bodies, schema separation,
+  lazy construction, error boundaries, preflight failures and absence of execution.
+- Pinned the new prompt digest without changing the existing full-code prompt digests.
+- Passed 990 tests on Python `3.12.14` and 973 deterministic tests on `3.13.14`, both with 100%
+  line and branch coverage, plus Ruff, mypy and distribution builds.
+- On Python `3.11.16`, 969 deterministic tests passed, including every new test. The same four
+  existing worker tests failed because Windows application control blocked pandas' `indexing`
+  DLL; the Linux CI check remains required. No tests or coverage requirements were weakened.
+
+### Decisions
+
+- Keep this integration opt-in through the Python API, with no CLI/default changes or live calls.
+- Require exact parameter evidence before provider I/O; do not provide a weaker body-only mode.
+- Preserve strict validation, execution consent and the prohibition on automatic proposal writing.
+- Build this branch on the body-contract branch while its merge into `main` remains pending.
+
+### Open questions
+
+- Does this body-only mode improve model acceptance without cross-task regressions?
+- How should benchmark artifacts retain both raw body and assembled response for rejected cases?
+
+### Next step
+
+- Add a versioned body-only benchmark/replay adapter and then measure both local models on the
+  unchanged corpus, with explicit behavioral-execution consent and complete provenance.
+
+## 2026-10-04 - Body-only contract and deterministic function assembly
+
+### Completed
+
+- Added immutable `NodeBodyResponse` schema `1.0`, with exact JSON fields and separate schema export.
+- Added `assemble_node_body` and version `node-body-assembly-v1`, producing a compatible
+  `NodeCodeResponse` from the trusted request interface and an untrusted body.
+- Selected only referenced allowed imports in request order and appended the exact output return.
+- Used AST assembly to preserve multiline string values without textual-indentation changes.
+- Added offline fidelity, identity, import, parameter and non-execution regressions, plus checks
+  against eight reviewed reference bodies and seventeen consent-gated behavioral scenarios.
+- Passed 952 tests on Python `3.12.14` and 935 deterministic tests on `3.13.14`, both with
+  100% line and branch coverage, plus Ruff, mypy and distribution builds.
+- On Python `3.11.16`, 931 deterministic tests passed, including all new body tests; four existing
+  worker tests failed because Windows application control blocked pandas' `indexing` DLL.
+  A retry reproduced the environment failure; the Linux CI check remains required.
+
+### Decisions
+
+- Keep the existing full-code provider mode, prompts and validator unchanged.
+- Do not repair bodies, insert missing statements, strip unwanted statements or substitute literals.
+- Treat reference compatibility separately from model accuracy. No live model was called this step.
+- Preserve execution consent and keep accepted proposals out of automatic project generation.
+
+### Open questions
+
+- Will a body-only local prompt improve end-to-end acceptance without cross-task regressions?
+- Which fresh independent tasks should be added before assessing generalization?
+
+### Next step
+
+- Add an explicit local body-only provider and prompt, then a versioned benchmark/replay adapter
+  recording raw bodies, assembled responses and assembly provenance before comparing both models.
+
 ## 2026-10-03 - Statement-retention prompt rejected after cross-task regressions
 
 ### Completed

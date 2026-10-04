@@ -326,6 +326,16 @@ omitted metric expression but regressed other tasks on both models. The `v5` can
 active prompts remain default `v1` and opt-in `v4`, with the strict validator unchanged. Current
 measured `v4` results therefore remain 15/17 for `qwen3:8b` and 16/17 for `qwen2.5-coder:7b`.
 
+A separate [node body contract](docs/node-body-contract.md) now provides an offline Python API
+for proposing only body statements. Deterministic AST assembly supplies the exact signature,
+necessary permitted imports and terminal return, then applies the unchanged strict validator.
+It does not repair omissions or execute proposals. All eight approved reference bodies assemble
+correctly and match seventeen scenarios with explicit test consent; this is not a model-accuracy
+measurement. An opt-in [body-only Ollama provider](docs/ollama-node-body.md) now exposes
+`request_node_body`, with mandatory parameter evidence, strict assembly and exact raw-response
+provenance. Offline transport tests pass for all eight references; body-only benchmark/replay
+integration and live model measurements remain the next steps. Conversion defaults are unchanged.
+
 An opt-in provider mode supplies [exact parameter substitutions](docs/node-parameter-evidence.md):
 original expressions, literal types, source ranges and corresponding function arguments derived
 from V1 rules. Ambiguous mappings fail before model I/O in this experimental mode. The static validator
