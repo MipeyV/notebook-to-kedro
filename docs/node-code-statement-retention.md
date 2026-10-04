@@ -135,6 +135,8 @@ Different timestamps and timings produce different artifact hashes even with ide
 Keep `v4` as the active opt-in prompt and preserve strict validation. Investigate separating the
 deterministic function shell (signature, import boundaries and terminal return) from the model's
 source-body proposal under an explicit versioned contract, rather than asking prompt prose alone
-to guarantee assembly. This is a future design, not automatic repair of rejected responses.
+to guarantee assembly. This design must not automatically repair rejected responses.
+The [body-only contract and offline assembler](node-body-contract.md) now implement that boundary;
+local provider integration and model measurements remain separate next steps.
 Keep the current cases as development regressions and add independently reviewed fresh tasks before
 assessing broader generalization. Complete notebooks and structure-planner quality remain separate.

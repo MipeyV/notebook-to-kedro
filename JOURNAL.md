@@ -40,6 +40,40 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-10-04 - Body-only contract and deterministic function assembly
+
+### Completed
+
+- Added immutable `NodeBodyResponse` schema `1.0`, with exact JSON fields and separate schema export.
+- Added `assemble_node_body` and version `node-body-assembly-v1`, producing a compatible
+  `NodeCodeResponse` from the trusted request interface and an untrusted body.
+- Selected only referenced allowed imports in request order and appended the exact output return.
+- Used AST assembly to preserve multiline string values without textual-indentation changes.
+- Added offline fidelity, identity, import, parameter and non-execution regressions, plus checks
+  against eight reviewed reference bodies and seventeen consent-gated behavioral scenarios.
+- Passed 952 tests on Python `3.12.14` and 935 deterministic tests on `3.13.14`, both with
+  100% line and branch coverage, plus Ruff, mypy and distribution builds.
+- On Python `3.11.16`, 931 deterministic tests passed, including all new body tests; four existing
+  worker tests failed because Windows application control blocked pandas' `indexing` DLL.
+  A retry reproduced the environment failure; the Linux CI check remains required.
+
+### Decisions
+
+- Keep the existing full-code provider mode, prompts and validator unchanged.
+- Do not repair bodies, insert missing statements, strip unwanted statements or substitute literals.
+- Treat reference compatibility separately from model accuracy. No live model was called this step.
+- Preserve execution consent and keep accepted proposals out of automatic project generation.
+
+### Open questions
+
+- Will a body-only local prompt improve end-to-end acceptance without cross-task regressions?
+- Which fresh independent tasks should be added before assessing generalization?
+
+### Next step
+
+- Add an explicit local body-only provider and prompt, then a versioned benchmark/replay adapter
+  recording raw bodies, assembled responses and assembly provenance before comparing both models.
+
 ## 2026-10-03 - Statement-retention prompt rejected after cross-task regressions
 
 ### Completed

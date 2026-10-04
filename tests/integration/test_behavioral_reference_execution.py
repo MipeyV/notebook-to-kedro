@@ -1,3 +1,4 @@
+import ast
 from pathlib import Path
 
 import pytest
@@ -18,7 +19,32 @@ from notebook_to_kedro.evaluation.behavioral_execution import (
     _worker_request,
 )
 from notebook_to_kedro.evaluation.behavioral_worker import run_worker_payload
-from notebook_to_kedro.generation.code import NodeCodeRequest
+from notebook_to_kedro.generation.code import NodeBodyResponse, NodeCodeRequest, assemble_node_body
+
+
+@pytest.mark.integration
+def test_assembled_reviewed_bodies_match_all_seventeen_scenarios() -> None:
+    nodes = load_node_code_corpus(Path("tests/fixtures/evaluation/node_code/v2"))
+    behaviors = load_behavioral_corpus(Path("tests/fixtures/evaluation/behavioral/v2"))
+    assert len(nodes) == 8
+    assert len(behaviors) == 17
+    for node in nodes:
+        function = ast.parse(node.reference_response.function_code).body[0]
+        assert isinstance(function, ast.FunctionDef)
+        body = ast.unparse(ast.Module(body=function.body[:-1], type_ignores=[]))
+        response = assemble_node_body(
+            node.request,
+            NodeBodyResponse("1.0", node.request.request_id, node.request.task_id, body),
+        )
+        scenarios = [case for case in behaviors if case.node_code_case_id == node.case_id]
+        assert scenarios
+        for scenario in scenarios:
+            with pytest.raises(ValueError, match="allow_untrusted_code_execution=True"):
+                evaluate_behavioral_proposal(scenario, node, response)
+            evaluation = evaluate_behavioral_proposal(
+                scenario, node, response, allow_untrusted_code_execution=True
+            )
+            assert evaluation.matched, evaluation.comparison
 
 
 @pytest.mark.integration

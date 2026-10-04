@@ -9,6 +9,11 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Separate versioned `NodeBodyResponse` contract and JSON schema, with an offline AST assembler
+  that supplies exact signatures, referenced permitted imports and terminal returns before
+  unchanged strict validation. No repair, execution, provider call or automatic project writing.
+- Body-contract regressions and compatibility checks for all eight reviewed node references and
+  seventeen consent-gated behavioral scenarios; existing full-code providers remain unchanged.
 - Archived statement-retention prompt experiment with a reproducible candidate revision, live
   measurements and offline replays for both local models. The regressive `v5` candidate was not
   retained; active prompts `v1`/`v4`, parameter evidence, schemas and the strict validator are unchanged.

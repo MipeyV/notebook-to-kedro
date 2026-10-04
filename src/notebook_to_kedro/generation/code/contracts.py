@@ -13,6 +13,9 @@ if TYPE_CHECKING:
     from notebook_to_kedro.ir import ConversionPlan
 
 NODE_CODE_SCHEMA_VERSION = "1.0"
+NODE_BODY_SCHEMA_VERSION = "1.0"
+_BODY_STRINGS = ("schema_version", "request_id", "task_id", "body_code")
+_BODY_ARRAYS = ("review_notes",)
 _RESPONSE_STRINGS = ("schema_version", "request_id", "task_id", "function_code")
 _RESPONSE_ARRAYS = ("imports", "review_notes")
 _REQUEST_STRINGS = ("schema_version", "request_id", "task_id", "node_name", "raw_source")
@@ -27,8 +30,14 @@ _REQUEST_ARRAYS = (
 )
 
 
-def _identity(schema_version: str, request_id: str, task_id: str) -> None:
-    if schema_version != NODE_CODE_SCHEMA_VERSION:
+def _identity(
+    schema_version: str,
+    request_id: str,
+    task_id: str,
+    *,
+    expected_version: str = NODE_CODE_SCHEMA_VERSION,
+) -> None:
+    if schema_version != expected_version:
         raise ValueError("unsupported node code schema_version")
     if not request_id.strip() or not task_id.strip():
         raise ValueError("request_id and task_id must not be empty")
@@ -120,6 +129,37 @@ class NodeCodeResponse:
         """Parse strict JSON without executing the proposed code."""
         data = decode_object(payload, _RESPONSE_STRINGS, _RESPONSE_ARRAYS)
         return cls(**data)
+
+
+@dataclass(frozen=True, slots=True)
+class NodeBodyResponse:
+    """Untrusted body statements without a signature, imports or terminal return."""
+
+    schema_version: str
+    request_id: str
+    task_id: str
+    body_code: str
+    review_notes: tuple[str, ...] = ()
+
+    def __post_init__(self) -> None:
+        _identity(
+            self.schema_version,
+            self.request_id,
+            self.task_id,
+            expected_version=NODE_BODY_SCHEMA_VERSION,
+        )
+        if not self.body_code.strip():
+            raise ValueError("body_code must not be empty")
+        _unique(self.review_notes, "review_notes")
+
+    def to_json(self, *, indent: int | None = 2) -> str:
+        """Serialize the untrusted body with stable JSON key ordering."""
+        return encode_object(asdict(self), indent=indent)
+
+    @classmethod
+    def from_json(cls, payload: str) -> Self:
+        """Parse the exact versioned body response without executing it."""
+        return cls(**decode_object(payload, _BODY_STRINGS, _BODY_ARRAYS))
 
 
 def build_node_code_request(
