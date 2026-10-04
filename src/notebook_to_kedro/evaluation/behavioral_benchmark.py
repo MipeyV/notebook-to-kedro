@@ -221,6 +221,15 @@ def _run_proposal(
     if not isfinite(duration) or duration < 0:
         raise ValueError("benchmark clock must produce a non-negative finite duration")
     proposal = replace(proposal, proposal_duration_seconds=duration)
+    return _evaluate_proposal(proposal, node, behaviors, execution_config)
+
+
+def _evaluate_proposal(
+    proposal: BehavioralCodeBenchmarkProposal,
+    node: NodeCodeCase,
+    behaviors: tuple[BehavioralCase, ...],
+    execution_config: BehavioralExecutionConfig | None,
+) -> BehavioralCodeBenchmarkProposal:
     if proposal.status != "accepted":
         return proposal
     response = proposal.response

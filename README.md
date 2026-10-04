@@ -333,8 +333,11 @@ It does not repair omissions or execute proposals. All eight approved reference 
 correctly and match seventeen scenarios with explicit test consent; this is not a model-accuracy
 measurement. An opt-in [body-only Ollama provider](docs/ollama-node-body.md) now exposes
 `request_node_body`, with mandatory parameter evidence, strict assembly and exact raw-response
-provenance. Offline transport tests pass for all eight references; body-only benchmark/replay
-integration and live model measurements remain the next steps. Conversion defaults are unchanged.
+provenance. A separate [body-only benchmark/replay API](docs/node-body-benchmark.md) now archives
+all proposals and replays their raw bodies without Ollama on an integrity-bound corpus.
+Approved-reference benchmark and replay match all seventeen scenarios; this does not establish
+live model accuracy. CLI/comparison integration and body-only model measurements remain next.
+Conversion defaults are unchanged.
 
 An opt-in provider mode supplies [exact parameter substitutions](docs/node-parameter-evidence.md):
 original expressions, literal types, source ranges and corresponding function arguments derived

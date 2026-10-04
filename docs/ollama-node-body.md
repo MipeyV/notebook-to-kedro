@@ -73,9 +73,10 @@ approved `v2` reference bodies pass through the simulated provider/service path.
 integration, not model accuracy or improved acceptance. Prior full-code measurements remain
 historical full-code results and must not be attributed to this new mode.
 
-There is no body-only CLI, benchmark artifact or replay adapter yet. The next step is to preserve
-raw body responses, assembly/schema/prompt versions and assembled responses in a separate
-benchmark format, including rejected proposals, before measuring both local models on the
-unchanged corpus. Keep behavioral execution opt-in: subprocesses provide fault containment,
+The [body-only benchmark/replay API](node-body-benchmark.md) now preserves raw body responses,
+assembly/schema/prompt versions, accepted assembled responses and rejected proposals in a separate
+artifact envelope. There is no body-only CLI or live accuracy measurement yet; CLI integration and
+comparison precede measurements of both local models on the unchanged corpus.
+Keep behavioral execution opt-in: subprocesses provide fault containment,
 not an OS security sandbox. See the [body contract](node-body-contract.md),
 [local transport](ollama-provider.md) and [full-code API](node-code-contract.md).

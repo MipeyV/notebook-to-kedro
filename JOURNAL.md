@@ -40,6 +40,46 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-10-04 - Body-only benchmark artifacts and offline replay
+
+### Completed
+
+- Added `run_node_body_benchmark` and an explicit body-only artifact envelope, schema `1.0`.
+- Reused behavioral metric serialization and factored the existing accepted-proposal evaluation
+  helper without changing full-code reports, artifacts, prompts or conversion defaults.
+- Preserved exact raw responses and parsed bodies, including static rejections, while exposing
+  assembled code and evaluations only for accepted proposals.
+- Recorded body, assembly, evidence, prompt and validator versions with source and corpus identities.
+- Added duplicate-key rejection, raw/parsed/assembled consistency checks, mutation detection and
+  exclusive atomic writes using existing artifact helpers.
+- Added replay without provider/network calls, requiring supported versions, the exact corpus,
+  matching recorded sources and renewed execution consent. Replay proposal durations are zero.
+- Executed and replayed all seventeen scenarios for the eight approved reference nodes in real
+  subprocesses. These are compatibility results, not new model-accuracy measurements.
+- Passed 1,036 tests on Python `3.12.14` and 1,018 deterministic tests on each of `3.11.16` and
+  `3.13.14`, all with 100% line and branch coverage. The previously observed Windows pandas DLL
+  failure did not recur on this Python 3.11 run; no security policy or tests were changed to bypass it.
+- Passed Ruff lint/format checks, strict mypy and distribution builds; restored the locked
+  development environment to Python `3.12.14`.
+
+### Decisions
+
+- Keep body-only artifacts explicitly separate from full-code artifacts; do not silently relabel
+  raw body responses as complete model-generated functions.
+- Bind replay to all reviewed corpus content, not only successful scenario IDs or node names.
+- Preserve rejected proposals without synthesizing repair code or dropping their denominators.
+- Scope this PR to the Python API and artifact/replay boundary, with no live model calls or CLI changes.
+
+### Open questions
+
+- How should comparisons label the structural change from full-code proposals to deterministic assembly?
+- Will body-only prompting improve the measured acceptance of the two local models?
+
+### Next step
+
+- Add explicit body-only CLI run/replay and compatible artifact comparison, then capture controlled
+  local measurements for both models on the unchanged eight-node, seventeen-scenario corpus.
+
 ## 2026-10-04 - Opt-in Ollama body-only provider and service
 
 ### Completed
