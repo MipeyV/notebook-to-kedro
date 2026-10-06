@@ -9,6 +9,11 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Documented six local body-only model runs, six offline replays and thirteen comparisons on
+  the unchanged eight-node, seventeen-scenario development corpus: stable 7/8 nodes and 16/17
+  matches for `qwen3:8b`, and 8/8 and 17/17 for `qwen2.5-coder:7b`. Includes exact provenance,
+  artifact hashes, the general model's parameter-fidelity rejection and historical-runtime caveats;
+  no prompt, validator, corpus or conversion-default change.
 - Explicit `--proposal-format node-body` selection for behavioral benchmark CLI run/replay/compare,
   preserving full-code defaults and requiring renewed consent for execution.
 - Body-only artifact comparison with envelope revalidation, exact corpus/source and execution

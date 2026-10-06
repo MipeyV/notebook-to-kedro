@@ -250,3 +250,9 @@ statically rejected. The comparison documents exact provenance, unchanged inputs
 The subsequent [statement-retention prompt experiment](node-code-statement-retention.md) corrected
 the metric omission but regressed end-to-end results on both models. Its archived `v5` candidate
 is not active; opt-in prompt `v4` and the original comparison results remain the current baseline.
+
+The separate [body-only measurements](node-body-local-measurements.md) now document six live runs,
+six offline replays and thirteen comparisons. They observe stable 7/8 nodes and 16/17 matches for
+`qwen3:8b`, and 8/8 and 17/17 for the code model, on this same development corpus. Body-only mode
+and Ollama `0.35.1` differ from this historical full-code baseline; causal format comparisons and
+broader notebook accuracy require further controlled evaluation.

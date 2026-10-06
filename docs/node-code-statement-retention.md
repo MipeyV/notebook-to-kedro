@@ -137,6 +137,7 @@ deterministic function shell (signature, import boundaries and terminal return) 
 source-body proposal under an explicit versioned contract, rather than asking prompt prose alone
 to guarantee assembly. This design must not automatically repair rejected responses.
 The [body-only contract and offline assembler](node-body-contract.md) now implement that boundary;
-local provider integration and model measurements remain separate next steps.
+the [local provider](ollama-node-body.md) and
+[repeated body-only measurements](node-body-local-measurements.md) are now available separately.
 Keep the current cases as development regressions and add independently reviewed fresh tasks before
 assessing broader generalization. Complete notebooks and structure-planner quality remain separate.

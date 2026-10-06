@@ -77,7 +77,9 @@ The [body-only benchmark/replay API](node-body-benchmark.md) now preserves raw b
 assembly/schema/prompt versions, accepted assembled responses and rejected proposals in a separate
 artifact envelope. The CLI now explicitly selects this mode with `--proposal-format node-body`
 for run/replay/compare. Body comparisons require matching corpus/source and execution contracts;
-live accuracy measurements of both local models on the unchanged corpus remain next.
+the [local measurements](node-body-local-measurements.md) now record three live runs and three
+offline replays per model on the unchanged development corpus. They observe 7/8 accepted nodes
+and 16/17 matches for `qwen3:8b`, and 8/8 and 17/17 for the code model, not general notebook accuracy.
 Keep behavioral execution opt-in: subprocesses provide fault containment,
 not an OS security sandbox. See the [body contract](node-body-contract.md),
 [local transport](ollama-provider.md) and [full-code API](node-code-contract.md).

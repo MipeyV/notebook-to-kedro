@@ -184,3 +184,9 @@ The subsequent [statement-retention prompt experiment](node-code-statement-reten
 rejected after cross-task regressions on both models. Active prompt selection remains `v4` when
 parameter evidence is enabled; the next investigation is deterministic shell assembly under an
 explicit contract, without weakening validation or silently repairing rejected responses.
+
+The [body-only measurements](node-body-local-measurements.md) now record three live runs and
+three replays per model with the same development corpus and unchanged validator. The code model
+passes all eight nodes and seventeen scenarios, while the general model has one parameter-fidelity
+rejection. These later runs used Ollama `0.35.1`; they are not a same-runtime full-code/body-only
+ablation and do not alter the historical full-code results above.
