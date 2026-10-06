@@ -9,7 +9,10 @@ as the full-code benchmark. Full-code artifact formats and CLI defaults are unch
 
 The Python API and CLI explicitly select a separate body-only artifact envelope. Offline tests
 and approved-reference execution are compatibility checks, not evidence that a model has improved.
-No body-only live model measurement has been recorded yet.
+The [local measurements](node-body-local-measurements.md) now record three live runs and three
+offline replays per model: `qwen3:8b` at 7/8 accepted nodes and 16/17 matches, and
+`qwen2.5-coder:7b` at 8/8 and 17/17. These are results on the fixed development corpus, not
+accuracy estimates for arbitrary notebooks.
 
 ## CLI
 
@@ -194,8 +197,8 @@ the eight reviewed reference bodies once, executes all seventeen scenarios, writ
 artifact, then replays all seventeen through real subprocesses. All match their approved
 expectations; these are reference results, not live model outputs.
 
-Next: run both local models on the unchanged corpus with this explicit body mode, archive their
-responses, replay them offline and compare repeated runs before claiming any improvement. Add a
-corpus-bound full-code/body-only comparison bridge before automating cross-format conclusions.
-Subprocess containment
-is not an OS security sandbox and no proposal automatically enters project generation.
+The [six live runs, six replays and thirteen comparisons](node-body-local-measurements.md) are
+now recorded separately from those reference tests. Next: add fresh independent task patterns and
+a corpus-bound full-code/body-only bridge with contemporaneous full-code controls before broader
+or causal conclusions. Subprocess containment is not an OS security sandbox and no proposal
+automatically enters project generation.

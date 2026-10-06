@@ -113,7 +113,9 @@ These are reference-compatibility tests, not outputs sampled from a model. The s
 local provider, prompt and benchmark/replay adapter are implemented with offline transport and
 approved-reference tests. The adapter records body/schema/assembly provenance, exact raw responses,
 accepted assembled code and rejected proposals. The explicit benchmark CLI and body-artifact
-comparison are available; live body-only measurements remain next.
-Compare both local models on the unchanged corpus before considering promotion, and use fresh
-independent tasks before claiming generalization. See the
+comparison are available. The [local measurements](node-body-local-measurements.md) now record
+three live runs and three replays per model, with stable 7/8 nodes and 16/17 matches for `qwen3:8b`,
+and 8/8 and 17/17 for `qwen2.5-coder:7b`, on this fixed development corpus only.
+Use fresh independent tasks before claiming generalization or promoting an application default.
+See the
 [rejected statement-retention experiment](node-code-statement-retention.md) for motivation.

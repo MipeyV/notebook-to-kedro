@@ -40,6 +40,50 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-10-06 - Repeated local body-only model measurements
+
+### Completed
+
+- Recorded three live `qwen3:8b` runs followed by three `qwen2.5-coder:7b` runs on the unchanged
+  eight-node, seventeen-scenario `v2` development corpus at revision `f334359`.
+- Captured Ollama `0.35.1`, Python `3.12.14`, full model digests, exact corpus identity and
+  unchanged `node-body-v1` prompt / `node-code-validation-v4` validation with parameter evidence.
+- Observed stable 7/8 accepted nodes and 16/17 matches for the general model, and 8/8 and 17/17
+  for the code model, with no provider errors, invalid responses, mismatches or execution errors.
+- Inspected the general model's imputation rejection: a retained literal instead of the exact
+  planned parameter argument. No retry, output repair or validator exception was applied.
+- Replayed all six artifacts offline; verified raw/parsed/assembled responses, non-timing
+  summaries and per-scenario comparisons against their live source envelopes.
+- Created thirteen body comparisons: stable intra-model and live/replay outcomes, plus one improved
+  node/scenario for the code model in each paired cross-model comparison with zero regressions.
+- Confirmed byte-identical raw responses within each model across three runs. Retained every
+  duration, whole artifact hash and the rejected scenario's full denominator in the report.
+- Checked historical requests/source identities/configuration and unchanged corpus, lockfile and
+  validator content; documented the historical Ollama `0.35.0` versus current `0.35.1` caveat.
+- Kept raw artifacts private in ignored `generated/`; changed documentation only.
+- Passed 1,038 deterministic tests on Python `3.12.14` with 100% line/branch coverage, Ruff
+  lint/format, strict mypy and distribution builds. The full multi-version test suite was not
+  rerun for this documentation-only change.
+- Verified every published model/corpus/artifact hash, all eighteen rounded durations and local
+  report links directly against the recorded evidence.
+
+### Decisions
+
+- Prefer the code model plus body-only assembly for further evaluation, not as a new default.
+- Treat these previously inspected synthetic tasks as development regressions, not fresh held-out
+  evidence, whole-notebook accuracy or a causal format ablation.
+- Keep runtime validation strict and make no silent repairs or project-generation integration.
+
+### Open questions
+
+- Will the candidate remain faithful on fresh task patterns and independently reviewed notebooks?
+- Will contemporaneous full-code controls reproduce the historical format differences?
+
+### Next step
+
+- Add independent tasks and a corpus-bound full-code/body-only bridge with same-runtime controls
+  before broader accuracy claims or promotion. Full notebook and structure-planner evaluation remain.
+
 ## 2026-10-06 - Body-only benchmark CLI and compatible comparison
 
 ### Completed

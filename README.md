@@ -338,8 +338,13 @@ all proposals and replays their raw bodies without Ollama on an integrity-bound 
 Approved-reference benchmark and replay match all seventeen scenarios; this does not establish
 live model accuracy. `behavioral-benchmark run|replay|compare --proposal-format node-body`
 explicitly selects body artifacts; comparison checks corpus/source and execution compatibility,
-retains rejected denominators and does not treat replay as live latency. Body-only model measurements
-remain next. Cross-format comparison needs a corpus-bound bridge for legacy full-code artifacts.
+retains rejected denominators and does not treat replay as live latency.
+[Three live body-only runs per model and their offline replays](docs/node-body-local-measurements.md)
+now reproduce 7/8 accepted nodes and 16/17 matches for `qwen3:8b`, and 8/8 and 17/17 for
+`qwen2.5-coder:7b`. The former systematically misses one parameter substitution; the latter passes
+this small synthetic development corpus, not arbitrary notebooks. Fresh independent tasks remain
+necessary. Cross-format comparison needs a corpus-bound bridge and same-runtime controls;
+historical full-code measurements used a different Ollama version.
 Conversion defaults are unchanged.
 
 An opt-in provider mode supplies [exact parameter substitutions](docs/node-parameter-evidence.md):
