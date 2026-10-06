@@ -5,11 +5,59 @@
 The Python API now benchmarks body-only providers on the independent node-code and behavioral
 corpora, preserving rejected proposals rather than reporting only successful nodes. It uses the
 same static validator, consent-gated subprocess execution, comparators and metric denominators
-as the full-code benchmark. Full-code artifacts and CLI commands are unchanged.
+as the full-code benchmark. Full-code artifact formats and CLI defaults are unchanged.
 
-This step adds an API and a separate artifact envelope, not a body-only CLI or live model
-measurement. Offline tests and approved-reference execution are compatibility checks, not
-evidence that a model has improved.
+The Python API and CLI explicitly select a separate body-only artifact envelope. Offline tests
+and approved-reference execution are compatibility checks, not evidence that a model has improved.
+No body-only live model measurement has been recorded yet.
+
+## CLI
+
+Use `--proposal-format node-body` on each action. Without it, `full-code` remains the default;
+the loaders reject the other format rather than guessing or silently converting it.
+
+```bash
+uv run notebook-to-kedro behavioral-benchmark run tests/fixtures/evaluation/behavioral/v2 tests/fixtures/evaluation/node_code/v2 generated/body-run.json --proposal-format node-body --ollama-model qwen3:8b --ollama-timeout 120 --allow-untrusted-code-execution
+uv run notebook-to-kedro behavioral-benchmark replay generated/body-run.json tests/fixtures/evaluation/behavioral/v2 tests/fixtures/evaluation/node_code/v2 generated/body-replay.json --proposal-format node-body --allow-untrusted-code-execution
+uv run notebook-to-kedro behavioral-benchmark compare generated/body-run.json generated/body-replay.json --proposal-format node-body --output generated/body-comparison.json
+```
+
+`run` always includes exact parameter evidence in body mode; `--include-parameter-evidence`
+is redundant there. Ollama is required only for `run`. Both run and replay require explicit
+execution consent. `--project-root` resolves the reviewed source paths. `--execution-timeout`
+defaults to ten seconds on both actions; replay preserves the source byte/capture limits.
+To compare a run made with a non-default execution timeout to its replay, pass that same
+timeout to replay. Every output path must be new, including comparison files. Omitting
+`--output` on compare prints JSON to stdout. Expected failures return exit code 1 on stderr;
+invalid CLI options return argparse's exit code 2.
+
+## Comparison
+
+`compare_node_body_benchmark_artifacts(baseline, candidate)` and the CLI compare two **body-only**
+artifacts. They revalidate both envelopes, raw/parsed/assembled consistency and report hashes
+before inspecting results. They require identical corpus digests, node case IDs, recorded requests,
+source paths/hashes, scenario counts, validator versions, execution policies and execution settings.
+Model and prompt identities may differ: these are the experimental variables, not silently merged
+identities. Metadata includes both configurations and environment/model provenance.
+
+Comparison schema `1.0` is tagged `node-body-comparison` and identifies the **whole outer artifacts**.
+It contains acceptance and end-to-end match rate deltas, proposal/scenario status changes, regression
+counts, per-node rejection diagnostics and both full summaries. Summaries retain every rejection,
+not-evaluated count and the complete scenario denominator. The scenario-change table uses the union
+of evaluated scenario IDs; scenarios never evaluated on either side remain in summary denominators,
+not invented rows. A missing evaluated outcome is labeled `not_evaluated`.
+
+Provider timing means the whole proposal phase (prompt/provider, parse, assembly and validation),
+not pure inference latency. Its delta is populated only for two live runs; replay comparisons mark
+it non-comparable and emit a null delta. Live timings are observations under the recorded environment,
+not evidence of equivalent hardware, model residency or request settings. Execution timing remains
+an observed subprocess duration, not model latency. Comparison only reads evidence: it neither
+executes code nor contacts Ollama.
+
+Mixed full-code/body-only comparisons are intentionally rejected. Legacy full-code artifacts do
+not record the complete corpus digest; matching case names alone cannot establish identical inputs,
+references and comparators. A future corpus-bound bridge is needed before automating cross-format
+comparisons. Neither artifact format nor the existing full-code comparator is changed here.
 
 ## Run And Archive
 
@@ -146,7 +194,8 @@ the eight reviewed reference bodies once, executes all seventeen scenarios, writ
 artifact, then replays all seventeen through real subprocesses. All match their approved
 expectations; these are reference results, not live model outputs.
 
-Next: add explicit CLI run/replay and comparison for this envelope, including full-code versus
-body-only comparisons with compatible corpus identities and clearly labeled latency. Then run
-both local models on the unchanged corpus before claiming any improvement. Subprocess containment
+Next: run both local models on the unchanged corpus with this explicit body mode, archive their
+responses, replay them offline and compare repeated runs before claiming any improvement. Add a
+corpus-bound full-code/body-only comparison bridge before automating cross-format conclusions.
+Subprocess containment
 is not an OS security sandbox and no proposal automatically enters project generation.

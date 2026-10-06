@@ -333,10 +333,13 @@ It does not repair omissions or execute proposals. All eight approved reference 
 correctly and match seventeen scenarios with explicit test consent; this is not a model-accuracy
 measurement. An opt-in [body-only Ollama provider](docs/ollama-node-body.md) now exposes
 `request_node_body`, with mandatory parameter evidence, strict assembly and exact raw-response
-provenance. A separate [body-only benchmark/replay API](docs/node-body-benchmark.md) now archives
+provenance. A separate [body-only benchmark/replay API and CLI](docs/node-body-benchmark.md) archives
 all proposals and replays their raw bodies without Ollama on an integrity-bound corpus.
 Approved-reference benchmark and replay match all seventeen scenarios; this does not establish
-live model accuracy. CLI/comparison integration and body-only model measurements remain next.
+live model accuracy. `behavioral-benchmark run|replay|compare --proposal-format node-body`
+explicitly selects body artifacts; comparison checks corpus/source and execution compatibility,
+retains rejected denominators and does not treat replay as live latency. Body-only model measurements
+remain next. Cross-format comparison needs a corpus-bound bridge for legacy full-code artifacts.
 Conversion defaults are unchanged.
 
 An opt-in provider mode supplies [exact parameter substitutions](docs/node-parameter-evidence.md):

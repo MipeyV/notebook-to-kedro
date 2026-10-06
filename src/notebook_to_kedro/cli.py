@@ -21,17 +21,24 @@ from notebook_to_kedro.evaluation import (
     behavioral_benchmark_artifact_sha256,
     collect_environment_provenance,
     compare_behavioral_benchmark_artifacts,
+    compare_node_body_benchmark_artifacts,
     create_behavioral_benchmark_artifact,
+    create_node_body_benchmark_artifact,
     load_behavioral_benchmark_artifact,
     load_behavioral_corpus,
+    load_node_body_benchmark_artifact,
     load_node_code_corpus,
     load_planning_corpus,
+    node_body_benchmark_artifact_sha256,
     planning_benchmark_to_json,
     replay_behavioral_benchmark,
+    replay_node_body_benchmark,
     run_behavioral_code_benchmark,
+    run_node_body_benchmark,
     run_planning_benchmark,
     write_behavioral_benchmark_artifact,
     write_json_exclusive,
+    write_node_body_benchmark_artifact,
 )
 from notebook_to_kedro.exceptions import (
     BehavioralBenchmarkArtifactError,
@@ -41,7 +48,7 @@ from notebook_to_kedro.exceptions import (
     PlanningBenchmarkError,
     ProjectGenerationError,
 )
-from notebook_to_kedro.generation.code import OllamaNodeCodeProvider
+from notebook_to_kedro.generation.code import OllamaNodeBodyProvider, OllamaNodeCodeProvider
 from notebook_to_kedro.semantic import (
     DEFAULT_OLLAMA_BASE_URL,
     DEFAULT_OLLAMA_TIMEOUT_SECONDS,
@@ -187,6 +194,13 @@ def _parser() -> argparse.ArgumentParser:
     behavioral_compare.add_argument(
         "--output", type=Path, default=None, help="new comparison JSON path to create"
     )
+    for action in (behavioral_run, behavioral_replay, behavioral_compare):
+        action.add_argument(
+            "--proposal-format",
+            choices=("full-code", "node-body"),
+            default="full-code",
+            help="explicit response/artifact format (default: full-code)",
+        )
     return parser
 
 
@@ -326,6 +340,8 @@ def _behavioral_benchmark(args: argparse.Namespace) -> int:
 
 
 def _run_behavioral_benchmark(args: argparse.Namespace) -> int:
+    if args.proposal_format == "node-body":
+        return _run_node_body_benchmark(args)
     behaviors = load_behavioral_corpus(args.behavioral_corpus)
     nodes = load_node_code_corpus(args.node_code_corpus)
     execution = BehavioralExecutionConfig(timeout_seconds=args.execution_timeout)
@@ -365,6 +381,8 @@ def _run_behavioral_benchmark(args: argparse.Namespace) -> int:
 
 
 def _replay_behavioral_benchmark(args: argparse.Namespace) -> int:
+    if args.proposal_format == "node-body":
+        return _replay_node_body_benchmark(args)
     source = load_behavioral_benchmark_artifact(args.artifact)
     behaviors = load_behavioral_corpus(args.behavioral_corpus)
     nodes = load_node_code_corpus(args.node_code_corpus)
@@ -404,9 +422,16 @@ def _replay_behavioral_benchmark(args: argparse.Namespace) -> int:
 
 
 def _compare_behavioral_benchmarks(args: argparse.Namespace) -> int:
-    baseline = load_behavioral_benchmark_artifact(args.baseline)
-    candidate = load_behavioral_benchmark_artifact(args.candidate)
-    comparison = compare_behavioral_benchmark_artifacts(baseline, candidate)
+    if args.proposal_format == "node-body":
+        comparison = compare_node_body_benchmark_artifacts(
+            load_node_body_benchmark_artifact(args.baseline),
+            load_node_body_benchmark_artifact(args.candidate),
+        )
+    else:
+        comparison = compare_behavioral_benchmark_artifacts(
+            load_behavioral_benchmark_artifact(args.baseline),
+            load_behavioral_benchmark_artifact(args.candidate),
+        )
     if args.output is not None:
         write_json_exclusive(args.output, comparison)
         sys.stdout.write(f"Created behavioral benchmark comparison `{args.output}`\n")
@@ -421,6 +446,86 @@ def _compare_behavioral_benchmarks(args: argparse.Namespace) -> int:
             )
             + "\n"
         )
+    return 0
+
+
+def _run_node_body_benchmark(args: argparse.Namespace) -> int:
+    behaviors = load_behavioral_corpus(args.behavioral_corpus)
+    nodes = load_node_code_corpus(args.node_code_corpus)
+    execution = BehavioralExecutionConfig(timeout_seconds=args.execution_timeout)
+    provider = OllamaNodeBodyProvider(
+        args.ollama_model,
+        base_url=args.ollama_base_url,
+        timeout_seconds=args.ollama_timeout,
+    )
+    report = run_node_body_benchmark(
+        behaviors,
+        nodes,
+        provider,
+        allow_untrusted_code_execution=args.allow_untrusted_code_execution,
+        project_root=args.project_root,
+        execution_config=execution,
+    )
+    configuration = BehavioralBenchmarkConfiguration(
+        ollama_base_url=args.ollama_base_url,
+        provider_timeout_seconds=args.ollama_timeout,
+        include_parameter_evidence=True,
+        execution=execution,
+    )
+    artifact = create_node_body_benchmark_artifact(
+        report,
+        collect_environment_provenance(
+            project_root=args.project_root,
+            ollama_base_url=args.ollama_base_url,
+            model_name=args.ollama_model,
+        ),
+        configuration,
+    )
+    write_node_body_benchmark_artifact(args.output, artifact)
+    sys.stdout.write(
+        f"Created node-body benchmark artifact `{args.output}` "
+        f"({node_body_benchmark_artifact_sha256(artifact)})\n"
+    )
+    return 0
+
+
+def _replay_node_body_benchmark(args: argparse.Namespace) -> int:
+    source = load_node_body_benchmark_artifact(args.artifact)
+    behaviors = load_behavioral_corpus(args.behavioral_corpus)
+    nodes = load_node_code_corpus(args.node_code_corpus)
+    original = source.benchmark.configuration
+    execution = BehavioralExecutionConfig(
+        timeout_seconds=args.execution_timeout,
+        max_request_bytes=original.execution.max_request_bytes,
+        max_result_bytes=original.execution.max_result_bytes,
+        max_capture_bytes=original.execution.max_capture_bytes,
+    )
+    configuration = BehavioralBenchmarkConfiguration(
+        ollama_base_url=original.ollama_base_url,
+        provider_timeout_seconds=original.provider_timeout_seconds,
+        include_parameter_evidence=True,
+        execution=execution,
+    )
+    report = replay_node_body_benchmark(
+        source,
+        behaviors,
+        nodes,
+        allow_untrusted_code_execution=args.allow_untrusted_code_execution,
+        project_root=args.project_root,
+        execution_config=execution,
+    )
+    artifact = create_node_body_benchmark_artifact(
+        report,
+        collect_environment_provenance(project_root=args.project_root),
+        configuration,
+        mode="replay",
+        source_artifact_sha256=node_body_benchmark_artifact_sha256(source),
+    )
+    write_node_body_benchmark_artifact(args.output, artifact)
+    sys.stdout.write(
+        f"Created node-body benchmark replay `{args.output}` "
+        f"({node_body_benchmark_artifact_sha256(artifact)})\n"
+    )
     return 0
 
 

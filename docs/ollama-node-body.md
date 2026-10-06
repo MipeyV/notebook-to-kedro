@@ -75,8 +75,9 @@ historical full-code results and must not be attributed to this new mode.
 
 The [body-only benchmark/replay API](node-body-benchmark.md) now preserves raw body responses,
 assembly/schema/prompt versions, accepted assembled responses and rejected proposals in a separate
-artifact envelope. There is no body-only CLI or live accuracy measurement yet; CLI integration and
-comparison precede measurements of both local models on the unchanged corpus.
+artifact envelope. The CLI now explicitly selects this mode with `--proposal-format node-body`
+for run/replay/compare. Body comparisons require matching corpus/source and execution contracts;
+live accuracy measurements of both local models on the unchanged corpus remain next.
 Keep behavioral execution opt-in: subprocesses provide fault containment,
 not an OS security sandbox. See the [body contract](node-body-contract.md),
 [local transport](ollama-provider.md) and [full-code API](node-code-contract.md).

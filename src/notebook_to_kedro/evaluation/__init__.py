@@ -107,7 +107,9 @@ from notebook_to_kedro.evaluation.models import (
 )
 from notebook_to_kedro.evaluation.node_body_artifacts import (
     NODE_BODY_BENCHMARK_ARTIFACT_SCHEMA_VERSION,
+    NODE_BODY_BENCHMARK_COMPARISON_SCHEMA_VERSION,
     NodeBodyBenchmarkArtifact,
+    compare_node_body_benchmark_artifacts,
     create_node_body_benchmark_artifact,
     load_node_body_benchmark_artifact,
     node_body_benchmark_artifact_from_dict,
@@ -169,6 +171,7 @@ __all__ = [
     "DEFAULT_PIPELINE_ID",
     "FALLBACK_DIAGNOSTIC_CODE",
     "NODE_BODY_BENCHMARK_ARTIFACT_SCHEMA_VERSION",
+    "NODE_BODY_BENCHMARK_COMPARISON_SCHEMA_VERSION",
     "NODE_CODE_BENCHMARK_SCHEMA_VERSION",
     "NODE_CODE_CASE_SCHEMA_VERSION",
     "PLANNING_BENCHMARK_SCHEMA_VERSION",
@@ -242,6 +245,7 @@ __all__ = [
     "compare_behavioral_benchmark_artifacts",
     "compare_behavioral_corpus",
     "compare_behavioral_result",
+    "compare_node_body_benchmark_artifacts",
     "create_behavioral_benchmark_artifact",
     "create_node_body_benchmark_artifact",
     "evaluate_behavioral_proposal",

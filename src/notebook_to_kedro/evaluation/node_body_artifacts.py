@@ -19,6 +19,7 @@ from notebook_to_kedro.evaluation.behavioral_artifacts import (
     _to_json,
     behavioral_benchmark_artifact_from_dict,
     behavioral_benchmark_artifact_to_dict,
+    compare_behavioral_benchmark_artifacts,
     create_behavioral_benchmark_artifact,
     write_json_exclusive,
 )
@@ -53,6 +54,7 @@ if TYPE_CHECKING:
     from notebook_to_kedro.evaluation.node_code_corpus import NodeCodeCase
 
 NODE_BODY_BENCHMARK_ARTIFACT_SCHEMA_VERSION = "1.0"
+NODE_BODY_BENCHMARK_COMPARISON_SCHEMA_VERSION = "1.0"
 _KEYS = frozenset(
     {
         "schema_version",
@@ -190,6 +192,77 @@ def node_body_benchmark_artifact_to_json(
 def node_body_benchmark_artifact_sha256(artifact: NodeBodyBenchmarkArtifact) -> str:
     """Hash the whole envelope, including body and assembly provenance."""
     return _json_sha256(node_body_benchmark_artifact_to_dict(artifact))
+
+
+def compare_node_body_benchmark_artifacts(
+    baseline: NodeBodyBenchmarkArtifact,
+    candidate: NodeBodyBenchmarkArtifact,
+) -> dict[str, object]:
+    """Compare revalidated body artifacts on identical corpus and execution contracts."""
+    baseline_payload = node_body_benchmark_artifact_to_dict(baseline)
+    candidate_payload = node_body_benchmark_artifact_to_dict(candidate)
+    baseline = node_body_benchmark_artifact_from_dict(baseline_payload)
+    candidate = node_body_benchmark_artifact_from_dict(candidate_payload)
+    if baseline.corpus_sha256 != candidate.corpus_sha256:
+        raise BehavioralBenchmarkArtifactError("body comparison requires the exact same corpus")
+    left, right = baseline.benchmark, candidate.benchmark
+    if (
+        left.configuration.execution != right.configuration.execution
+        or left.report["validator_version"] != right.report["validator_version"]
+        or left.report["execution_policy"] != right.report["execution_policy"]
+        or left.report["scenario_count"] != right.report["scenario_count"]
+    ):
+        raise BehavioralBenchmarkArtifactError(
+            "body comparison requires matching validation and execution contracts"
+        )
+    left_proposals = _proposals_by_id(left.report)
+    right_proposals = _proposals_by_id(right.report)
+    if left_proposals.keys() != right_proposals.keys():
+        raise BehavioralBenchmarkArtifactError("body comparison requires matching case IDs")
+    for case_id, proposal in left_proposals.items():
+        other = right_proposals[case_id]
+        if any(
+            proposal[key] != other[key] for key in ("request", "source_sha256", "notebook_path")
+        ):
+            raise BehavioralBenchmarkArtifactError("body comparison requires matching sources")
+    comparison = compare_behavioral_benchmark_artifacts(left, right)
+    comparison.update(
+        schema_version=NODE_BODY_BENCHMARK_COMPARISON_SCHEMA_VERSION,
+        artifact_kind="node-body-comparison",
+        corpus_sha256=baseline.corpus_sha256,
+        baseline_artifact_sha256=_json_sha256(baseline_payload),
+        candidate_artifact_sha256=_json_sha256(candidate_payload),
+        baseline_summary=left.report["summary"],
+        candidate_summary=right.report["summary"],
+        baseline_metadata=_comparison_metadata(baseline),
+        candidate_metadata=_comparison_metadata(candidate),
+        proposal_diagnostics=[
+            {
+                "node_code_case_id": case_id,
+                "baseline_code": left_proposals[case_id]["diagnostic_code"],
+                "candidate_code": right_proposals[case_id]["diagnostic_code"],
+                "baseline_message": left_proposals[case_id]["diagnostic_message"],
+                "candidate_message": right_proposals[case_id]["diagnostic_message"],
+            }
+            for case_id in sorted(left_proposals)
+        ],
+    )
+    return comparison
+
+
+def _comparison_metadata(artifact: NodeBodyBenchmarkArtifact) -> dict[str, object]:
+    benchmark = artifact.benchmark
+    return {
+        "mode": benchmark.mode,
+        "provider_name": benchmark.report["provider_name"],
+        "model_name": benchmark.report["model_name"],
+        "prompt_version": benchmark.report["prompt_version"],
+        "assembly_version": artifact.assembly_version,
+        "body_schema_version": artifact.body_schema_version,
+        "parameter_evidence_version": artifact.parameter_evidence_version,
+        "configuration": behavioral_benchmark_artifact_to_dict(benchmark)["configuration"],
+        "provenance": behavioral_benchmark_artifact_to_dict(benchmark)["provenance"],
+    }
 
 
 def node_body_benchmark_artifact_from_dict(payload: object) -> NodeBodyBenchmarkArtifact:

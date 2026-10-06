@@ -9,6 +9,11 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Explicit `--proposal-format node-body` selection for behavioral benchmark CLI run/replay/compare,
+  preserving full-code defaults and requiring renewed consent for execution.
+- Body-only artifact comparison with envelope revalidation, exact corpus/source and execution
+  compatibility, outer artifact identities, rejection diagnostics, complete summaries and metadata.
+  Replay proposal latency is non-comparable; mixed legacy/body comparisons are rejected.
 - Body-only benchmark/replay Python API with a distinct versioned artifact envelope, raw and
   parsed bodies, accepted assembled responses, explicit rejection statuses, corpus identity,
   prompt/assembly/evidence provenance and exclusive atomic publication. Replays regenerate

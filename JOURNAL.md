@@ -40,6 +40,40 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-10-06 - Body-only benchmark CLI and compatible comparison
+
+### Completed
+
+- Added explicit `--proposal-format node-body` selection to behavioral benchmark run/replay/compare.
+- Kept full-code CLI defaults, artifact formats, prompts, validation and conversion unchanged.
+- Made exact parameter evidence mandatory in body runs and retained renewed execution consent.
+- Added a body comparison API with envelope revalidation, corpus/source identity, compatible
+  validation/execution contracts, outer artifact hashes, full summaries and rejection diagnostics.
+- Recorded both model/prompt/environment/configuration metadata; replay provider timing is
+  non-comparable to live timing and its delta is null.
+- Added offline CLI orchestration, real artifact roundtrips, format isolation, consent, exclusive
+  output and compatibility regression tests without model calls.
+- Passed 1,056 tests on Python `3.12.14` and 1,038 deterministic tests on each of `3.11.16` and
+  `3.13.14`, all with 100% line and branch coverage (5,279 statements and 1,504 branches).
+- Passed Ruff lint/format, strict mypy and distribution builds.
+
+### Decisions
+
+- Require explicit artifact format instead of inferring it from untrusted files.
+- Compare only body artifacts in this increment. Legacy full-code artifacts lack complete corpus
+  identity; case-name equality is insufficient for safe automated cross-format conclusions.
+- Keep metrics over all proposals/scenarios, including rejected and not-evaluated outcomes.
+
+### Open questions
+
+- Will body-only prompting improve acceptance and behavioral match rates for either local model?
+- What corpus-bound evidence should accompany historical full-code runs for cross-format comparison?
+
+### Next step
+
+- Measure both local models on the unchanged eight-node, seventeen-scenario corpus, archive raw
+  bodies, replay offline and compare repeated runs; no body-only accuracy improvement is claimed yet.
+
 ## 2026-10-04 - Body-only benchmark artifacts and offline replay
 
 ### Completed
