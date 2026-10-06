@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING, Any, cast
 
 import pytest
 
+from notebook_to_kedro import cli
 from notebook_to_kedro.evaluation import (
     BehavioralBenchmarkConfiguration,
     BehavioralBenchmarkProvenance,
@@ -21,6 +22,7 @@ from notebook_to_kedro.evaluation import (
     behavioral_benchmark_artifact_from_json,
     behavioral_benchmark_artifact_to_json,
     behavioral_code_benchmark_to_dict,
+    compare_node_body_benchmark_artifacts,
     create_node_body_benchmark_artifact,
     load_behavioral_corpus,
     load_node_body_benchmark_artifact,
@@ -365,6 +367,252 @@ def test_body_artifact_roundtrip_identity_and_format_separation(
         node_body_benchmark_artifact_from_json(
             behavioral_benchmark_artifact_to_json(artifact.benchmark)
         )
+
+
+@pytest.mark.parametrize("mode", ["live", "replay"])
+def test_body_comparison_preserves_summaries_diagnostics_and_outer_identity(
+    artifact: NodeBodyBenchmarkArtifact, mixed: NodeBodyBenchmarkArtifact, mode: str
+) -> None:
+    candidate = mixed
+    if mode == "replay":
+        candidate = replace(
+            mixed,
+            benchmark=replace(
+                mixed.benchmark,
+                mode="replay",
+                source_artifact_sha256=node_body_benchmark_artifact_sha256(mixed),
+            ),
+        )
+    comparison = compare_node_body_benchmark_artifacts(artifact, candidate)
+    assert comparison["artifact_kind"] == "node-body-comparison"
+    assert comparison["corpus_sha256"] == artifact.corpus_sha256
+    assert comparison["baseline_artifact_sha256"] == node_body_benchmark_artifact_sha256(artifact)
+    assert comparison["candidate_artifact_sha256"] == node_body_benchmark_artifact_sha256(candidate)
+    assert comparison["baseline_summary"] == artifact.benchmark.report["summary"]
+    assert comparison["candidate_summary"] == mixed.benchmark.report["summary"]
+    assert comparison["regressed_proposal_count"] == 3
+    data = cast("dict[str, Any]", comparison)
+    assert data["candidate_metadata"]["mode"] == mode
+    assert data["candidate_metadata"]["prompt_version"] == NODE_BODY_PROMPT_VERSION
+    assert data["candidate_metadata"]["provenance"]["python_version"] == "3.12.14"
+    latency = data["metrics"]["provider_duration_seconds"]
+    assert latency["comparable"] is (mode == "live")
+    assert latency["delta"] == (0.0 if mode == "live" else None)
+    assert sum(row["candidate_code"] is not None for row in data["proposal_diagnostics"]) == 3
+    assert data["candidate_summary"]["not_evaluated_scenario_count"] == 4
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    [
+        "corpus",
+        "execution",
+        "validator",
+        "policy",
+        "count",
+        "cases",
+        "request",
+        "source_sha256",
+        "notebook_path",
+    ],
+)
+def test_body_comparison_refuses_incompatible_evidence(
+    artifact: NodeBodyBenchmarkArtifact, mixed: NodeBodyBenchmarkArtifact, mutation: str
+) -> None:
+    def mutate(data: dict[str, Any]) -> None:
+        report = data["benchmark"]["report"]
+        if mutation == "corpus":
+            data["corpus_sha256"] = "0" * 64
+        elif mutation == "execution":
+            data["benchmark"]["configuration"]["execution"]["timeout_seconds"] = 3.0
+        elif mutation == "validator":
+            report["validator_version"] = "other"
+        elif mutation == "policy":
+            report["execution_policy"] = "other"
+        elif mutation == "count":
+            report["scenario_count"] += 1
+        elif mutation == "cases":
+            old = report["proposals"][0]["node_code_case_id"]
+            report["proposals"][0]["node_code_case_id"] = "other-case"
+            data["body_responses"]["other-case"] = data["body_responses"].pop(old)
+        elif mutation == "request":
+            report["proposals"][0]["request"]["raw_source"] = "changed = 1"
+        else:
+            report["proposals"][0][mutation] = (
+                "0" * 64 if mutation == "source_sha256" else "other.ipynb"
+            )
+
+    changed = _mutate(mixed, mutate)
+    with pytest.raises(
+        BehavioralBenchmarkArtifactError, match=r"corpus|contracts|case IDs|sources"
+    ):
+        compare_node_body_benchmark_artifacts(artifact, changed)
+
+
+def test_body_comparison_revalidates_mutable_contents(artifact: NodeBodyBenchmarkArtifact) -> None:
+    artifact.benchmark.report["model_name"] = "tampered"
+    with pytest.raises(ValueError, match="report_sha256"):
+        compare_node_body_benchmark_artifacts(artifact, artifact)
+
+
+def test_body_cli_run_replay_and_compare_with_real_artifacts(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    nodes: tuple[NodeCodeCase, ...],
+    behaviors: tuple[BehavioralCase, ...],
+) -> None:
+    provider = _Provider(nodes)
+    monkeypatch.setattr(cli, "OllamaNodeBodyProvider", lambda *_args, **_kwargs: provider)
+    monkeypatch.setattr(
+        cli,
+        "collect_environment_provenance",
+        lambda **_kwargs: BehavioralBenchmarkProvenance(
+            "2026-10-06T10:00:00Z", "abc123", "3.12.14", "win32", None, None
+        ),
+    )
+    calls = _workers(monkeypatch, behaviors)
+    run_path, replay_path = tmp_path / "run.json", tmp_path / "replay.json"
+    corpus_args = [
+        str(ROOT / "tests/fixtures/evaluation/behavioral/v1"),
+        str(ROOT / "tests/fixtures/evaluation/node_code/v1"),
+    ]
+    options = ["--proposal-format", "node-body", "--project-root", str(ROOT)]
+    run_args = [
+        "behavioral-benchmark",
+        "run",
+        *corpus_args,
+        str(run_path),
+        *options,
+        "--ollama-model",
+        "offline",
+        "--allow-untrusted-code-execution",
+    ]
+    assert cli.main(run_args) == 0
+    assert len(provider.requests) == len(nodes)
+    recorded = load_node_body_benchmark_artifact(run_path)
+    assert recorded.benchmark.configuration.include_parameter_evidence is True
+
+    def no_provider(*_args: object, **_kwargs: object) -> None:
+        pytest.fail("replay and comparison must not invoke Ollama")
+
+    monkeypatch.setattr(cli, "OllamaNodeBodyProvider", no_provider)
+    monkeypatch.setattr("notebook_to_kedro.semantic.ollama.urlopen", no_provider)
+    monkeypatch.setattr("notebook_to_kedro.evaluation.behavioral_artifacts.urlopen", no_provider)
+    replay_args = [
+        "behavioral-benchmark",
+        "replay",
+        str(run_path),
+        *corpus_args,
+        str(replay_path),
+        *options,
+        "--allow-untrusted-code-execution",
+    ]
+    assert cli.main(replay_args) == 0
+    replayed = load_node_body_benchmark_artifact(replay_path)
+    assert replayed.benchmark.source_artifact_sha256 == node_body_benchmark_artifact_sha256(
+        recorded
+    )
+    assert len(calls) == len(behaviors) * 2
+    capsys.readouterr()
+    compare_args = [
+        "behavioral-benchmark",
+        "compare",
+        str(run_path),
+        str(replay_path),
+        "--proposal-format",
+        "node-body",
+    ]
+    assert cli.main(compare_args) == 0
+    comparison = json.loads(capsys.readouterr().out)
+    assert comparison["regressed_proposal_count"] == 0
+    assert comparison["regressed_scenario_count"] == 0
+    assert comparison["candidate_summary"]["matched_scenario_count"] == len(behaviors)
+    assert comparison["metrics"]["provider_duration_seconds"]["delta"] is None
+    output = tmp_path / "comparison.json"
+    assert cli.main([*compare_args, "--output", str(output)]) == 0
+    assert json.loads(output.read_text(encoding="utf-8")) == comparison
+    assert cli.main([*compare_args, "--output", str(output)]) == 1
+    assert "already exists" in capsys.readouterr().err
+
+
+@pytest.mark.parametrize("action", ["run", "replay"])
+def test_body_cli_requires_execution_consent_without_provider_calls(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    artifact: NodeBodyBenchmarkArtifact,
+    action: str,
+) -> None:
+    nodes = load_node_code_corpus(ROOT / "tests/fixtures/evaluation/node_code/v1")
+    provider = _Provider(nodes)
+    monkeypatch.setattr(cli, "OllamaNodeBodyProvider", lambda *_args, **_kwargs: provider)
+    source = tmp_path / "source.json"
+    write_node_body_benchmark_artifact(source, artifact)
+    output = tmp_path / "unauthorized.json"
+    args = ["behavioral-benchmark", action]
+    if action == "replay":
+        args.append(str(source))
+    args.extend(
+        [
+            str(ROOT / "tests/fixtures/evaluation/behavioral/v1"),
+            str(ROOT / "tests/fixtures/evaluation/node_code/v1"),
+            str(output),
+            "--proposal-format",
+            "node-body",
+            "--project-root",
+            str(ROOT),
+        ]
+    )
+    if action == "run":
+        args.extend(["--ollama-model", "offline"])
+    assert cli.main(args) == 1
+    assert "allow_untrusted_code_execution=True" in capsys.readouterr().err
+    assert provider.requests == []
+    assert not output.exists()
+
+
+def test_body_cli_rejects_full_code_format_and_keeps_default_explicit(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str], artifact: NodeBodyBenchmarkArtifact
+) -> None:
+    body_path = tmp_path / "body.json"
+    full_path = tmp_path / "full.json"
+    write_node_body_benchmark_artifact(body_path, artifact)
+    full_path.write_text(
+        behavioral_benchmark_artifact_to_json(artifact.benchmark), encoding="utf-8"
+    )
+    assert (
+        cli._parser()
+        .parse_args(["behavioral-benchmark", "compare", str(full_path), str(full_path)])
+        .proposal_format
+        == "full-code"
+    )
+    assert (
+        cli.main(
+            [
+                "behavioral-benchmark",
+                "compare",
+                str(body_path),
+                str(full_path),
+                "--proposal-format",
+                "node-body",
+            ]
+        )
+        == 1
+    )
+    assert "cannot load body benchmark artifact" in capsys.readouterr().err
+    assert (
+        cli.main(
+            [
+                "behavioral-benchmark",
+                "compare",
+                str(body_path),
+                str(body_path),
+            ]
+        )
+        == 1
+    )
+    assert "invalid behavioral benchmark artifact fields" in capsys.readouterr().err
 
 
 @pytest.mark.parametrize(

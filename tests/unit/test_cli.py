@@ -324,10 +324,12 @@ def test_cli_benchmark_rejects_ollama_settings_without_hybrid(
     assert "Error: Ollama settings require planner mode 'hybrid'" in captured.err
 
 
+@pytest.mark.parametrize("proposal_format", ["full-code", "node-body"])
 def test_cli_behavioral_benchmark_run_writes_versioned_artifact(
     tmp_path: Path,
     capsys: pytest.CaptureFixture[str],
     monkeypatch: pytest.MonkeyPatch,
+    proposal_format: str,
 ) -> None:
     output = tmp_path / "run.json"
     calls: dict[str, Any] = {}
@@ -343,13 +345,29 @@ def test_cli_behavioral_benchmark_run_writes_versioned_artifact(
 
     monkeypatch.setattr("notebook_to_kedro.cli.load_behavioral_corpus", lambda path: (path,))
     monkeypatch.setattr("notebook_to_kedro.cli.load_node_code_corpus", lambda path: (path,))
-    monkeypatch.setattr("notebook_to_kedro.cli.OllamaNodeCodeProvider", _Provider)
+    body_only = proposal_format == "node-body"
+    provider_name = "OllamaNodeBodyProvider" if body_only else "OllamaNodeCodeProvider"
+    monkeypatch.setattr(cli, provider_name, _Provider)
+    run_name = "run_node_body_benchmark" if body_only else "run_behavioral_code_benchmark"
+    create_name = (
+        "create_node_body_benchmark_artifact"
+        if body_only
+        else "create_behavioral_benchmark_artifact"
+    )
+    write_name = (
+        "write_node_body_benchmark_artifact" if body_only else "write_behavioral_benchmark_artifact"
+    )
+    hash_name = (
+        "node_body_benchmark_artifact_sha256"
+        if body_only
+        else "behavioral_benchmark_artifact_sha256"
+    )
 
     def fake_run(*args: object, **kwargs: object) -> object:
         calls["run"] = (args, kwargs)
         return report
 
-    monkeypatch.setattr("notebook_to_kedro.cli.run_behavioral_code_benchmark", fake_run)
+    monkeypatch.setattr(cli, run_name, fake_run)
     monkeypatch.setattr(
         "notebook_to_kedro.cli.collect_environment_provenance",
         lambda **kwargs: calls.setdefault("provenance", kwargs) and provenance,
@@ -359,19 +377,20 @@ def test_cli_behavioral_benchmark_run_writes_versioned_artifact(
         calls["create"] = (args, kwargs)
         return artifact
 
-    monkeypatch.setattr("notebook_to_kedro.cli.create_behavioral_benchmark_artifact", fake_create)
+    monkeypatch.setattr(cli, create_name, fake_create)
     monkeypatch.setattr(
-        "notebook_to_kedro.cli.write_behavioral_benchmark_artifact",
+        cli,
+        write_name,
         lambda path, value: calls.setdefault("write", (path, value)),
     )
-    monkeypatch.setattr(
-        "notebook_to_kedro.cli.behavioral_benchmark_artifact_sha256", lambda _value: "a" * 64
-    )
+    monkeypatch.setattr(cli, hash_name, lambda _value: "a" * 64)
 
     exit_code = main(
         [
             "behavioral-benchmark",
             "run",
+            "--proposal-format",
+            proposal_format,
             str(BEHAVIORAL_CORPUS),
             str(NODE_CODE_CORPUS),
             str(output),
@@ -394,10 +413,15 @@ def test_cli_behavioral_benchmark_run_writes_versioned_artifact(
     configuration = calls["create"][0][2]
     assert exit_code == 0
     assert captured.err == ""
-    assert f"Created behavioral benchmark artifact `{output}`" in captured.out
+    label = "node-body" if body_only else "behavioral"
+    assert f"Created {label} benchmark artifact `{output}`" in captured.out
     assert provider_model == "qwen3:8b"
     assert provider_kwargs["timeout_seconds"] == 30
-    assert provider_kwargs["include_parameter_evidence"] is True
+    if body_only:
+        assert "include_parameter_evidence" not in provider_kwargs
+        assert "prompt_version" not in run_kwargs
+    else:
+        assert provider_kwargs["include_parameter_evidence"] is True
     assert run_args[2].prompt_version == "test-prompt"
     assert run_kwargs["allow_untrusted_code_execution"] is True
     assert run_kwargs["execution_config"] == BehavioralExecutionConfig(timeout_seconds=4)
@@ -405,10 +429,12 @@ def test_cli_behavioral_benchmark_run_writes_versioned_artifact(
     assert calls["write"] == (output, artifact)
 
 
+@pytest.mark.parametrize("proposal_format", ["full-code", "node-body"])
 def test_cli_behavioral_benchmark_replay_is_offline(
     tmp_path: Path,
     capsys: pytest.CaptureFixture[str],
     monkeypatch: pytest.MonkeyPatch,
+    proposal_format: str,
 ) -> None:
     source_path = tmp_path / "source.json"
     output = tmp_path / "replay.json"
@@ -417,16 +443,35 @@ def test_cli_behavioral_benchmark_replay_is_offline(
             ollama_base_url="http://localhost:11434",
             provider_timeout_seconds=120.0,
             include_parameter_evidence=True,
-            execution=BehavioralExecutionConfig(),
+            execution=BehavioralExecutionConfig(
+                max_request_bytes=2048, max_result_bytes=4096, max_capture_bytes=1024
+            ),
         )
     )
     report = object()
     provenance = object()
     replay_artifact = object()
     calls: dict[str, Any] = {}
-    monkeypatch.setattr(
-        "notebook_to_kedro.cli.load_behavioral_benchmark_artifact", lambda _path: source
+    body_only = proposal_format == "node-body"
+    names = (
+        (
+            "load_node_body_benchmark_artifact",
+            "replay_node_body_benchmark",
+            "create_node_body_benchmark_artifact",
+            "node_body_benchmark_artifact_sha256",
+            "write_node_body_benchmark_artifact",
+        )
+        if body_only
+        else (
+            "load_behavioral_benchmark_artifact",
+            "replay_behavioral_benchmark",
+            "create_behavioral_benchmark_artifact",
+            "behavioral_benchmark_artifact_sha256",
+            "write_behavioral_benchmark_artifact",
+        )
     )
+    recorded = SimpleNamespace(benchmark=source) if body_only else source
+    monkeypatch.setattr(cli, names[0], lambda _path: recorded)
     monkeypatch.setattr("notebook_to_kedro.cli.load_behavioral_corpus", lambda _path: ("behavior",))
     monkeypatch.setattr("notebook_to_kedro.cli.load_node_code_corpus", lambda _path: ("node",))
 
@@ -434,23 +479,28 @@ def test_cli_behavioral_benchmark_replay_is_offline(
         calls["replay"] = (args, kwargs)
         return report
 
-    monkeypatch.setattr("notebook_to_kedro.cli.replay_behavioral_benchmark", fake_replay)
-    monkeypatch.setattr(
-        "notebook_to_kedro.cli.collect_environment_provenance", lambda **_kwargs: provenance
-    )
+    monkeypatch.setattr(cli, names[1], fake_replay)
+
+    def offline_provenance(**kwargs: object) -> object:
+        assert kwargs == {"project_root": ROOT}
+        return provenance
+
+    monkeypatch.setattr("notebook_to_kedro.cli.collect_environment_provenance", offline_provenance)
 
     def fake_create(*args: object, **kwargs: object) -> object:
         calls["create"] = (args, kwargs)
         return replay_artifact
 
-    monkeypatch.setattr("notebook_to_kedro.cli.create_behavioral_benchmark_artifact", fake_create)
+    monkeypatch.setattr(cli, names[2], fake_create)
     digests = iter(("b" * 64, "c" * 64))
     monkeypatch.setattr(
-        "notebook_to_kedro.cli.behavioral_benchmark_artifact_sha256",
+        cli,
+        names[3],
         lambda _value: next(digests),
     )
     monkeypatch.setattr(
-        "notebook_to_kedro.cli.write_behavioral_benchmark_artifact",
+        cli,
+        names[4],
         lambda path, value: calls.setdefault("write", (path, value)),
     )
 
@@ -458,6 +508,8 @@ def test_cli_behavioral_benchmark_replay_is_offline(
         [
             "behavioral-benchmark",
             "replay",
+            "--proposal-format",
+            proposal_format,
             str(source_path),
             str(BEHAVIORAL_CORPUS),
             str(NODE_CODE_CORPUS),
@@ -473,8 +525,14 @@ def test_cli_behavioral_benchmark_replay_is_offline(
     captured = capsys.readouterr()
     assert exit_code == 0
     assert captured.err == ""
-    assert f"Created behavioral benchmark replay `{output}`" in captured.out
-    assert calls["replay"][1]["execution_config"].timeout_seconds == 3
+    label = "node-body" if body_only else "behavioral"
+    assert f"Created {label} benchmark replay `{output}`" in captured.out
+    assert calls["replay"][0][0] is recorded
+    assert calls["replay"][1]["allow_untrusted_code_execution"] is True
+    assert calls["replay"][1]["execution_config"] == BehavioralExecutionConfig(
+        timeout_seconds=3, max_request_bytes=2048, max_result_bytes=4096, max_capture_bytes=1024
+    )
+    assert calls["create"][0][2].include_parameter_evidence is True
     assert calls["create"][1] == {
         "mode": "replay",
         "source_artifact_sha256": "b" * 64,
@@ -483,29 +541,46 @@ def test_cli_behavioral_benchmark_replay_is_offline(
 
 
 @pytest.mark.parametrize("output_mode", ["stdout", "file"])
+@pytest.mark.parametrize("proposal_format", ["full-code", "node-body"])
 def test_cli_behavioral_benchmark_compare(
     tmp_path: Path,
     capsys: pytest.CaptureFixture[str],
     monkeypatch: pytest.MonkeyPatch,
     output_mode: str,
+    proposal_format: str,
 ) -> None:
     baseline = object()
     candidate = object()
     comparison = {"schema_version": "1.0", "regressed_scenario_count": 0}
     loaded = iter((baseline, candidate))
     writes: list[tuple[Path, object]] = []
-    monkeypatch.setattr(
-        "notebook_to_kedro.cli.load_behavioral_benchmark_artifact", lambda _path: next(loaded)
+    body_only = proposal_format == "node-body"
+    load_name = (
+        "load_node_body_benchmark_artifact" if body_only else "load_behavioral_benchmark_artifact"
     )
+    compare_name = (
+        "compare_node_body_benchmark_artifacts"
+        if body_only
+        else "compare_behavioral_benchmark_artifacts"
+    )
+    monkeypatch.setattr(cli, load_name, lambda _path: next(loaded))
     monkeypatch.setattr(
-        "notebook_to_kedro.cli.compare_behavioral_benchmark_artifacts",
+        cli,
+        compare_name,
         lambda left, right: comparison if (left, right) == (baseline, candidate) else {},
     )
     monkeypatch.setattr(
         "notebook_to_kedro.cli.write_json_exclusive",
         lambda path, payload: writes.append((path, payload)),
     )
-    argv = ["behavioral-benchmark", "compare", "baseline.json", "candidate.json"]
+    argv = [
+        "behavioral-benchmark",
+        "compare",
+        "baseline.json",
+        "candidate.json",
+        "--proposal-format",
+        proposal_format,
+    ]
     if output_mode == "file":
         argv.extend(("--output", str(tmp_path / "comparison.json")))
 

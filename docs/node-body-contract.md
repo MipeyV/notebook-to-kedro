@@ -9,7 +9,7 @@ ordered inputs and outputs, parameter arguments and allowed imports remain trust
 The assembler implements an offline Python API. A separate opt-in
 [local body-only provider](ollama-node-body.md) now connects it to Ollama through
 `request_node_body`. A separate [benchmark/replay API](node-body-benchmark.md) now records these
-proposals; there is no body-only CLI or automatic project writer.
+proposals; an explicit body-only benchmark CLI is available, but no automatic project writer.
 Existing full-code providers, prompts `v1`/`v4`, contracts and
 validator `node-code-validation-v4` are unchanged. No new model-accuracy result is claimed.
 
@@ -112,8 +112,8 @@ seventeen reviewed behavioral scenarios, including expected exceptions.
 These are reference-compatibility tests, not outputs sampled from a model. The separate body-only
 local provider, prompt and benchmark/replay adapter are implemented with offline transport and
 approved-reference tests. The adapter records body/schema/assembly provenance, exact raw responses,
-accepted assembled code and rejected proposals. CLI integration and comparison remain before
-live body-only measurements.
+accepted assembled code and rejected proposals. The explicit benchmark CLI and body-artifact
+comparison are available; live body-only measurements remain next.
 Compare both local models on the unchanged corpus before considering promotion, and use fresh
 independent tasks before claiming generalization. See the
 [rejected statement-retention experiment](node-code-statement-retention.md) for motivation.
