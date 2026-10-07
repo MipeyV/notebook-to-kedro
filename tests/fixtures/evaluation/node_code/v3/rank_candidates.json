@@ -1,0 +1,69 @@
+{
+  "schema_version": "1.0",
+  "case_id": "rank-candidates",
+  "notebook_path": "tests/fixtures/notebooks/node_code_eval_v3/rank_candidates.ipynb",
+  "source_sha256": "9915160b58d5622ec625ae3ad88b05fad7c22c2ed68d55ebd92cfdfa48f8d1d9",
+  "review_status": "approved",
+  "request": {
+    "schema_version": "1.0",
+    "request_id": "independent-v3-rank-candidates",
+    "task_id": "fresh-task-0004",
+    "node_name": "rank_shortlist",
+    "raw_source": "ranked = frame.sort_values([\"score\", \"name\"], ascending=[False, True], kind=\"stable\").reset_index(drop=True)\nwinners = ranked.head(2).copy()\nsummary = {\"rows\": len(ranked), \"winners\": len(winners)}",
+    "source_cell_ids": [
+      "ranking-code"
+    ],
+    "statement_ids": [
+      "ranking-code-stmt-0000",
+      "ranking-code-stmt-0001",
+      "ranking-code-stmt-0002"
+    ],
+    "inputs": [
+      "frame"
+    ],
+    "outputs": [
+      "ranked",
+      "winners",
+      "summary"
+    ],
+    "parameter_names": [],
+    "parameter_arguments": [],
+    "allowed_imports": []
+  },
+  "reference_response": {
+    "schema_version": "1.0",
+    "request_id": "independent-v3-rank-candidates",
+    "task_id": "fresh-task-0004",
+    "function_code": "def rank_shortlist(frame):\n    ranked = frame.sort_values([\"score\", \"name\"], ascending=[False, True], kind=\"stable\").reset_index(drop=True)\n    winners = ranked.head(2).copy()\n    summary = {\"rows\": len(ranked), \"winners\": len(winners)}\n    return ranked, winners, summary\n",
+    "imports": [],
+    "review_notes": [
+      "Hand-authored fixture contract, not planner/generator output or a sampled model proposal. Maintainer PR review precedes scored model evaluation."
+    ]
+  },
+  "invalid_examples": [
+    {
+      "id": "ascending-score",
+      "response": {
+        "schema_version": "1.0",
+        "request_id": "independent-v3-rank-candidates",
+        "task_id": "fresh-task-0004",
+        "function_code": "def rank_shortlist(frame):\n    ranked = frame.sort_values([\"score\", \"name\"], ascending=[True, True], kind=\"stable\").reset_index(drop=True)\n    winners = ranked.head(2).copy()\n    summary = {\"rows\": len(ranked), \"winners\": len(winners)}\n    return ranked, winners, summary\n",
+        "imports": [],
+        "review_notes": []
+      },
+      "expected_error_contains": "function body must preserve source AST"
+    },
+    {
+      "id": "retained-source-index",
+      "response": {
+        "schema_version": "1.0",
+        "request_id": "independent-v3-rank-candidates",
+        "task_id": "fresh-task-0004",
+        "function_code": "def rank_shortlist(frame):\n    ranked = frame.sort_values([\"score\", \"name\"], ascending=[False, True], kind=\"stable\")\n    winners = ranked.head(2).copy()\n    summary = {\"rows\": len(ranked), \"winners\": len(winners)}\n    return ranked, winners, summary\n",
+        "imports": [],
+        "review_notes": []
+      },
+      "expected_error_contains": "function body must preserve source AST"
+    }
+  ]
+}

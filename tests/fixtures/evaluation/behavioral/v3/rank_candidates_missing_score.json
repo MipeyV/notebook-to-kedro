@@ -1,0 +1,36 @@
+{
+  "schema_version": "1.0",
+  "case_id": "rank-candidates-missing-score",
+  "node_code_case_id": "rank-candidates",
+  "review_status": "approved",
+  "inputs": [
+    {
+      "argument_name": "frame",
+      "value": {
+        "kind": "table",
+        "columns": [
+          "name",
+          "row_id"
+        ],
+        "dtypes": [
+          "object",
+          "object"
+        ],
+        "rows": [
+          [
+            "a",
+            "r1"
+          ]
+        ],
+        "index": [
+          0
+        ]
+      }
+    }
+  ],
+  "expected_outputs": [],
+  "expected_exception": {
+    "type_name": "KeyError",
+    "message_contains": "score"
+  }
+}

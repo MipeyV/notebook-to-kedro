@@ -1,0 +1,103 @@
+{
+  "schema_version": "1.0",
+  "case_id": "cumulative-balance-standard",
+  "node_code_case_id": "cumulative-balance",
+  "review_status": "approved",
+  "inputs": [
+    {
+      "argument_name": "opening_balance",
+      "value": {
+        "kind": "scalar",
+        "value": 10
+      }
+    },
+    {
+      "argument_name": "transactions",
+      "value": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "object",
+            "entries": [
+              {
+                "key": "amount",
+                "value": {
+                  "kind": "scalar",
+                  "value": 5
+                }
+              }
+            ]
+          },
+          {
+            "kind": "object",
+            "entries": [
+              {
+                "key": "amount",
+                "value": {
+                  "kind": "scalar",
+                  "value": 0
+                }
+              }
+            ]
+          },
+          {
+            "kind": "object",
+            "entries": [
+              {
+                "key": "amount",
+                "value": {
+                  "kind": "scalar",
+                  "value": -4
+                }
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "expected_outputs": [
+    {
+      "output_name": "closing_balance",
+      "value": {
+        "kind": "scalar",
+        "value": 11
+      },
+      "comparison": {
+        "kind": "exact",
+        "absolute_tolerance": null,
+        "relative_tolerance": null,
+        "equal_nan": null,
+        "check_dtype": null,
+        "check_order": null,
+        "check_index": null
+      }
+    },
+    {
+      "output_name": "history",
+      "value": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "scalar",
+            "value": 15
+          },
+          {
+            "kind": "scalar",
+            "value": 11
+          }
+        ]
+      },
+      "comparison": {
+        "kind": "exact",
+        "absolute_tolerance": null,
+        "relative_tolerance": null,
+        "equal_nan": null,
+        "check_dtype": null,
+        "check_order": null,
+        "check_index": null
+      }
+    }
+  ],
+  "expected_exception": null
+}

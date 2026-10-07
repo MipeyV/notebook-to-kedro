@@ -48,7 +48,9 @@ def test_assembled_reviewed_bodies_match_all_seventeen_scenarios() -> None:
 
 
 @pytest.mark.integration
-@pytest.mark.parametrize(("version", "scenario_count", "node_count"), [("v1", 5, 4), ("v2", 17, 8)])
+@pytest.mark.parametrize(
+    ("version", "scenario_count", "node_count"), [("v1", 5, 4), ("v2", 17, 8), ("v3", 12, 4)]
+)
 def test_all_reviewed_behavioral_references_execute_in_isolated_workers(
     version: str, scenario_count: int, node_count: int
 ) -> None:

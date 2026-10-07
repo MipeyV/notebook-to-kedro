@@ -15,7 +15,7 @@ CORPUS = ROOT / "tests/fixtures/evaluation/node_code"
 
 
 @pytest.mark.parametrize(
-    ("version", "references", "invalid_examples"), [("v1", 4, 9), ("v2", 8, 17)]
+    ("version", "references", "invalid_examples"), [("v1", 4, 9), ("v2", 8, 17), ("v3", 4, 8)]
 )
 def test_independent_node_code_corpus_is_traceable_and_matches_review(
     version: str, references: int, invalid_examples: int

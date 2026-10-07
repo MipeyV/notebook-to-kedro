@@ -1,0 +1,131 @@
+{
+  "schema_version": "1.0",
+  "case_id": "partition-measurements-standard",
+  "node_code_case_id": "partition-measurements",
+  "review_status": "approved",
+  "inputs": [
+    {
+      "argument_name": "values",
+      "value": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "scalar",
+            "value": -1
+          },
+          {
+            "kind": "scalar",
+            "value": null
+          },
+          {
+            "kind": "scalar",
+            "value": 1
+          },
+          {
+            "kind": "scalar",
+            "value": 2
+          },
+          {
+            "kind": "scalar",
+            "value": 3
+          }
+        ]
+      }
+    },
+    {
+      "argument_name": "limit",
+      "value": {
+        "kind": "scalar",
+        "value": 2
+      }
+    }
+  ],
+  "expected_outputs": [
+    {
+      "output_name": "kept",
+      "value": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "scalar",
+            "value": 2
+          },
+          {
+            "kind": "scalar",
+            "value": 3
+          }
+        ]
+      },
+      "comparison": {
+        "kind": "exact",
+        "absolute_tolerance": null,
+        "relative_tolerance": null,
+        "equal_nan": null,
+        "check_dtype": null,
+        "check_order": null,
+        "check_index": null
+      }
+    },
+    {
+      "output_name": "rejected",
+      "value": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "scalar",
+            "value": -1
+          },
+          {
+            "kind": "scalar",
+            "value": null
+          },
+          {
+            "kind": "scalar",
+            "value": 1
+          }
+        ]
+      },
+      "comparison": {
+        "kind": "exact",
+        "absolute_tolerance": null,
+        "relative_tolerance": null,
+        "equal_nan": null,
+        "check_dtype": null,
+        "check_order": null,
+        "check_index": null
+      }
+    },
+    {
+      "output_name": "counts",
+      "value": {
+        "kind": "object",
+        "entries": [
+          {
+            "key": "kept",
+            "value": {
+              "kind": "scalar",
+              "value": 2
+            }
+          },
+          {
+            "key": "rejected",
+            "value": {
+              "kind": "scalar",
+              "value": 3
+            }
+          }
+        ]
+      },
+      "comparison": {
+        "kind": "exact",
+        "absolute_tolerance": null,
+        "relative_tolerance": null,
+        "equal_nan": null,
+        "check_dtype": null,
+        "check_order": null,
+        "check_index": null
+      }
+    }
+  ],
+  "expected_exception": null
+}

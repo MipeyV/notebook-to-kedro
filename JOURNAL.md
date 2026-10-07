@@ -40,6 +40,47 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-10-07 - Fresh standalone node corpus v3
+
+### Completed
+
+- Added four disjoint task notebooks and independent hand-authored node contracts in `v3`, with
+  twelve scenarios, four expected exceptions, eighteen output records and eight invalid variants.
+- Covered a stdlib helper/list comprehension, Unicode case folding, inclusive conditional
+  partitioning, stateful transactions with `continue`/raise and multi-output tied table ranking.
+- Kept `v1`/`v2` measured fixtures, schemas, prompts, production code and validator unchanged.
+- Pinned full corpus identity and tested source provenance, notebook validity, empty execution
+  state, ordered interfaces, body/reference AST assembly and disjoint prior identities/sources.
+- Detected every fixed negative control statically and through the intended behavioral scenario.
+- Executed all twelve references and validated proposals in real subprocesses, then benchmarked
+  reference bodies and replayed their raw responses offline; no Ollama model was invoked.
+- Documented fixture eligibility versus independent human sign-off: maintainer PR review is
+  required before first scored evaluation. These candidates are synthetic task snippets, not
+  complete notebooks or a new model-accuracy claim.
+- Passed 1,071 full-suite tests on Python `3.12.14` and 1,043 deterministic tests on each of
+  `3.11.16` and `3.13.14`, all with 100% line/branch coverage. Ruff lint/format and strict mypy
+  passed; the Windows mypy launcher was blocked, so its Python module entry point was used
+  without modifying application-control policy.
+- Built both distributions, verified the pinned corpus identity and documentation links, and
+  restored the locked development environment to Python `3.12.14`.
+
+### Decisions
+
+- Keep this dataset separate rather than mixing the fresh cases into the tuned development corpus.
+- Freeze candidate identity before model observation; preserve future measured revisions.
+- Use only existing supported scopes. Nested helpers remain rejected rather than weakening
+  validation to admit them. Imported stdlib helpers exercise the existing allowed-import boundary.
+
+### Open questions
+
+- How will both local models perform on these new cases without prompt changes?
+- Which independently reviewed real notebooks and additional supported task patterns should follow?
+
+### Next step
+
+- Review and merge the candidate dataset, then add corpus-bound cross-format comparison and
+  same-runtime controls before scored evaluation. Full notebook and project equivalence remain.
+
 ## 2026-10-06 - Repeated local body-only model measurements
 
 ### Completed

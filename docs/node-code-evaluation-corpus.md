@@ -49,6 +49,17 @@ under evaluation but do not establish performance on full, real-world notebooks 
 operations to deterministic project generation. The new cases were authored before running models
 on them, with the existing prompt and validator unchanged.
 
+## Fresh Standalone Corpus
+
+The [fresh `v3` corpus](fresh-node-corpus-v3.md) adds four disjoint task contracts, twelve
+behavioral scenarios and eight negative controls in separate directories, without copying or
+modifying the measured `v1`/`v2` cases. It covers an imported helper, Unicode normalization,
+branching, stateful loops and ordered multiple outputs. Its complete identity is pinned before
+model evaluation; references pass static and runtime checks, but no live model score is recorded.
+Maintainer PR review is required before scored evaluation; the schema's `approved` marker is
+not a claim of a second independent human review. The unchanged validator still rejects nested
+helper definitions and scope-changing code.
+
 ## Loading And Integrity
 
 `load_node_code_corpus` reads strict JSON in deterministic filename order. Unknown or missing

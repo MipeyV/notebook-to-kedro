@@ -26,12 +26,18 @@ from notebook_to_kedro.generation.code import (
 
 
 @pytest.mark.integration
-def test_reviewed_body_benchmark_and_offline_replay_match_seventeen_scenarios(
+@pytest.mark.parametrize(
+    ("version", "node_count", "scenario_count"), [("v2", 8, 17), ("v3", 4, 12)]
+)
+def test_reviewed_body_benchmark_and_offline_replay_match_scenarios(
     tmp_path: Path,
+    version: str,
+    node_count: int,
+    scenario_count: int,
 ) -> None:
     root = Path(__file__).parents[2]
-    behaviors = load_behavioral_corpus(root / "tests/fixtures/evaluation/behavioral/v2")
-    nodes = load_node_code_corpus(root / "tests/fixtures/evaluation/node_code/v2")
+    behaviors = load_behavioral_corpus(root / "tests/fixtures/evaluation/behavioral" / version)
+    nodes = load_node_code_corpus(root / "tests/fixtures/evaluation/node_code" / version)
 
     class ReferenceProvider:
         provider_name = "approved-body-reference"
@@ -53,8 +59,8 @@ def test_reviewed_body_benchmark_and_offline_replay_match_seventeen_scenarios(
     report = run_node_body_benchmark(
         behaviors, nodes, provider, allow_untrusted_code_execution=True, project_root=root
     )
-    assert len(provider.requests) == 8
-    assert report.benchmark.scenario_count == 17
+    assert len(provider.requests) == node_count
+    assert report.benchmark.scenario_count == scenario_count
     assert all(proposal.status == "accepted" for proposal in report.benchmark.proposals)
     assert all(
         evaluation.matched
@@ -72,7 +78,7 @@ def test_reviewed_body_benchmark_and_offline_replay_match_seventeen_scenarios(
     replay = replay_node_body_benchmark(
         loaded, behaviors, nodes, allow_untrusted_code_execution=True, project_root=root
     )
-    assert len(provider.requests) == 8
+    assert len(provider.requests) == node_count
     summary = behavioral_code_benchmark_to_dict(replay.benchmark)["summary"]
     assert isinstance(summary, dict)
     assert summary["end_to_end_match_rate"] == 1.0

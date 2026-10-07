@@ -1,0 +1,180 @@
+{
+  "schema_version": "1.0",
+  "case_id": "rank-candidates-standard",
+  "node_code_case_id": "rank-candidates",
+  "review_status": "approved",
+  "inputs": [
+    {
+      "argument_name": "frame",
+      "value": {
+        "kind": "table",
+        "columns": [
+          "name",
+          "score",
+          "row_id"
+        ],
+        "dtypes": [
+          "object",
+          "int64",
+          "object"
+        ],
+        "rows": [
+          [
+            "b",
+            10,
+            "r1"
+          ],
+          [
+            "a",
+            10,
+            "r2"
+          ],
+          [
+            "b",
+            10,
+            "r3"
+          ],
+          [
+            "c",
+            5,
+            "r4"
+          ]
+        ],
+        "index": [
+          10,
+          11,
+          12,
+          13
+        ]
+      }
+    }
+  ],
+  "expected_outputs": [
+    {
+      "output_name": "ranked",
+      "value": {
+        "kind": "table",
+        "columns": [
+          "name",
+          "score",
+          "row_id"
+        ],
+        "dtypes": [
+          "object",
+          "int64",
+          "object"
+        ],
+        "rows": [
+          [
+            "a",
+            10,
+            "r2"
+          ],
+          [
+            "b",
+            10,
+            "r1"
+          ],
+          [
+            "b",
+            10,
+            "r3"
+          ],
+          [
+            "c",
+            5,
+            "r4"
+          ]
+        ],
+        "index": [
+          0,
+          1,
+          2,
+          3
+        ]
+      },
+      "comparison": {
+        "kind": "table",
+        "absolute_tolerance": 0,
+        "relative_tolerance": 0,
+        "equal_nan": false,
+        "check_dtype": true,
+        "check_order": true,
+        "check_index": true
+      }
+    },
+    {
+      "output_name": "winners",
+      "value": {
+        "kind": "table",
+        "columns": [
+          "name",
+          "score",
+          "row_id"
+        ],
+        "dtypes": [
+          "object",
+          "int64",
+          "object"
+        ],
+        "rows": [
+          [
+            "a",
+            10,
+            "r2"
+          ],
+          [
+            "b",
+            10,
+            "r1"
+          ]
+        ],
+        "index": [
+          0,
+          1
+        ]
+      },
+      "comparison": {
+        "kind": "table",
+        "absolute_tolerance": 0,
+        "relative_tolerance": 0,
+        "equal_nan": false,
+        "check_dtype": true,
+        "check_order": true,
+        "check_index": true
+      }
+    },
+    {
+      "output_name": "summary",
+      "value": {
+        "kind": "object",
+        "entries": [
+          {
+            "key": "rows",
+            "value": {
+              "kind": "scalar",
+              "value": 4
+            }
+          },
+          {
+            "key": "winners",
+            "value": {
+              "kind": "scalar",
+              "value": 2
+            }
+          }
+        ]
+      },
+      "comparison": {
+        "kind": "exact",
+        "absolute_tolerance": null,
+        "relative_tolerance": null,
+        "equal_nan": null,
+        "check_dtype": null,
+        "check_order": null,
+        "check_index": null
+      }
+    }
+  ],
+  "expected_exception": null
+}

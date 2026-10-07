@@ -1,0 +1,72 @@
+{
+  "schema_version": "1.0",
+  "case_id": "partition-measurements",
+  "notebook_path": "tests/fixtures/notebooks/node_code_eval_v3/partition_measurements.ipynb",
+  "source_sha256": "d484e8d178750fc084ffa2a6832d74a906c06a4a16cb253d008f3c21d949b1c3",
+  "review_status": "approved",
+  "request": {
+    "schema_version": "1.0",
+    "request_id": "independent-v3-partition-measurements",
+    "task_id": "fresh-task-0002",
+    "node_name": "partition_values",
+    "raw_source": "assert limit >= 0, \"limit must be non-negative\"\nkept = []\nrejected = []\nfor value in values:\n    if value is not None and value >= limit:\n        kept.append(value)\n    else:\n        rejected.append(value)\ncounts = {\"kept\": len(kept), \"rejected\": len(rejected)}",
+    "source_cell_ids": [
+      "partition-code"
+    ],
+    "statement_ids": [
+      "partition-code-stmt-0000",
+      "partition-code-stmt-0001",
+      "partition-code-stmt-0002",
+      "partition-code-stmt-0003",
+      "partition-code-stmt-0004"
+    ],
+    "inputs": [
+      "values",
+      "limit"
+    ],
+    "outputs": [
+      "kept",
+      "rejected",
+      "counts"
+    ],
+    "parameter_names": [],
+    "parameter_arguments": [],
+    "allowed_imports": []
+  },
+  "reference_response": {
+    "schema_version": "1.0",
+    "request_id": "independent-v3-partition-measurements",
+    "task_id": "fresh-task-0002",
+    "function_code": "def partition_values(values, limit):\n    assert limit >= 0, \"limit must be non-negative\"\n    kept = []\n    rejected = []\n    for value in values:\n        if value is not None and value >= limit:\n            kept.append(value)\n        else:\n            rejected.append(value)\n    counts = {\"kept\": len(kept), \"rejected\": len(rejected)}\n    return kept, rejected, counts\n",
+    "imports": [],
+    "review_notes": [
+      "Hand-authored fixture contract, not planner/generator output or a sampled model proposal. Maintainer PR review precedes scored model evaluation."
+    ]
+  },
+  "invalid_examples": [
+    {
+      "id": "exclusive-boundary",
+      "response": {
+        "schema_version": "1.0",
+        "request_id": "independent-v3-partition-measurements",
+        "task_id": "fresh-task-0002",
+        "function_code": "def partition_values(values, limit):\n    assert limit >= 0, \"limit must be non-negative\"\n    kept = []\n    rejected = []\n    for value in values:\n        if value is not None and value > limit:\n            kept.append(value)\n        else:\n            rejected.append(value)\n    counts = {\"kept\": len(kept), \"rejected\": len(rejected)}\n    return kept, rejected, counts\n",
+        "imports": [],
+        "review_notes": []
+      },
+      "expected_error_contains": "function body must preserve source AST"
+    },
+    {
+      "id": "omitted-limit-validation",
+      "response": {
+        "schema_version": "1.0",
+        "request_id": "independent-v3-partition-measurements",
+        "task_id": "fresh-task-0002",
+        "function_code": "def partition_values(values, limit):\n    kept = []\n    rejected = []\n    for value in values:\n        if value is not None and value >= limit:\n            kept.append(value)\n        else:\n            rejected.append(value)\n    counts = {\"kept\": len(kept), \"rejected\": len(rejected)}\n    return kept, rejected, counts\n",
+        "imports": [],
+        "review_notes": []
+      },
+      "expected_error_contains": "assertions and their enclosing statements"
+    }
+  ]
+}
