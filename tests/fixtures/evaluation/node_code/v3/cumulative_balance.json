@@ -1,0 +1,70 @@
+{
+  "schema_version": "1.0",
+  "case_id": "cumulative-balance",
+  "notebook_path": "tests/fixtures/notebooks/node_code_eval_v3/cumulative_balance.ipynb",
+  "source_sha256": "f3e8be17abbcef3e5fb851deb7a01075ae8b6ba754cfdd177a98b595f74ac031",
+  "review_status": "approved",
+  "request": {
+    "schema_version": "1.0",
+    "request_id": "independent-v3-cumulative-balance",
+    "task_id": "fresh-task-0003",
+    "node_name": "track_balance",
+    "raw_source": "balance = opening_balance\nhistory = []\nfor transaction in transactions:\n    amount = transaction[\"amount\"]\n    if amount == 0:\n        continue\n    balance += amount\n    if balance < 0:\n        raise ValueError(\"negative balance\")\n    history.append(balance)\nclosing_balance = balance",
+    "source_cell_ids": [
+      "balance-code"
+    ],
+    "statement_ids": [
+      "balance-code-stmt-0000",
+      "balance-code-stmt-0001",
+      "balance-code-stmt-0002",
+      "balance-code-stmt-0003"
+    ],
+    "inputs": [
+      "opening_balance",
+      "transactions"
+    ],
+    "outputs": [
+      "closing_balance",
+      "history"
+    ],
+    "parameter_names": [],
+    "parameter_arguments": [],
+    "allowed_imports": []
+  },
+  "reference_response": {
+    "schema_version": "1.0",
+    "request_id": "independent-v3-cumulative-balance",
+    "task_id": "fresh-task-0003",
+    "function_code": "def track_balance(opening_balance, transactions):\n    balance = opening_balance\n    history = []\n    for transaction in transactions:\n        amount = transaction[\"amount\"]\n        if amount == 0:\n            continue\n        balance += amount\n        if balance < 0:\n            raise ValueError(\"negative balance\")\n        history.append(balance)\n    closing_balance = balance\n    return closing_balance, history\n",
+    "imports": [],
+    "review_notes": [
+      "Hand-authored fixture contract, not planner/generator output or a sampled model proposal. Maintainer PR review precedes scored model evaluation."
+    ]
+  },
+  "invalid_examples": [
+    {
+      "id": "recorded-zero-amount",
+      "response": {
+        "schema_version": "1.0",
+        "request_id": "independent-v3-cumulative-balance",
+        "task_id": "fresh-task-0003",
+        "function_code": "def track_balance(opening_balance, transactions):\n    balance = opening_balance\n    history = []\n    for transaction in transactions:\n        amount = transaction[\"amount\"]\n        balance += amount\n        if balance < 0:\n            raise ValueError(\"negative balance\")\n        history.append(balance)\n    closing_balance = balance\n    return closing_balance, history\n",
+        "imports": [],
+        "review_notes": []
+      },
+      "expected_error_contains": "function body must preserve source AST"
+    },
+    {
+      "id": "omitted-overdraft-check",
+      "response": {
+        "schema_version": "1.0",
+        "request_id": "independent-v3-cumulative-balance",
+        "task_id": "fresh-task-0003",
+        "function_code": "def track_balance(opening_balance, transactions):\n    balance = opening_balance\n    history = []\n    for transaction in transactions:\n        amount = transaction[\"amount\"]\n        if amount == 0:\n            continue\n        balance += amount\n        history.append(balance)\n    closing_balance = balance\n    return closing_balance, history\n",
+        "imports": [],
+        "review_notes": []
+      },
+      "expected_error_contains": "function body must preserve source AST"
+    }
+  ]
+}

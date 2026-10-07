@@ -1,0 +1,29 @@
+{
+  "schema_version": "1.0",
+  "case_id": "normalize-tags-non-string",
+  "node_code_case_id": "normalize-tags",
+  "review_status": "approved",
+  "inputs": [
+    {
+      "argument_name": "labels",
+      "value": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "scalar",
+            "value": "ok"
+          },
+          {
+            "kind": "scalar",
+            "value": null
+          }
+        ]
+      }
+    }
+  ],
+  "expected_outputs": [],
+  "expected_exception": {
+    "type_name": "TypeError",
+    "message_contains": "must be str"
+  }
+}

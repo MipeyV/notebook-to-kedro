@@ -1,0 +1,32 @@
+{
+  "schema_version": "1.0",
+  "case_id": "partition-measurements-negative-limit",
+  "node_code_case_id": "partition-measurements",
+  "review_status": "approved",
+  "inputs": [
+    {
+      "argument_name": "values",
+      "value": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "scalar",
+            "value": 1
+          }
+        ]
+      }
+    },
+    {
+      "argument_name": "limit",
+      "value": {
+        "kind": "scalar",
+        "value": -1
+      }
+    }
+  ],
+  "expected_outputs": [],
+  "expected_exception": {
+    "type_name": "AssertionError",
+    "message_contains": "limit must be non-negative"
+  }
+}

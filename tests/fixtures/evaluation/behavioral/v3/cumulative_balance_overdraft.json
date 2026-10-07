@@ -1,0 +1,40 @@
+{
+  "schema_version": "1.0",
+  "case_id": "cumulative-balance-overdraft",
+  "node_code_case_id": "cumulative-balance",
+  "review_status": "approved",
+  "inputs": [
+    {
+      "argument_name": "opening_balance",
+      "value": {
+        "kind": "scalar",
+        "value": 1
+      }
+    },
+    {
+      "argument_name": "transactions",
+      "value": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "object",
+            "entries": [
+              {
+                "key": "amount",
+                "value": {
+                  "kind": "scalar",
+                  "value": -2
+                }
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "expected_outputs": [],
+  "expected_exception": {
+    "type_name": "ValueError",
+    "message_contains": "negative balance"
+  }
+}

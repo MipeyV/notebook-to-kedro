@@ -1,0 +1,73 @@
+{
+  "schema_version": "1.0",
+  "case_id": "normalize-tags",
+  "notebook_path": "tests/fixtures/notebooks/node_code_eval_v3/normalize_tags.ipynb",
+  "source_sha256": "175edbcbc2b33a81f33ed3732ffc3d52702f73f42cb9c8d39fa29b46634ae73d",
+  "review_status": "approved",
+  "request": {
+    "schema_version": "1.0",
+    "request_id": "independent-v3-normalize-tags",
+    "task_id": "fresh-task-0001",
+    "node_name": "normalize_labels",
+    "raw_source": "normalized = [normalize(\"NFKC\", label).strip().casefold() for label in labels]",
+    "source_cell_ids": [
+      "tags-code"
+    ],
+    "statement_ids": [
+      "tags-code-stmt-0000"
+    ],
+    "inputs": [
+      "labels"
+    ],
+    "outputs": [
+      "normalized"
+    ],
+    "parameter_names": [],
+    "parameter_arguments": [],
+    "allowed_imports": [
+      "from unicodedata import normalize"
+    ]
+  },
+  "reference_response": {
+    "schema_version": "1.0",
+    "request_id": "independent-v3-normalize-tags",
+    "task_id": "fresh-task-0001",
+    "function_code": "def normalize_labels(labels):\n    normalized = [normalize(\"NFKC\", label).strip().casefold() for label in labels]\n    return normalized\n",
+    "imports": [
+      "from unicodedata import normalize"
+    ],
+    "review_notes": [
+      "Hand-authored fixture contract, not planner/generator output or a sampled model proposal. Maintainer PR review precedes scored model evaluation."
+    ]
+  },
+  "invalid_examples": [
+    {
+      "id": "lower-instead-of-casefold",
+      "response": {
+        "schema_version": "1.0",
+        "request_id": "independent-v3-normalize-tags",
+        "task_id": "fresh-task-0001",
+        "function_code": "def normalize_labels(labels):\n    normalized = [normalize(\"NFKC\", label).strip().lower() for label in labels]\n    return normalized\n",
+        "imports": [
+          "from unicodedata import normalize"
+        ],
+        "review_notes": []
+      },
+      "expected_error_contains": "function body must preserve source AST"
+    },
+    {
+      "id": "omitted-whitespace-trimming",
+      "response": {
+        "schema_version": "1.0",
+        "request_id": "independent-v3-normalize-tags",
+        "task_id": "fresh-task-0001",
+        "function_code": "def normalize_labels(labels):\n    normalized = [normalize(\"NFKC\", label).casefold() for label in labels]\n    return normalized\n",
+        "imports": [
+          "from unicodedata import normalize"
+        ],
+        "review_notes": []
+      },
+      "expected_error_contains": "function body must preserve source AST"
+    }
+  ]
+}

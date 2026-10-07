@@ -9,6 +9,11 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Standalone fresh `v3` node/behavioral corpus with four disjoint task notebooks, twelve scenarios
+  and eight negative controls for imported helpers, Unicode normalization, branching, stateful
+  loops and multiple outputs. Includes pinned identity, static/source checks, negative-control
+  sensitivity and real subprocess reference/body-benchmark/replay verification, without model
+  calls, prompt/validator changes or edits to measured `v1`/`v2` fixtures.
 - Documented six local body-only model runs, six offline replays and thirteen comparisons on
   the unchanged eight-node, seventeen-scenario development corpus: stable 7/8 nodes and 16/17
   matches for `qwen3:8b`, and 8/8 and 17/17 for `qwen2.5-coder:7b`. Includes exact provenance,

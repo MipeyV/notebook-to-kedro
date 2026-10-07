@@ -1,0 +1,60 @@
+{
+  "schema_version": "1.0",
+  "case_id": "normalize-tags-standard",
+  "node_code_case_id": "normalize-tags",
+  "review_status": "approved",
+  "inputs": [
+    {
+      "argument_name": "labels",
+      "value": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "scalar",
+            "value": "  Alpha  "
+          },
+          {
+            "kind": "scalar",
+            "value": "Stra\u00dfe"
+          },
+          {
+            "kind": "scalar",
+            "value": "\uff23\uff21\uff26\uff25"
+          }
+        ]
+      }
+    }
+  ],
+  "expected_outputs": [
+    {
+      "output_name": "normalized",
+      "value": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "scalar",
+            "value": "alpha"
+          },
+          {
+            "kind": "scalar",
+            "value": "strasse"
+          },
+          {
+            "kind": "scalar",
+            "value": "cafe"
+          }
+        ]
+      },
+      "comparison": {
+        "kind": "exact",
+        "absolute_tolerance": null,
+        "relative_tolerance": null,
+        "equal_nan": null,
+        "check_dtype": null,
+        "check_order": null,
+        "check_index": null
+      }
+    }
+  ],
+  "expected_exception": null
+}

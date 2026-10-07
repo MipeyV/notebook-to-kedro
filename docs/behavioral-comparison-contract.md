@@ -34,6 +34,13 @@ addition to their rejection by the static validator.
 
 ## Serializable Values
 
+The standalone [fresh `v3` dataset](fresh-node-corpus-v3.md) supplies twelve disjoint scenarios
+for four new nodes: eight successful cases, four expected exceptions and eighteen output records.
+It uses exact recursive comparisons for scalar/list/object outputs and explicit zero-tolerance
+dtype/order/index checks for ranking tables. All reference scenarios and body-only reference
+benchmark/replay checks pass without model calls; eight fixed negative controls are detected.
+It is not a cumulative expansion of `v2` or a published model-accuracy measurement.
+
 Runtime evidence uses immutable tagged values rather than Python pickle or arbitrary object
 serialization:
 

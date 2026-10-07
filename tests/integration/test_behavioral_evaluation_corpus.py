@@ -15,7 +15,7 @@ ROOT = Path(__file__).parents[2]
 
 @pytest.mark.parametrize(
     ("version", "scenario_count", "exception_count", "output_count"),
-    [("v1", 5, 1, 7), ("v2", 17, 5, 15)],
+    [("v1", 5, 1, 7), ("v2", 17, 5, 15), ("v3", 12, 4, 18)],
 )
 def test_behavioral_corpus_matches_independent_node_code_interfaces(
     version: str, scenario_count: int, exception_count: int, output_count: int

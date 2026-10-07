@@ -347,6 +347,12 @@ necessary. Cross-format comparison needs a corpus-bound bridge and same-runtime 
 historical full-code measurements used a different Ollama version.
 Conversion defaults are unchanged.
 
+A [fresh standalone `v3` corpus](docs/fresh-node-corpus-v3.md) now prepares the next evaluation:
+four disjoint task contracts, twelve scenarios and eight negative controls for imported helpers,
+Unicode normalization, branching, stateful loops and multiple outputs. Reference execution,
+assembly and offline replay pass; no model was run on it. Maintainer review precedes scored
+evaluation, and full notebooks remain separate work.
+
 An opt-in provider mode supplies [exact parameter substitutions](docs/node-parameter-evidence.md):
 original expressions, literal types, source ranges and corresponding function arguments derived
 from V1 rules. Ambiguous mappings fail before model I/O in this experimental mode. The static validator
@@ -510,13 +516,15 @@ Progress and architectural decisions are recorded chronologically in [JOURNAL.md
 ### Phase 4: evaluation and broader coverage
 
 1. [ ] Build a versioned corpus of representative notebooks beyond controlled fixtures.
-   An independent eight-task node-code corpus now provides seventeen behavioral scenarios;
-   broader real-world coverage is still required.
+   The eight-task development corpus provides seventeen behavioral scenarios. A separate fresh
+   four-task `v3` corpus adds twelve scenarios for a later, untuned evaluation; broader real-world
+   notebook coverage is still required.
 2. [ ] Measure plan validity, generation success, behavioral equivalence, review corrections, latency, and cost.
    Behavioral input/output contracts, deterministic comparison reports and approved-reference
    execution are implemented. Statically validated proposal execution is available behind explicit
-   consent. An initial local benchmark now reports static acceptance, end-to-end behavioral results
-   and latency; broader repeated measurements, review corrections and cost remain outstanding.
+   consent. Repeated local full-code/body-only measurements report static acceptance, end-to-end
+   behavioral results and latency on the development corpus. Fresh-corpus measurements, whole
+   projects, review corrections and cost remain outstanding.
 3. [ ] Compare deterministic and hybrid results on the same corpus.
    Behavioral code artifacts can now compare two provider runs and replay identical raw responses;
    broader planning and generation comparisons remain outstanding.
