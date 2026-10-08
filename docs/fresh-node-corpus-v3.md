@@ -100,7 +100,9 @@ and runtime settings, distinct output paths, repeated runs, raw archives and off
 The [benchmark commands](node-body-benchmark.md#cli) accept these two `v3` corpus directories;
 reading the corpus or running the default tests does not invoke a model.
 
-A corpus-bound full-code/body-only comparison bridge and contemporaneous full-code controls
-remain separate work. Model roles, full notebooks and project-level equivalence need their own
+A [corpus-bound full-code/body-only comparison](generation-format-comparison.md) is now available;
+contemporaneous full-code controls and scored model measurements remain the next work. No model
+was invoked on v3 while adding that comparison. Model roles, full notebooks and project-level
+equivalence need their own
 evaluation. Keep execution opt-in in a controlled environment: subprocesses are fault containment,
 not an OS security sandbox.

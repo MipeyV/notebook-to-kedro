@@ -343,8 +343,10 @@ retains rejected denominators and does not treat replay as live latency.
 now reproduce 7/8 accepted nodes and 16/17 matches for `qwen3:8b`, and 8/8 and 17/17 for
 `qwen2.5-coder:7b`. The former systematically misses one parameter substitution; the latter passes
 this small synthetic development corpus, not arbitrary notebooks. Fresh independent tasks remain
-necessary. Cross-format comparison needs a corpus-bound bridge and same-runtime controls;
-historical full-code measurements used a different Ollama version.
+necessary. A [corpus-bound format comparison](docs/generation-format-comparison.md) now archives
+complete full-code corpus evidence with `--proposal-format bound-full-code` and compares it to
+body mode using `behavioral-benchmark compare-formats`. Exact corpus/runtime controls are required;
+legacy measurements cannot be upgraded retroactively and used a different Ollama version.
 Conversion defaults are unchanged.
 
 A [fresh standalone `v3` corpus](docs/fresh-node-corpus-v3.md) now prepares the next evaluation:
@@ -527,7 +529,9 @@ Progress and architectural decisions are recorded chronologically in [JOURNAL.md
    projects, review corrections and cost remain outstanding.
 3. [ ] Compare deterministic and hybrid results on the same corpus.
    Behavioral code artifacts can now compare two provider runs and replay identical raw responses;
-   broader planning and generation comparisons remain outstanding.
+   corpus-bound full-code/body-only comparisons enforce matching recorded controls. Fresh v3
+   same-runtime measurements are next; legacy files are not automatically migrated.
+   Broader planning and generation comparisons remain outstanding.
 4. [ ] Expand deterministic pandas support for `rename`, `replace`, joins, and aggregations.
 5. [ ] Add richer catalog formats and schema-aware diagnostics.
 6. [ ] Define release thresholds for a supported V2 preview.
