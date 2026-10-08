@@ -57,10 +57,12 @@ not evidence of equivalent hardware, model residency or request settings. Execut
 an observed subprocess duration, not model latency. Comparison only reads evidence: it neither
 executes code nor contacts Ollama.
 
-Mixed full-code/body-only comparisons are intentionally rejected. Legacy full-code artifacts do
+The body-only comparator rejects mixed full-code/body-only inputs. Legacy full-code artifacts do
 not record the complete corpus digest; matching case names alone cannot establish identical inputs,
-references and comparators. A future corpus-bound bridge is needed before automating cross-format
-comparisons. Neither artifact format nor the existing full-code comparator is changed here.
+references and comparators. A dedicated [corpus-bound format comparison](generation-format-comparison.md)
+now accepts newly captured `bound-full-code` artifacts and body artifacts with exact corpus/runtime
+controls. Use `behavioral-benchmark compare-formats`, not this body-only comparator. Existing
+formats/comparators remain unchanged, and historical files are not automatically migrated.
 
 ## Run And Archive
 

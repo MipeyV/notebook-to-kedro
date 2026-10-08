@@ -40,6 +40,53 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-10-09 - Corpus-bound full-code and body-only comparison
+
+### Completed
+
+- Added an opt-in full-code envelope capturing the complete typed corpus before provider calls,
+  with the same canonical identity as body benchmarking and a separate outer artifact hash.
+- Added strict dictionary/file loading, duplicate-key rejection, raw/code revalidation, exact
+  source/request/scenario bindings, executed-response identity and recorded-result recomparison.
+- Preserved full-code/provider-error/invalid-response/invalid-code evidence without repair,
+  execution of rejected proposals or retroactive binding of historical artifacts.
+- Added consent-gated bound replay with exact corpus identity and raw responses, offline operation,
+  renewed validation and the whole source envelope hash.
+- Added dedicated cross-format comparison API/CLI with identical model/configuration/runtime
+  controls, summary count/rate/duration consistency and every scenario in the change table,
+  including scenarios never evaluated on either side.
+- Required known matching repository revision, Ollama version and model digest for two live
+  artifacts; comparisons involving replay are explicitly outcomes-only with null proposal-time deltas.
+- Tested failure paths and offline CLI orchestration; executed both authored reference formats
+  and full-code replay on all twelve v3 scenarios in real subprocesses without model calls.
+- Documented commands, trust boundaries, missing experimental controls and the next measurement
+  gate. Kept existing artifacts/comparators, corpus files, prompts, validator and defaults unchanged.
+- Passed 1,142 full-suite tests on Python `3.12.14` and 1,113 deterministic tests on each of
+  `3.11.16` and `3.13.14`, all with 100% line/branch coverage (5,502 statements, 1,568 branches).
+  Initial Windows runs encountered a pandas DLL rejection and a stalled legacy import;
+  unchanged reruns passed without changing application-control policy.
+- Passed Ruff lint/format, strict mypy through its Python module entry point and both distribution
+  builds. Restored the locked development environment to Python `3.12.14`.
+
+### Decisions
+
+- Capture fresh evidence before generation instead of assigning current corpus hashes to old files.
+- Compare both format paths and their respective prompts, not claim an isolated assembly effect.
+- Treat matching recorded controls as necessary, not proof of identical load, model residency,
+  dependency state, seeds/context or an authenticated clean worktree.
+- Preserve rejected proposals and all scenario denominators rather than select passing nodes.
+
+### Open questions
+
+- Will the body-only candidate remain faithful on immutable v3 under contemporaneous controls?
+- Which real-world notebooks should follow for planning and full-project equivalence?
+
+### Next step
+
+- Review and merge this comparison increment, then measure both local models repeatedly on v3
+  with unchanged prompts, same-runtime full-code/body-only controls, raw archives and offline replay.
+  No scored v3 evaluation or provider promotion has been performed in this increment.
+
 ## 2026-10-07 - Fresh standalone node corpus v3
 
 ### Completed

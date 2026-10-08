@@ -18,25 +18,34 @@ from notebook_to_kedro.api import (
 from notebook_to_kedro.evaluation import (
     BehavioralBenchmarkConfiguration,
     BehavioralExecutionConfig,
+    CorpusBoundCodeBenchmarkArtifact,
+    CorpusBoundCodeBenchmarkReport,
     behavioral_benchmark_artifact_sha256,
     collect_environment_provenance,
     compare_behavioral_benchmark_artifacts,
+    compare_generation_formats,
     compare_node_body_benchmark_artifacts,
+    corpus_bound_code_artifact_sha256,
     create_behavioral_benchmark_artifact,
+    create_corpus_bound_code_artifact,
     create_node_body_benchmark_artifact,
     load_behavioral_benchmark_artifact,
     load_behavioral_corpus,
+    load_corpus_bound_code_artifact,
     load_node_body_benchmark_artifact,
     load_node_code_corpus,
     load_planning_corpus,
     node_body_benchmark_artifact_sha256,
     planning_benchmark_to_json,
     replay_behavioral_benchmark,
+    replay_corpus_bound_code_benchmark,
     replay_node_body_benchmark,
     run_behavioral_code_benchmark,
+    run_corpus_bound_code_benchmark,
     run_node_body_benchmark,
     run_planning_benchmark,
     write_behavioral_benchmark_artifact,
+    write_corpus_bound_code_artifact,
     write_json_exclusive,
     write_node_body_benchmark_artifact,
 )
@@ -194,13 +203,27 @@ def _parser() -> argparse.ArgumentParser:
     behavioral_compare.add_argument(
         "--output", type=Path, default=None, help="new comparison JSON path to create"
     )
-    for action in (behavioral_run, behavioral_replay, behavioral_compare):
+    for action in (behavioral_run, behavioral_replay):
         action.add_argument(
             "--proposal-format",
-            choices=("full-code", "node-body"),
+            choices=("full-code", "node-body", "bound-full-code"),
             default="full-code",
             help="explicit response/artifact format (default: full-code)",
         )
+    behavioral_compare.add_argument(
+        "--proposal-format",
+        choices=("full-code", "node-body"),
+        default="full-code",
+        help="explicit response/artifact format (default: full-code)",
+    )
+    format_compare = behavioral_actions.add_parser(
+        "compare-formats", help="compare corpus-bound full code with body-only evidence"
+    )
+    format_compare.add_argument("full_code", type=Path, help="corpus-bound full-code artifact")
+    format_compare.add_argument("node_body", type=Path, help="body-only candidate artifact")
+    format_compare.add_argument(
+        "--output", type=Path, default=None, help="new comparison JSON path"
+    )
     return parser
 
 
@@ -330,6 +353,12 @@ def _behavioral_benchmark(args: argparse.Namespace) -> int:
             return _replay_behavioral_benchmark(args)
         if args.behavioral_action == "compare":
             return _compare_behavioral_benchmarks(args)
+        if args.behavioral_action == "compare-formats":
+            comparison = compare_generation_formats(
+                load_corpus_bound_code_artifact(args.full_code),
+                load_node_body_benchmark_artifact(args.node_body),
+            )
+            return _write_comparison(args.output, comparison)
     except ValueError as error:
         if isinstance(error, BehavioralBenchmarkArtifactError):
             raise
@@ -351,7 +380,12 @@ def _run_behavioral_benchmark(args: argparse.Namespace) -> int:
         timeout_seconds=args.ollama_timeout,
         include_parameter_evidence=args.include_parameter_evidence,
     )
-    report = run_behavioral_code_benchmark(
+    runner = (
+        run_corpus_bound_code_benchmark
+        if args.proposal_format == "bound-full-code"
+        else run_behavioral_code_benchmark
+    )
+    report = runner(
         behaviors,
         nodes,
         provider,
@@ -371,53 +405,78 @@ def _run_behavioral_benchmark(args: argparse.Namespace) -> int:
         ollama_base_url=args.ollama_base_url,
         model_name=args.ollama_model,
     )
-    artifact = create_behavioral_benchmark_artifact(report, provenance, configuration)
-    write_behavioral_benchmark_artifact(args.output, artifact)
-    sys.stdout.write(
-        f"Created behavioral benchmark artifact `{args.output}` "
-        f"({behavioral_benchmark_artifact_sha256(artifact)})\n"
-    )
+    if isinstance(report, CorpusBoundCodeBenchmarkReport):
+        bound_artifact = create_corpus_bound_code_artifact(report, provenance, configuration)
+        write_corpus_bound_code_artifact(args.output, bound_artifact)
+        digest = corpus_bound_code_artifact_sha256(bound_artifact)
+    else:
+        artifact = create_behavioral_benchmark_artifact(report, provenance, configuration)
+        write_behavioral_benchmark_artifact(args.output, artifact)
+        digest = behavioral_benchmark_artifact_sha256(artifact)
+    sys.stdout.write(f"Created behavioral benchmark artifact `{args.output}` ({digest})\n")
     return 0
 
 
 def _replay_behavioral_benchmark(args: argparse.Namespace) -> int:
     if args.proposal_format == "node-body":
         return _replay_node_body_benchmark(args)
-    source = load_behavioral_benchmark_artifact(args.artifact)
+    source = (
+        load_corpus_bound_code_artifact(args.artifact)
+        if args.proposal_format == "bound-full-code"
+        else load_behavioral_benchmark_artifact(args.artifact)
+    )
+    original = source.benchmark if isinstance(source, CorpusBoundCodeBenchmarkArtifact) else source
     behaviors = load_behavioral_corpus(args.behavioral_corpus)
     nodes = load_node_code_corpus(args.node_code_corpus)
     execution = BehavioralExecutionConfig(
         timeout_seconds=args.execution_timeout,
-        max_request_bytes=source.configuration.execution.max_request_bytes,
-        max_result_bytes=source.configuration.execution.max_result_bytes,
-        max_capture_bytes=source.configuration.execution.max_capture_bytes,
+        max_request_bytes=original.configuration.execution.max_request_bytes,
+        max_result_bytes=original.configuration.execution.max_result_bytes,
+        max_capture_bytes=original.configuration.execution.max_capture_bytes,
     )
     configuration = BehavioralBenchmarkConfiguration(
-        ollama_base_url=source.configuration.ollama_base_url,
-        provider_timeout_seconds=source.configuration.provider_timeout_seconds,
-        include_parameter_evidence=source.configuration.include_parameter_evidence,
+        ollama_base_url=original.configuration.ollama_base_url,
+        provider_timeout_seconds=original.configuration.provider_timeout_seconds,
+        include_parameter_evidence=original.configuration.include_parameter_evidence,
         execution=execution,
     )
-    report = replay_behavioral_benchmark(
-        source,
-        behaviors,
-        nodes,
-        allow_untrusted_code_execution=args.allow_untrusted_code_execution,
-        project_root=args.project_root,
-        execution_config=execution,
-    )
-    artifact = create_behavioral_benchmark_artifact(
-        report,
-        collect_environment_provenance(project_root=args.project_root),
-        configuration,
-        mode="replay",
-        source_artifact_sha256=behavioral_benchmark_artifact_sha256(source),
-    )
-    write_behavioral_benchmark_artifact(args.output, artifact)
-    sys.stdout.write(
-        f"Created behavioral benchmark replay `{args.output}` "
-        f"({behavioral_benchmark_artifact_sha256(artifact)})\n"
-    )
+    if isinstance(source, CorpusBoundCodeBenchmarkArtifact):
+        bound_report = replay_corpus_bound_code_benchmark(
+            source,
+            behaviors,
+            nodes,
+            allow_untrusted_code_execution=args.allow_untrusted_code_execution,
+            project_root=args.project_root,
+            execution_config=execution,
+        )
+        bound_artifact = create_corpus_bound_code_artifact(
+            bound_report,
+            collect_environment_provenance(project_root=args.project_root),
+            configuration,
+            mode="replay",
+            source_artifact_sha256=corpus_bound_code_artifact_sha256(source),
+        )
+        write_corpus_bound_code_artifact(args.output, bound_artifact)
+        digest = corpus_bound_code_artifact_sha256(bound_artifact)
+    else:
+        report = replay_behavioral_benchmark(
+            source,
+            behaviors,
+            nodes,
+            allow_untrusted_code_execution=args.allow_untrusted_code_execution,
+            project_root=args.project_root,
+            execution_config=execution,
+        )
+        artifact = create_behavioral_benchmark_artifact(
+            report,
+            collect_environment_provenance(project_root=args.project_root),
+            configuration,
+            mode="replay",
+            source_artifact_sha256=behavioral_benchmark_artifact_sha256(source),
+        )
+        write_behavioral_benchmark_artifact(args.output, artifact)
+        digest = behavioral_benchmark_artifact_sha256(artifact)
+    sys.stdout.write(f"Created behavioral benchmark replay `{args.output}` ({digest})\n")
     return 0
 
 
@@ -432,9 +491,13 @@ def _compare_behavioral_benchmarks(args: argparse.Namespace) -> int:
             load_behavioral_benchmark_artifact(args.baseline),
             load_behavioral_benchmark_artifact(args.candidate),
         )
-    if args.output is not None:
-        write_json_exclusive(args.output, comparison)
-        sys.stdout.write(f"Created behavioral benchmark comparison `{args.output}`\n")
+    return _write_comparison(args.output, comparison)
+
+
+def _write_comparison(output: Path | None, comparison: dict[str, object]) -> int:
+    if output is not None:
+        write_json_exclusive(output, comparison)
+        sys.stdout.write(f"Created behavioral benchmark comparison `{output}`\n")
     else:
         sys.stdout.write(
             json.dumps(

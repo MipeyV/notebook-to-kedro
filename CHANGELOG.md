@@ -9,6 +9,13 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Opt-in `bound-full-code` benchmark/replay envelope capturing the complete corpus before
+  generation, with strict source/scenario/raw-response validation and exclusive artifact writes.
+- Dedicated `compare-formats` API/CLI for corpus-bound full code versus body-only evidence,
+  requiring exact corpus, configuration and recorded runtime controls, consistent summaries
+  and full scenario denominators. Replay latency deltas are null; legacy files are not migrated.
+- Offline comparison regressions and real subprocess reference/archive/replay verification on
+  all twelve fresh v3 scenarios, without model calls or prompt/validator/default changes.
 - Standalone fresh `v3` node/behavioral corpus with four disjoint task notebooks, twelve scenarios
   and eight negative controls for imported helpers, Unicode normalization, branching, stateful
   loops and multiple outputs. Includes pinned identity, static/source checks, negative-control
