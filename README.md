@@ -349,11 +349,15 @@ body mode using `behavioral-benchmark compare-formats`. Exact corpus/runtime con
 legacy measurements cannot be upgraded retroactively and used a different Ollama version.
 Conversion defaults are unchanged.
 
-A [fresh standalone `v3` corpus](docs/fresh-node-corpus-v3.md) now prepares the next evaluation:
+A separate [`v3` corpus](docs/fresh-node-corpus-v3.md) adds tasks beyond the earlier development cases:
 four disjoint task contracts, twelve scenarios and eight negative controls for imported helpers,
-Unicode normalization, branching, stateful loops and multiple outputs. Reference execution,
-assembly and offline replay pass; no model was run on it. Maintainer review precedes scored
-evaluation, and full notebooks remain separate work.
+Unicode normalization, branching, stateful loops and multiple outputs.
+[Twelve complete same-runtime model runs and their replays](docs/fresh-v3-format-measurements.md)
+now show 4/4 nodes and 12/12 matches for `qwen3:8b` in both formats and for
+`qwen2.5-coder:7b` in body mode. The code model's full-code path consistently omits an assertion,
+is rejected before execution and retains 3/4 nodes and 9/12 matches. The report preserves an
+initial Windows infrastructure interruption, exact evidence and small-sample limits.
+This is not whole-notebook accuracy; prompts, validation and conversion defaults are unchanged.
 
 An opt-in provider mode supplies [exact parameter substitutions](docs/node-parameter-evidence.md):
 original expressions, literal types, source ranges and corresponding function arguments derived
@@ -525,12 +529,12 @@ Progress and architectural decisions are recorded chronologically in [JOURNAL.md
    Behavioral input/output contracts, deterministic comparison reports and approved-reference
    execution are implemented. Statically validated proposal execution is available behind explicit
    consent. Repeated local full-code/body-only measurements report static acceptance, end-to-end
-   behavioral results and latency on the development corpus. Fresh-corpus measurements, whole
-   projects, review corrections and cost remain outstanding.
+   behavioral results and latency on the development corpus and on the separate four-task v3
+   corpus. Whole projects, review corrections, broader coverage and cost remain outstanding.
 3. [ ] Compare deterministic and hybrid results on the same corpus.
    Behavioral code artifacts can now compare two provider runs and replay identical raw responses;
-   corpus-bound full-code/body-only comparisons enforce matching recorded controls. Fresh v3
-   same-runtime measurements are next; legacy files are not automatically migrated.
+   corpus-bound full-code/body-only comparisons enforce matching recorded controls, now exercised
+   by repeated same-runtime v3 measurements. Legacy files are not automatically migrated.
    Broader planning and generation comparisons remain outstanding.
 4. [ ] Expand deterministic pandas support for `rename`, `replace`, joins, and aggregations.
 5. [ ] Add richer catalog formats and schema-aware diagnostics.

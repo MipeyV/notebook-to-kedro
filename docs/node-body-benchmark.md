@@ -14,6 +14,11 @@ offline replays per model: `qwen3:8b` at 7/8 accepted nodes and 16/17 matches, a
 `qwen2.5-coder:7b` at 8/8 and 17/17. These are results on the fixed development corpus, not
 accuracy estimates for arbitrary notebooks.
 
+[Same-runtime v3 measurements](fresh-v3-format-measurements.md) now compare both formats on
+four separate tasks: both models pass 4/4 nodes and 12/12 scenarios in body mode, while the
+code model's full-code path rejects an omitted assertion. This does not resolve the earlier
+v2 parameter-fidelity failure or establish full-notebook coverage.
+
 ## CLI
 
 Use `--proposal-format node-body` on each action. Without it, `full-code` remains the default;

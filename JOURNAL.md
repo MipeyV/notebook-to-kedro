@@ -40,6 +40,63 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-10-10 - Same-runtime fresh v3 format measurements
+
+### Completed
+
+- Froze unchanged v3 source/corpus/dependency-lock identities, revision `39d2127`, Python `3.12.14`,
+  Ollama `0.40.2`, model digests and a partially balanced full/body order before the complete series.
+- Retained an initial incomplete Windows-temp cleanup attempt with no published artifact or
+  recoverable raw-response archive, rather than presenting it as a model rejection or successful run.
+- Recorded a separate replacement protocol with process-local workspace temp storage and exact
+  response capture before validation/execution. Twelve reference scenarios passed first; no
+  application source, dependency, fixture, prompt, validator or security policy was changed.
+- Completed all twelve scheduled live runs: general-model full/body and code-model body each
+  accepted 4/4 nodes and matched 12/12 scenarios; code-model full code retained 3/4 and 9/12.
+- Inspected the code model's repeated partition assertion omission, rejected before execution;
+  kept all three unevaluated scenarios in each denominator and applied no repair or proposal retry.
+- Captured 48 exact assistant responses and 24 before/after runtime snapshots, including empty
+  initial residency, observed 4096-token contexts and full VRAM residency for each selected model.
+- Replayed all twelve complete artifacts with provider/metadata network guards. Raw/parsed code,
+  rejection diagnostics, non-timing summaries and worker/comparison evidence agree with sources.
+- Produced six live and six replay format comparisons plus three body-only model comparisons.
+  Code-model body gains one node and three scenarios in each format pair; general-model format
+  outcomes and between-model body outcomes are unchanged, with zero regressions.
+- Verified byte-identical raw responses within each model/format across three complete runs.
+  Published all 24 canonical artifact identities, 36 rounded durations and protocol/audit identities;
+  raw evidence and one-off local runners remain in ignored `generated/`.
+- Passed 1,113 deterministic tests on Python `3.12.14` with 100% line/branch coverage after an
+  unchanged rerun of a Windows-blocked NumPy import. Ruff lint/format and both distribution builds
+  passed. Documentation hashes, rounded durations and links were checked against the archives.
+  The full multi-version suite was not rerun for this documentation-only increment;
+  mypy's module entry point was blocked
+  twice by application-control rejection of a native `internal` DLL, not a type-check finding.
+
+### Decisions
+
+- Treat complete v3 results as observations on four explicit task contracts, not arbitrary
+  notebooks, new deterministic conversion support or isolated causal assembly effects.
+- Keep both body-only models as pilot candidates; the specialized model is not universally
+  better and no provider/default is promoted. Earlier v2 parameter failures remain separate.
+- Preserve the incomplete attempt and changed temp-root/observer protocol explicitly; no cold
+  run, rejected proposal or slow duration is hidden, and preliminary v3 exposure is acknowledged.
+- Preserve measured fixtures. Any tuning informed by these results makes v3 development evidence
+  and requires another held-out dataset for subsequent claims.
+
+### Open questions
+
+- What durable checkpoint and cleanup-error behavior should the distributed benchmark guarantee
+  on Windows, where cleanup can otherwise prevent publication of an entire run?
+- Will the candidates preserve structure and behavior on independently reviewed full notebooks?
+- Can local application-control DLL restrictions be resolved through the user's approved system
+  configuration without weakening execution or validation safeguards?
+
+### Next step
+
+- Harden worker cleanup and pre-execution response capture, then evaluate reviewed complete
+  notebooks for grouping, interfaces, pipeline wiring, source traceability and project equivalence.
+  Training, broad deployment and promotion remain premature on these four tasks.
+
 ## 2026-10-09 - Corpus-bound full-code and body-only comparison
 
 ### Completed

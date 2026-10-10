@@ -13,8 +13,10 @@ case names alone is insufficient. It lists **all** scenarios, including those no
 either side, and preserves rejection counts and full end-to-end denominators.
 
 This increment includes offline regression tests and real subprocess reference execution on
-the four-node, twelve-scenario [fresh v3 corpus](fresh-node-corpus-v3.md). It publishes no new
-model score and does not promote a provider or integrate generated proposals into projects.
+the four-node, twelve-scenario [fresh v3 corpus](fresh-node-corpus-v3.md). The implementation
+published no model score. Subsequent [same-runtime measurements](fresh-v3-format-measurements.md)
+exercise the comparison on twelve complete live artifacts and their replays, without promoting
+a provider or integrating generated proposals into projects.
 
 ## CLI
 
@@ -104,10 +106,10 @@ Execution durations are observed subprocess timings, not inference latency. Offl
 providers can compare outcomes through replay but cannot claim eligible live measurements without
 actual runtime identity.
 
-## Next Measurement
+## Measurement Status
 
-After review and merge, run both local models on immutable v3 with unchanged prompts and
-contemporaneous full-code/body-only controls, distinct paths and repeated runs. Archive raw
-responses, inspect rejections and replay offline before publishing results. Historical v2
-measurements remain development evidence with a runtime difference, not controlled comparisons
+After review and merge, both local models were run on immutable v3 with unchanged prompts and
+contemporaneous full-code/body-only controls. The linked report preserves repeated runs,
+rejections, raw evidence, offline replay and an initial Windows infrastructure interruption.
+Historical v2 measurements remain development evidence with a runtime difference, not controlled comparisons
 retroactively repaired by this envelope. Full notebooks and project equivalence remain separate.
