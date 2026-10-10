@@ -20,6 +20,7 @@ from notebook_to_kedro.evaluation import (
     BehavioralExecutionConfig,
     CorpusBoundCodeBenchmarkArtifact,
     CorpusBoundCodeBenchmarkReport,
+    NodeBodyBenchmarkReport,
     behavioral_benchmark_artifact_sha256,
     collect_environment_provenance,
     compare_behavioral_benchmark_artifacts,
@@ -29,17 +30,21 @@ from notebook_to_kedro.evaluation import (
     create_behavioral_benchmark_artifact,
     create_corpus_bound_code_artifact,
     create_node_body_benchmark_artifact,
+    create_response_capture,
     load_behavioral_benchmark_artifact,
     load_behavioral_corpus,
     load_corpus_bound_code_artifact,
     load_node_body_benchmark_artifact,
     load_node_code_corpus,
     load_planning_corpus,
+    load_response_capture,
     node_body_benchmark_artifact_sha256,
     planning_benchmark_to_json,
+    recover_response_capture,
     replay_behavioral_benchmark,
     replay_corpus_bound_code_benchmark,
     replay_node_body_benchmark,
+    response_capture_summary,
     run_behavioral_code_benchmark,
     run_corpus_bound_code_benchmark,
     run_node_body_benchmark,
@@ -65,6 +70,14 @@ from notebook_to_kedro.semantic import (
 )
 
 if TYPE_CHECKING:
+    from collections.abc import Sequence
+
+    from notebook_to_kedro.evaluation import (
+        BehavioralBenchmarkProvenance,
+        BehavioralCase,
+        NodeCodeCase,
+        ResponseCaptureProvider,
+    )
     from notebook_to_kedro.ir import ConversionPlan
 
 ERROR_EXIT_CODE = 1
@@ -158,7 +171,7 @@ def _parser() -> argparse.ArgumentParser:
     _add_ollama_arguments(benchmark_parser)
     behavioral_parser = subparsers.add_parser(
         "behavioral-benchmark",
-        help="run, replay or compare behavioral node-code benchmark artifacts",
+        help="run, capture, recover, replay or compare behavioral benchmark evidence",
     )
     behavioral_actions = behavioral_parser.add_subparsers(dest="behavioral_action", required=True)
     behavioral_run = behavioral_actions.add_parser(
@@ -188,6 +201,27 @@ def _parser() -> argparse.ArgumentParser:
         help="include deterministic parameter evidence in node-code prompts",
     )
     _add_behavioral_execution_arguments(behavioral_run)
+    behavioral_run.add_argument(
+        "--capture-dir",
+        type=Path,
+        default=None,
+        help="new directory for durable raw outcomes before validation/execution",
+    )
+    capture_info = behavioral_actions.add_parser(
+        "capture-info", help="inspect response capture completeness without execution"
+    )
+    capture_info.add_argument("capture", type=Path, help="response capture directory")
+    capture_recover = behavioral_actions.add_parser(
+        "recover", help="evaluate a complete response capture without contacting Ollama"
+    )
+    capture_recover.add_argument("capture", type=Path, help="response capture directory")
+    _add_behavioral_corpus_arguments(capture_recover)
+    capture_recover.add_argument("output", type=Path, help="new recovered artifact path")
+    capture_recover.add_argument(
+        "--allow-untrusted-code-execution",
+        action="store_true",
+        help="authorize validated captured proposals in local subprocesses",
+    )
     behavioral_replay = behavioral_actions.add_parser(
         "replay", help="revalidate and re-execute recorded responses without Ollama"
     )
@@ -347,6 +381,14 @@ def _benchmark(args: argparse.Namespace) -> int:
 
 def _behavioral_benchmark(args: argparse.Namespace) -> int:
     try:
+        if args.behavioral_action == "capture-info":
+            sys.stdout.write(
+                json.dumps(response_capture_summary(load_response_capture(args.capture)), indent=2)
+                + "\n"
+            )
+            return 0
+        if args.behavioral_action == "recover":
+            return _recover_response_capture(args)
         if args.behavioral_action == "run":
             return _run_behavioral_benchmark(args)
         if args.behavioral_action == "replay":
@@ -380,6 +422,9 @@ def _run_behavioral_benchmark(args: argparse.Namespace) -> int:
         timeout_seconds=args.ollama_timeout,
         include_parameter_evidence=args.include_parameter_evidence,
     )
+    captured_provider, early_provenance = _with_response_capture(
+        args, behaviors, nodes, provider, execution
+    )
     runner = (
         run_corpus_bound_code_benchmark
         if args.proposal_format == "bound-full-code"
@@ -388,7 +433,7 @@ def _run_behavioral_benchmark(args: argparse.Namespace) -> int:
     report = runner(
         behaviors,
         nodes,
-        provider,
+        captured_provider,
         allow_untrusted_code_execution=args.allow_untrusted_code_execution,
         project_root=args.project_root,
         prompt_version=provider.prompt_version,
@@ -400,7 +445,7 @@ def _run_behavioral_benchmark(args: argparse.Namespace) -> int:
         include_parameter_evidence=args.include_parameter_evidence,
         execution=execution,
     )
-    provenance = collect_environment_provenance(
+    provenance = early_provenance or collect_environment_provenance(
         project_root=args.project_root,
         ollama_base_url=args.ollama_base_url,
         model_name=args.ollama_model,
@@ -521,10 +566,13 @@ def _run_node_body_benchmark(args: argparse.Namespace) -> int:
         base_url=args.ollama_base_url,
         timeout_seconds=args.ollama_timeout,
     )
+    captured_provider, early_provenance = _with_response_capture(
+        args, behaviors, nodes, provider, execution
+    )
     report = run_node_body_benchmark(
         behaviors,
         nodes,
-        provider,
+        captured_provider,
         allow_untrusted_code_execution=args.allow_untrusted_code_execution,
         project_root=args.project_root,
         execution_config=execution,
@@ -537,7 +585,8 @@ def _run_node_body_benchmark(args: argparse.Namespace) -> int:
     )
     artifact = create_node_body_benchmark_artifact(
         report,
-        collect_environment_provenance(
+        early_provenance
+        or collect_environment_provenance(
             project_root=args.project_root,
             ollama_base_url=args.ollama_base_url,
             model_name=args.ollama_model,
@@ -548,6 +597,89 @@ def _run_node_body_benchmark(args: argparse.Namespace) -> int:
     sys.stdout.write(
         f"Created node-body benchmark artifact `{args.output}` "
         f"({node_body_benchmark_artifact_sha256(artifact)})\n"
+    )
+    return 0
+
+
+def _with_response_capture(
+    args: argparse.Namespace,
+    behaviors: Sequence[BehavioralCase],
+    nodes: Sequence[NodeCodeCase],
+    provider: OllamaNodeCodeProvider | OllamaNodeBodyProvider,
+    execution: BehavioralExecutionConfig,
+) -> tuple[
+    OllamaNodeCodeProvider | OllamaNodeBodyProvider | ResponseCaptureProvider,
+    BehavioralBenchmarkProvenance | None,
+]:
+    if args.capture_dir is None:
+        return provider, None
+    provenance = collect_environment_provenance(
+        project_root=args.project_root,
+        ollama_base_url=args.ollama_base_url,
+        model_name=args.ollama_model,
+    )
+    configuration = BehavioralBenchmarkConfiguration(
+        args.ollama_base_url,
+        args.ollama_timeout,
+        args.proposal_format == "node-body" or args.include_parameter_evidence,
+        execution,
+    )
+    captured = create_response_capture(
+        args.capture_dir,
+        behaviors,
+        nodes,
+        provider,
+        provenance=provenance,
+        configuration=configuration,
+        prompt_version=provider.prompt_version,
+        proposal_format=args.proposal_format,
+        allow_untrusted_code_execution=args.allow_untrusted_code_execution,
+        project_root=args.project_root,
+    )
+    return captured, provenance
+
+
+def _recover_response_capture(args: argparse.Namespace) -> int:
+    capture = load_response_capture(args.capture)
+    report = recover_response_capture(
+        capture,
+        load_behavioral_corpus(args.behavioral_corpus),
+        load_node_code_corpus(args.node_code_corpus),
+        allow_untrusted_code_execution=args.allow_untrusted_code_execution,
+        project_root=args.project_root,
+    )
+    provenance = collect_environment_provenance(project_root=args.project_root)
+    configuration = capture.configuration
+    if isinstance(report, CorpusBoundCodeBenchmarkReport):
+        bound = create_corpus_bound_code_artifact(
+            report,
+            provenance,
+            configuration,
+            mode="replay",
+            source_artifact_sha256=capture.capture_sha256,
+        )
+        write_corpus_bound_code_artifact(args.output, bound)
+    elif isinstance(report, NodeBodyBenchmarkReport):
+        body = create_node_body_benchmark_artifact(
+            report,
+            provenance,
+            configuration,
+            mode="replay",
+            source_artifact_sha256=capture.capture_sha256,
+        )
+        write_node_body_benchmark_artifact(args.output, body)
+    else:
+        full = create_behavioral_benchmark_artifact(
+            report,
+            provenance,
+            configuration,
+            mode="replay",
+            source_artifact_sha256=capture.capture_sha256,
+        )
+        write_behavioral_benchmark_artifact(args.output, full)
+    sys.stdout.write(
+        f"Created recovered benchmark artifact `{args.output}` "
+        f"from capture {capture.capture_sha256}\n"
     )
     return 0
 

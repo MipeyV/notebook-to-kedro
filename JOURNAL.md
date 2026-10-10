@@ -40,6 +40,53 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-10-11 - Durable pre-execution response capture
+
+### Completed
+
+- Added an opt-in capture provider for full-code, corpus-bound full-code and body-only benchmarks.
+  Published complete source/corpus/request/reference/scenario/configuration/provenance manifests
+  before generation and an exclusive request reservation before every provider call.
+- Published exact raw assistant-content strings and UTF-8 hashes, or expected provider-error
+  diagnostics, before parsing, assembly, validation or execution. Failed publication aborts;
+  existing captures and reserved requests are never automatically overwritten or retried.
+- Added strict capture inspection, including partial evidence, missing node IDs and explicit
+  separation between complete provider evidence and a completed scored benchmark.
+- Added API/CLI offline recovery requiring the exact corpus, current source preflight, original
+  execution bounds and renewed consent. Reused all existing generation/validation/execution paths;
+  incomplete captures cannot produce completed reports and recovery makes no Ollama/metadata calls.
+- Preserved existing completed artifact formats, marked recovered outputs as replay and linked their
+  source identity to the canonical capture snapshot. Recovery proposal durations are zero;
+  raw provenance/diagnostics are retained while runtime results are recomputed.
+- Added deterministic regressions for interrupted execution, disk-write failure, duplicate requests,
+  unknown outcomes, JSON/identity/hash corruption, provider errors, all CLI formats and invalid raw code.
+- Passed 1,183 deterministic tests on Python `3.11.16`, `3.12.14` and `3.13.14`, with 100% line/branch
+  coverage for each version. Passed all three real-worker recovery tests on Python `3.12.14`,
+  covering twelve v3 scenarios per format and thirty-six executions, with no live model calls.
+  Strict mypy (125 files), Ruff lint/format and source/wheel builds passed; the earlier local
+  Python 3.11 DLL block did not recur in this matrix and no Windows security settings were changed.
+
+### Decisions
+
+- Keep capture optional and separate from scored artifacts, with no migration of historical runs.
+- Reserve requests before generation so an interrupted call cannot silently become a repeated model
+  request. Preserve already published outcomes, but do not claim recovery of unpublished data.
+- Retain exact parameter evidence and strict validation, including complete rejected denominators.
+  Do not change prompts, models, fixtures, security policies, conversion defaults or dependencies.
+- Record filesystem I/O overhead and limits explicitly: hashes are not authentication, captured
+  content is sensitive, and recovery scores are not live model latency or notebook accuracy.
+
+### Open questions
+
+- Partial captures expose existing responses but cannot finish missing requests automatically.
+- Select an independently reviewed complete notebook and define observable end-to-end expectations
+  before evaluating a model-assisted project conversion.
+
+### Next step
+
+- Merge the capture/recovery infrastructure, then start the complete-notebook pilot with separate
+  source review, task-structure checks, node/pipeline generation and behavioral equivalence tests.
+
 ## 2026-10-10 - Bounded Windows worker cleanup
 
 ### Completed
