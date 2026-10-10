@@ -64,8 +64,9 @@ A persistent failure may leave source, inputs and worker outputs on disk. Inspec
 and remove the remaining directory once its lock is released, according to your local data policy.
 The warning is separate from execution results and is not embedded in artifact schemas or hashes;
 retain stderr/logs alongside benchmark evidence. No timeout, process isolation, validation,
-execution consent or security policy is relaxed. Durable pre-execution response checkpoints are
-still a separate follow-up: unrelated interruptions can still prevent final artifact publication.
+execution consent or security policy is relaxed. Optional [durable response capture](response-capture.md)
+now saves provider outcomes before parsing/validation/execution via `--capture-dir`. Captures are
+separate from final scored artifacts; incomplete captures cannot be recovered as complete benchmarks.
 
 ```bash
 uv run notebook-to-kedro behavioral-benchmark run \

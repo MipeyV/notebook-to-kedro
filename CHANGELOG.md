@@ -16,6 +16,13 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Opt-in durable behavioral response capture for full-code, corpus-bound full-code and node-body
+  runs: complete corpus/metadata manifests, exclusive request reservations and exact raw/provider-error
+  publication before validation/execution. Includes `--capture-dir`, `capture-info`, Python APIs and
+  offline `recover` with exact-corpus checks and renewed consent. Partial captures are not scored;
+  existing artifact schemas, prompts, validation, model retries and conversion defaults are unchanged.
+- Capture regressions for interruption, write failure, duplicate calls, corruption and recovery;
+  real-worker reference recovery on all twelve v3 scenarios in each of the three formats, without LLMs.
 - Documented twelve complete same-runtime full-code/body-only v3 runs, twelve offline replays
   and fifteen comparisons: both body paths and general-model full code pass 4/4 nodes and
   12/12 scenarios; code-model full code rejects an omitted assertion at 3/4 and 9/12.

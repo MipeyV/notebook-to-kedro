@@ -361,8 +361,10 @@ This is not whole-notebook accuracy; prompts, validation and conversion defaults
 
 The [behavioral executor](docs/behavioral-code-benchmark.md#local-run) now bounds Windows
 permission-error cleanup retries and logs persistent failures without discarding worker outcomes.
-This does not retry model calls or execution; durable pre-execution response checkpoints remain
-the next infrastructure step before a complete-notebook pilot.
+This does not retry model calls or execution. Optional [durable response capture](docs/response-capture.md)
+now publishes raw outcomes before validation/execution with `--capture-dir`, exposes `capture-info`,
+and recovers complete captures without Ollama using `behavioral-benchmark recover`. Partial evidence
+cannot masquerade as a completed benchmark. A complete-notebook pilot remains the next milestone.
 
 An opt-in provider mode supplies [exact parameter substitutions](docs/node-parameter-evidence.md):
 original expressions, literal types, source ranges and corresponding function arguments derived
