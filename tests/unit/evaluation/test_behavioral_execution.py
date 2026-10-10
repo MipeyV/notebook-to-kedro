@@ -4,6 +4,8 @@ import json
 import os
 import subprocess
 import sys
+import tempfile
+import time
 from pathlib import Path
 from typing import Any, cast
 
@@ -567,6 +569,143 @@ def test_execute_reference_rejects_oversized_worker_result(
 
     assert result.status == "process_failure"
     assert "max_result_bytes" in str(result.diagnostic_message)
+
+
+class _CleanupDirectory:
+    def __init__(self, path: Path, error: OSError, failures: int) -> None:
+        self.name = str(path)
+        self.error = error
+        self.failures = failures
+        self.calls = 0
+
+    def cleanup(self) -> None:
+        self.calls += 1
+        if self.calls <= self.failures:
+            raise self.error
+
+
+@pytest.mark.parametrize("failures", [0, 1, 2, 3])
+def test_windows_cleanup_retries_are_bounded_and_visible(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    caplog: pytest.LogCaptureFixture,
+    failures: int,
+) -> None:
+    directory = _CleanupDirectory(tmp_path, PermissionError("sharing violation"), failures)
+    sleeps: list[float] = []
+    monkeypatch.setattr(execution, "_is_windows", lambda: True)
+    monkeypatch.setattr(time, "sleep", sleeps.append)
+
+    execution._cleanup_worker_directory(cast("tempfile.TemporaryDirectory[str]", directory))
+
+    assert directory.calls == min(failures + 1, 3)
+    assert sleeps == [0.1] * min(failures, 2)
+    if failures == 3:
+        assert len(caplog.records) == 1
+        assert caplog.records[0].levelname == "WARNING"
+        assert "execution outcome is unchanged" in caplog.text
+        assert str(tmp_path) in caplog.text
+        assert "sharing violation" in caplog.text
+    else:
+        assert not caplog.records
+
+
+@pytest.mark.parametrize(
+    ("windows", "error"),
+    [(False, PermissionError("permissions")), (True, OSError("unexpected I/O failure"))],
+)
+def test_cleanup_does_not_swallow_other_errors(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    *,
+    windows: bool,
+    error: OSError,
+) -> None:
+    directory = _CleanupDirectory(tmp_path, error, 3)
+    monkeypatch.setattr(execution, "_is_windows", lambda: windows)
+    monkeypatch.setattr(time, "sleep", lambda _seconds: pytest.fail("unexpected retry"))
+
+    with pytest.raises(type(error), match=str(error)):
+        execution._cleanup_worker_directory(cast("tempfile.TemporaryDirectory[str]", directory))
+
+    assert directory.calls == 1
+
+
+@pytest.mark.parametrize("target", ["reference", "proposal"])
+@pytest.mark.parametrize(
+    "outcome", ["success", "exception", "process_failure", "timeout", "invalid_result", "startup"]
+)
+def test_windows_cleanup_failure_preserves_worker_outcome_and_original_exception(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    caplog: pytest.LogCaptureFixture,
+    target: str,
+    outcome: str,
+) -> None:
+    case, node = _reviewed_pair()
+    directory = _CleanupDirectory(tmp_path, PermissionError("locked directory"), 3)
+    monkeypatch.setattr(
+        tempfile,
+        "TemporaryDirectory",
+        lambda **_kwargs: cast("tempfile.TemporaryDirectory[str]", directory),
+    )
+    monkeypatch.setattr(execution, "_is_windows", lambda: True)
+    monkeypatch.setattr(time, "sleep", lambda _seconds: None)
+    monkeypatch.setattr(execution, "_terminate_process_tree", lambda _process: None)
+
+    starts: list[tuple[str, ...]] = []
+
+    def fake_start(command: tuple[str, ...], _directory: Path) -> subprocess.Popen[bytes]:
+        starts.append(command)
+        if outcome == "startup":
+            raise RuntimeError("original startup failure")
+        payload = _worker_result(case_id=case.case_id, node_code_case_id=case.node_code_case_id)
+        if outcome == "exception":
+            payload.update(
+                status="exception",
+                outputs=[],
+                exception={"type_name": "KeyError", "message": "missing"},
+            )
+        Path(command[-2]).write_text(
+            "not json" if outcome == "invalid_result" else json.dumps(payload), encoding="utf-8"
+        )
+        return cast(
+            "subprocess.Popen[bytes]",
+            _FakeProcess(
+                return_code=7 if outcome == "process_failure" else 0, timeout=outcome == "timeout"
+            ),
+        )
+
+    monkeypatch.setattr(execution, "_start_worker", fake_start)
+
+    def run() -> BehavioralExecutionResult:
+        if target == "reference":
+            return execute_behavioral_reference(case, node)
+        return execution.execute_behavioral_proposal(
+            case, node, node.reference_response, allow_untrusted_code_execution=True
+        )
+
+    if outcome == "startup":
+        with pytest.raises(RuntimeError, match="original startup failure"):
+            run()
+    else:
+        result = run()
+        assert result.status == ("process_failure" if outcome == "invalid_result" else outcome)
+        if outcome == "success":
+            assert result.outputs == (BehavioralExecutionOutput("result", ScalarBehaviorValue(2)),)
+            assert result.diagnostic_message is None
+        elif outcome == "exception":
+            assert result.exception == BehavioralExecutionException("KeyError", "missing")
+        elif outcome == "timeout":
+            assert result.diagnostic_message == f"{target} execution exceeded 10 seconds"
+        elif outcome == "process_failure":
+            assert result.diagnostic_message == f"{target} worker exited with code 7"
+        else:
+            assert "Expecting value" in str(result.diagnostic_message)
+    assert directory.calls == 3
+    assert len(starts) == 1
+    assert len(caplog.records) == 1
+    assert str(tmp_path) in caplog.text
 
 
 @pytest.mark.parametrize(

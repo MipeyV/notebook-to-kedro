@@ -53,6 +53,20 @@ Proposal execution is opt-in because a subprocess is fault containment, not an O
 validation constrains the response to the source-derived node body, but the original notebook code
 can still access the filesystem or network. Run only in a controlled environment.
 
+Worker directories are cleaned after each execution, including failures and timeouts. On Windows,
+cleanup `PermissionError`s are retried at most three times, with two 0.1-second waits. If cleanup
+still fails, a logging warning includes the directory path and error, without changing an already
+observed result or replacing an exception from the execution body. This retries cleanup only: it
+does not rerun a worker, a model request, validation or a scenario. Other cleanup errors, and
+permission errors on non-Windows platforms, still propagate.
+
+A persistent failure may leave source, inputs and worker outputs on disk. Inspect the logged path
+and remove the remaining directory once its lock is released, according to your local data policy.
+The warning is separate from execution results and is not embedded in artifact schemas or hashes;
+retain stderr/logs alongside benchmark evidence. No timeout, process isolation, validation,
+execution consent or security policy is relaxed. Durable pre-execution response checkpoints are
+still a separate follow-up: unrelated interruptions can still prevent final artifact publication.
+
 ```bash
 uv run notebook-to-kedro behavioral-benchmark run \
   tests/fixtures/evaluation/behavioral/v2 \

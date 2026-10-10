@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import logging
 import math
 import os
 import signal
@@ -10,7 +11,7 @@ import subprocess
 import sys
 import tempfile
 import time
-from contextlib import suppress
+from contextlib import contextmanager, suppress
 from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Literal, TypeAlias, cast
@@ -29,7 +30,7 @@ from notebook_to_kedro.evaluation.behavioral import (
 from notebook_to_kedro.generation.code import validate_node_code
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
+    from collections.abc import Callable, Iterator
 
     from notebook_to_kedro.evaluation.behavioral import BehavioralCase
     from notebook_to_kedro.evaluation.node_code_corpus import NodeCodeCase
@@ -45,6 +46,9 @@ BehavioralExecutionStatus: TypeAlias = Literal[
     "serialization_failure",
 ]
 _WORKER_MODULE = "notebook_to_kedro.evaluation.behavioral_worker"
+_LOGGER = logging.getLogger(__name__)
+_WORKER_CLEANUP_ATTEMPTS = 3
+_WORKER_CLEANUP_RETRY_SECONDS = 0.1
 _KILL_SIGNAL = getattr(signal, "SIGKILL", signal.SIGTERM)
 _WORKER_RESULT_KEYS = {
     "schema_version",
@@ -229,8 +233,7 @@ def _execute_behavioral_response(
         raise ValueError("behavioral execution request exceeds max_request_bytes")
 
     started = time.perf_counter()
-    with tempfile.TemporaryDirectory(prefix="notebook-to-kedro-") as directory:
-        working_directory = Path(directory)
+    with _worker_directory() as working_directory:
         request_path = working_directory / "request.json"
         result_path = working_directory / "result.json"
         request_path.write_bytes(encoded_request)
@@ -275,6 +278,37 @@ def _execute_behavioral_response(
             return result
         except (OSError, json.JSONDecodeError, ValueError) as error:
             return _failed_result(case, "process_failure", duration, str(error))
+
+
+@contextmanager
+def _worker_directory() -> Iterator[Path]:
+    directory = tempfile.TemporaryDirectory(prefix="notebook-to-kedro-")
+    try:
+        yield Path(directory.name)
+    finally:
+        _cleanup_worker_directory(directory)
+
+
+def _cleanup_worker_directory(directory: tempfile.TemporaryDirectory[str]) -> None:
+    attempts = 0
+    while True:
+        try:
+            directory.cleanup()
+            return
+        except PermissionError as error:
+            if not _is_windows():
+                raise
+            attempts += 1
+            if attempts >= _WORKER_CLEANUP_ATTEMPTS:
+                _LOGGER.warning(
+                    "Worker directory cleanup failed after %s attempts; "
+                    "execution outcome is unchanged, inspect remaining directory `%s`: %s",
+                    attempts,
+                    directory.name,
+                    error,
+                )
+                return
+            time.sleep(_WORKER_CLEANUP_RETRY_SECONDS)
 
 
 def behavioral_execution_result_to_dict(result: BehavioralExecutionResult) -> dict[str, object]:
