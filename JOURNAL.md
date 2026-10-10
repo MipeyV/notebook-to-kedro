@@ -40,6 +40,50 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-10-10 - Bounded Windows worker cleanup
+
+### Completed
+
+- Replaced automatic worker-directory context exit with explicit cleanup shared by reviewed
+  references, live proposals and offline replay execution.
+- Added up to three cleanup attempts for Windows permission errors, with two 0.1-second waits.
+  Persistent failures emit a logging warning containing the error and remaining directory path,
+  preserving observed results and exceptions from the execution body.
+- Added deterministic regressions for immediate/transient/persistent cleanup, both execution
+  targets, successful values, expected exceptions, timeouts, process/result failures and original
+  startup exceptions. Checked that each worker starts only once and other cleanup errors propagate.
+- Documented residual-data handling and the separate, non-artifact logging channel. Raw response
+  checkpointing is not implemented by this increment and unrelated interruptions can still abort
+  final artifact publication.
+- Passed 1,131 deterministic tests on both Python `3.12.14` and `3.13.14`, with 100% line/branch
+  coverage, plus 13 real subprocess integration tests on Python `3.12.14`. Ruff lint/format,
+  strict mypy (122 files) and source/wheel builds passed. No live model requests were made.
+- Recorded a Python `3.11.16` startup block (`uv` error 4551), followed by an unchanged retry with
+  1,128 passes and three existing runtime-test failures involving Windows-blocked pandas and
+  scikit-learn DLL imports (99.92% coverage). New cleanup regressions passed; the full 3.11 suite
+  is not green locally. No test exclusions, coverage threshold or security-policy changes were made.
+
+### Decisions
+
+- Keep this PR limited to the cleanup failure seen in the v3 experiment. Do not infer the root cause
+  of the Windows lock or treat an infrastructure problem as a model rejection.
+- Use standard-library temporary-directory cleanup, bounded retries and visible diagnostics rather
+  than silently ignoring all cleanup errors. Do not change Windows application-control policy.
+- Preserve execution/artifact schemas, validator, prompt, model/worker request counts, subprocess
+  timeout and opt-in execution consent. Cleanup warnings do not alter comparison hashes or scores.
+
+### Open questions
+
+- Define integrity-bound, exclusive pre-execution raw-response checkpoints and their recovery
+  contract without presenting partial captures as completed benchmark artifacts.
+- Retain logs and inspect any remaining worker directory according to local data-retention policy.
+- Confirm the full Python 3.11 suite in CI, without the local Windows application-control blocks.
+
+### Next step
+
+- Add durable pre-execution response capture in a separate PR, then run an independently reviewed
+  complete-notebook pilot rather than extrapolating node-corpus scores to arbitrary notebooks.
+
 ## 2026-10-10 - Same-runtime fresh v3 format measurements
 
 ### Completed

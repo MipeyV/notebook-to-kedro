@@ -359,6 +359,11 @@ is rejected before execution and retains 3/4 nodes and 9/12 matches. The report 
 initial Windows infrastructure interruption, exact evidence and small-sample limits.
 This is not whole-notebook accuracy; prompts, validation and conversion defaults are unchanged.
 
+The [behavioral executor](docs/behavioral-code-benchmark.md#local-run) now bounds Windows
+permission-error cleanup retries and logs persistent failures without discarding worker outcomes.
+This does not retry model calls or execution; durable pre-execution response checkpoints remain
+the next infrastructure step before a complete-notebook pilot.
+
 An opt-in provider mode supplies [exact parameter substitutions](docs/node-parameter-evidence.md):
 original expressions, literal types, source ranges and corresponding function arguments derived
 from V1 rules. Ambiguous mappings fail before model I/O in this experimental mode. The static validator

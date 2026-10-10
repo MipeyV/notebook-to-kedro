@@ -7,6 +7,13 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed
+
+- Windows behavioral-worker directory cleanup retries permission errors at most three times.
+  Persistent failures log the remaining path without discarding observed outcomes or masking
+  execution-body exceptions; other cleanup errors still propagate. No worker/model retry,
+  artifact schema, validator, timeout, consent or security-policy change.
+
 ### Added
 
 - Documented twelve complete same-runtime full-code/body-only v3 runs, twelve offline replays
