@@ -9,6 +9,11 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Documented twelve complete same-runtime full-code/body-only v3 runs, twelve offline replays
+  and fifteen comparisons: both body paths and general-model full code pass 4/4 nodes and
+  12/12 scenarios; code-model full code rejects an omitted assertion at 3/4 and 9/12.
+  Includes exact provenance, raw evidence hashes, repeatability, an initial Windows cleanup
+  interruption and limits on generalization, without prompt/validator/default changes.
 - Opt-in `bound-full-code` benchmark/replay envelope capturing the complete corpus before
   generation, with strict source/scenario/raw-response validation and exclusive artifact writes.
 - Dedicated `compare-formats` API/CLI for corpus-bound full code versus body-only evidence,

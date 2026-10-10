@@ -12,9 +12,12 @@ controls, not a twelve-node cumulative extension of `v2`. Node, request, task an
 notebook paths and exact source bodies are disjoint from `v1` and `v2`. Both case schemas remain
 `1.0`: the directory version identifies the dataset, not a format or application release.
 
-No evaluated Ollama model was invoked on these cases in this PR, and no prompt, validator or
-production code was changed. The references and expected results are explicitly authored fixture
-candidates, not outputs copied from the planner, generator or a sampled model response. Test
+No evaluated Ollama model was invoked in the corpus-creation PR, and no prompt, validator or
+production code was changed there. Subsequent
+[same-runtime model measurements](fresh-v3-format-measurements.md) now report twelve complete
+live runs and their replays, including an initial infrastructure interruption and the code
+model's full-code assertion omission. The references and expected results are explicitly authored
+fixture candidates, not outputs copied from the planner, generator or a sampled model response. Test
 execution checks the authored expectations rather than computing replacement snapshots.
 
 The candidates were authored by the coding assistant and need maintainer review through the PR
@@ -75,8 +78,9 @@ validated reference proposals. An offline reference provider then exercises body
 exclusive artifact publication and replay on all twelve scenarios, without Ollama.
 
 These checks establish fixture and harness consistency, not LLM acceptance or generalization.
-The new dataset has no published model score. Once model results guide changes, treat it as a
-development regression corpus and reserve another fresh dataset for evaluation.
+The separate measurement report now provides node-generation observations, not whole-notebook
+accuracy. Once those results guide changes, treat v3 as a development regression corpus and
+reserve another fresh dataset for evaluation. Measured fixtures remain unchanged.
 
 ## Identity And Measurement Gate
 
@@ -94,15 +98,14 @@ and comparison policies. Keep measured revisions immutable; further reviewed cas
 new dataset rather than silently changing these inputs after observing model outputs. Do not
 compare `v2` and `v3` percentages as improvements: both task sets and denominators differ.
 
-After maintainer review, evaluate both existing local models without tuning prompts on `v3`.
-Retain rejected proposals and all twelve scenarios in end-to-end denominators. Use fixed versions
-and runtime settings, distinct output paths, repeated runs, raw archives and offline replay.
+After the creation/comparison PRs were merged, both local models were evaluated without prompt
+tuning on v3, using fixed recorded runtime controls, repeated runs, raw archives and offline replay.
+The report retains rejected proposals and all twelve scenarios in end-to-end denominators.
 The [benchmark commands](node-body-benchmark.md#cli) accept these two `v3` corpus directories;
 reading the corpus or running the default tests does not invoke a model.
 
 A [corpus-bound full-code/body-only comparison](generation-format-comparison.md) is now available;
-contemporaneous full-code controls and scored model measurements remain the next work. No model
-was invoked on v3 while adding that comparison. Model roles, full notebooks and project-level
-equivalence need their own
-evaluation. Keep execution opt-in in a controlled environment: subprocesses are fault containment,
-not an OS security sandbox.
+contemporaneous full-code controls and scored node measurements are now recorded separately.
+No model was invoked while implementing the comparison itself. Model roles, full notebooks and
+project-level equivalence still need their own evaluation. Keep execution opt-in in a controlled
+environment: subprocesses are fault containment, not an OS security sandbox.
