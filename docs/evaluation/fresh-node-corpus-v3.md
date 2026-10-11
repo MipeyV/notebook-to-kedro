@@ -1,9 +1,11 @@
 # Fresh Node Corpus V3
 
+[Documentation index](../README.md)
+
 ## Purpose And Status
 
 Dataset `v3` provides fresh task contracts for the next evaluation after the repeated
-[body-only development measurements](node-body-local-measurements.md). The existing eight-node
+[body-only development measurements](../experiments/node-body-local-measurements.md). The existing eight-node
 `v2` dataset has already informed prompt experiments and must not be presented as fresh held-out
 evidence. Its files, results and corpus identity are unchanged.
 
@@ -14,7 +16,7 @@ notebook paths and exact source bodies are disjoint from `v1` and `v2`. Both cas
 
 No evaluated Ollama model was invoked in the corpus-creation PR, and no prompt, validator or
 production code was changed there. Subsequent
-[same-runtime model measurements](fresh-v3-format-measurements.md) now report twelve complete
+[same-runtime model measurements](../experiments/fresh-v3-format-measurements.md) now report twelve complete
 live runs and their replays, including an initial infrastructure interruption and the code
 model's full-code assertion omission. The references and expected results are explicitly authored
 fixture candidates, not outputs copied from the planner, generator or a sampled model response. Test

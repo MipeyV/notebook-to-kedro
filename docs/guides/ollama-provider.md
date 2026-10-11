@@ -1,5 +1,7 @@
 # Local Ollama Provider
 
+[Documentation index](../README.md)
+
 ## Scope
 
 `OllamaSemanticPlanningProvider` connects the semantic planning boundary to a local Ollama

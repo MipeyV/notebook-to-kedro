@@ -1,5 +1,7 @@
 # Notebook Facts Schema
 
+[Documentation index](../README.md)
+
 ## Purpose
 
 `NotebookFacts` is the canonical deterministic representation produced from a notebook. It separates facts extracted from source code from future semantic inferences and code transformations.

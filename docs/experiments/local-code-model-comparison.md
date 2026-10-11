@@ -1,5 +1,7 @@
 # Local Code Model Comparison
 
+[Documentation index](../README.md)
+
 ## Purpose
 
 Compare an instruction-tuned code model with the measured `qwen3:8b` baseline before tuning the
@@ -15,7 +17,7 @@ installation, not a hosted API subscription. Download size is not a total runtim
 ## Controlled Protocol
 
 Keep these inputs and policies identical to the expanded
-[baseline](behavioral-code-benchmark.md#expanded-dataset-baseline):
+[baseline](../evaluation/behavioral-code-benchmark.md#expanded-dataset-baseline):
 
 - Node dataset `tests/fixtures/evaluation/node_code/v2`: eight reviewed requests.
 - Behavioral dataset `tests/fixtures/evaluation/behavioral/v2`: seventeen reviewed scenarios.

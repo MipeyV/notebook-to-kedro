@@ -1,5 +1,7 @@
 # Architecture
 
+[Documentation index](../README.md)
+
 ## Objective
 
 Notebook to Kedro is designed as a staged compiler assisted by an optional semantic planner:
@@ -198,14 +200,14 @@ programming errors remain visible. The in-process fake provider tests this flow 
 access or nondeterminism.
 
 The first real transport is the loopback-only Ollama adapter documented in
-[`ollama-provider.md`](ollama-provider.md). It uses the native `/api/chat` endpoint with a JSON
+[`ollama-provider.md`](../guides/ollama-provider.md). It uses the native `/api/chat` endpoint with a JSON
 Schema, non-streaming output, and temperature zero. It has no provider SDK dependency, cannot
 target a remote host, and rejects known cloud-model tags. Strict isolation also requires disabling
 Ollama cloud features on the local server. Direct cloud integration remains outside this adapter
 and requires a separate consent and credential policy.
 
 Validated suggestions are assembled according to
-[`hybrid-planning.md`](hybrid-planning.md). The initial hybrid planner permits semantic naming and
+[`hybrid-planning.md`](../guides/hybrid-planning.md). The initial hybrid planner permits semantic naming and
 adjacent task grouping while recomputing interfaces, parameters, source, and diagnostics from V1
 evidence. Unsupported boundaries and provider failures return a reportable deterministic fallback
 instead of reaching generation.
@@ -343,7 +345,7 @@ They require explicit credentials and run only in a protected workflow or manual
 ### Planner evaluation
 
 The versioned planning corpus described in
-[`planning-evaluation-corpus.md`](planning-evaluation-corpus.md) compares planners by source
+[`planning-evaluation-corpus.md`](../evaluation/planning-evaluation-corpus.md) compares planners by source
 boundaries, names, raw code, inputs, outputs, parameters, diagnostics, pipeline assignments, and
 plan-level configuration. The deterministic planner is the first baseline. Future local and remote
 providers must be evaluated against the same reviewed cases before their results are compared.

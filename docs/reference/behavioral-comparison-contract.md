@@ -1,5 +1,7 @@
 # Behavioral Comparison Contract
 
+[Documentation index](../README.md)
+
 ## Scope
 
 `notebook_to_kedro.evaluation.behavioral` defines versioned, deterministic evidence for isolated
@@ -7,11 +9,11 @@ comparisons between a reviewed notebook task and a proposed node. It describes r
 expected outputs or an expected exception, and explicit comparison policies. The separate
 `behavioral_execution` module executes approved references and explicitly authorized, statically
 validated proposals. `behavioral_proposal` joins proposal execution with deterministic comparison.
-The provider-level [behavioral code benchmark](behavioral-code-benchmark.md) aggregates these
+The provider-level [behavioral code benchmark](../evaluation/behavioral-code-benchmark.md) aggregates these
 outcomes without hiding proposals that never reach execution.
 
 Behavioral schema `1.0` is linked to the
-[independent node-code corpus](node-code-evaluation-corpus.md) by `node_code_case_id`.
+[independent node-code corpus](../evaluation/node-code-evaluation-corpus.md) by `node_code_case_id`.
 `validate_behavioral_case` requires input names and order to match the node function arguments.
 For successful cases, output names and order must match the node outputs. Exception cases have no
 expected outputs and instead record an exception type plus an optional stable message fragment.
@@ -34,7 +36,7 @@ addition to their rejection by the static validator.
 
 ## Serializable Values
 
-The standalone [fresh `v3` dataset](fresh-node-corpus-v3.md) supplies twelve disjoint scenarios
+The standalone [fresh `v3` dataset](../evaluation/fresh-node-corpus-v3.md) supplies twelve disjoint scenarios
 for four new nodes: eight successful cases, four expected exceptions and eighteen output records.
 It uses exact recursive comparisons for scalar/list/object outputs and explicit zero-tolerance
 dtype/order/index checks for ranking tables. All reference scenarios and body-only reference
@@ -187,11 +189,11 @@ container or operating-system sandbox with filesystem, network, CPU and memory p
 Approved references execute and compare successfully across both dataset revisions, including all
 expected exceptions. This validates the execution and comparison harness. Real provider runs on
 both the frozen `v1` and expanded `v2` corpora are documented in the
-[benchmark](behavioral-code-benchmark.md). Three unchanged `qwen3:8b` runs on `v2` and one offline
+[benchmark](../evaluation/behavioral-code-benchmark.md). Three unchanged `qwen3:8b` runs on `v2` and one offline
 replay each matched fifteen of seventeen scenarios end to end; two scenarios were not executed
 because their node proposals failed static validation. These are synthetic corpus observations,
 not proof of equivalence for arbitrary notebooks.
 
-A [same-contract code-model comparison](local-code-model-comparison.md) subsequently evaluated
+A [same-contract code-model comparison](../experiments/local-code-model-comparison.md) subsequently evaluated
 `qwen2.5-coder:7b`: three live runs and a replay each matched sixteen of seventeen scenarios, with
 one scenario blocked by static rejection and no observed regression against the baseline.

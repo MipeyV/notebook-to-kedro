@@ -1,5 +1,7 @@
 # Corpus-Bound Generation Format Comparison
 
+[Documentation index](../README.md)
+
 ## Scope
 
 `compare_generation_formats(full_code, node_body)` compares a newly corpus-bound full-code
@@ -14,7 +16,7 @@ either side, and preserves rejection counts and full end-to-end denominators.
 
 This increment includes offline regression tests and real subprocess reference execution on
 the four-node, twelve-scenario [fresh v3 corpus](fresh-node-corpus-v3.md). The implementation
-published no model score. Subsequent [same-runtime measurements](fresh-v3-format-measurements.md)
+published no model score. Subsequent [same-runtime measurements](../experiments/fresh-v3-format-measurements.md)
 exercise the comparison on twelve complete live artifacts and their replays, without promoting
 a provider or integrating generated proposals into projects.
 

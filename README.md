@@ -2,77 +2,21 @@
 
 > Progressively transform a reasonably clean Data Science notebook into a structured, reproducible Kedro project that is easy to review.
 
-## Context
+## Project status
 
-Machine Learning workflows often begin in a Jupyter notebook used as an experimentation environment:
+The deterministic V1 path is operational for a controlled notebook subset: static analysis,
+reviewable planning, reports and minimal Kedro project generation. Supported patterns include
+simple local CSV catalog inputs and selected pandas/scikit-learn transformations and parameters.
 
-```text
-data loading
-    → preprocessing
-    → feature engineering
-    → train/test split
-    → training
-    → prediction
-    → evaluation
-```
+Optional local Ollama planning can propose constrained naming/grouping changes. Node-code
+proposals have separate validation and consent-gated benchmark/replay tools; accepted model
+proposals are not automatically written into generated projects. Small synthetic measurements
+do not establish arbitrary-notebook accuracy. The next milestone is a complete-notebook pilot.
 
-When an experiment needs to become a maintainable project, much of the work consists of manually restructuring the notebook:
-
-- extracting functions;
-- identifying the inputs and outputs of each step;
-- building Kedro nodes and a pipeline;
-- moving parameters into configuration;
-- declaring datasets;
-- organizing the code and separating responsibilities;
-- making the workflow reproducible and testable.
-
-This work is valuable but repetitive. **Notebook to Kedro** aims to automate its mechanical parts while exposing ambiguities that require human judgement.
-
-## Goal
-
-The target library interface is deliberately simple:
-
-```python
-from notebook_to_kedro import convert
-
-report = convert(
-    input_path="notebooks/model.ipynb",
-    output_path="generated/my_kedro_project",
-)
-```
-
-Eventually, the generated directory should be a coherent Kedro project whose workflow can be started with:
-
-```bash
-cd generated/my_kedro_project
-kedro run
-```
-
-Success means more than generating syntactically valid code: the observable outputs of the generated project should be comparable to those of the source notebook.
-
-The intended conversion contract is:
-
-1. preserve the notebook cells, source code, and dependencies as traceable static facts;
-2. represent the workflow as explicit steps with inputs, outputs, parameters, diagnostics, and source provenance;
-3. propose code for each step as a Kedro node without silently changing the notebook's behavior;
-4. validate and expose the complete plan for human review before writing the project;
-5. compare observable notebook and Kedro outputs whenever the workflow can be executed safely.
-
-The generated project may improve structure, naming, configuration, and separation of responsibilities. It must not invent new business logic or silently optimize away behavior from the source notebook.
-
-## Longer-term product direction
-
-The [product vision and staged roadmap](docs/product-vision.md) describe a shared foundation
-with three proposed usage modes: faithful notebook reproduction, explicit industrialization,
-and reviewed end-to-end optimization. The target includes contract-adapted templates,
-automatic source/catalog interpretation, optional cross-validation and Bayesian search,
-business KPIs, segmented metrics/plots, and enterprise-selected MLflow or W&B tracking.
-
-These are future objectives, not current capabilities. Faithful conversion keeps its existing
-behavior-preservation guarantees; workflow changes require a separate approved contract.
-The next milestone remains a complete-notebook pilot. The vision also records an MDL-inspired
-complexity experiment and criteria for separating a future application/platform repository
-without duplicating this package's core conversion logic.
+See the [compatibility policy](docs/reference/compatibility.md) for support boundaries and the
+[detailed status](docs/product/project-status.md) for APIs, measurements and limitations.
+The tool does not promise automatic production deployment or support for arbitrary Spark/cloud
+workflows. It preserves source provenance and reports unsupported or ambiguous behavior.
 
 ## Installation
 
@@ -124,472 +68,29 @@ server; invalid responses, connection failures, and unsafe suggestions fall back
 deterministic plan and are identified in its diagnostics. When static constraints permit no task
 merges, hybrid mode returns the deterministic plan without contacting Ollama.
 
-## Positioning
-
-This project does not promise to turn any chaotic notebook into production-ready code automatically.
-
-Instead, it aims to:
-
-> automate much of the repetitive refactoring required to turn a reasonably clean, sequential ML notebook into a structured Kedro pipeline, with explicit diagnostics and human review.
-
-The tool should distinguish between three outcomes:
-
-1. conversion is supported;
-2. conversion is possible but produces warnings;
-3. conversion is rejected with an actionable explanation.
-
-## Initial scope
-
-The MVP will target notebooks that are:
-
-- written in Python;
-- syntactically valid;
-- executable in cell order;
-- independent of previous interactive state;
-- primarily using named variables to pass results between steps;
-- composed of reasonably explicit data transformations and ML steps.
-
-The MVP will not attempt to support:
-
-- cells executed in an inconsistent order;
-- Jupyter magics and shell commands;
-- `exec`, `eval`, or dynamic imports;
-- mutations and side effects that cannot be determined statically;
-- complex external dependencies or the inference of their exact versions;
-- every Machine Learning framework;
-- deployment, serving, production monitoring, or cloud infrastructure.
-
-When a construct is not supported, the tool should report it rather than silently generate a questionable result.
-
-## Proposed architecture
-
-```text
-Notebook .ipynb
-      ↓
-Loading and validation
-      ↓
-Cell-level AST analysis
-      ↓
-Symbol and dependency resolution
-      ↓
-Intermediate representation + diagnostics
-      ↓
-Versioned Kedro generator
-      ↓
-Transactional filesystem writer
-      ↓
-Generated project + conversion report
-```
-
-### Loader
-
-The loader opens the notebook, validates its format, and returns its cells in source order. It performs no semantic analysis.
-
-### Analyzer
-
-The analyzer relies on Python's AST wherever possible to identify:
-
-- imports;
-- defined and referenced symbols;
-- functions and classes;
-- dependencies between cells;
-- suspicious mutations or side effects;
-- unsupported constructs.
-
-Static analysis alone cannot guarantee semantic equivalence, so its limitations must be represented in the diagnostics.
-
-### Intermediate representation
-
-Notebook analysis will not generate Kedro code directly. An intermediate representation will describe tasks, their inputs and outputs, their provenance, and recognized parameters.
-
-Conceptual example:
-
-```python
-Task(
-    name="train_model",
-    source_cells=(5,),
-    inputs=("X_train", "y_train"),
-    outputs=("model",),
-    parameters=("learning_rate",),
-    source_code="...",
-)
-```
-
-This boundary will allow analysis and generation to evolve independently.
-
-### Kedro generator
-
-The generator will consume only the intermediate representation. It will create a Kedro structure compatible with an explicitly targeted version, including:
-
-- node functions;
-- the pipeline definition;
-- pipeline registration;
-- parameter configuration;
-- a catalog for persistent inputs and outputs;
-- the minimum project files required for execution.
-
-## Design principles
-
-- **Determinism first**: parsing, dependency analysis, generation, and validation do not depend on an LLM.
-- **Traceability**: every generated task remains linked to its source cells.
-- **Explicit failure**: significant ambiguity blocks conversion or produces a visible warning.
-- **No silent overwrites**: an existing destination is protected by default.
-- **Simplicity**: focused functions, dataclasses, and modules before broader abstractions.
-- **Testability**: analysis decisions and generated projects can be tested independently.
-- **Human review**: the conversion report is part of the product.
-
-## V2: hybrid semantic planning
-
-V2 will add an optional LLM-assisted planner around the deterministic core. The LLM will not parse notebooks, write directly to the destination, or replace validation. It will receive structured notebook facts and propose a structured plan that remains reviewable and traceable to the original cells.
-
-```text
-Notebook .ipynb
-      |
-      v
-Deterministic loading, AST analysis, and dependency resolution
-      |
-      v
-Versioned notebook facts + deterministic baseline plan
-      |
-      v
-Hybrid semantic planner
-  - deterministic rules
-  - optional LLM suggestions for ambiguous steps
-      |
-      v
-Validated ConversionPlan + human-readable report
-      |
-      v
-Deterministic Kedro generator
-      |
-      v
-Generated project + equivalence checks
-```
-
-The hybrid planner may assist with:
-
-- domain-aware node naming and block classification;
-- grouping multiple related cells into coherent pipeline steps;
-- identifying inputs, outputs, datasets, and parameters when static evidence is ambiguous;
-- refactoring complex imperative code into focused node functions;
-- explaining conversion risks and suggesting tests.
-
-Static evidence remains authoritative. Every LLM proposal must use a versioned structured response, preserve source-cell provenance, pass deterministic validation, and appear in the conversion report before generation. Invalid or unavailable LLM output must produce an actionable diagnostic or fall back to the deterministic plan.
-
-The default mode remains fully local and deterministic. Hybrid mode will be explicit and opt-in because notebook code and metadata may be sensitive. Provider configuration, redaction rules, timeouts, cost visibility, and local-model support belong to the provider boundary rather than the core analyzer or generator.
-
-## Project status
-
-The deterministic V1 pipeline is operational for the supported notebook subset. It can analyze a notebook, build and validate a reviewable conversion plan, render a Markdown report, and generate a minimal Kedro project whose observable outputs are checked against reference notebooks.
-
-Development is now moving from the deterministic foundation toward V2 hybrid semantic planning and broader notebook coverage. The deterministic path will remain available as the default and as the fallback for every future provider integration.
-
-The [node code generation API](docs/node-code-contract.md) provides versioned task requests,
-strict JSON responses, a fake provider for offline tests, and an opt-in local Ollama code provider
-with a versioned fidelity prompt. Function signatures, imports, global references, and returns
-are statically validated, with versioned guards against changed or missing assertion blocks and
-incorrect parameter substitutions. All node bodies, with or without parameters, must preserve the
-source AST except for the exact planned substitutions and the required terminal return. Deleted,
-added or rewritten instructions are rejected, even for potentially equivalent refactorings.
-A [node code benchmark](docs/node-code-benchmark.md) measures acceptance,
-V1 function AST matches, missing parameter reads, failures and latency over 26 tasks in four
-reviewed notebooks. Accepted proposals are never written into generated projects automatically.
-An explicit evaluation API can execute them after static validation and caller consent;
-behavioral results remain distinct from static benchmark scores.
-
-An [independent node-code corpus](docs/node-code-evaluation-corpus.md) now contains eight notebook
-tasks with hand-authored references and seventeen known-invalid proposals. The expanded `v2`
-dataset preserves the four-case `v1` baseline and adds aggregation, joins, categorical encoding and
-calendar features. It measures compilation,
-static validation, AST fidelity, detected errors and false rejections without using the V1 generator
-as ground truth or calling a model. This remains a small synthetic validator corpus, not an accuracy
-claim or behavioral-equivalence result.
-
-A versioned [behavioral comparison contract](docs/behavioral-comparison-contract.md) now links seventeen
-reviewed runtime scenarios to that independent corpus. It represents finite scalars, nested JSON,
-typed arrays and tables, plus exact, numeric, array and table comparison policies or expected
-exceptions. Approved reference functions now run in isolated Python subprocesses with temporary
-working directories, filtered environments, timeouts and bounded transport. Deterministic
-comparators produce per-output diagnostics and aggregate reports; all seventeen reference scenarios
-match their reviewed expectations. Statically valid proposals can now be executed through an
-explicit opt-in subprocess path and compared with an auditable response hash. This is fault
-containment rather than an OS sandbox. A
-[behavioral code benchmark](docs/behavioral-code-benchmark.md) now measures real provider outputs
-without dropping rejected nodes. The first local `qwen3:8b` run accepted 2/4 nodes and matched 3/5
-reviewed scenarios end to end; this small single run is not a general accuracy claim. Versioned
-benchmark artifacts now preserve raw responses, model and runtime provenance, configuration and
-integrity hashes. They can be replayed without Ollama and compared for static, behavioral and
-latency regressions through the CLI. A three-run `qwen3:8b` baseline reproduced the same 2/4 static
-acceptance and 3/5 end-to-end matches every time; the corpus is still too small for a general
-accuracy claim.
-The measured 60% result applies to the frozen `v1` dataset. Three unchanged `qwen3:8b` runs on the
-expanded `v2` dataset each accepted 6/8 nodes (75%) and matched 15/17 scenarios end to end (88.24%);
-an offline replay reproduced the same outcomes. All four new tasks passed all twelve linked
-scenarios, while the same two original nodes remained statically rejected. The higher percentage
-reflects the added passing cases, not a model improvement; these synthetic task-cell measurements
-do not establish full-notebook conversion accuracy.
-
-A [controlled local code-model comparison](docs/local-code-model-comparison.md) kept the same
-`v2` inputs, prompt and validator. Three `qwen2.5-coder:7b` runs and an offline replay each accepted
-7/8 nodes and matched 16/17 scenarios (94.12%). The split node improved without observed regressions;
-the source-expression omission remained rejected. This is a pilot-model signal, not a general
-accuracy claim, a fine-tuned model or an automatic change to conversion defaults.
-
-A later [statement-retention prompt experiment](docs/node-code-statement-retention.md) retained the
-omitted metric expression but regressed other tasks on both models. The `v5` candidate was rejected;
-active prompts remain default `v1` and opt-in `v4`, with the strict validator unchanged. Current
-measured `v4` results therefore remain 15/17 for `qwen3:8b` and 16/17 for `qwen2.5-coder:7b`.
-
-A separate [node body contract](docs/node-body-contract.md) now provides an offline Python API
-for proposing only body statements. Deterministic AST assembly supplies the exact signature,
-necessary permitted imports and terminal return, then applies the unchanged strict validator.
-It does not repair omissions or execute proposals. All eight approved reference bodies assemble
-correctly and match seventeen scenarios with explicit test consent; this is not a model-accuracy
-measurement. An opt-in [body-only Ollama provider](docs/ollama-node-body.md) now exposes
-`request_node_body`, with mandatory parameter evidence, strict assembly and exact raw-response
-provenance. A separate [body-only benchmark/replay API and CLI](docs/node-body-benchmark.md) archives
-all proposals and replays their raw bodies without Ollama on an integrity-bound corpus.
-Approved-reference benchmark and replay match all seventeen scenarios; this does not establish
-live model accuracy. `behavioral-benchmark run|replay|compare --proposal-format node-body`
-explicitly selects body artifacts; comparison checks corpus/source and execution compatibility,
-retains rejected denominators and does not treat replay as live latency.
-[Three live body-only runs per model and their offline replays](docs/node-body-local-measurements.md)
-now reproduce 7/8 accepted nodes and 16/17 matches for `qwen3:8b`, and 8/8 and 17/17 for
-`qwen2.5-coder:7b`. The former systematically misses one parameter substitution; the latter passes
-this small synthetic development corpus, not arbitrary notebooks. Fresh independent tasks remain
-necessary. A [corpus-bound format comparison](docs/generation-format-comparison.md) now archives
-complete full-code corpus evidence with `--proposal-format bound-full-code` and compares it to
-body mode using `behavioral-benchmark compare-formats`. Exact corpus/runtime controls are required;
-legacy measurements cannot be upgraded retroactively and used a different Ollama version.
-Conversion defaults are unchanged.
-
-A separate [`v3` corpus](docs/fresh-node-corpus-v3.md) adds tasks beyond the earlier development cases:
-four disjoint task contracts, twelve scenarios and eight negative controls for imported helpers,
-Unicode normalization, branching, stateful loops and multiple outputs.
-[Twelve complete same-runtime model runs and their replays](docs/fresh-v3-format-measurements.md)
-now show 4/4 nodes and 12/12 matches for `qwen3:8b` in both formats and for
-`qwen2.5-coder:7b` in body mode. The code model's full-code path consistently omits an assertion,
-is rejected before execution and retains 3/4 nodes and 9/12 matches. The report preserves an
-initial Windows infrastructure interruption, exact evidence and small-sample limits.
-This is not whole-notebook accuracy; prompts, validation and conversion defaults are unchanged.
-
-The [behavioral executor](docs/behavioral-code-benchmark.md#local-run) now bounds Windows
-permission-error cleanup retries and logs persistent failures without discarding worker outcomes.
-This does not retry model calls or execution. Optional [durable response capture](docs/response-capture.md)
-now publishes raw outcomes before validation/execution with `--capture-dir`, exposes `capture-info`,
-and recovers complete captures without Ollama using `behavioral-benchmark recover`. Partial evidence
-cannot masquerade as a completed benchmark. A complete-notebook pilot remains the next milestone.
-
-An opt-in provider mode supplies [exact parameter substitutions](docs/node-parameter-evidence.md):
-original expressions, literal types, source ranges and corresponding function arguments derived
-from V1 rules. Ambiguous mappings fail before model I/O in this experimental mode. The static validator
-independently checks these substitutions for every provider; it does not prove runtime equivalence.
-
-The initial deterministic analysis contract is documented in [docs/mvp-contract.md](docs/mvp-contract.md), and its interchange model is defined in [docs/notebook-facts-schema.md](docs/notebook-facts-schema.md).
-
-The first reference fixture runs a deterministic Iris classification workflow. It provides a known-good baseline whose predictions and accuracy can later be compared with the generated Kedro pipeline.
-
-The planned module boundaries and test strategy are described in [docs/architecture.md](docs/architecture.md). Supported runtimes and library-support levels are defined in [docs/compatibility.md](docs/compatibility.md).
-
-The first versioned IR is implemented as immutable Python models with deterministic dictionary and JSON round trips:
-
-```python
-json_text = facts.to_json()
-restored = NotebookFacts.from_json(json_text)
-```
-
-The notebook loader now validates local Jupyter notebooks, rejects unsupported formats and non-Python notebooks with stable diagnostic codes, and returns normalized source cells without executing or analyzing notebook code.
-
-The analyzer extracts imports, top-level statements, reads, writes, calls, and blocking syntax diagnostics from loaded notebooks. It resolves cross-cell dependencies by linking reads to the most recent earlier data definition.
-
-The package now exposes a public analysis entrypoint that loads a notebook path and returns deterministic `NotebookFacts`:
-
-```python
-from notebook_to_kedro import analyze_notebook_path
-
-facts = analyze_notebook_path("notebooks/model.ipynb")
-```
-
-It also exposes a planning entrypoint that proposes Kedro-oriented task candidates without writing
-project files. Deterministic planning is the default:
-
-```python
-from notebook_to_kedro import plan_notebook_path
-
-plan = plan_notebook_path("notebooks/model.ipynb")
-```
-
-Hybrid planning must be selected explicitly and requires a downloaded local Ollama model:
-
-```python
-from notebook_to_kedro import PlannerMode, plan_notebook_path
-
-plan = plan_notebook_path(
-    "notebooks/model.ipynb",
-    planner=PlannerMode.HYBRID,
-    ollama_model="your-local-model",
-)
-```
-
-`create_semantic_planner` can be used separately when an application wants to construct and reuse
-a planner. A custom object implementing `SemanticPlanner` can still be injected directly.
-
-The package can render a deterministic Markdown report from a plan so reviewers can inspect the proposed nodes, catalog datasets, parameters, and blocking diagnostics before generation:
-
-```python
-from notebook_to_kedro import render_conversion_report
-
-report = render_conversion_report(plan)
-```
-
-Plans can also be validated explicitly before generation:
-
-```python
-from notebook_to_kedro import validate_conversion_plan
-
-validate_conversion_plan(plan)
-```
-
-The same static review flow is available from the command line:
-
-```bash
-notebook-to-kedro plan notebooks/model.ipynb
-```
-
-After reviewing the plan, the CLI can generate the minimal Kedro project:
-
-```bash
-notebook-to-kedro generate notebooks/model.ipynb generated/model_project
-```
-
-Expected notebook loading and generation failures are reported as concise CLI errors on stderr with a non-zero exit code.
-
-The first Kedro generator writes an importable minimal project skeleton from a `ConversionPlan`:
-
-```python
-from notebook_to_kedro import generate_kedro_project
-
-generate_kedro_project(plan, "generated/model_project")
-```
-
-The end-to-end suite now executes the generated Kedro pipeline for the reference Iris notebook and compares its final accuracy with the notebook output.
-
-The planner recognizes simple `pd.read_csv("...")` assignments as catalog inputs. The generator writes a minimal `conf/base/catalog.yml` for those CSV-backed datasets and copies the source CSV into the generated project's `data/01_raw/` directory.
-
-The planner also extracts selected literal scikit-learn parameters, and the generator writes `conf/base/parameters.yml` while wiring nodes with Kedro `params:` inputs.
-
-Generated node names are now deterministic but reviewable: the planner uses nearby Markdown headings when available and falls back to simple source patterns such as `split_data`, `train_model`, `predict`, and `evaluate_model`.
-
-The supported scikit-learn workflow now includes a simple `StandardScaler` preprocessing step using `fit_transform` and `transform`, with literal `with_mean` and `with_std` parameters extracted into Kedro configuration.
-
-The planner recognizes simple pandas preprocessing steps such as `dropna`, `fillna`, and `assign` when they rewrite a dataframe variable, producing reviewable node names like `clean_data`, `impute_missing_values`, and `engineer_features`.
-
-The planner also extracts selected literal pandas preprocessing parameters into Kedro configuration, including `fillna(value=...)`, positional `fillna({...})`, and `drop(columns=[...])`.
-
-The planner also emits conversion diagnostics for review risks such as fallback names, inherited cell diagnostics, unresolved external inputs, and tasks without data outputs. These diagnostics are visible in the Markdown report and do not block generation unless the plan itself has blocking diagnostics.
-
-Progress and architectural decisions are recorded chronologically in [JOURNAL.md](JOURNAL.md).
-
-## V1 roadmap: deterministic foundation
-
-1. [x] Formalize the supported notebook subset.
-2. [x] Initialize the Python package and quality tooling.
-3. [x] Implement the immutable intermediate representation and serialization.
-4. [x] Load and validate notebooks.
-5. [x] Analyze cells with Python's AST.
-6. [x] Resolve cross-cell dependencies.
-7. [x] Plan minimal Kedro-oriented task candidates.
-8. [x] Generate a minimal Kedro project skeleton for controlled fixtures.
-9. [x] Verify reference fixture equivalence through observable outputs.
-10. [x] Add a file-backed CSV fixture with minimal catalog generation.
-11. [x] Extract selected literal parameters into Kedro configuration.
-12. [x] Generate readable deterministic node names from headings and simple source patterns.
-13. [x] Render a reviewable Markdown conversion report.
-14. [x] Add a minimal CLI for planning and reporting.
-15. [x] Add a CLI command for generating a Kedro project.
-16. [x] Report expected CLI failures without stack traces.
-17. [x] Validate conversion plans explicitly before CLI generation.
-18. [x] Add reviewable conversion diagnostics to plans and reports.
-19. [x] Support a simple `StandardScaler` preprocessing pattern.
-20. [x] Support simple pandas preprocessing naming patterns.
-21. [x] Extract selected literal pandas preprocessing parameters.
-
-## V2 roadmap: LLM-assisted conversion
-
-### Phase 1: planner boundary
-
-1. [x] Introduce a provider-neutral `SemanticPlanner` protocol.
-2. [x] Keep the current deterministic planner as the default implementation.
-3. [x] Define versioned request and response contracts for semantic suggestions.
-4. [x] Add explicit planner selection to the Python API and CLI.
-5. [x] Seed a versioned planning evaluation corpus from the reviewed V1 fixtures.
-
-### Phase 2: safe provider integration
-
-1. [x] Implement a fake provider for deterministic prompt, parsing, and failure tests.
-2. [x] Add an optional local Ollama adapter without adding an SDK dependency to the core package.
-3. [ ] Require explicit consent before sending notebook content to a remote provider.
-4. [ ] Define redaction, credential, timeout, retry, cost, and error-reporting policies.
-5. [ ] Keep paid and nondeterministic provider tests outside the default CI workflow.
-
-### Phase 3: hybrid planning
-
-1. [ ] Use LLM suggestions for ambiguous naming, classification, and cell grouping.
-2. [ ] Propose node code, parameters, datasets, and tests for transformations not covered by deterministic patterns.
-3. [x] Merge suggestions only when they are compatible with static dependencies and plan invariants.
-4. [x] Preserve source provenance and identify LLM-assisted decisions in the conversion report.
-5. [x] Fall back cleanly to deterministic planning when the provider is disabled or fails.
-
-### Phase 4: evaluation and broader coverage
-
-1. [ ] Build a versioned corpus of representative notebooks beyond controlled fixtures.
-   The eight-task development corpus provides seventeen behavioral scenarios. A separate fresh
-   four-task `v3` corpus adds twelve scenarios for a later, untuned evaluation; broader real-world
-   notebook coverage is still required.
-2. [ ] Measure plan validity, generation success, behavioral equivalence, review corrections, latency, and cost.
-   Behavioral input/output contracts, deterministic comparison reports and approved-reference
-   execution are implemented. Statically validated proposal execution is available behind explicit
-   consent. Repeated local full-code/body-only measurements report static acceptance, end-to-end
-   behavioral results and latency on the development corpus and on the separate four-task v3
-   corpus. Whole projects, review corrections, broader coverage and cost remain outstanding.
-3. [ ] Compare deterministic and hybrid results on the same corpus.
-   Behavioral code artifacts can now compare two provider runs and replay identical raw responses;
-   corpus-bound full-code/body-only comparisons enforce matching recorded controls, now exercised
-   by repeated same-runtime v3 measurements. Legacy files are not automatically migrated.
-   Broader planning and generation comparisons remain outstanding.
-4. [ ] Expand deterministic pandas support for `rename`, `replace`, joins, and aggregations.
-5. [ ] Add richer catalog formats and schema-aware diagnostics.
-6. [ ] Define release thresholds for a supported V2 preview.
-
-V2 is successful when hybrid planning improves useful notebook coverage without weakening the deterministic guarantees: no unreviewed code reaches generation, invalid plans are rejected, generated nodes remain traceable to source cells, and equivalence checks continue to protect observable behavior.
-
-The provider boundary and its trust rules are documented in
-[docs/semantic-planning-contract.md](docs/semantic-planning-contract.md).
-The local transport and its loopback-only safety policy are documented in
-[docs/ollama-provider.md](docs/ollama-provider.md).
-Safe suggestion assembly and fallback behavior are documented in
-[docs/hybrid-planning.md](docs/hybrid-planning.md).
-
-Compare the deterministic planner with a downloaded local model on the reviewed corpus:
-
-```bash
-notebook-to-kedro benchmark tests/fixtures/evaluation/planning/v1 \
-  --project-root . \
-  --planners deterministic hybrid \
-  --ollama-model your-local-model > planning-benchmark.json
-```
-
-The versioned JSON report records corpus hashes, structural accuracy, deterministic plan validity,
-fallback usage, and wall-clock planning latency. Live Ollama benchmarking is opt-in and remains
-outside the default test suite. The report contract and current limitations are documented in
-[docs/planning-evaluation-corpus.md](docs/planning-evaluation-corpus.md).
+## Documentation
+
+The root `README.md` remains the repository and package entry point. The
+[documentation index](docs/README.md) provides reading paths and a categorized document list.
+
+- [Product overview](docs/product/overview.md): original scope, goals and design principles.
+- [Conversion roadmap](docs/product/roadmap.md): completed V1 milestones and remaining V2 work.
+- [Product vision](docs/product/product-vision.md): proposed faithful reproduction,
+  industrialization and explicit optimization, including templates, broader catalog inference,
+  CV/Bayesian search, segmented KPIs, tracking profiles and MDL-inspired experiments.
+- [Architecture](docs/reference/architecture.md): module boundaries and test strategy.
+- [Evaluation and experiments](docs/README.md#evaluation): protocols, corpora and measured evidence.
+
+Product objectives are not supported-feature claims. Optimization requires a separate approved
+contract and must not weaken faithful-conversion guarantees. Decisions about future applications
+or separate repositories are recorded in the product vision; the shared core stays here for now.
 
 ## Contributing
 
 The project uses [uv](https://docs.astral.sh/uv/) for Python and dependency management.
 
 ```bash
-uv sync
+uv sync --locked
 uv run pytest
 uv run ruff check .
 uv run ruff format --check .
@@ -601,7 +102,9 @@ uv run pre-commit install
 The committed `uv.lock` file defines the reproducible development and CI environment. See [docs/decisions/0001-use-uv.md](docs/decisions/0001-use-uv.md) for the decision record.
 
 Release history is recorded in [CHANGELOG.md](CHANGELOG.md). Maintainers should follow the
-[release process](docs/releasing.md) when preparing tags and GitHub artifacts.
+[release process](docs/guides/releasing.md) when preparing tags and GitHub artifacts.
+Development history remains in [JOURNAL.md](JOURNAL.md). See the documentation index's
+[maintenance rules](docs/README.md#maintaining-documentation) when adding or moving documents.
 
 ## Project name
 

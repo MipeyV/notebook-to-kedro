@@ -1,5 +1,7 @@
 # Compatibility Policy
 
+[Documentation index](../README.md)
+
 ## Purpose
 
 Compatibility is defined separately for:

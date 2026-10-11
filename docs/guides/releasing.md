@@ -1,5 +1,7 @@
 # Release process
 
+[Documentation index](../README.md)
+
 Releases are created from reviewed commits on `main`. Release tags are immutable and use the
 package version prefixed with `v`, for example `v0.1.0`.
 

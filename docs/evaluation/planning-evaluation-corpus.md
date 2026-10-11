@@ -1,5 +1,7 @@
 # Planning Evaluation Corpus
 
+[Documentation index](../README.md)
+
 ## Purpose
 
 The planning corpus is the reviewed reference for comparing deterministic and future
