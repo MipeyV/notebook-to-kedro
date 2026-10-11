@@ -16,6 +16,10 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Product vision and staged roadmap for faithful reproduction, industrialization and explicit
+  end-to-end optimization, including contract-adapted templates, source/catalog interpretation,
+  enterprise tracking profiles, KPI/segment evaluation, MDL-inspired complexity and repository
+  boundaries. Documentation only; no supported-feature, dependency or conversion-default change.
 - Opt-in durable behavioral response capture for full-code, corpus-bound full-code and node-body
   runs: complete corpus/metadata manifests, exclusive request reservations and exact raw/provider-error
   publication before validation/execution. Includes `--capture-dir`, `capture-info`, Python APIs and

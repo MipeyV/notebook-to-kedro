@@ -60,6 +60,20 @@ The intended conversion contract is:
 
 The generated project may improve structure, naming, configuration, and separation of responsibilities. It must not invent new business logic or silently optimize away behavior from the source notebook.
 
+## Longer-term product direction
+
+The [product vision and staged roadmap](docs/product-vision.md) describe a shared foundation
+with three proposed usage modes: faithful notebook reproduction, explicit industrialization,
+and reviewed end-to-end optimization. The target includes contract-adapted templates,
+automatic source/catalog interpretation, optional cross-validation and Bayesian search,
+business KPIs, segmented metrics/plots, and enterprise-selected MLflow or W&B tracking.
+
+These are future objectives, not current capabilities. Faithful conversion keeps its existing
+behavior-preservation guarantees; workflow changes require a separate approved contract.
+The next milestone remains a complete-notebook pilot. The vision also records an MDL-inspired
+complexity experiment and criteria for separating a future application/platform repository
+without duplicating this package's core conversion logic.
+
 ## Installation
 
 Notebook to Kedro requires Python 3.11, 3.12, or 3.13. Until the package is published to PyPI,
