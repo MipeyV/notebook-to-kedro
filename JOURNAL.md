@@ -40,6 +40,40 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-10-11 - Multi-mode MLOps product vision
+
+### Completed
+
+- Recorded the broader product objective in `docs/product-vision.md` and linked it from the README.
+- Distinguished faithful reproduction, industrialization and explicit optimization contracts.
+- Documented notebook-adapted templates, automatic source/catalog interpretation, simulation,
+  sklearn, Kaggle, Spark/Databricks and AWS/GCP source targets without claiming connector support.
+- Recorded optional CV/Bayesian search, business KPIs, segmented metrics/plots, enterprise-selected
+  MLflow/W&B tracking, privacy controls and an explicitly MDL-inspired complexity experiment.
+- Defined a staged roadmap and criteria for a future separate application/platform repository.
+- Verified local documentation links and the README anchor, passed all seven package tests,
+  and built the source distribution and wheel. The full runtime suite was not rerun for this
+  documentation-only change; pytest reported a non-failing cache-permission warning.
+
+### Decisions
+
+- Keep the vision in this repository for now and reuse the deterministic and evaluation core.
+  Separate product modes must not weaken faithful-conversion defaults or silently alter experiments.
+- Defer application/platform extraction until independent operational and release needs justify it.
+  Future products should consume versioned core contracts, not duplicate notebook analysis.
+- Keep this increment documentation-only: no runtime, validator, dependency or model changes.
+
+### Open questions
+
+- Final product packaging, local/hosted execution, business acceptance thresholds and enterprise
+  profiles need validation with actual team requirements.
+- A formal MDL coding scheme and independent optimization protocol remain research questions.
+
+### Next step
+
+- Build the complete synthetic notebook pilot and its source/catalog and behavioral contract;
+  obtain independent human review before treating it as approved evaluation evidence.
+
 ## 2026-10-11 - Durable pre-execution response capture
 
 ### Completed
