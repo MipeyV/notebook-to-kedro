@@ -6,6 +6,14 @@ Status: completed V1 milestones and ongoing V2 roadmap, extracted on 2026-10-11.
 Checkboxes retain their previous state; this reorganization does not complete milestones.
 The broader product direction is recorded in [Product vision](product-vision.md).
 
+## Current next step
+
+A [draft complete synthetic notebook](../evaluation/synthetic-notebook-pilot.md) now exercises
+simulation, local CSV catalog loading and generated pipeline equivalence with negative controls.
+Its independent human review remains pending; it is not yet an approved whole-notebook LLM
+benchmark. The next gate is source/catalog and behavioral-contract review before defining that
+model experiment. Existing V2 coverage and release-threshold checkboxes remain incomplete.
+
 ## V1 roadmap: deterministic foundation
 
 1. [x] Formalize the supported notebook subset.

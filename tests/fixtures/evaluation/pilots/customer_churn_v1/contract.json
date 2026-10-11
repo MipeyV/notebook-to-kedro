@@ -1,0 +1,184 @@
+{
+  "schema_version": "pilot-draft-1",
+  "case_id": "synthetic-customer-churn-v1",
+  "review": {
+    "status": "pending",
+    "independent_human_review": false,
+    "reviewed_by": null,
+    "provenance": "Assistant-authored synthetic notebook and manually specified expected tables; not independently approved ground truth.",
+    "local_benchmark_provider_exposure": "none at fixture creation"
+  },
+  "notebook": {
+    "path": "tests/fixtures/notebooks/pilots/customer_churn_v1/customer_churn.ipynb",
+    "sha256": "7c31af4d3ba17cc4d9619431392432c1f684f58f7e9b28743cd1f2a646efee92",
+    "cell_count": 22
+  },
+  "sources": [
+    {
+      "name": "customers",
+      "kind": "simulation",
+      "cell_index": 3,
+      "notebook_cell_id": "simulate-customers",
+      "engine": "pandas",
+      "seed": 7,
+      "seed_expression": "np.random.default_rng(7)",
+      "catalog_entry": false,
+      "expected_node_name": "simulate_customers",
+      "note": "Seed remains in source; the current planner does not externalize simulation parameters."
+    },
+    {
+      "name": "orders",
+      "kind": "local_csv",
+      "cell_index": 5,
+      "notebook_cell_id": "load-orders",
+      "engine": "pandas",
+      "loader_expression": "pd.read_csv(\"orders.csv\")",
+      "path": "tests/fixtures/notebooks/pilots/customer_churn_v1/orders.csv",
+      "sha256": "1ad388a0182df5da859aa6ec3742c9cf572e814768fc22071f5c079ac7da0549",
+      "row_count": 21,
+      "columns": ["order_id", "customer_id", "status", "units", "unit_price", "discount"],
+      "catalog_entry": true,
+      "catalog_type": "kedro_datasets.pandas.CSVDataset",
+      "generated_filepath": "data/01_raw/orders.csv"
+    }
+  ],
+  "pipeline_id": "notebook_pipeline",
+  "shared_import_cell_indices": [1],
+  "catalog_cell_indices": [5],
+  "expected_blocking_diagnostic_codes": [],
+  "tasks": [
+    {
+      "cell_index": 3, "notebook_cell_id": "simulate-customers", "statement_count": 2,
+      "name": "simulate_customers", "inputs": [], "outputs": ["customers"],
+      "parameters": [], "diagnostic_codes": []
+    },
+    {
+      "cell_index": 7, "notebook_cell_id": "clean-orders", "statement_count": 4,
+      "name": "clean_orders", "inputs": ["orders"], "outputs": ["clean_orders"],
+      "parameters": [], "diagnostic_codes": ["DF002"]
+    },
+    {
+      "cell_index": 9, "notebook_cell_id": "aggregate-orders", "statement_count": 1,
+      "name": "aggregate_orders", "inputs": ["clean_orders"], "outputs": ["order_totals"],
+      "parameters": [], "diagnostic_codes": []
+    },
+    {
+      "cell_index": 11, "notebook_cell_id": "join-features", "statement_count": 6,
+      "name": "join_customer_features", "inputs": ["customers", "order_totals"], "outputs": ["features"],
+      "parameters": ["join_customer_features.fillna_values"], "diagnostic_codes": ["DF002"]
+    },
+    {
+      "cell_index": 13, "notebook_cell_id": "prepare-features", "statement_count": 3,
+      "name": "prepare_features", "inputs": ["features"], "outputs": ["X", "y", "holdout"],
+      "parameters": [], "diagnostic_codes": []
+    },
+    {
+      "cell_index": 15, "notebook_cell_id": "split-holdout", "statement_count": 4,
+      "name": "split_fixed_holdout", "inputs": ["X", "holdout", "y"],
+      "outputs": ["X_train", "X_test", "y_train", "y_test"], "parameters": [], "diagnostic_codes": []
+    },
+    {
+      "cell_index": 17, "notebook_cell_id": "train-model", "statement_count": 2,
+      "name": "train_model", "inputs": ["X_train", "y_train"], "outputs": ["model"],
+      "parameters": [], "diagnostic_codes": ["DF003"]
+    },
+    {
+      "cell_index": 19, "notebook_cell_id": "predict", "statement_count": 1,
+      "name": "predict", "inputs": ["model", "X_test"], "outputs": ["predictions"],
+      "parameters": [], "diagnostic_codes": []
+    },
+    {
+      "cell_index": 21, "notebook_cell_id": "evaluate", "statement_count": 7,
+      "name": "evaluate_model", "inputs": ["y_test", "predictions", "features", "holdout"],
+      "outputs": ["accuracy", "confusion", "evaluation", "segment_metrics"],
+      "parameters": [], "diagnostic_codes": ["DF002"]
+    }
+  ],
+  "expected_parameters": {"join_customer_features.fillna_values": {"net_revenue": 0.0, "completed_orders": 0}},
+  "comparison": {"numeric_atol": 1e-12, "numeric_rtol": 0.0, "check_dtypes": true, "check_row_order": true},
+  "expected_tables": {
+    "customers": {
+      "columns": ["customer_id", "segment", "recency_days", "service_tickets", "churned"],
+      "dtypes": ["object", "object", "int64", "int64", "int64"],
+      "index": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+      "data": [
+        ["C01", "small", 5, 4, 0], ["C02", "large", 10, 3, 0], ["C03", "small", 12, 3, 0],
+        ["C04", "large", 8, 4, 0], ["C05", "small", 15, 2, 0], ["C06", "small", 20, 3, 0],
+        ["C07", "small", 45, 4, 1], ["C08", "large", 50, 1, 1], ["C09", "large", 60, 0, 1],
+        ["C10", "small", 75, 1, 1], ["C11", "small", 90, 1, 1], ["C12", "small", 55, 4, 1]
+      ]
+    },
+    "clean_orders": {
+      "columns": ["order_id", "customer_id", "status", "units", "unit_price", "discount", "net_revenue"],
+      "dtypes": ["object", "object", "object", "float64", "int64", "float64", "float64"],
+      "index": [0, 1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 12, 13, 14, 15, 17, 18],
+      "data": [
+        ["O01", "C01", "completed", 1.0, 60, 0.0, 60.0],
+        ["O02", "C01", "completed", 1.0, 50, 0.2, 40.0],
+        ["O03", "C02", "completed", 2.0, 60, 0.0, 120.0],
+        ["O04", "C02", "completed", 1.0, 80, null, 80.0],
+        ["O05", "C03", "completed", 3.0, 50, 0.0, 150.0],
+        ["O06", "C04", "completed", 2.0, 50, 0.0, 100.0],
+        ["O07", "C04", "completed", 2.0, 40, 0.0, 80.0],
+        ["O09", "C06", "completed", 1.0, 50, 0.0, 50.0],
+        ["O10", "C07", "completed", 1.0, 120, 0.0, 120.0],
+        ["O11", "C07", "completed", -1.0, 20, 0.0, -20.0],
+        ["O12", "C08", "completed", 2.0, 50, 0.0, 100.0],
+        ["O13", "C08", "completed", 2.0, 40, 0.0, 80.0],
+        ["O14", "C09", "completed", 2.0, 60, 0.0, 120.0],
+        ["O15", "C09", "completed", 1.0, 100, 0.2, 80.0],
+        ["O16", "C10", "completed", 3.0, 50, 0.0, 150.0],
+        ["O18", "C12", "completed", 1.0, 50, 0.0, 50.0],
+        ["O19", "C99", "completed", 1.0, 999, 0.0, 999.0]
+      ]
+    },
+    "order_totals": {
+      "columns": ["customer_id", "net_revenue", "completed_orders"],
+      "dtypes": ["object", "float64", "int64"], "index": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+      "data": [
+        ["C01", 100.0, 2], ["C02", 200.0, 2], ["C03", 150.0, 1], ["C04", 180.0, 2],
+        ["C06", 50.0, 1], ["C07", 100.0, 2], ["C08", 180.0, 2], ["C09", 200.0, 2],
+        ["C10", 150.0, 1], ["C12", 50.0, 1], ["C99", 999.0, 1]
+      ]
+    },
+    "features": {
+      "columns": ["customer_id", "segment", "recency_days", "service_tickets", "churned", "net_revenue", "completed_orders", "average_order"],
+      "dtypes": ["object", "object", "int64", "int64", "int64", "float64", "int64", "float64"],
+      "index": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+      "data": [
+        ["C01", "small", 5, 4, 0, 100.0, 2, 50.0], ["C02", "large", 10, 3, 0, 200.0, 2, 100.0],
+        ["C03", "small", 12, 3, 0, 150.0, 1, 150.0], ["C04", "large", 8, 4, 0, 180.0, 2, 90.0],
+        ["C05", "small", 15, 2, 0, 0.0, 0, 0.0], ["C06", "small", 20, 3, 0, 50.0, 1, 50.0],
+        ["C07", "small", 45, 4, 1, 100.0, 2, 50.0], ["C08", "large", 50, 1, 1, 180.0, 2, 90.0],
+        ["C09", "large", 60, 0, 1, 200.0, 2, 100.0], ["C10", "small", 75, 1, 1, 150.0, 1, 150.0],
+        ["C11", "small", 90, 1, 1, 0.0, 0, 0.0], ["C12", "small", 55, 4, 1, 50.0, 1, 50.0]
+      ]
+    },
+    "evaluation": {
+      "columns": ["customer_id", "segment", "churned", "prediction", "correct"],
+      "dtypes": ["object", "object", "int64", "int64", "int64"], "index": [3, 5, 7, 11],
+      "data": [["C04", "large", 0, 0, 1], ["C06", "small", 0, 0, 1], ["C08", "large", 1, 1, 1], ["C12", "small", 1, 1, 1]]
+    },
+    "segment_metrics": {
+      "columns": ["segment", "support", "accuracy"],
+      "dtypes": ["object", "int64", "float64"], "index": [0, 1],
+      "data": [["large", 2, 1.0], ["small", 2, 1.0]]
+    }
+  },
+  "feature_columns": ["recency_days", "net_revenue", "completed_orders", "average_order"],
+  "train_indices": [0, 1, 2, 4, 6, 8, 9, 10],
+  "test_indices": [3, 5, 7, 11],
+  "train_targets": [0, 0, 0, 0, 1, 1, 1, 1],
+  "test_targets": [0, 0, 1, 1],
+  "predictions": [0, 0, 1, 1],
+  "confusion": [[2, 0], [0, 2]],
+  "accuracy": 1.0,
+  "negative_controls": [
+    {"id": "wrong-simulation-seed", "task": "simulate_customers", "old": "default_rng(7)", "new": "default_rng(8)", "observed_table": "customers"},
+    {"id": "keep-last-duplicate", "task": "clean_orders", "old": "keep=\"first\"", "new": "keep=\"last\"", "observed_table": "clean_orders"},
+    {"id": "drop-refunds", "task": "clean_orders", "old": "& clean_orders[\"units\"].notna()", "new": "& clean_orders[\"units\"].notna() & (clean_orders[\"units\"] > 0)", "observed_table": "clean_orders"},
+    {"id": "inner-join", "task": "join_customer_features", "old": "how=\"left\"", "new": "how=\"inner\"", "observed_table": "features"},
+    {"id": "changed-count-dtype", "task": "join_customer_features", "old": "astype(\"int64\")", "new": "astype(\"float64\")", "observed_table": "features"},
+    {"id": "reversed-holdout", "task": "split_fixed_holdout", "old": "X_test = X.loc[holdout]", "new": "X_test = X.loc[holdout].iloc[::-1]", "expected_exception": "AssertionError"}
+  ]
+}

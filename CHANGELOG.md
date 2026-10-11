@@ -16,6 +16,13 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Draft synthetic whole-notebook pilot with seeded clients, edge-case local orders, hand-specified
+  source/catalog/task/output expectations and explicitly pending independent human review.
+  Tests real Jupyter execution and nine generated Kedro nodes using the actual CSV catalog,
+  intermediate schemas/rows, splits, predictions and segment metrics, plus six negative controls.
+- Test-only CSV connector dependency matching the generated project's existing datasets 8.x
+  target. Its pandas constraint resolves the development lockfile to pandas 2.3.3 instead of 3.0.5;
+  core dependencies, generator behavior, model prompts, validators and historical corpora are unchanged.
 - Categorized documentation index, with product, guides, reference, evaluation and experiment
   folders. The root package README remains in place and is shortened; its detailed overview,
   project status and unchanged roadmap are preserved in product documents. Offline tests check

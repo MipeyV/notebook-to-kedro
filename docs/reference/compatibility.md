@@ -177,6 +177,7 @@ lint = [
 test = [
     "ipykernel",
     "kedro>=1.5,<2",
+    "kedro-datasets[pandas-csvdataset]>=8,<9",
     "nbclient",
     "pandas",
     "pytest",
@@ -190,6 +191,12 @@ dev = [
 ```
 
 Optional features intended for library users belong in `[project.optional-dependencies]`, not development groups.
+
+The CSV connector is a test-only dependency for real generated-catalog loading. Its 8.x
+target matches the existing generator; the locked CSV extra resolves pandas to `2.3.3`
+because it requires pandas below 3. The package's core runtime and broader pandas constraint
+are unchanged. See the [synthetic pilot](../evaluation/synthetic-notebook-pilot.md) for the
+runtime change and why it is not a same-runtime comparison with older model measurements.
 
 ## Locking and upgrades
 
