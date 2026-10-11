@@ -139,8 +139,10 @@ uv run notebook-to-kedro generate \
   generated/customer_churn_pilot_v1 --package-name customer_churn_pilot
 ```
 
-Three unmarked checks run in the deterministic matrix. One integration test executes a real
-notebook; seven end-to-end cases execute the baseline or controlled generated variants.
+The original three unmarked checks run in the deterministic matrix. One integration test executes
+a real notebook; seven end-to-end cases execute the baseline or controlled generated variants.
+The offline batch increment adds five unmarked fixed-response checks and one end-to-end
+trusted-body pipeline check, bringing the current pilot module to seventeen cases.
 The observation fixture shares one kernel execution within a test session. No Ollama, cloud
 endpoint, Kaggle download, Spark session, remote tracker or untrusted model code is contacted.
 
@@ -168,6 +170,9 @@ structure and sensitivity checks, with an explicit human decision-record templat
 boxes remain unchecked. The [whole-notebook experiment proposal](whole-notebook-experiment.md)
 defines the later nine-body run, complete-pipeline denominators, evidence and offline gates;
 it is not an implemented runner or a live measurement.
+The first [offline batch increment](offline-notebook-body-batch.md) now validates recorded bodies
+and exercises trusted fixed assemblies through the complete pilot in a temporary test project.
+This does not approve the fixture or enable execution of untrusted provider proposals.
 
 A reviewer must inspect the original cells, source interpretation, duplicate/refund/join rules,
 task interfaces, catalog, hand calculations, split alignment and negative controls. Record the

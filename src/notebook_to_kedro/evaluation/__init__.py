@@ -166,6 +166,13 @@ from notebook_to_kedro.evaluation.node_code_corpus import (
     node_code_case_to_json,
     verify_node_code_case_source,
 )
+from notebook_to_kedro.evaluation.notebook_body import (
+    NotebookBodyBatchReport,
+    NotebookBodyProposal,
+    NotebookBodyRecord,
+    prepare_notebook_body_requests,
+    validate_notebook_body_batch,
+)
 from notebook_to_kedro.evaluation.planning import DEFAULT_PIPELINE_ID, evaluate_planning_case
 from notebook_to_kedro.evaluation.response_capture import (
     RESPONSE_CAPTURE_SCHEMA_VERSION,
@@ -242,6 +249,9 @@ __all__ = [
     "NodeCodeCase",
     "NodeCodeCaseEvaluation",
     "NodeCodeCorpusEvaluation",
+    "NotebookBodyBatchReport",
+    "NotebookBodyProposal",
+    "NotebookBodyRecord",
     "ObjectBehaviorValue",
     "PlannerBenchmark",
     "PlanningBenchmarkCaseResult",
@@ -320,6 +330,7 @@ __all__ = [
     "planning_case_from_json",
     "planning_case_to_dict",
     "planning_case_to_json",
+    "prepare_notebook_body_requests",
     "recover_response_capture",
     "replay_behavioral_benchmark",
     "replay_corpus_bound_code_benchmark",
@@ -332,6 +343,7 @@ __all__ = [
     "run_planning_benchmark",
     "validate_behavioral_case",
     "validate_behavioral_corpus",
+    "validate_notebook_body_batch",
     "verify_node_code_case_source",
     "write_behavioral_benchmark_artifact",
     "write_corpus_bound_code_artifact",

@@ -16,6 +16,9 @@ The [human review worksheet](../evaluation/synthetic-pilot-review.md) and
 [whole-notebook experiment proposal](../evaluation/whole-notebook-experiment.md) are now documented.
 They do not approve the fixture, implement a live runner or measure a model; the proposed first
 experiment holds source interpretation and task boundaries fixed to evaluate code proposals.
+An [offline static batch API](../evaluation/offline-notebook-body-batch.md) now prepares and
+validates all recorded bodies without provider or execution I/O. Trusted fixed bodies match the
+complete pilot in tests; notebook-bound capture, the untrusted worker and live measurement are pending.
 
 The deterministic V1 pipeline is operational for the supported notebook subset. It can analyze a notebook, build and validate a reviewable conversion plan, render a Markdown report, and generate a minimal Kedro project whose observable outputs are checked against reference notebooks.
 
