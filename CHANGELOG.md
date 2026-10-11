@@ -16,6 +16,10 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Pending synthetic-pilot human review worksheet with source/catalog checks, hand calculations
+  and approval evidence, plus a proposed whole-notebook LLM experiment with fixed nine-node
+  boundaries, complete-pipeline denominators, durable evidence and offline acceptance gates.
+  Documentation only; no human approval, runner, model call or conversion-default change.
 - Draft synthetic whole-notebook pilot with seeded clients, edge-case local orders, hand-specified
   source/catalog/task/output expectations and explicitly pending independent human review.
   Tests real Jupyter execution and nine generated Kedro nodes using the actual CSV catalog,

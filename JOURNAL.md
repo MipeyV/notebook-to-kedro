@@ -40,6 +40,49 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-10-11 - Pilot review and whole-notebook experiment protocol
+
+### Completed
+
+- Prepared an explicitly pending human review worksheet for the synthetic pilot: original
+  sources, real CSV catalog, manual edge-case calculations, task coverage, splits, schemas,
+  predictions and all six oracle sensitivity controls.
+- Defined a human decision record requiring reviewer identity, exact revision/source hashes,
+  checks, corrections and evidence. No approval or reviewer identity was fabricated.
+- Proposed a body-only whole-notebook experiment with nine fixed task requests and one
+  complete-pipeline outcome, preserving all failures, incomplete attempts and raw evidence.
+- Documented offline acceptance for fake providers, complete validation before execution,
+  real catalog loading, bounded worker observations, interruption and consent-gated replay.
+- Linked both documents from the index, pilot, project status and roadmap. No fixture, schema,
+  source implementation, provider prompt, dependency or historical measurement was changed.
+- Passed all 50 focused documentation and pilot tests with locked Python 3.12, including
+  real notebook/catalog execution and the six negative controls; `git diff --check` passed.
+  The complete suite and multi-Python matrix were not rerun for this documentation-only change.
+
+### Decisions
+
+- Keep independent review pending until a human supplies explicit approval evidence. A merged
+  pilot PR is not independent review, and the assistant cannot sign off its own expectations.
+- Start with a fixed source interpretation and deterministic DAG to measure code proposals;
+  LLM task discovery and an advisory structure-review role are separate experiments.
+- Prepare an offline harness on clearly labeled draft inputs without live model calls.
+  Approved live measurement needs recorded review, explicit consent and a separate bound envelope.
+- Do not feed the pilot draft into existing approved node-corpus loaders or report isolated
+  accepted nodes as successful whole notebooks. Preserve the strict faithful-conversion policy.
+
+### Open questions
+
+- Human reviewer, review date, corrections and evidence remain unspecified.
+- Choose and test final response/observation byte limits before live measurement. The proposed
+  provider/worker timeouts are protocol settings, not measurements or implemented notebook defaults.
+- Select one installed local model explicitly after offline acceptance; no best-model claim,
+  download, fine-tuning, paid API or second-model requirement is introduced.
+
+### Next step
+
+- Record human review evidence, then implement the offline notebook-bound harness and fake-provider
+  regressions before any opted-in live call. Draft offline development can proceed independently.
+
 ## 2026-10-11 - Draft synthetic whole-notebook pilot
 
 ### Completed
