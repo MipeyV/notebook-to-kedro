@@ -1,5 +1,7 @@
 # Exact Parameter Evidence
 
+[Documentation index](../README.md)
+
 ## Purpose
 
 Parameter names alone do not identify which occurrence of a literal to replace, or whether the
@@ -87,7 +89,7 @@ The provider's read-only `prompt_version` reports the selected mode for benchmar
 The option is not the default because the first measured corpus run did not improve overall
 acceptance or AST matching. Default adapter calls preserve the previous prompt and behavior.
 
-The later [statement-retention `v5` experiment](node-code-statement-retention.md) was rejected after
+The later [statement-retention `v5` experiment](../experiments/node-code-statement-retention.md) was rejected after
 cross-task regressions. Both active fixture prompts are pinned by regression digests; source
 expressions and assertions remain unchanged JSON data in both modes, rather than trusted commands.
 

@@ -1,5 +1,7 @@
 # Independent Node Code Evaluation Corpus
 
+[Documentation index](../README.md)
+
 ## Purpose
 
 The first node-code benchmark compares model proposals with functions rendered by the deterministic
@@ -37,7 +39,7 @@ The complete dataset has eight references and seventeen invalid examples. Every 
 static validation and every invalid example is rejected with its expected diagnostic. Corpus tests
 also require the copied baseline cases to equal their original `v1` contracts.
 
-The associated [behavioral corpus](behavioral-comparison-contract.md) has seventeen scenarios. Each
+The associated [behavioral corpus](../reference/behavioral-comparison-contract.md) has seventeen scenarios. Each
 new task has a nominal scenario, a boundary scenario and an expected exception. Its expected results
 are hand-authored; they are checked by executing approved references and never derived from the V1
 generator. Integer and object casts in the source make observable table dtypes explicit across
@@ -113,7 +115,7 @@ assert evaluation.missed_invalid_count == 0
 These are validator regression results over stored reviewed examples, not model scores. The
 reference functions and invalid proposals are compiled but never imported or executed. The corpus
 does not establish data-dependent behavior, package availability, side-effect safety or semantic
-equivalence. A separate [behavioral comparison contract](behavioral-comparison-contract.md) now
+equivalence. A separate [behavioral comparison contract](../reference/behavioral-comparison-contract.md) now
 defines explicit inputs, expected outputs or exceptions and comparator policies. Approved references
 and explicitly authorized proposals now execute through the bounded worker and deterministic
 comparators. This validates the harness; model performance requires separate provider runs.

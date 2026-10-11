@@ -1,5 +1,7 @@
 # Body-Only Benchmark And Replay
 
+[Documentation index](../README.md)
+
 ## Scope
 
 The Python API now benchmarks body-only providers on the independent node-code and behavioral
@@ -9,12 +11,12 @@ as the full-code benchmark. Full-code artifact formats and CLI defaults are unch
 
 The Python API and CLI explicitly select a separate body-only artifact envelope. Offline tests
 and approved-reference execution are compatibility checks, not evidence that a model has improved.
-The [local measurements](node-body-local-measurements.md) now record three live runs and three
+The [local measurements](../experiments/node-body-local-measurements.md) now record three live runs and three
 offline replays per model: `qwen3:8b` at 7/8 accepted nodes and 16/17 matches, and
 `qwen2.5-coder:7b` at 8/8 and 17/17. These are results on the fixed development corpus, not
 accuracy estimates for arbitrary notebooks.
 
-[Same-runtime v3 measurements](fresh-v3-format-measurements.md) now compare both formats on
+[Same-runtime v3 measurements](../experiments/fresh-v3-format-measurements.md) now compare both formats on
 four separate tasks: both models pass 4/4 nodes and 12/12 scenarios in body mode, while the
 code model's full-code path rejects an omitted assertion. This does not resolve the earlier
 v2 parameter-fidelity failure or establish full-notebook coverage.
@@ -204,7 +206,7 @@ the eight reviewed reference bodies once, executes all seventeen scenarios, writ
 artifact, then replays all seventeen through real subprocesses. All match their approved
 expectations; these are reference results, not live model outputs.
 
-The [six live runs, six replays and thirteen comparisons](node-body-local-measurements.md) are
+The [six live runs, six replays and thirteen comparisons](../experiments/node-body-local-measurements.md) are
 now recorded separately from those reference tests. Next: add fresh independent task patterns and
 a corpus-bound full-code/body-only bridge with contemporaneous full-code controls before broader
 or causal conclusions. Subprocess containment is not an OS security sandbox and no proposal

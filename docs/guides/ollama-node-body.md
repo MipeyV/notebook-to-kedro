@@ -1,5 +1,7 @@
 # Local Body-Only Node Provider
 
+[Documentation index](../README.md)
+
 ## Scope
 
 `OllamaNodeBodyProvider` explicitly requests a `NodeBodyResponse` rather than a complete function.
@@ -73,13 +75,13 @@ approved `v2` reference bodies pass through the simulated provider/service path.
 integration, not model accuracy or improved acceptance. Prior full-code measurements remain
 historical full-code results and must not be attributed to this new mode.
 
-The [body-only benchmark/replay API](node-body-benchmark.md) now preserves raw body responses,
+The [body-only benchmark/replay API](../evaluation/node-body-benchmark.md) now preserves raw body responses,
 assembly/schema/prompt versions, accepted assembled responses and rejected proposals in a separate
 artifact envelope. The CLI now explicitly selects this mode with `--proposal-format node-body`
 for run/replay/compare. Body comparisons require matching corpus/source and execution contracts;
-the [local measurements](node-body-local-measurements.md) now record three live runs and three
+the [local measurements](../experiments/node-body-local-measurements.md) now record three live runs and three
 offline replays per model on the unchanged development corpus. They observe 7/8 accepted nodes
 and 16/17 matches for `qwen3:8b`, and 8/8 and 17/17 for the code model, not general notebook accuracy.
 Keep behavioral execution opt-in: subprocesses provide fault containment,
-not an OS security sandbox. See the [body contract](node-body-contract.md),
-[local transport](ollama-provider.md) and [full-code API](node-code-contract.md).
+not an OS security sandbox. See the [body contract](../reference/node-body-contract.md),
+[local transport](ollama-provider.md) and [full-code API](../reference/node-code-contract.md).

@@ -1,5 +1,7 @@
 # ADR 0001: Use uv for Python project management
 
+[Documentation index](../README.md)
+
 - **Status:** Accepted
 - **Date:** 2026-08-17
 

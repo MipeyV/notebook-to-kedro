@@ -1,8 +1,10 @@
 # Product vision: notebook-to-production workflows
 
+[Documentation index](../README.md)
+
 Status: proposed product direction, recorded on 2026-10-11. This document is not a
 supported-feature list, an executable configuration contract, or a release commitment.
-The [compatibility guide](compatibility.md) and [README](../README.md#project-status)
+The [compatibility guide](../reference/compatibility.md) and [README](../../README.md#project-status)
 remain authoritative for current capabilities.
 
 ## Objective

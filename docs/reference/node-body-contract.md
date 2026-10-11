@@ -1,5 +1,7 @@
 # Node Body Contract
 
+[Documentation index](../README.md)
+
 ## Scope
 
 `NodeBodyResponse` is a separate versioned response format for proposing only a node's body.
@@ -7,8 +9,8 @@ It reuses the immutable `NodeCodeRequest`: source cells, statement IDs, original
 ordered inputs and outputs, parameter arguments and allowed imports remain trusted evidence.
 
 The assembler implements an offline Python API. A separate opt-in
-[local body-only provider](ollama-node-body.md) now connects it to Ollama through
-`request_node_body`. A separate [benchmark/replay API](node-body-benchmark.md) now records these
+[local body-only provider](../guides/ollama-node-body.md) now connects it to Ollama through
+`request_node_body`. A separate [benchmark/replay API](../evaluation/node-body-benchmark.md) now records these
 proposals; an explicit body-only benchmark CLI is available, but no automatic project writer.
 Existing full-code providers, prompts `v1`/`v4`, contracts and
 validator `node-code-validation-v4` are unchanged. No new model-accuracy result is claimed.
@@ -113,9 +115,9 @@ These are reference-compatibility tests, not outputs sampled from a model. The s
 local provider, prompt and benchmark/replay adapter are implemented with offline transport and
 approved-reference tests. The adapter records body/schema/assembly provenance, exact raw responses,
 accepted assembled code and rejected proposals. The explicit benchmark CLI and body-artifact
-comparison are available. The [local measurements](node-body-local-measurements.md) now record
+comparison are available. The [local measurements](../experiments/node-body-local-measurements.md) now record
 three live runs and three replays per model, with stable 7/8 nodes and 16/17 matches for `qwen3:8b`,
 and 8/8 and 17/17 for `qwen2.5-coder:7b`, on this fixed development corpus only.
 Use fresh independent tasks before claiming generalization or promoting an application default.
 See the
-[rejected statement-retention experiment](node-code-statement-retention.md) for motivation.
+[rejected statement-retention experiment](../experiments/node-code-statement-retention.md) for motivation.

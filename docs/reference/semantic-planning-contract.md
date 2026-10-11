@@ -1,5 +1,7 @@
 # Semantic Planning Contract
 
+[Documentation index](../README.md)
+
 ## Purpose
 
 The semantic planning contract is the provider-neutral boundary between deterministic V1
@@ -119,5 +121,5 @@ tests/fixtures/semantic/planning/v1/
 ```
 
 The local Ollama implementation is documented in
-[`ollama-provider.md`](ollama-provider.md). Accepted responses are converted into deterministic,
-validated plans according to [`hybrid-planning.md`](hybrid-planning.md).
+[`ollama-provider.md`](../guides/ollama-provider.md). Accepted responses are converted into deterministic,
+validated plans according to [`hybrid-planning.md`](../guides/hybrid-planning.md).

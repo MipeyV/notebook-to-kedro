@@ -1,5 +1,7 @@
 # Behavioral Code Benchmark
 
+[Documentation index](../README.md)
+
 ## Scope
 
 `run_behavioral_code_benchmark` measures one node-code provider against the independent reviewed
@@ -64,7 +66,7 @@ A persistent failure may leave source, inputs and worker outputs on disk. Inspec
 and remove the remaining directory once its lock is released, according to your local data policy.
 The warning is separate from execution results and is not embedded in artifact schemas or hashes;
 retain stderr/logs alongside benchmark evidence. No timeout, process isolation, validation,
-execution consent or security policy is relaxed. Optional [durable response capture](response-capture.md)
+execution consent or security policy is relaxed. Optional [durable response capture](../guides/response-capture.md)
 now saves provider outcomes before parsing/validation/execution via `--capture-dir`. Captures are
 separate from final scored artifacts; incomplete captures cannot be recovered as complete benchmarks.
 
@@ -257,16 +259,16 @@ accuracy estimate, a complete-notebook conversion result or an assessment of str
 quality. The next comparison should evaluate another local code model on exactly the same dataset,
 prompt and validator before tuning prompts or considering fine-tuning.
 
-That [controlled comparison](local-code-model-comparison.md) now records three `qwen2.5-coder:7b`
+That [controlled comparison](../experiments/local-code-model-comparison.md) now records three `qwen2.5-coder:7b`
 runs and an offline replay at 7/8 accepted nodes and 16/17 end-to-end matches. The split node passed
 without a regression on the remaining cases; the metric node's source-expression omission remained
 statically rejected. The comparison documents exact provenance, unchanged inputs, timings and limits.
 
-The subsequent [statement-retention prompt experiment](node-code-statement-retention.md) corrected
+The subsequent [statement-retention prompt experiment](../experiments/node-code-statement-retention.md) corrected
 the metric omission but regressed end-to-end results on both models. Its archived `v5` candidate
 is not active; opt-in prompt `v4` and the original comparison results remain the current baseline.
 
-The separate [body-only measurements](node-body-local-measurements.md) now document six live runs,
+The separate [body-only measurements](../experiments/node-body-local-measurements.md) now document six live runs,
 six offline replays and thirteen comparisons. They observe stable 7/8 nodes and 16/17 matches for
 `qwen3:8b`, and 8/8 and 17/17 for the code model, on this same development corpus. Body-only mode
 and Ollama `0.35.1` differ from this historical full-code baseline; causal format comparisons and

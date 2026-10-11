@@ -40,11 +40,46 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-10-11 - Categorized documentation navigation
+
+### Completed
+
+- Kept the root `README.md` as the GitHub/package entry point and reduced it to installation,
+  quick start, concise scope/status, documentation links and contribution commands.
+- Added `docs/README.md` with reading paths, status conventions and a complete categorized index.
+- Moved existing documents into product, guides, reference, evaluation and experiment folders;
+  kept architecture decisions under `docs/decisions` and release/development history at the root.
+- Extracted the old README's overview, detailed status and V1/V2 roadmap into product documents,
+  preserving original evidence, target-interface caveats and roadmap completion states.
+- Updated cross-document links and added offline link/heading, index and package README checks.
+- Verified preservation of all 26 moved documents and all ten extracted README sections apart
+  from navigation updates. The root README is reduced from 608 lines to 111 lines.
+- Passed 43 focused documentation/package tests and all 1,219 deterministic tests on Python
+  `3.12.14`, with 100% line/branch coverage; 32 integration/end-to-end/external/LLM tests were
+  excluded from that run. Strict mypy (126 files), Ruff lint/format and source/wheel builds passed.
+
+### Decisions
+
+- Group documentation by purpose, not by feature delivery date, without adding a docs framework.
+- Treat compatibility as supported-scope authority, product vision as a proposal and measurements
+  as corpus/runtime-specific evidence. Do not turn documentation moves into capability changes.
+- Current document paths change; earlier commits/tags retain their old layout. External bookmarks
+  to the old flat directory require updates. The documentation index is the current entry point.
+
+### Open questions
+
+- A hosted documentation site can be considered when external adoption justifies its maintenance.
+
+### Next step
+
+- Merge this navigation-only increment, then continue the complete synthetic notebook pilot and
+  independently reviewed source/catalog and behavioral contract.
+
 ## 2026-10-11 - Multi-mode MLOps product vision
 
 ### Completed
 
-- Recorded the broader product objective in `docs/product-vision.md` and linked it from the README.
+- Recorded the broader product objective in `docs/product/product-vision.md` and linked it from the README.
 - Distinguished faithful reproduction, industrialization and explicit optimization contracts.
 - Documented notebook-adapted templates, automatic source/catalog interpretation, simulation,
   sklearn, Kaggle, Spark/Databricks and AWS/GCP source targets without claiming connector support.

@@ -16,6 +16,10 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Categorized documentation index, with product, guides, reference, evaluation and experiment
+  folders. The root package README remains in place and is shortened; its detailed overview,
+  project status and unchanged roadmap are preserved in product documents. Offline tests check
+  local links/headings, index coverage and the root README metadata contract. No runtime changes.
 - Product vision and staged roadmap for faithful reproduction, industrialization and explicit
   end-to-end optimization, including contract-adapted templates, source/catalog interpretation,
   enterprise tracking profiles, KPI/segment evaluation, MDL-inspired complexity and repository

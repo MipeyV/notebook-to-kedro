@@ -1,5 +1,7 @@
 # Node Code Contract
 
+[Documentation index](../README.md)
+
 ## Scope
 
 `notebook_to_kedro.generation.code` defines the first provider-neutral code-generation boundary.
@@ -166,7 +168,7 @@ their results are recorded in the benchmark documentation. Assertion preservatio
 the validator, not by trusting instructions to the model. Request and response JSON schemas
 remain at version `1.0`; prompt, derived evidence and validator versions evolve independently.
 
-An archived [statement-retention `v5` candidate](node-code-statement-retention.md) corrected one
+An archived [statement-retention `v5` candidate](../experiments/node-code-statement-retention.md) corrected one
 omission but caused other strict-contract regressions on both local models. It was not retained;
 the active opt-in mode remains `v4`, with no automatic code repair or validator relaxation.
 
@@ -181,7 +183,7 @@ or unsupported mappings are rejected before HTTP when the evidence option is ena
 The validator independently enforces the exact substitutions and preservation of all task bodies
 after any provider response. Unsupported manually constructed parameter requests may still
 satisfy the JSON schema but now fail code validation. Tests use mocked HTTP responses and establish
-adapter behavior, not real model accuracy. The [code benchmark](node-code-benchmark.md) records
+adapter behavior, not real model accuracy. The [code benchmark](../evaluation/node-code-benchmark.md) records
 corpus-wide static acceptance, V1 AST matches and missing parameter reads. Behavioral equivalence
 and isolated execution remain
 separate milestones before proposals can be included in generated projects.

@@ -1,5 +1,7 @@
 # Statement Retention Prompt Experiment
 
+[Documentation index](../README.md)
+
 ## Decision
 
 The `node-code-v5` candidate was rejected. Active prompts remain `node-code-v1` by default and
@@ -108,7 +110,7 @@ Raw artifacts remain private in ignored `generated/`. Canonical artifact identit
 Comparisons are `qwen3-8b-v4-vs-v5.json`, `qwen25-coder-7b-v4-vs-v5.json` and the two files
 ending in `prompt-v5-vs-replay.json`. Each replay comparison found unchanged proposal and evaluated
 scenario statuses. Historical baseline identities are documented in the
-[behavioral benchmark](behavioral-code-benchmark.md) and
+[behavioral benchmark](../evaluation/behavioral-code-benchmark.md) and
 [local model comparison](local-code-model-comparison.md).
 
 To reproduce the archived prompt without changing the active checkout, create a fresh worktree:
@@ -136,8 +138,8 @@ Keep `v4` as the active opt-in prompt and preserve strict validation. Investigat
 deterministic function shell (signature, import boundaries and terminal return) from the model's
 source-body proposal under an explicit versioned contract, rather than asking prompt prose alone
 to guarantee assembly. This design must not automatically repair rejected responses.
-The [body-only contract and offline assembler](node-body-contract.md) now implement that boundary;
-the [local provider](ollama-node-body.md) and
+The [body-only contract and offline assembler](../reference/node-body-contract.md) now implement that boundary;
+the [local provider](../guides/ollama-node-body.md) and
 [repeated body-only measurements](node-body-local-measurements.md) are now available separately.
 Keep the current cases as development regressions and add independently reviewed fresh tasks before
 assessing broader generalization. Complete notebooks and structure-planner quality remain separate.

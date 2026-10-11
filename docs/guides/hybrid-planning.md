@@ -1,5 +1,7 @@
 # Hybrid Plan Assembly
 
+[Documentation index](../README.md)
+
 ## Purpose
 
 Hybrid assembly converts a validated `SemanticPlanningResult` into the existing

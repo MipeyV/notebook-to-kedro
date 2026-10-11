@@ -1,12 +1,14 @@
 # Local Body-Only Model Measurements
 
+[Documentation index](../README.md)
+
 ## Scope And Protocol
 
 Six live runs recorded on 2026-10-06 measure the opt-in body-only path on the unchanged `v2`
 development corpus: eight reviewed node requests and seventeen behavioral scenarios. Three
 consecutive runs of `qwen3:8b` were followed by three of `qwen2.5-coder:7b` on the same machine.
 All six artifacts were then replayed offline and compared with the
-[body-only benchmark CLI](node-body-benchmark.md).
+[body-only benchmark CLI](../evaluation/node-body-benchmark.md).
 
 This is a node-generation experiment, not a complete-notebook conversion, a structure-planner
 evaluation or a production accuracy estimate. These synthetic tasks have already informed prior
@@ -122,7 +124,7 @@ acceptance and approximately +5.88 points in end-to-end matching for the code mo
 | `qwen3:8b` | 6/8 nodes, 15/17 matches | 7/8 nodes, 16/17 matches |
 | `qwen2.5-coder:7b` | 7/8 nodes, 16/17 matches | 8/8 nodes, 17/17 matches |
 
-The historical [full-code baseline](behavioral-code-benchmark.md#expanded-dataset-baseline) and
+The historical [full-code baseline](../evaluation/behavioral-code-benchmark.md#expanded-dataset-baseline) and
 [code-model comparison](local-code-model-comparison.md) used Ollama `0.35.0`, not `0.35.1`.
 Local artifact inspection confirmed identical requests, notebook paths/hashes, provider/execution
 configuration and validator versions. Git inspection also confirmed unchanged `v2` corpora,
@@ -164,7 +166,7 @@ Within-model comparisons append `-vs-2.json` or `-vs-3.json` to the run-1 stem. 
 comparison appends `-vs-replay.json` to its live stem. Between-model comparison filenames are
 `node-body-qwen3-vs-qwen25-coder-v2-20261006-run-{n}.json`.
 
-Follow the [run/replay/compare commands](node-body-benchmark.md#cli) with these same corpus,
+Follow the [run/replay/compare commands](../evaluation/node-body-benchmark.md#cli) with these same corpus,
 model and timeout settings, repeated three times per model. Use fresh output stems: the atomic
 writer refuses overwrite. No model download is necessary when these digests are already installed.
 New timestamps and durations change artifact hashes even when code and outcomes are identical.

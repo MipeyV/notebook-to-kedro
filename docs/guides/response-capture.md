@@ -1,5 +1,7 @@
 # Durable Response Capture
 
+[Documentation index](../README.md)
+
 ## Scope
 
 Response capture is opt-in evidence storage for behavioral benchmarks, not another model or a

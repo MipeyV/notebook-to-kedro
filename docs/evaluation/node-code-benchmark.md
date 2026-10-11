@@ -1,5 +1,7 @@
 # Node Code Benchmark
 
+[Documentation index](../README.md)
+
 ## Scope
 
 `run_node_code_benchmark` evaluates a code provider over the reviewed deterministic planning
@@ -210,7 +212,7 @@ report = run_node_code_benchmark(cases, provider, prompt_version=provider.prompt
 ```
 
 The full local report is `generated/node-code-qwen3-8b-v4.json`. See
-[exact parameter evidence](node-parameter-evidence.md) for its scope and failure conditions.
+[exact parameter evidence](../reference/node-parameter-evidence.md) for its scope and failure conditions.
 This experiment motivated checking the exact application of these substitutions in proposed code,
 not assuming that providing the evidence guarantees it will be followed.
 

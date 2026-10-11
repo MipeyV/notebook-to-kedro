@@ -1,9 +1,11 @@
 # Fresh V3 Full-Code And Body-Only Measurements
 
+[Documentation index](../README.md)
+
 ## Scope And Frozen Protocol
 
 On 2026-10-10, twelve complete local model runs measured the unchanged four-node,
-twelve-scenario [v3 corpus](fresh-node-corpus-v3.md): three runs per model and format,
+twelve-scenario [v3 corpus](../evaluation/fresh-node-corpus-v3.md): three runs per model and format,
 followed by twelve offline replays. The corpus-creation and comparison PRs had been merged
 before measurement. These are synthetic independent tasks with supplied interfaces, not
 complete notebooks, a structure-planner evaluation or production accuracy estimates.
@@ -158,7 +160,7 @@ whole source-envelope SHA-256. Provider duration is zero by definition, not fast
 
 Fifteen comparison files retain metadata, summaries and every scenario denominator:
 
-- Six paired live [format comparisons](generation-format-comparison.md) satisfy exact corpus,
+- Six paired live [format comparisons](../evaluation/generation-format-comparison.md) satisfy exact corpus,
   source, model, configuration, validator, Python/platform, revision, Ollama version and digest
   controls. Body-only improves the code model's partition node and three scenarios in every pair:
   +25 percentage points in acceptance and end-to-end matching, with zero regressions. The general
@@ -226,7 +228,7 @@ hashes, per-case evidence, replay checks and stability observations. Hashes are 
 proof of independent annotation or substitutes for access to raw evidence. These local files and
 one-off runners are not distributed with the repository.
 
-Reproduce the experiment with the [bound full-code/body commands](generation-format-comparison.md#cli),
+Reproduce the experiment with the [bound full-code/body commands](../evaluation/generation-format-comparison.md#cli),
 these immutable v3 directories, model digests, timeouts and fixed order, using new output paths.
 On Windows, create a dedicated workspace temp directory and set process-local `TEMP`/`TMP`
 before invoking Python; run reference preflight before scored calls. For equally durable evidence,

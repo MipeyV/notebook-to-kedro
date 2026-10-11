@@ -1,5 +1,7 @@
 # MVP Contract
 
+[Documentation index](../README.md)
+
 ## Purpose
 
 The first Notebook to Kedro milestone converts a Python notebook into a deterministic, inspectable representation of static facts.
