@@ -163,14 +163,20 @@ by Git; committed fixtures and tests reconstruct it independently.
 
 ## Review gate and next step
 
+A [review worksheet](synthetic-pilot-review.md) now lists the source/catalog, manual calculation,
+structure and sensitivity checks, with an explicit human decision-record template. All review
+boxes remain unchecked. The [whole-notebook experiment proposal](whole-notebook-experiment.md)
+defines the later nine-body run, complete-pipeline denominators, evidence and offline gates;
+it is not an implemented runner or a live measurement.
+
 A reviewer must inspect the original cells, source interpretation, duplicate/refund/join rules,
 task interfaces, catalog, hand calculations, split alignment and negative controls. Record the
 reviewer and evidence in a subsequent reviewed contract change; a green CI or merged PR alone
 does not make this case independently approved. The pending-review assertions are intentional
 and must be replaced by explicit reviewed evidence when promoting the pilot.
 
-Then define the opt-in whole-notebook model experiment and its acceptance/reporting contract,
-including complete rejected denominators and durable raw evidence. Automatic project injection
-of LLM proposals remains disabled. Broader simulation/sklearn acquisition descriptors and
+Then implement and verify the proposed offline harness before opting into a live whole-notebook
+model experiment, preserving complete rejected denominators and durable raw evidence. Automatic
+project injection of LLM proposals remains disabled. Broader simulation/sklearn acquisition descriptors and
 Kaggle, Spark/Databricks, AWS/GCP integration require separate scoped increments and real loader
 tests. This pilot proves only one controlled simulation-plus-local-CSV workflow.

@@ -12,6 +12,10 @@ seeded simulation and real local CSV catalog loading through nine generated node
 explicit intermediate/output expectations and six negative controls. Independent human review
 is pending; this is deterministic development evidence, not a whole-notebook LLM measurement.
 Its test-only CSV connector changes the locked pandas runtime, as recorded in the pilot report.
+The [human review worksheet](../evaluation/synthetic-pilot-review.md) and
+[whole-notebook experiment proposal](../evaluation/whole-notebook-experiment.md) are now documented.
+They do not approve the fixture, implement a live runner or measure a model; the proposed first
+experiment holds source interpretation and task boundaries fixed to evaluate code proposals.
 
 The deterministic V1 pipeline is operational for the supported notebook subset. It can analyze a notebook, build and validate a reviewable conversion plan, render a Markdown report, and generate a minimal Kedro project whose observable outputs are checked against reference notebooks.
 

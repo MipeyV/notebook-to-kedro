@@ -11,8 +11,13 @@ The broader product direction is recorded in [Product vision](product-vision.md)
 A [draft complete synthetic notebook](../evaluation/synthetic-notebook-pilot.md) now exercises
 simulation, local CSV catalog loading and generated pipeline equivalence with negative controls.
 Its independent human review remains pending; it is not yet an approved whole-notebook LLM
-benchmark. The next gate is source/catalog and behavioral-contract review before defining that
-model experiment. Existing V2 coverage and release-threshold checkboxes remain incomplete.
+benchmark. The next gate is source/catalog and behavioral-contract review before live model
+evaluation. A [human review worksheet](../evaluation/synthetic-pilot-review.md) and
+[experiment proposal](../evaluation/whole-notebook-experiment.md) now make those gates concrete.
+The latter fixes nine task proposals, one complete-pipeline outcome, durable evidence and
+offline failure/replay tests; no live runner or human approval is claimed. Offline harness
+development can proceed with explicit draft status, but live evaluation requires recorded approval.
+Existing V2 coverage and release-threshold checkboxes remain incomplete.
 
 ## V1 roadmap: deterministic foundation
 
