@@ -40,6 +40,57 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-10-11 - Draft notebook source binding
+
+### Completed
+
+- Added a separate read-only binding API for the draft whole-notebook body batch. It captures
+  exact notebook, local CSV, complete contract and caller-selected expected-catalog byte identities,
+  relative resolved paths and sizes, pending-review JSON, plan and ordered request inventory.
+- Reused the existing loader/analyzer/deterministic planner and required exact reconstruction
+  before binding the plan. Added source/catalog consistency, root containment, regular-file and
+  bounded snapshot checks, plus file rechecks after reconstruction.
+- Added binding integrity verification and a source-bound static batch wrapper. Changed/missing
+  source files, stale reference metadata and rehashed but inconsistent cached evidence fail before
+  recorded response validation. No provider call, response repair, fallback or execution follows.
+- Added 80 source-binding unit cases, and routed the existing complete trusted-body pilot test
+  through the binding's nine frozen requests. Notebook/CSV source fixtures, business expectations,
+  provider prompts, strict body validation, default conversion and dependencies are unchanged.
+- Documented partial draft-envelope validation, point-in-time filesystem checks and their limits.
+  The expected catalog and business tables are byte-bound, not independently approved by this API.
+- Passed the final complete Python 3.12.14 suite: 1,406 tests, 100% line/branch coverage
+  (6,072 statements, 1,750 branches). Passed 1,365 deterministic tests on each of Python 3.11.16
+  and 3.13.14, with 41 deselected and 100% coverage. Restored the locked Python 3.12 environment.
+- Strict mypy passed for 131 files; Ruff lint/format passed for the final sources; source/wheel
+  builds succeeded; `git diff --check` passed. No Windows security-policy changes were made.
+
+### Decisions
+
+- Accept only the current explicitly pending `pilot-draft-1` review envelope in this increment.
+  Independent approval and promotion need human evidence and a separate reviewed-contract upgrade;
+  a merge, passing tests or cached hash cannot manufacture them.
+- Keep the source binding in memory and separate from existing unbound APIs and approved node
+  corpus/artifact formats. Preserve full draft provenance rather than relabeling it as gold evidence.
+- Read source files for identity, not through pandas/Spark/cloud readers. Simulation remains a
+  task output without an invented file; only simulation/local-CSV declarations are supported.
+- Treat hashes as content identities, not authentication. Rechecking detects observed drift but
+  does not lock files across gates or provide an atomic snapshot against hostile concurrent changes.
+- Keep live measurement, durable capture, immutable execution inputs and untrusted-code execution
+  outside this step. The pilot's parent-process execution path is still trusted test-only code.
+
+### Open questions
+
+- Independent review remains pending; reviewed schema and explicit approval evidence are not yet
+  supported by the draft-only binding. Other business-contract fields remain opaque hashed evidence.
+- A future worker must use bounded immutable snapshots and renew execution consent, not assume
+  source files stay unchanged after this point-in-time verification.
+
+### Next step
+
+- Add a notebook-bound durable request/raw-response evidence layer using this identity, then a
+  dedicated consent-gated whole-pipeline worker and offline replay. Record human review before
+  enabling approved live measurements, keeping current defaults and historical evidence intact.
+
 ## 2026-10-11 - Offline notebook body batches and trusted pilot execution
 
 ### Completed

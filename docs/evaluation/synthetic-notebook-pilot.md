@@ -173,6 +173,9 @@ it is not an implemented runner or a live measurement.
 The first [offline batch increment](offline-notebook-body-batch.md) now validates recorded bodies
 and exercises trusted fixed assemblies through the complete pilot in a temporary test project.
 This does not approve the fixture or enable execution of untrusted provider proposals.
+The trusted-body pipeline test now uses the [draft source binding](notebook-source-binding.md):
+four exact file identities, pending provenance and a rebuilt deterministic plan/request inventory
+are checked before assembly. The historical eleven-case verification above remains its original snapshot.
 
 A reviewer must inspect the original cells, source interpretation, duplicate/refund/join rules,
 task interfaces, catalog, hand calculations, split alignment and negative controls. Record the

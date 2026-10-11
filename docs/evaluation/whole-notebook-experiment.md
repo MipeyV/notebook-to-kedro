@@ -12,6 +12,9 @@ complete plan/graph/parameter preflight, recorded-response validation, full-slot
 accounting and all-or-nothing module assembly. Trusted fixed bodies execute the pilot in tests.
 Notebook/review-bound artifacts, durable capture, a consent-gated worker, replay and live
 measurements remain outstanding; the test-only fixture path is not that runner.
+A [draft source binding](notebook-source-binding.md) now freezes file identities and pending review
+metadata, checks exact deterministic reconstruction and rejects drift before response validation.
+It does not implement the approved notebook/review-bound artifact required for live measurement.
 
 ## Question and frozen scope
 

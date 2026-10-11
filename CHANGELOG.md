@@ -16,6 +16,12 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Read-only draft notebook source binding for complete body batches: exact notebook/CSV/contract/
+  expected-catalog identities, pending-review provenance, frozen requests and exact deterministic
+  reconstruction. Rejects source drift, inconsistent catalog metadata, root escapes and altered
+  bindings before response validation. No approved contract, persistence, provider or execution API.
+- Source-binding regressions and integration with the trusted fixed-body pilot pipeline; existing
+  unbound APIs, deterministic conversion, source fixtures and historical model artifacts are unchanged.
 - Offline notebook body-batch API with complete plan/graph/import/parameter-evidence preflight,
   exact recorded response/error retention, all planned slots, byte-bounded parsing and
   all-or-nothing static module assembly. No provider calls, execution, persistence or fallback.

@@ -173,6 +173,14 @@ from notebook_to_kedro.evaluation.notebook_body import (
     prepare_notebook_body_requests,
     validate_notebook_body_batch,
 )
+from notebook_to_kedro.evaluation.notebook_sources import (
+    NotebookSourceBinding,
+    NotebookSourceFile,
+    SourceBoundNotebookBodyReport,
+    create_notebook_source_binding,
+    validate_source_bound_notebook_body_batch,
+    verify_notebook_source_binding,
+)
 from notebook_to_kedro.evaluation.planning import DEFAULT_PIPELINE_ID, evaluate_planning_case
 from notebook_to_kedro.evaluation.response_capture import (
     RESPONSE_CAPTURE_SCHEMA_VERSION,
@@ -252,6 +260,8 @@ __all__ = [
     "NotebookBodyBatchReport",
     "NotebookBodyProposal",
     "NotebookBodyRecord",
+    "NotebookSourceBinding",
+    "NotebookSourceFile",
     "ObjectBehaviorValue",
     "PlannerBenchmark",
     "PlanningBenchmarkCaseResult",
@@ -262,6 +272,7 @@ __all__ = [
     "ResponseCapture",
     "ResponseCaptureProvider",
     "ScalarBehaviorValue",
+    "SourceBoundNotebookBodyReport",
     "TableBehaviorValue",
     "behavior_value_from_dict",
     "behavior_value_to_dict",
@@ -296,6 +307,7 @@ __all__ = [
     "create_behavioral_benchmark_artifact",
     "create_corpus_bound_code_artifact",
     "create_node_body_benchmark_artifact",
+    "create_notebook_source_binding",
     "create_response_capture",
     "evaluate_behavioral_proposal",
     "evaluate_node_code_case",
@@ -344,7 +356,9 @@ __all__ = [
     "validate_behavioral_case",
     "validate_behavioral_corpus",
     "validate_notebook_body_batch",
+    "validate_source_bound_notebook_body_batch",
     "verify_node_code_case_source",
+    "verify_notebook_source_binding",
     "write_behavioral_benchmark_artifact",
     "write_corpus_bound_code_artifact",
     "write_json_exclusive",

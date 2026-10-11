@@ -28,8 +28,10 @@ from notebook_to_kedro import (
 )
 from notebook_to_kedro.evaluation import (
     NotebookBodyRecord,
+    create_notebook_source_binding,
     prepare_notebook_body_requests,
     validate_notebook_body_batch,
+    validate_source_bound_notebook_body_batch,
 )
 from notebook_to_kedro.exceptions import NodeCodeProviderError
 from notebook_to_kedro.generation.code import NodeBodyResponse, NodeCodeRequest
@@ -360,9 +362,20 @@ def test_pilot_fixed_bodies_execute_complete_pipeline_and_real_catalog(
 ) -> None:
     """Trusted fixed assemblies match every observation without model calls or live injection."""
     plan = plan_notebook_path(NOTEBOOK)
-    requests = prepare_notebook_body_requests(plan)
+    binding = create_notebook_source_binding(
+        plan,
+        project_root=ROOT,
+        contract_path=CONTRACT_DIRECTORY / "contract.json",
+        expected_catalog_path=CONTRACT_DIRECTORY / "expected_catalog.yml",
+    )
+    requests = binding.requests
     provider = _FixedPilotBodyProvider(requests)
-    report = validate_notebook_body_batch(plan, _fixed_records(requests, provider))
+    bound = validate_source_bound_notebook_body_batch(
+        binding, _fixed_records(requests, provider), project_root=ROOT
+    )
+    assert bound.binding == binding
+    assert json.loads(binding.review_json)["independent_human_review"] is False
+    report = bound.batch
     assert report.static_ready
     assert report.module_source is not None
     generated = _snapshot(
