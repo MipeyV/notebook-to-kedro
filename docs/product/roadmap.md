@@ -23,6 +23,10 @@ The [first offline body-batch increment](../evaluation/offline-notebook-body-bat
 implemented, with complete static preflight, all-slot outcomes and trusted fixed-body execution
 on the pilot. Next are notebook/review identity binding, durable evidence and a consent-gated
 whole-pipeline worker/replay. No live whole-notebook measurement or release milestone is complete.
+A [draft source-binding increment](../evaluation/notebook-source-binding.md) now verifies notebook,
+CSV, contract and expected-catalog bytes plus exact deterministic plan/request reconstruction.
+Pending review is retained; reviewed-contract promotion, durable evidence and the worker/replay
+remain outstanding. Existing roadmap checkboxes are not promoted by this preparation work.
 
 ## V1 roadmap: deterministic foundation
 

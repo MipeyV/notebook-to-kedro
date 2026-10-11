@@ -6,6 +6,9 @@ Status: implemented **static recorded-response preparation and validation**, plu
 fixture execution in tests. This is the first offline increment of the
 [whole-notebook proposal](whole-notebook-experiment.md), not its live runner, durable artifact
 or consent-gated worker. The [pilot review](synthetic-pilot-review.md) is still pending.
+A separate [draft source-binding wrapper](notebook-source-binding.md) now verifies notebook,
+CSV, contract and expected-catalog bytes and reconstructs the deterministic plan before this
+static API processes records. The direct unbound APIs below retain their original scope.
 
 ## Boundary
 
@@ -108,6 +111,7 @@ uv run --locked --python 3.12 pytest -o addopts= \
   tests/integration/test_synthetic_notebook_pilot.py
 ```
 
-Next: bind notebook/CSV/review identities, define durable request capture and bounded observations,
+Draft notebook/CSV/review identity binding is now available in the separate wrapper. Next:
+define durable request capture and bounded observations,
 then implement a dedicated consent-gated whole-pipeline worker and offline replay. Live model
 measurement remains gated by recorded human approval and the remaining protocol acceptance tests.
