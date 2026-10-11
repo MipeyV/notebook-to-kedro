@@ -69,6 +69,7 @@ the dedicated experiment reports for their frozen settings, decisions and limita
 | [Synthetic whole-notebook pilot](evaluation/synthetic-notebook-pilot.md) | Simulation plus real CSV catalog loading, full-workflow checks and negative controls; human review pending. |
 | [Synthetic pilot review](evaluation/synthetic-pilot-review.md) | Pending human checklist, hand calculations and explicit approval evidence. |
 | [Whole-notebook experiment](evaluation/whole-notebook-experiment.md) | Proposed offline harness and opt-in nine-node LLM measurement; not implemented. |
+| [Offline notebook body batch](evaluation/offline-notebook-body-batch.md) | Implemented recorded-response static preflight/assembly and trusted pilot execution; no live runner. |
 | [Node code benchmark](evaluation/node-code-benchmark.md) | Static acceptance, AST fidelity and historical prompt/validator experiments. |
 | [Behavioral code benchmark](evaluation/behavioral-code-benchmark.md) | Consent-gated execution, observable comparisons and archived runs. |
 | [Body-only benchmark and replay](evaluation/node-body-benchmark.md) | Body artifacts, replay and compatible comparisons. |

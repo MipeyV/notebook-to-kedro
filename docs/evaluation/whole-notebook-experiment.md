@@ -2,10 +2,16 @@
 
 [Documentation index](../README.md)
 
-Status: **proposed, not implemented or measured**. The synthetic pilot's
+Status: **full experiment proposed, not implemented or measured**. The synthetic pilot's
 [independent human review](synthetic-pilot-review.md) is still pending. This document defines
 the next offline evaluation increment and the later opt-in live measurement, not a new CLI
 command, automatic model injection, production feature or V2 release threshold.
+
+The first [offline static batch increment](offline-notebook-body-batch.md) is implemented:
+complete plan/graph/parameter preflight, recorded-response validation, full-slot rejection
+accounting and all-or-nothing module assembly. Trusted fixed bodies execute the pilot in tests.
+Notebook/review-bound artifacts, durable capture, a consent-gated worker, replay and live
+measurements remain outstanding; the test-only fixture path is not that runner.
 
 ## Question and frozen scope
 

@@ -16,6 +16,12 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Offline notebook body-batch API with complete plan/graph/import/parameter-evidence preflight,
+  exact recorded response/error retention, all planned slots, byte-bounded parsing and
+  all-or-nothing static module assembly. No provider calls, execution, persistence or fallback.
+- Trusted fixed-provider pilot checks, including complete nine-node execution with the actual
+  CSV catalog and every observable expectation, plus failure/missing-slot rejection tests.
+  Human review remains pending; no live runner, durable notebook artifact or model result is claimed.
 - Pending synthetic-pilot human review worksheet with source/catalog checks, hand calculations
   and approval evidence, plus a proposed whole-notebook LLM experiment with fixed nine-node
   boundaries, complete-pipeline denominators, durable evidence and offline acceptance gates.

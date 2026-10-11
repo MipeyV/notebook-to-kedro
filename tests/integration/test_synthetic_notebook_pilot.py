@@ -26,6 +26,13 @@ from notebook_to_kedro import (
     plan_notebook_path,
     validate_conversion_plan,
 )
+from notebook_to_kedro.evaluation import (
+    NotebookBodyRecord,
+    prepare_notebook_body_requests,
+    validate_notebook_body_batch,
+)
+from notebook_to_kedro.exceptions import NodeCodeProviderError
+from notebook_to_kedro.generation.code import NodeBodyResponse, NodeCodeRequest
 
 ROOT = Path(__file__).resolve().parents[2]
 CONTRACT_DIRECTORY = ROOT / "tests/fixtures/evaluation/pilots/customer_churn_v1"
@@ -181,7 +188,11 @@ class _ObservedMemoryDataset(MemoryDataset):
 
 
 def _run_project(
-    destination: Path, monkeypatch: pytest.MonkeyPatch, control: dict[str, Any] | None = None
+    destination: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    control: dict[str, Any] | None = None,
+    *,
+    reference_module: str | None = None,
 ) -> dict[str, Any]:
     plan = plan_notebook_path(NOTEBOOK)
     package = "pilot_baseline"
@@ -197,7 +208,15 @@ def _run_project(
             ),
         )
     validate_conversion_plan(plan)
+    if reference_module is not None:
+        assert control is None
+        package = "pilot_fixed_bodies"
     generate_kedro_project(plan, destination, package_name=package)
+    if reference_module is not None:
+        # Trusted fixture bodies only: this is not a consent-gated untrusted-code runner.
+        (destination / "src" / package / "pipelines/notebook_pipeline/nodes.py").write_text(
+            reference_module, encoding="utf-8", newline="\n"
+        )
     monkeypatch.syspath_prepend(str(destination / "src"))
     monkeypatch.chdir(destination)
     module = importlib.import_module(f"{package}.pipeline_registry")
@@ -231,6 +250,127 @@ def _run_project(
     assert len(loaded) == CONTRACT["sources"][1]["row_count"]
     SequentialRunner().run(pipeline, catalog)
     return observed
+
+
+class _FixedPilotBodyProvider:
+    """Echo trusted original cells with the one explicit planned literal substitution."""
+
+    def __init__(self, requests: tuple[NodeCodeRequest, ...]) -> None:
+        notebook = _read_notebook()
+        self.requests: list[NodeCodeRequest] = []
+        self.responses: dict[str, str | NodeCodeProviderError] = {}
+        for request, task in zip(requests, CONTRACT["tasks"], strict=True):
+            source = notebook.cells[task["cell_index"]].source
+            if request.node_name == "join_customer_features":
+                assert request.parameter_arguments == ("join_customer_features_fillna_values",)
+                literal = '{"net_revenue": 0.0, "completed_orders": 0}'
+                assert source.count(literal) == 1
+                source = source.replace(literal, "join_customer_features_fillna_values")
+            self.responses[request.request_id] = (
+                "\n"
+                + NodeBodyResponse("1.0", request.request_id, request.task_id, source).to_json()
+                + "\n"
+            )
+
+    def complete(self, request: NodeCodeRequest) -> str:
+        self.requests.append(request)
+        response = self.responses[request.request_id]
+        if isinstance(response, NodeCodeProviderError):
+            raise response
+        return response
+
+
+def _fixed_records(
+    requests: tuple[NodeCodeRequest, ...], provider: _FixedPilotBodyProvider
+) -> tuple[NotebookBodyRecord, ...]:
+    records = []
+    for request in requests:
+        try:
+            raw = provider.complete(request)
+        except NodeCodeProviderError as error:
+            records.append(
+                NotebookBodyRecord(request.request_id, provider_error=(error.code, error.message))
+            )
+        else:
+            records.append(NotebookBodyRecord(request.request_id, raw))
+    return tuple(records)
+
+
+def test_pilot_fixed_body_batch_preserves_all_nine_requests() -> None:
+    """Offline reference compatibility keeps the full denominator and exact evidence."""
+    plan = plan_notebook_path(NOTEBOOK)
+    requests = prepare_notebook_body_requests(plan)
+    provider = _FixedPilotBodyProvider(requests)
+    records = _fixed_records(requests, provider)
+    report = validate_notebook_body_batch(plan, records)
+    assert provider.requests == list(requests)
+    assert report.planned_count == report.accepted_count == 9
+    assert report.static_ready
+    assert [proposal.record for proposal in report.proposals] == list(records)
+    assert [request.node_name for request in requests] == [
+        task["name"] for task in CONTRACT["tasks"]
+    ]
+    assert report.module_source is not None
+    assert report.module_source.count("import pandas as pd") == 1
+    assert report.module_source.count("import numpy as np") == 1
+    assert CONTRACT["review"]["status"] == "pending"
+
+
+@pytest.mark.parametrize("failure", ["provider", "schema", "body", "missing"])
+def test_pilot_one_failed_body_prevents_complete_assembly(failure: str) -> None:
+    """Eight valid nodes cannot become one statically ready pipeline by fallback."""
+    plan = plan_notebook_path(NOTEBOOK)
+    requests = prepare_notebook_body_requests(plan)
+    provider = _FixedPilotBodyProvider(requests)
+    request = requests[0]
+    if failure == "provider":
+        provider.responses[request.request_id] = NodeCodeProviderError(
+            "fixed_error", "offline failure"
+        )
+    elif failure == "schema":
+        provider.responses[request.request_id] = "{}"
+    elif failure == "body":
+        source = request.raw_source.replace("default_rng(7)", "default_rng(8)")
+        provider.responses[request.request_id] = NodeBodyResponse(
+            "1.0", request.request_id, request.task_id, source
+        ).to_json()
+    attempted = requests[1:] if failure == "missing" else requests
+    records = _fixed_records(attempted, provider)
+    report = validate_notebook_body_batch(plan, records)
+    assert report.planned_count == 9
+    assert report.accepted_count == 8
+    assert report.module_source is None
+    assert not report.static_ready
+    assert (
+        report.proposals[0].status
+        == {
+            "provider": "provider_error",
+            "schema": "invalid_response",
+            "body": "invalid_code",
+            "missing": "not_requested",
+        }[failure]
+    )
+    assert all(proposal.status == "accepted" for proposal in report.proposals[1:])
+    assert provider.requests == list(attempted)
+
+
+@pytest.mark.end_to_end
+def test_pilot_fixed_bodies_execute_complete_pipeline_and_real_catalog(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, notebook_snapshot: dict[str, Any]
+) -> None:
+    """Trusted fixed assemblies match every observation without model calls or live injection."""
+    plan = plan_notebook_path(NOTEBOOK)
+    requests = prepare_notebook_body_requests(plan)
+    provider = _FixedPilotBodyProvider(requests)
+    report = validate_notebook_body_batch(plan, _fixed_records(requests, provider))
+    assert report.static_ready
+    assert report.module_source is not None
+    generated = _snapshot(
+        _run_project(tmp_path / "project", monkeypatch, reference_module=report.module_source)
+    )
+    _assert_expected(generated)
+    assert generated == notebook_snapshot
+    assert provider.requests == list(requests)
 
 
 def test_pilot_identity_and_pending_review() -> None:

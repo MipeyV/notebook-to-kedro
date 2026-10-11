@@ -40,6 +40,59 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-10-11 - Offline notebook body batches and trusted pilot execution
+
+### Completed
+
+- Added pure evaluation APIs to preflight all plan requests and validate recorded response/error
+  batches without reading datasets, contacting providers, writing projects or executing code.
+- Added graph checks for unresolved inputs, ambiguous producers, repeated statement provenance
+  and cycles; shared import compilation/naming checks; complete parameter-evidence preflight.
+- Preserved one ordered result for every planned request, exact raw text/errors, parsed bodies
+  and accepted assemblies. Missing, transport, JSON, byte-limit and source-fidelity failures
+  remain distinct; complete module text exists only when every node is statically accepted.
+- Bound transient reports to a canonical declared-plan hash. The hash does not verify notebook
+  or CSV bytes, independent review, runtime equivalence or provider authorship.
+- Added 53 unit cases and six pilot cases. A fixed test-only source-echo provider accounts for
+  nine calls; one failed or unrequested body leaves eight accepted nodes but no complete module.
+- Executed trusted fixed assemblies in a temporary generated project using the actual CSV catalog,
+  matching every notebook and hand-specified observation. No live provider, untrusted parent-process
+  injection, historical corpus modification or change to the deterministic generator was introduced.
+- Passed the complete Python 3.12.14 suite: 1,324 tests, 100% line/branch coverage (5,909 statements,
+  1,692 branches). This collection preceded the new documentation file; the final focused run
+  checks that file and all final batch/pilot/navigation cases: 110 passed.
+- Passed 1,284 deterministic tests on each of Python 3.11.16 and 3.13.14, with 41 deselected and
+  100% coverage. Strict mypy passed for 129 files; Ruff lint and format passed; source/wheel builds
+  succeeded. Restored the locked Python 3.12 environment and passed `git diff --check`.
+- Python 3.12 coverage warned that Windows application control blocked its C tracer; the Python
+  tracer completed with 100% coverage. No security-policy changes, DLL unblocking or bypass occurred.
+
+### Decisions
+
+- Keep this first increment static and offline: no live runner/CLI, persistence schema, durable
+  notebook capture, consent-gated worker, replay or approved whole-notebook benchmark score yet.
+- Limit batch graphs to unique dataset producers. V1's versioned cross-task symbol rebinding
+  remains supported by the default renderer but is deliberately outside this initial batch API.
+- Preserve all shared imports in their original plan order, rather than selecting or reordering
+  them from successful responses. Keep the existing strict body validator unchanged.
+- Treat absent records as missing planned slots, not proof of collection history. Future durable
+  request reservation must distinguish unmade calls from lost/interrupted evidence.
+- Preserve pending human review and assistant-authored pilot provenance. Fixed source-echo tests
+  show API/pipeline compatibility, not independent gold code, LLM quality or general accuracy.
+
+### Open questions
+
+- Independent human approval is still pending. The transient API cannot bind review evidence or
+  on-disk source identities; those are required before a live notebook-bound experiment.
+- Choose total capture/observation bounds and version-aware graph support in scoped follow-ups.
+  The per-response UTF-8 parsing limit is not an inference, total-memory or artifact-size budget.
+
+### Next step
+
+- Bind exact notebook, CSV, contract, catalog and human-review identities, then add durable
+  request evidence, a dedicated consent-gated whole-pipeline worker and network-free replay.
+  Keep live calls gated until the complete protocol is implemented and human review recorded.
+
 ## 2026-10-11 - Pilot review and whole-notebook experiment protocol
 
 ### Completed

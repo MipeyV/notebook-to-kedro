@@ -19,6 +19,11 @@ offline failure/replay tests; no live runner or human approval is claimed. Offli
 development can proceed with explicit draft status, but live evaluation requires recorded approval.
 Existing V2 coverage and release-threshold checkboxes remain incomplete.
 
+The [first offline body-batch increment](../evaluation/offline-notebook-body-batch.md) is now
+implemented, with complete static preflight, all-slot outcomes and trusted fixed-body execution
+on the pilot. Next are notebook/review identity binding, durable evidence and a consent-gated
+whole-pipeline worker/replay. No live whole-notebook measurement or release milestone is complete.
+
 ## V1 roadmap: deterministic foundation
 
 1. [x] Formalize the supported notebook subset.
