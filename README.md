@@ -11,7 +11,9 @@ simple local CSV catalog inputs and selected pandas/scikit-learn transformations
 Optional local Ollama planning can propose constrained naming/grouping changes. Node-code
 proposals have separate validation and consent-gated benchmark/replay tools; accepted model
 proposals are not automatically written into generated projects. Small synthetic measurements
-do not establish arbitrary-notebook accuracy. The next milestone is a complete-notebook pilot.
+do not establish arbitrary-notebook accuracy. A [draft whole-notebook pilot](docs/evaluation/synthetic-notebook-pilot.md)
+now checks a seeded simulation plus real CSV catalog loading against explicit expectations.
+Independent human review is still required before a whole-notebook model experiment.
 
 See the [compatibility policy](docs/reference/compatibility.md) for support boundaries and the
 [detailed status](docs/product/project-status.md) for APIs, measurements and limitations.

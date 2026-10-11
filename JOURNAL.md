@@ -40,6 +40,60 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-10-11 - Draft synthetic whole-notebook pilot
+
+### Completed
+
+- Added an outputless 22-cell synthetic churn notebook combining twelve seeded simulated
+  clients with 21 local order rows, including conflicting duplicates, cancellations, missing
+  values, a refund and an orphan customer key.
+- Added a separate `pilot-draft-1` contract with source hashes, source/catalog expectations,
+  nine task boundaries, hand-specified tables, split indices, predictions and segment metrics.
+  Independent human review remains explicitly pending; no reviewed corpus was modified.
+- Verified all 35 top-level instructions are accounted for as task source, shared imports or
+  catalog loading. Static analysis neither executes the notebook nor calls the CSV reader.
+- Executed the notebook in a fresh real kernel and compared a generated pipeline's registry,
+  wiring, YAML configuration, real `CSVDataset` loading and observed node outputs with the
+  separately specified expectations. Test-only observers preserve normal memory-dataset release.
+- Added six trusted negative controls for simulation seed, duplicate selection, refund omission,
+  inner joins, order-count dtype and holdout order. Five preserve aggregate accuracy `1.0` but
+  fail table/schema checks; the sixth fails the original generated evaluation assertion.
+- Added the CSV connector only to test dependencies. Its existing generated-project 8.x target
+  requires pandas below 3, so the lockfile now resolves pandas `2.3.3` rather than `3.0.5`.
+  Core dependencies, generation, validators, prompts and historical model evidence are unchanged.
+- Passed the complete Python `3.12.14` suite: 1,263 tests with 100% line/branch coverage.
+  Passed 1,223 deterministic tests on each of Python `3.11.16` and `3.13.14`, with 40 deselected
+  and 100% coverage. The focused pilot/documentation run passed all 48 cases; all six negative
+  controls were detected. Strict mypy (127 files) and Ruff lint/format passed.
+- Verified the lockfile, built source/wheel distributions and restored the locked Python 3.12
+  environment after the compatibility matrix. Final focused tests still pass after provenance
+  clarification; fixture notebook/CSV bytes and the core runtime implementation are unchanged.
+- Generated an inspectable local example under `generated/customer_churn_pilot_v1`, preserving
+  the actual CSV catalog, parameters, nine node bodies and registered pipeline without model calls.
+
+### Decisions
+
+- Treat the notebook and expectations as assistant-authored development evidence, not independently
+  approved ground truth or a whole-notebook LLM accuracy result. Do not equate a merged PR with review.
+- Keep simulation output in memory without an invented catalog path. Record its seed in the
+  original source; broader source descriptors and parameter extraction remain separate work.
+- Check actual data identity, schemas, split alignment and intermediate outputs, not just accuracy.
+  Accept a dependency-respecting schedule for independent branches rather than cell-order execution.
+- Use the locked test environment and generated registry/config/catalog/runner, without claiming
+  fresh-environment installation, separate `kedro run` bootstrap, cloud support or production readiness.
+
+### Open questions
+
+- Independent source/catalog, calculations and behavioral-contract review is still required.
+- Define the opt-in whole-notebook model experiment and review-gated project integration next.
+- Broader acquisition adapters, fresh-environment/CLI execution and enterprise integrations need
+  their own compatibility and security acceptance gates.
+
+### Next step
+
+- Review the synthetic contract, then define a whole-notebook model experiment with durable raw
+  evidence, full rejected denominators and explicit execution consent before testing broader inputs.
+
 ## 2026-10-11 - Categorized documentation navigation
 
 ### Completed

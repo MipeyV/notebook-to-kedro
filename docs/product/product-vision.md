@@ -206,5 +206,7 @@ complete by this documentation change.
    choose library/API/application packaging and repository boundaries from demonstrated needs.
    Serving, deployment and monitoring require their own acceptance gates if added.
 
-The immediate next implementation remains the complete-notebook pilot and its reviewed
-source/catalog and behavioral contract, not an unbounded optimizer or a production platform.
+The [draft complete-notebook pilot](../evaluation/synthetic-notebook-pilot.md) now covers one
+controlled simulation-plus-local-CSV workflow. Its independent source/catalog and behavioral
+review remains the next gate before a whole-notebook model experiment, not an unbounded
+optimizer or a production platform.

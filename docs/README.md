@@ -66,6 +66,7 @@ the dedicated experiment reports for their frozen settings, decisions and limita
 | [Planning evaluation corpus](evaluation/planning-evaluation-corpus.md) | Reviewed planning cases, structural metrics and benchmark CLI. |
 | [Independent node-code corpus](evaluation/node-code-evaluation-corpus.md) | Hand-authored references, source binding and negative controls. |
 | [Fresh node corpus v3](evaluation/fresh-node-corpus-v3.md) | Four additional tasks, twelve scenarios and independent controls. |
+| [Synthetic whole-notebook pilot](evaluation/synthetic-notebook-pilot.md) | Simulation plus real CSV catalog loading, full-workflow checks and negative controls; human review pending. |
 | [Node code benchmark](evaluation/node-code-benchmark.md) | Static acceptance, AST fidelity and historical prompt/validator experiments. |
 | [Behavioral code benchmark](evaluation/behavioral-code-benchmark.md) | Consent-gated execution, observable comparisons and archived runs. |
 | [Body-only benchmark and replay](evaluation/node-body-benchmark.md) | Body artifacts, replay and compatible comparisons. |

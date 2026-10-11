@@ -7,6 +7,12 @@ Historical measurements retain their original corpus, runtime and limitations.
 
 ## Project status
 
+A [draft complete-notebook pilot](../evaluation/synthetic-notebook-pilot.md) now checks a
+seeded simulation and real local CSV catalog loading through nine generated nodes, with
+explicit intermediate/output expectations and six negative controls. Independent human review
+is pending; this is deterministic development evidence, not a whole-notebook LLM measurement.
+Its test-only CSV connector changes the locked pandas runtime, as recorded in the pilot report.
+
 The deterministic V1 pipeline is operational for the supported notebook subset. It can analyze a notebook, build and validate a reviewable conversion plan, render a Markdown report, and generate a minimal Kedro project whose observable outputs are checked against reference notebooks.
 
 Development is now moving from the deterministic foundation toward V2 hybrid semantic planning and broader notebook coverage. The deterministic path will remain available as the default and as the fallback for every future provider integration.
@@ -105,7 +111,8 @@ permission-error cleanup retries and logs persistent failures without discarding
 This does not retry model calls or execution. Optional [durable response capture](../guides/response-capture.md)
 now publishes raw outcomes before validation/execution with `--capture-dir`, exposes `capture-info`,
 and recovers complete captures without Ollama using `behavioral-benchmark recover`. Partial evidence
-cannot masquerade as a completed benchmark. A complete-notebook pilot remains the next milestone.
+cannot masquerade as a completed benchmark. Independent review of the draft whole-notebook
+pilot remains the next gate before a model-assisted project experiment.
 
 An opt-in provider mode supplies [exact parameter substitutions](../reference/node-parameter-evidence.md):
 original expressions, literal types, source ranges and corresponding function arguments derived
