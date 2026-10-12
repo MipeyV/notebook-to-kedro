@@ -40,6 +40,56 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-10-12 - Draft pipeline artifacts and compatible offline replay
+
+### Completed
+
+- Added a separate `notebook-pipeline-artifact-draft-1` API for exclusive, bounded publication of
+  complete raw capture, source binding, all static slots, typed execution results, explicit draft
+  expectations/policies and recomputed comparisons. Partial/error/rejected captures and failed
+  workers remain visible as not evaluated; no missing output is counted as a match.
+- Recorded selected local runtime identities before and after execution: Python implementation/
+  version/platform/architecture, installed package metadata, lock hash and executing package-source
+  hash. Missing lock/dependencies remain unknown; publication never fabricates later provenance.
+- Added read-only inspection that verifies JSON integrity, current source/capture evidence and
+  reconstructed static/comparison reports without executing code or contacting a provider.
+- Added renewed-consent replay with exact saved budgets/observations/expectations, known compatible
+  runtime controls, a frozen capture guard before execution and capture/module/request checks after
+  execution. Fresh results link to their source artifact; cached observations are not reused.
+- Extended the trusted nine-node pilot to publish, inspect and replay actual worker reports while
+  matching seventeen observables against both notebook and hand expectations. Source fixtures,
+  catalog, all six sensitivity controls, prompts, AST validation and conversion defaults are unchanged.
+- Added corruption, rehashed-evidence, incomplete/reserved-only capture, provider/parse/code failure,
+  exception/timeout/mismatch, runtime drift/unknown identity, consent and numeric-serialization tests.
+- Verified the final complete Python 3.12.14 suite: 1,609 passed. Deterministic Python 3.11.16 and
+  3.13.14 suites each passed 1,565 tests with 44 deselected. All reached 100% line/branch coverage
+  (6,781 statements, 1,974 branches); Ruff, strict mypy and distribution builds pass.
+- Restored the locked Python 3.12 environment. A local overlapping environment-switch attempt
+  invalidated one intermediate 3.13 run; reinstalling locked dependencies and rerunning without
+  concurrent environment changes produced the clean final result above, without code/lock changes.
+
+### Decisions
+
+- Kept the draft format separate from approved node-corpus artifacts and retained pending review.
+  Explicit caller expectations and matching results are not independent business-contract approval.
+- Used local installed metadata rather than importing heavy optional libraries or querying Ollama.
+  Exact selected identities are compatibility controls, not binary/hardware/environment attestation.
+- Publication happens after execution. A crash before publication leaves no complete runtime report;
+  this increment does not claim durable execution-attempt reservation or campaign accounting.
+- Preserved explicit subprocess-not-OS-sandbox, sensitive-storage and unauthenticated-hash limits.
+
+### Open questions
+
+- Independent human review, reviewed-contract promotion, execution/campaign accounting and verified
+  live model controls remain outstanding. No whole-notebook LLM measurement or fine-tuning was run.
+- Other dataset loaders, production bootstrap, broader observables and optimizer/template contracts
+  remain separate roadmap work; this pilot still certifies only its locked synthetic simulation/CSV path.
+
+### Next step
+
+- Implement genuine reviewed-contract evidence and promotion without inventing approval, then add
+  durable execution/campaign accounting and model controls before any opt-in live collection.
+
 ## 2026-10-12 - Draft complete-pipeline worker and behavioral replay
 
 ### Completed

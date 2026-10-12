@@ -16,6 +16,10 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Separate draft complete-notebook execution artifacts: exclusive bounded publication, exact raw/
+  static/runtime/comparison evidence, before/after local runtime identities, read-only inspection
+  and consent-gated compatible offline replay. Unknown controls and observed drift block replay;
+  pending review, conversion defaults, historical measurements and provider behavior are unchanged.
 - Separate consent-gated draft notebook pipeline worker: bounded source/project snapshots, full
   statically validated DAG execution, typed JSON observations, explicit draft comparison and fresh
   offline behavioral replay. No model calls, approval, OS sandbox or default generator changes.

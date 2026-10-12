@@ -73,6 +73,7 @@ the dedicated experiment reports for their frozen settings, decisions and limita
 | [Draft notebook source binding](evaluation/notebook-source-binding.md) | Read-only file hashes, deterministic reconstruction and drift rejection; human review stays pending. |
 | [Draft notebook body capture](evaluation/notebook-body-capture.md) | Exclusive request/raw-outcome inventory and offline static replay; no model calls or worker. |
 | [Draft notebook pipeline worker](evaluation/notebook-pipeline-worker.md) | Consent-gated complete DAG execution, typed observations and offline behavioral replay/comparison; review pending. |
+| [Draft notebook pipeline artifacts](evaluation/notebook-pipeline-artifacts.md) | Exclusive execution/comparison reports, runtime identities, offline inspection and compatible consent-gated replay; review pending. |
 | [Node code benchmark](evaluation/node-code-benchmark.md) | Static acceptance, AST fidelity and historical prompt/validator experiments. |
 | [Behavioral code benchmark](evaluation/behavioral-code-benchmark.md) | Consent-gated execution, observable comparisons and archived runs. |
 | [Body-only benchmark and replay](evaluation/node-body-benchmark.md) | Body artifacts, replay and compatible comparisons. |

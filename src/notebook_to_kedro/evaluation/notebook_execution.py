@@ -26,6 +26,10 @@ from notebook_to_kedro.evaluation.behavioral_execution import (
 )
 from notebook_to_kedro.evaluation.behavioral_worker import _BoundedTextCapture
 from notebook_to_kedro.evaluation.notebook_capture import load_notebook_body_capture
+from notebook_to_kedro.evaluation.notebook_runtime import (
+    NotebookRuntimeIdentity,
+    collect_notebook_runtime_identity,
+)
 from notebook_to_kedro.evaluation.notebook_sources import (
     _read_file,
     _reject_constant,
@@ -77,6 +81,8 @@ class NotebookPipelineRun:
     module_sha256: str | None
     request_sha256: str | None
     execution: BehavioralExecutionResult | None
+    runtime_before: NotebookRuntimeIdentity | None = None
+    runtime_after: NotebookRuntimeIdentity | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -260,6 +266,7 @@ def run_notebook_pipeline_capture(  # noqa: PLR0913
     project_root: str | Path,
     allow_untrusted_code_execution: bool = False,
     config: BehavioralExecutionConfig | None = None,
+    expected_capture_sha256: str | None = None,
 ) -> NotebookPipelineRun:
     """Revalidate captured bodies, snapshot inputs and run one complete DAG after consent."""
     if allow_untrusted_code_execution is not True:
@@ -273,6 +280,8 @@ def run_notebook_pipeline_capture(  # noqa: PLR0913
         max_result_bytes=4_194_304,
     )
     capture = load_notebook_body_capture(directory, binding, project_root=project_root)
+    if expected_capture_sha256 is not None and capture.content_sha256 != expected_capture_sha256:
+        raise ValueError("execution capture does not match frozen replay identity")
     targets = tuple(observations)
     produced = {name for task in binding.plan.task_candidates for name in task.outputs}
     if not targets or any(not isinstance(item, NotebookObservation) for item in targets):
@@ -288,10 +297,18 @@ def run_notebook_pipeline_capture(  # noqa: PLR0913
     )
     module = static.batch.module_source
     result = NotebookPipelineRun(
-        NOTEBOOK_PIPELINE_EXECUTION_VERSION, capture, static, targets, settings, None, None, None
+        NOTEBOOK_PIPELINE_EXECUTION_VERSION,
+        capture,
+        static,
+        targets,
+        settings,
+        None,
+        None,
+        None,
+        runtime_before=collect_notebook_runtime_identity(project_root),
     )
     if module is None:
-        return result
+        return replace(result, runtime_after=collect_notebook_runtime_identity(project_root))
     with _worker_directory() as workspace:
         sources, files = _prepare_project(
             workspace, binding, module, Path(project_root).resolve(), settings
@@ -319,6 +336,7 @@ def run_notebook_pipeline_capture(  # noqa: PLR0913
         module_sha256=hashlib.sha256(module.encode("utf-8")).hexdigest(),
         request_sha256=digest,
         execution=execution,
+        runtime_after=collect_notebook_runtime_identity(project_root),
     )
 
 

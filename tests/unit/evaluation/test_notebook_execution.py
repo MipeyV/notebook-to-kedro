@@ -32,12 +32,15 @@ from notebook_to_kedro.evaluation import (
     reserve_notebook_body_request,
     run_notebook_pipeline_capture,
 )
+from notebook_to_kedro.evaluation import notebook_artifacts as artifacts
 from notebook_to_kedro.evaluation import notebook_execution as execution_module
 from notebook_to_kedro.evaluation import notebook_worker as worker
+from notebook_to_kedro.evaluation.behavioral_artifacts import _json_sha256, write_json_exclusive
 from notebook_to_kedro.evaluation.behavioral_execution import _result_from_worker
 from notebook_to_kedro.evaluation.behavioral_worker import _base_result
 from notebook_to_kedro.evaluation.notebook_capture import _raw_sha256
 from notebook_to_kedro.evaluation.notebook_sources import _read_file
+from notebook_to_kedro.exceptions import BehavioralBenchmarkArtifactError
 from notebook_to_kedro.generation.code import NodeBodyResponse
 
 if TYPE_CHECKING:
@@ -112,9 +115,10 @@ def prepared(tmp_path_factory: pytest.TempPathFactory) -> _Prepared:
         _config: BehavioralExecutionConfig,
     ) -> tuple[str, BehavioralExecutionResult]:
         payload.update(data)
-        return "fixture-request", _result_from_worker(
-            _successful(binding, capture.content_sha256), 0.0
-        )
+        digest = hashlib.sha256(
+            json.dumps(data, ensure_ascii=True, allow_nan=False).encode()
+        ).hexdigest()
+        return digest, _result_from_worker(_successful(binding, capture.content_sha256), 0.0)
 
     with pytest.MonkeyPatch.context() as context:
         context.setattr(execution_module, "_execute", capture_payload)
@@ -122,6 +126,428 @@ def prepared(tmp_path_factory: pytest.TempPathFactory) -> _Prepared:
             directory, binding, TARGETS, project_root=ROOT, allow_untrusted_code_execution=True
         )
     return _Prepared(binding, directory, payload, run)
+
+
+def _artifact_file(
+    tmp_path: Path, run: NotebookPipelineRun
+) -> tuple[Path, artifacts.NotebookPipelineArtifact]:
+    artifact = artifacts.create_notebook_pipeline_artifact(run, EXPECTED)
+    path = artifacts.write_notebook_pipeline_artifact(tmp_path / "report.json", artifact)
+    return path, artifact
+
+
+def _load_artifact(
+    path: Path, prepared: _Prepared, **kwargs: Any
+) -> artifacts.NotebookPipelineArtifact:
+    return artifacts.load_notebook_pipeline_artifact(
+        path, prepared.binding, prepared.directory, project_root=ROOT, **kwargs
+    )
+
+
+def _resign(payload: dict[str, Any]) -> dict[str, Any]:
+    payload["content_sha256"] = _json_sha256(
+        {key: value for key, value in payload.items() if key != "content_sha256"}
+    )
+    return payload
+
+
+def test_artifact_round_trip_inspects_without_execution(
+    tmp_path: Path, prepared: _Prepared, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    path, artifact = _artifact_file(tmp_path, prepared.run)
+    monkeypatch.setattr(
+        artifacts,
+        "run_notebook_pipeline_capture",
+        lambda *_a, **_k: pytest.fail("must not execute"),
+    )
+    assert _load_artifact(path, prepared) == artifact
+    payload = artifacts.notebook_pipeline_artifact_to_dict(artifact)
+    assert payload["capture"]["binding"]["review_json"] == prepared.binding.review_json  # type: ignore[index]
+    assert artifact.comparison.status == "matched"
+    with pytest.raises(BehavioralBenchmarkArtifactError, match="exists"):
+        artifacts.write_notebook_pipeline_artifact(path, artifact)
+    assert _load_artifact(path, prepared) == artifact
+
+
+@pytest.mark.parametrize(
+    "mode",
+    [
+        "partial",
+        "unfinished",
+        "provider_error",
+        "invalid_json",
+        "invalid_code",
+        "timeout",
+        "exception",
+        "mismatch",
+    ],
+)
+def test_artifacts_retain_failed_and_partial_outcomes(
+    tmp_path: Path, prepared: _Prepared, mode: str
+) -> None:
+    directory = tmp_path / "capture"
+    if mode in ("partial", "unfinished", "provider_error", "invalid_json", "invalid_code"):
+        artifacts_capture = create_notebook_body_capture(
+            directory,
+            prepared.binding,
+            project_root=ROOT,
+            provider_name="offline",
+            model_name="fixture",
+            prompt_version="fixture-1",
+        )
+        if mode == "unfinished":
+            reserve_notebook_body_request(
+                artifacts_capture,
+                prepared.binding,
+                prepared.binding.requests[0].request_id,
+                project_root=ROOT,
+            )
+        elif mode != "partial":
+            request = prepared.binding.requests[0]
+            reserve_notebook_body_request(
+                artifacts_capture, prepared.binding, request.request_id, project_root=ROOT
+            )
+            record = (
+                NotebookBodyRecord(request.request_id, provider_error=("failure", "offline"))
+                if mode == "provider_error"
+                else NotebookBodyRecord(
+                    request.request_id,
+                    "{"
+                    if mode == "invalid_json"
+                    else NodeBodyResponse(
+                        "1.0", request.request_id, request.task_id, "wrong = 1"
+                    ).to_json(),
+                )
+            )
+            record_notebook_body_response(
+                artifacts_capture, prepared.binding, record, project_root=ROOT
+            )
+        run = _run(prepared, directory)
+    else:
+        directory = prepared.directory
+        assert prepared.run.execution is not None
+        result = _successful(prepared.binding, prepared.run.capture.content_sha256)
+        if mode == "mismatch":
+            result["outputs"] = [
+                {"output_name": "accuracy", "value": {"kind": "scalar", "value": 0.0}}
+            ]
+        else:
+            result.update(status=mode, outputs=[])
+            if mode == "exception":
+                result["exception"] = {"type_name": "ValueError", "message": "fixture"}
+            else:
+                result["diagnostic_message"] = "fixture timeout"
+        run = replace(prepared.run, execution=_result_from_worker(result, 0.1))
+    path, artifact = _artifact_file(tmp_path, run)
+    restored = artifacts.load_notebook_pipeline_artifact(
+        path, prepared.binding, directory, project_root=ROOT
+    )
+    assert restored == artifact
+    assert restored.comparison.status == ("mismatch" if mode == "mismatch" else "not_evaluated")
+    assert len(restored.run.static.batch.proposals) == len(prepared.binding.requests)
+    assert len(restored.comparison.outputs) == 1
+    if mode == "unfinished":
+        assert restored.run.capture.unfinished_request_ids == (
+            prepared.binding.requests[0].request_id,
+        )
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("schema_version", "old"),
+        ("content_sha256", "bad"),
+        ("source_artifact_sha256", "bad"),
+        ("module_sha256", "0" * 64),
+        ("request_sha256", "bad"),
+        ("observations", {}),
+        ("observations", [{"dataset": "accuracy", "kind": "wrong"}]),
+        ("observations", [{"dataset": "accuracy", "kind": "value", "extra": True}]),
+        ("observations", []),
+        ("runtime_before", {}),
+        ("expectations", []),
+    ],
+)
+def test_artifact_rejects_malformed_fields(
+    tmp_path: Path, prepared: _Prepared, field: str, value: Any
+) -> None:
+    payload = artifacts.notebook_pipeline_artifact_to_dict(
+        artifacts.create_notebook_pipeline_artifact(prepared.run, EXPECTED)
+    )
+    payload[field] = value
+    if field != "content_sha256":
+        _resign(payload)
+    path = tmp_path / "bad.json"
+    write_json_exclusive(path, payload)
+    with pytest.raises(
+        ValueError, match=r"unsupported|SHA256|mismatch|array|fields|outputs|inventory|string"
+    ):
+        _load_artifact(path, prepared)
+
+
+@pytest.mark.parametrize(
+    ("section", "field", "value"),
+    [
+        ("comparison", "status", "mismatch"),
+        ("static", "module_source", "wrong"),
+        ("capture", "model_name", "other"),
+        ("capture", "attempted_request_ids", []),
+        ("configuration", "timeout_seconds", True),
+        ("configuration", "max_request_bytes", True),
+        ("configuration", "max_result_bytes", 0),
+        ("configuration", "extra", True),
+        ("execution", "duration_seconds", -1),
+        ("execution", "case_id", "other"),
+        ("execution", "stdout", "x" * 16_385),
+        ("execution", "extra", True),
+        ("runtime_before", "packages", [["name"]]),
+        ("runtime_before", "packages", [["wrong", "1"]]),
+        ("runtime_before", "package_sha256", "bad"),
+        ("runtime_before", "lock_sha256", "bad"),
+        ("runtime_before", "python_version", ""),
+    ],
+)
+def test_artifact_recomputes_evidence_even_after_rehash(
+    tmp_path: Path, prepared: _Prepared, section: str, field: str, value: Any
+) -> None:
+    payload: dict[str, Any] = artifacts.notebook_pipeline_artifact_to_dict(
+        artifacts.create_notebook_pipeline_artifact(prepared.run, EXPECTED)
+    )
+    payload[section][field] = value
+    write_json_exclusive(tmp_path / "bad.json", _resign(payload))
+    with pytest.raises(
+        ValueError,
+        match=r"mismatch|number|integer|positive|fields|non-negative|capture|version|SHA256|non-empty",
+    ):
+        _load_artifact(tmp_path / "bad.json", prepared)
+
+
+@pytest.mark.parametrize("payload", ['{"x":1,"x":2}', '{"x":NaN}', "[]", "{"])
+def test_artifact_rejects_invalid_json(tmp_path: Path, prepared: _Prepared, payload: str) -> None:
+    path = tmp_path / "invalid.json"
+    path.write_text(payload, encoding="utf-8")
+    with pytest.raises(ValueError, match=r"duplicate|constant|finite|object|Expecting"):
+        _load_artifact(path, prepared)
+
+
+def test_artifact_file_bounds_and_integrity(tmp_path: Path, prepared: _Prepared) -> None:
+    path, artifact = _artifact_file(tmp_path, prepared.run)
+    assert _load_artifact(path, prepared, max_file_bytes=path.stat().st_size) == artifact
+    for limit in (0, True, 1):
+        with pytest.raises(ValueError, match="max_file_bytes"):
+            _load_artifact(path, prepared, max_file_bytes=limit)
+        with pytest.raises(ValueError, match="max_file_bytes"):
+            artifacts.write_notebook_pipeline_artifact(
+                tmp_path / f"limit{limit}.json", artifact, max_file_bytes=limit
+            )
+    with pytest.raises(ValueError, match="regular file"):
+        _load_artifact(tmp_path, prepared)
+    payload = json.loads(path.read_text())
+    payload["capture"]["model_name"] = "changed"
+    write_json_exclusive(tmp_path / "corrupt.json", payload)
+    with pytest.raises(ValueError, match="integrity"):
+        _load_artifact(tmp_path / "corrupt.json", prepared)
+    payload.pop("runtime_after")
+    write_json_exclusive(tmp_path / "missing.json", payload)
+    with pytest.raises(ValueError, match="fields"):
+        _load_artifact(tmp_path / "missing.json", prepared)
+
+
+@pytest.mark.parametrize(
+    "mode",
+    ["version", "binding", "runtime", "observations", "module", "request", "execution", "blocked"],
+)
+def test_artifact_factory_refuses_inconsistent_runs(prepared: _Prepared, mode: str) -> None:
+    run = prepared.run
+    if mode == "version":
+        run = replace(run, schema_version="old")
+    elif mode == "binding":
+        run = replace(
+            run, static=replace(run.static, binding=replace(prepared.binding, case_id="other"))
+        )
+    elif mode == "runtime":
+        run = replace(run, runtime_after=None)
+    elif mode == "observations":
+        run = replace(run, observations=(NotebookObservation("missing"),))
+    elif mode == "module":
+        run = replace(run, module_sha256=None)
+    elif mode == "request":
+        run = replace(run, request_sha256=None)
+    elif mode == "execution":
+        run = replace(run, execution=None)
+    else:
+        run = replace(
+            run, static=replace(run.static, batch=replace(run.static.batch, module_source=None))
+        )
+    with pytest.raises(
+        ValueError, match=r"version|binding|runtime|outputs|digest|string|outcome|blocked"
+    ):
+        artifacts.create_notebook_pipeline_artifact(run, EXPECTED)
+
+
+def test_artifact_serializer_rejects_forged_comparison(prepared: _Prepared) -> None:
+    artifact = artifacts.create_notebook_pipeline_artifact(prepared.run, EXPECTED)
+    with pytest.raises(ValueError, match="comparison mismatch"):
+        artifacts.notebook_pipeline_artifact_to_dict(
+            replace(artifact, comparison=replace(artifact.comparison, status="mismatch"))
+        )
+
+
+@pytest.mark.parametrize("consent", [False, None, 1])
+def test_artifact_replay_requires_consent_before_io(prepared: _Prepared, consent: Any) -> None:
+    with pytest.raises(ValueError, match="allow_untrusted_code_execution"):
+        artifacts.replay_notebook_pipeline_artifact(
+            "missing",
+            prepared.binding,
+            "missing",
+            project_root=ROOT,
+            allow_untrusted_code_execution=consent,
+        )
+
+
+def test_artifact_replay_reexecutes_and_links_source(
+    tmp_path: Path, prepared: _Prepared, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    path, source = _artifact_file(tmp_path, prepared.run)
+    calls = []
+
+    def run_again(*args: Any, **kwargs: Any) -> NotebookPipelineRun:
+        calls.append((args, kwargs))
+        assert prepared.run.execution is not None
+        return replace(
+            prepared.run, execution=replace(prepared.run.execution, duration_seconds=2.0)
+        )
+
+    monkeypatch.setattr(artifacts, "run_notebook_pipeline_capture", run_again)
+    replay = artifacts.replay_notebook_pipeline_artifact(
+        path,
+        prepared.binding,
+        prepared.directory,
+        project_root=ROOT,
+        allow_untrusted_code_execution=True,
+    )
+    assert len(calls) == 1
+    assert calls[0][1]["config"] == source.run.configuration
+    assert calls[0][1]["allow_untrusted_code_execution"] is True
+    assert calls[0][1]["expected_capture_sha256"] == prepared.run.capture.content_sha256
+    assert (
+        replay.source_artifact_sha256
+        == artifacts.notebook_pipeline_artifact_to_dict(source)["content_sha256"]
+    )
+    assert replay.run.execution is not None
+    assert replay.run.execution.duration_seconds == 2.0
+    assert replay.comparison == source.comparison
+
+
+@pytest.mark.parametrize("mode", ["current", "after", "unknown", "unknown_packages", "during"])
+def test_artifact_replay_refuses_runtime_drift(
+    tmp_path: Path, prepared: _Prepared, monkeypatch: pytest.MonkeyPatch, mode: str
+) -> None:
+    before = prepared.run.runtime_before
+    assert before is not None
+    changed = replace(before, python_version="different")
+    run = prepared.run
+    if mode == "after":
+        run = replace(run, runtime_after=changed)
+    if mode == "unknown":
+        run = replace(run, runtime_before=replace(before, lock_sha256=None))
+    if mode == "unknown_packages":
+        run = replace(
+            run,
+            runtime_before=replace(
+                before, packages=tuple((name, None) for name, _ in before.packages)
+            ),
+        )
+    path, _artifact = _artifact_file(tmp_path, run)
+    calls = []
+
+    def execute(*_a: Any, **_k: Any) -> NotebookPipelineRun:
+        calls.append(True)
+        return replace(prepared.run, runtime_after=changed)
+
+    monkeypatch.setattr(artifacts, "run_notebook_pipeline_capture", execute)
+    if mode == "current":
+        monkeypatch.setattr(artifacts, "collect_notebook_runtime_identity", lambda _r: changed)
+    assert _load_artifact(path, prepared).run == run
+    with pytest.raises(ValueError, match="runtime compatibility"):
+        artifacts.replay_notebook_pipeline_artifact(
+            path,
+            prepared.binding,
+            prepared.directory,
+            project_root=ROOT,
+            allow_untrusted_code_execution=True,
+        )
+    assert bool(calls) is (mode == "during")
+
+
+def test_worker_frozen_capture_check_precedes_execution(prepared: _Prepared) -> None:
+    with pytest.raises(ValueError, match="frozen replay identity"):
+        _run(prepared, prepared.directory, expected_capture_sha256="0" * 64)
+
+
+def test_artifact_normalizes_integer_duration(tmp_path: Path, prepared: _Prepared) -> None:
+    assert prepared.run.execution is not None
+    run = replace(prepared.run, execution=replace(prepared.run.execution, duration_seconds=0))
+    path, artifact = _artifact_file(tmp_path, run)
+    assert _load_artifact(path, prepared) == artifact
+    assert isinstance(json.loads(path.read_text())["execution"]["duration_seconds"], float)
+
+
+def test_artifact_refuses_boolean_timeout(prepared: _Prepared) -> None:
+    run = replace(
+        prepared.run, configuration=replace(prepared.run.configuration, timeout_seconds=True)
+    )
+    with pytest.raises(ValueError, match="timeout_seconds must be a number"):
+        artifacts.create_notebook_pipeline_artifact(run, EXPECTED)
+
+
+def test_artifact_normalizes_numeric_comparison(tmp_path: Path, prepared: _Prepared) -> None:
+    expectations = (
+        ExpectedBehaviorOutput(
+            "accuracy",
+            ScalarBehaviorValue(1.0),
+            ComparisonSpec("numeric", absolute_tolerance=0, relative_tolerance=0, equal_nan=False),
+        ),
+    )
+    artifact = artifacts.create_notebook_pipeline_artifact(prepared.run, expectations)
+    path = artifacts.write_notebook_pipeline_artifact(tmp_path / "numeric.json", artifact)
+    assert _load_artifact(path, prepared) == artifact
+    assert isinstance(artifact.expectations[0].comparison.absolute_tolerance, float)
+
+
+def test_artifact_replay_refuses_changed_request_identity(
+    tmp_path: Path, prepared: _Prepared, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    path, _artifact = _artifact_file(tmp_path, prepared.run)
+    monkeypatch.setattr(
+        artifacts,
+        "run_notebook_pipeline_capture",
+        lambda *_a, **_k: replace(prepared.run, request_sha256="0" * 64),
+    )
+    with pytest.raises(ValueError, match="request identity mismatch"):
+        artifacts.replay_notebook_pipeline_artifact(
+            path,
+            prepared.binding,
+            prepared.directory,
+            project_root=ROOT,
+            allow_untrusted_code_execution=True,
+        )
+
+
+def test_artifact_load_refuses_changed_capture(tmp_path: Path, prepared: _Prepared) -> None:
+    path, _artifact = _artifact_file(tmp_path, prepared.run)
+    directory = create_notebook_body_capture(
+        tmp_path / "different",
+        prepared.binding,
+        project_root=ROOT,
+        provider_name="offline",
+        model_name="fixture",
+        prompt_version="fixture-1",
+    )
+    with pytest.raises(ValueError, match="blocked static report"):
+        artifacts.load_notebook_pipeline_artifact(
+            path, prepared.binding, directory, project_root=ROOT
+        )
 
 
 @pytest.fixture
@@ -446,7 +872,7 @@ def test_private_worker_states_with_trusted_payload(
         "observation": "serialization_failure",
         "missing": "serialization_failure",
     }[mode]
-    assert result["status"] == expected
+    assert result["status"] == expected, result
     if mode == "success":
         assert result["outputs"] == [
             {"output_name": "accuracy", "value": {"kind": "scalar", "value": 1.0}}

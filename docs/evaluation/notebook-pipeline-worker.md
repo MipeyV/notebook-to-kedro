@@ -98,8 +98,10 @@ accuracy. The API does not automatically interpret or approve business expectati
 Calling `run_notebook_pipeline_capture` again rereads and statically validates the same saved raw
 evidence, requires renewed consent and executes a fresh worker. It makes zero provider calls and
 does not trust cached runtime outputs. Request hashes identify bytes, not runtime compatibility.
-Use the same locked environment; runtime/hardware/model provenance freezing, persisted execution
-reports and campaign accounting remain later gates before live measurement.
+The [draft artifact API](notebook-pipeline-artifacts.md) now records local runtime controls before/after,
+publishes execution/comparison reports and checks compatible controls for its separate replay entry
+point. Calling this worker directly remains a new run, not a compatibility-checked artifact replay.
+Verified model controls, hardware limits and durable campaign accounting remain later gates.
 
 ```python
 from notebook_to_kedro.evaluation import (
@@ -139,6 +141,6 @@ uv run --locked --python 3.12 pytest -o addopts= \
   tests/integration/test_synthetic_notebook_pilot.py
 ```
 
-Next: bind and publish complete execution/comparison evidence and frozen runtime controls, then
-support genuine human-reviewed contract promotion. Live collection still requires those gates and
+Next: support genuine human-reviewed contract promotion and durable execution/campaign accounting.
+Live collection still requires those gates and
 the remaining [whole-notebook protocol](whole-notebook-experiment.md); no model calls while pending.

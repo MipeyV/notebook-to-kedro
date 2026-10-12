@@ -29,7 +29,12 @@ A separate [draft pipeline worker](../evaluation/notebook-pipeline-worker.md) no
 execution consent, copies verified source bytes into a private evaluation project, runs the complete
 DAG in a fresh process and returns typed JSON observations for explicit comparison. Trusted fixtures
 match seventeen observables against the notebook and hand expectations; no model accuracy, human
-approval, OS sandbox, persisted runtime-report format or frozen runtime provenance is claimed.
+approval or OS sandbox is claimed.
+A separate [draft artifact API](../evaluation/notebook-pipeline-artifacts.md) now publishes complete
+execution/comparison evidence exclusively, records selected local runtime controls before/after,
+inspects reports without execution and requires compatible controls plus renewed consent for replay.
+Unknown identities and observed drift block replay. Human-reviewed promotion, durable execution
+attempt accounting, verified model controls and live collection remain outstanding.
 
 The deterministic V1 pipeline is operational for the supported notebook subset. It can analyze a notebook, build and validate a reviewable conversion plan, render a Markdown report, and generate a minimal Kedro project whose observable outputs are checked against reference notebooks.
 

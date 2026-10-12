@@ -10,7 +10,7 @@ import json
 from copy import deepcopy
 from dataclasses import replace
 from pathlib import Path
-from typing import Any, cast
+from typing import TYPE_CHECKING, Any, cast
 
 import nbformat
 import pytest
@@ -35,19 +35,30 @@ from notebook_to_kedro.evaluation import (
     TableBehaviorValue,
     compare_notebook_pipeline_run,
     create_notebook_body_capture,
+    create_notebook_pipeline_artifact,
     create_notebook_source_binding,
     load_notebook_body_capture,
+    load_notebook_pipeline_artifact,
     prepare_notebook_body_requests,
     record_notebook_body_response,
     replay_notebook_body_capture,
+    replay_notebook_pipeline_artifact,
     reserve_notebook_body_request,
     run_notebook_pipeline_capture,
     validate_notebook_body_batch,
     validate_source_bound_notebook_body_batch,
+    write_notebook_pipeline_artifact,
 )
 from notebook_to_kedro.evaluation.behavioral_worker import _serialize
 from notebook_to_kedro.exceptions import NodeCodeProviderError
 from notebook_to_kedro.generation.code import NodeBodyResponse, NodeCodeRequest
+
+if TYPE_CHECKING:
+    from notebook_to_kedro.evaluation import (
+        NotebookPipelineArtifact,
+        NotebookPipelineRun,
+        NotebookSourceBinding,
+    )
 
 ROOT = Path(__file__).resolve().parents[2]
 CONTRACT_DIRECTORY = ROOT / "tests/fixtures/evaluation/pilots/customer_churn_v1"
@@ -498,6 +509,24 @@ def test_pilot_one_failed_body_prevents_complete_assembly(failure: str) -> None:
     assert provider.requests == list(attempted)
 
 
+def _persist_pilot_artifact(
+    path: Path, artifact: NotebookPipelineArtifact, binding: NotebookSourceBinding, capture: Path
+) -> None:
+    write_notebook_pipeline_artifact(path, artifact)
+    assert load_notebook_pipeline_artifact(path, binding, capture, project_root=ROOT) == artifact
+
+
+def _replay_pilot_artifact(
+    path: Path, binding: NotebookSourceBinding, capture: Path
+) -> NotebookPipelineRun:
+    replay = replay_notebook_pipeline_artifact(
+        path, binding, capture, project_root=ROOT, allow_untrusted_code_execution=True
+    )
+    _persist_pilot_artifact(path.with_name("replay.json"), replay, binding, capture)
+    assert replay.source_artifact_sha256 is not None
+    return replay.run
+
+
 @pytest.mark.end_to_end
 def test_pilot_fixed_bodies_execute_complete_pipeline_and_real_catalog(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, notebook_snapshot: dict[str, Any]
@@ -535,14 +564,24 @@ def test_pilot_fixed_bodies_execute_complete_pipeline_and_real_catalog(
     source_expectations = _worker_expectations(notebook_snapshot)
     hand_expectations = _worker_expectations(_hand_expected_snapshot())
     previous = None
-    for _ in range(2):
-        run = run_notebook_pipeline_capture(
-            capture_path,
-            binding,
-            _worker_observations(),
-            project_root=ROOT,
-            allow_untrusted_code_execution=True,
-        )
+    artifact_path = tmp_path / "execution.json"
+    for iteration in range(2):
+        if iteration == 0:
+            run = run_notebook_pipeline_capture(
+                capture_path,
+                binding,
+                _worker_observations(),
+                project_root=ROOT,
+                allow_untrusted_code_execution=True,
+            )
+            _persist_pilot_artifact(
+                artifact_path,
+                create_notebook_pipeline_artifact(run, hand_expectations),
+                binding,
+                capture_path,
+            )
+        else:
+            run = _replay_pilot_artifact(artifact_path, binding, capture_path)
         assert run.execution is not None
         assert run.execution.status == "success", (
             run.execution.exception,
