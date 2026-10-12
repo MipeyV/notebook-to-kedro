@@ -21,12 +21,14 @@ Existing V2 coverage and release-threshold checkboxes remain incomplete.
 
 The [first offline body-batch increment](../evaluation/offline-notebook-body-batch.md) is now
 implemented, with complete static preflight, all-slot outcomes and trusted fixed-body execution
-on the pilot. Next are notebook/review identity binding, durable evidence and a consent-gated
-whole-pipeline worker/replay. No live whole-notebook measurement or release milestone is complete.
+on the pilot. No live whole-notebook measurement or release milestone is complete.
 A [draft source-binding increment](../evaluation/notebook-source-binding.md) now verifies notebook,
 CSV, contract and expected-catalog bytes plus exact deterministic plan/request reconstruction.
-Pending review is retained; reviewed-contract promotion, durable evidence and the worker/replay
-remain outstanding. Existing roadmap checkboxes are not promoted by this preparation work.
+Pending review is retained. A [draft durable capture](../evaluation/notebook-body-capture.md) now
+persists the binding, exclusive reservations and raw outcomes, with offline static replay and
+explicit missing/unfinished inventory. Next are reviewed-contract promotion and a consent-gated
+whole-pipeline worker with behavioral replay; no live adapter is added. Existing roadmap checkboxes
+are not promoted by this preparation work.
 
 ## V1 roadmap: deterministic foundation
 

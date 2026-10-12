@@ -16,6 +16,9 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Separate offline draft notebook-body capture: persisted source/plan/request binding, exclusive
+  reservations and raw response/error publication, incomplete inventory inspection and source-bound
+  static replay. No model calls, approval, worker, CLI or historical corpus-format changes.
 - Read-only draft notebook source binding for complete body batches: exact notebook/CSV/contract/
   expected-catalog identities, pending-review provenance, frozen requests and exact deterministic
   reconstruction. Rejects source drift, inconsistent catalog metadata, root escapes and altered

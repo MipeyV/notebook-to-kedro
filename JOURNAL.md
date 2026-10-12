@@ -40,6 +40,48 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-10-12 - Durable draft notebook body evidence
+
+### Completed
+
+- Added a separate draft notebook capture API with a new manifest, complete source/plan/request
+  binding, caller-declared provider/model/prompt identities, validator version and parsing limit.
+- Reused exclusive atomic JSON publication for request reservations and exact raw outcomes or
+  provider errors before proposal parsing. Rechecked current sources and complete inventory before
+  every append; duplicate/unknown requests, altered evidence and publication failures stop the caller.
+- Added bounded envelope reads/writes, strict JSON/schema checks and ordered missing/unfinished
+  inventory. Added static replay from saved responses without provider calls, repair or fallback.
+- Extended the trusted-body complete pilot test to capture all nine fixed outcomes, compare static
+  replay with direct validation and execute only trusted fixture assemblies against all observations.
+- Documented that inventory completeness is not static success, hashes are not authentication,
+  reservation history is not a provider-call receipt, and human review remains pending.
+- Added 58 offline capture unit cases. The final complete Python 3.12.14 suite passed 1,465 tests
+  with 100% line/branch coverage (6,219 statements, 1,788 branches). Python 3.11.16 and 3.13.14 each
+  passed 1,424 deterministic tests with 41 deselected and 100% coverage.
+- Strict mypy passed for 133 files; Ruff lint and formatting passed; source/wheel builds succeeded.
+  No model call, dependency/lock change, fixture correction or Windows security-policy change.
+
+### Decisions
+
+- Keep this increment offline and draft-only. No provider adapter, live measurement, CLI or
+  untrusted-code execution is introduced; default generation and existing corpus formats stay intact.
+- Require the explicit source binding on load/replay instead of constructing execution inputs from
+  arbitrary persisted plans. Capture raw decoded strings losslessly, including invalid Unicode,
+  before reusing the unchanged static parser/validator under the saved parsing limit.
+- Treat directory inspection and source checks as point-in-time integrity checks on trusted storage,
+  not cross-file locks, hostile-race protection or authenticated evidence.
+
+### Open questions
+
+- Independent human review and a reviewed-contract upgrade remain necessary before live evaluation.
+- A future live adapter needs frozen transport/prompt/environment controls and privacy/consent gates;
+  caller-declared identities alone are not enough for a reproducible live benchmark.
+
+### Next step
+
+- Add a dedicated consent-gated whole-pipeline worker using bounded immutable inputs and typed
+  observations, then behavioral replay. Preserve separate static, runtime and review outcomes.
+
 ## 2026-10-11 - Draft notebook source binding
 
 ### Completed

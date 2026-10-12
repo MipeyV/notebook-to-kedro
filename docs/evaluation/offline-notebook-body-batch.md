@@ -111,7 +111,8 @@ uv run --locked --python 3.12 pytest -o addopts= \
   tests/integration/test_synthetic_notebook_pilot.py
 ```
 
-Draft notebook/CSV/review identity binding is now available in the separate wrapper. Next:
-define durable request capture and bounded observations,
-then implement a dedicated consent-gated whole-pipeline worker and offline replay. Live model
+Draft notebook/CSV/review identity binding is available in the separate wrapper, and
+[durable draft capture](notebook-body-capture.md) now records reservations/raw outcomes and supports
+offline static replay. Next: bounded observations and a dedicated consent-gated whole-pipeline
+worker with behavioral replay. Live model
 measurement remains gated by recorded human approval and the remaining protocol acceptance tests.

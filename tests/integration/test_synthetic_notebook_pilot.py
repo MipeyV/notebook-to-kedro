@@ -28,8 +28,13 @@ from notebook_to_kedro import (
 )
 from notebook_to_kedro.evaluation import (
     NotebookBodyRecord,
+    create_notebook_body_capture,
     create_notebook_source_binding,
+    load_notebook_body_capture,
     prepare_notebook_body_requests,
+    record_notebook_body_response,
+    replay_notebook_body_capture,
+    reserve_notebook_body_request,
     validate_notebook_body_batch,
     validate_source_bound_notebook_body_batch,
 )
@@ -370,9 +375,26 @@ def test_pilot_fixed_bodies_execute_complete_pipeline_and_real_catalog(
     )
     requests = binding.requests
     provider = _FixedPilotBodyProvider(requests)
-    bound = validate_source_bound_notebook_body_batch(
-        binding, _fixed_records(requests, provider), project_root=ROOT
+    capture_path = create_notebook_body_capture(
+        tmp_path / "capture",
+        binding,
+        project_root=ROOT,
+        provider_name="offline-fixture",
+        model_name="trusted-source-echo",
+        prompt_version="fixture-1",
     )
+    records = []
+    for request in requests:
+        reserve_notebook_body_request(capture_path, binding, request.request_id, project_root=ROOT)
+        record = NotebookBodyRecord(request.request_id, provider.complete(request))
+        record_notebook_body_response(capture_path, binding, record, project_root=ROOT)
+        records.append(record)
+    bound = validate_source_bound_notebook_body_batch(binding, records, project_root=ROOT)
+    capture = load_notebook_body_capture(capture_path, binding, project_root=ROOT)
+    assert capture.complete
+    assert len(capture.records) == 9
+    assert capture.unfinished_request_ids == ()
+    assert replay_notebook_body_capture(capture_path, binding, project_root=ROOT) == bound
     assert bound.binding == binding
     assert json.loads(binding.review_json)["independent_human_review"] is False
     report = bound.batch
