@@ -23,8 +23,11 @@ batches after explicit consent and returns bounded typed observations. It suppor
 behavioral replay and caller-declared comparisons; the trusted pilot checks seventeen observables.
 A [draft artifact API](notebook-pipeline-artifacts.md) now persists runtime reports and caller-declared
 comparisons, records selected runtime controls before/after and refuses incompatible offline replay.
-The complete experiment's reviewed-contract gate, verified model controls, durable execution/campaign
-accounting and live collection remain outstanding. No prior roadmap milestone is promoted.
+A separate [human-review evidence API](notebook-human-review.md) now prepares pending requests and
+validates externally declared, operator-accepted review wrappers. The actual pilot remains pending;
+identity/independence are not authenticated. Actual independent review, verified model controls,
+durable execution/campaign accounting and live collection remain outstanding. No prior roadmap
+milestone is promoted.
 
 ## Question and frozen scope
 

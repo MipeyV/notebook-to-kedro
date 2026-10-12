@@ -30,8 +30,11 @@ explicit missing/unfinished inventory. A [draft pipeline worker](../evaluation/n
 now executes a complete statically valid capture after renewed consent, with bounded snapshots,
 typed observations and offline behavioral replay/comparison. A [draft artifact API](../evaluation/notebook-pipeline-artifacts.md)
 now publishes runtime/comparison evidence with local before/after identities and strict compatible
-offline replay. Next are genuine reviewed-contract promotion, durable execution/campaign accounting
-and verified model controls; no live adapter is added. Existing roadmap checkboxes are not promoted
+offline replay. A [human-review evidence API](../evaluation/notebook-human-review.md) now supports
+unchecked pending requests and externally declared, operator-accepted contract wrappers. The real
+pilot remains pending; no human identity is authenticated or approval invented. Next are actual human
+review, durable execution/campaign accounting and verified model controls; no live adapter is added.
+Existing roadmap checkboxes are not promoted
 by this preparation work.
 
 ## V1 roadmap: deterministic foundation

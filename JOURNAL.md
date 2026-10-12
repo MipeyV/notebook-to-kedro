@@ -40,6 +40,56 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-10-12 - Human-declared notebook review and explicit contract promotion
+
+### Completed
+
+- Added an offline human-review evidence API tied to an exact complete reference artifact, source
+  binding and typed expectations. Reference preflight requires every planned output, matching
+  comparisons and known, stable original runtime controls; none of these checks imply human approval.
+- Added exclusively published pending requests with explicit author identities, no reviewer/proof,
+  independence false and four unchecked worksheet sections. Decisions and completed notes are supplied
+  externally, never inferred from CI, model agreement or conversion success.
+- Added strict versioned declaration parsing, local non-empty proof-file hashing and drift detection,
+  exact metadata/section inventories, ISO dates and full declared Git revisions. Rejected, incomplete
+  and model-declared records remain inspectable without passing the promotion gate.
+- Added explicit operator acceptance before promotion I/O, exact reference/source/expectation checks,
+  complete independent-human declarations and reviewer/author identity separation. Published separate
+  reviewed-contract wrappers without mutating draft contracts, captures or historical artifacts.
+- Added 56 isolated synthetic gate tests. Positive declarations and fabricated typed transport exist
+  only in temporary test roots and are not real human review, ground truth or actual pilot approval.
+- Extended the actual nine-node pilot to prepare a pending request and refuse promotion despite
+  seventeen matched observations. Source fixtures and their review metadata remain unchanged/pending.
+- Verified the complete Python 3.12.14 suite: 1,666 passed. Deterministic Python 3.11.16 and 3.13.14
+  suites each passed 1,622 tests with 44 deselected. All reached 100% line/branch coverage (6,981
+  statements, 2,028 branches). Ruff, strict mypy and distribution builds pass; the locked Python 3.12
+  environment is restored.
+- Indexed the new workflow, updated the worksheet and next-step links, and kept the root README,
+  historical model measurements, dependencies, prompts, validator and default converter unchanged.
+
+### Decisions
+
+- Treated reviewer identity, independence, commit provenance, evidence links and proof prose as
+  externally supplied declarations. Hashes and structural checks do not authenticate any of them;
+  operator acceptance must follow external verification, not a model-generated assessment.
+- Kept original draft provenance/exposure history intact. No legacy gold-corpus relabeling, automatic
+  source correction, human identity inference, provider call or code execution was added.
+- Kept execution consent, current runtime compatibility and campaign admission separate from reading
+  a review wrapper. Review inspection can occur on a different runtime; future execution cannot
+  silently bypass its own compatibility/consent gates.
+
+### Open questions
+
+- Actual independent human review is still pending. Hosted/live workflows also need authenticated
+  reviewer/operator provenance, access controls, storage/privacy policy and appropriate isolation.
+- Durable execution/campaign accounting and verified model controls remain outstanding; no complete
+  notebook LLM experiment or production-accuracy claim was made.
+
+### Next step
+
+- Obtain actual human evidence for the pilot and implement durable execution/campaign reservation,
+  interruption and outcome accounting offline before any opt-in whole-notebook model collection.
+
 ## 2026-10-12 - Draft pipeline artifacts and compatible offline replay
 
 ### Completed

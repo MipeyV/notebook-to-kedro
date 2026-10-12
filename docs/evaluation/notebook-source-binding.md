@@ -121,7 +121,8 @@ uv run --locked --python 3.12 pytest -o addopts= \
 A separate [draft pipeline worker](notebook-pipeline-worker.md) now rechecks this binding, snapshots
 source/project bytes and runs complete valid captures after explicit consent. A separate
 [draft artifact API](notebook-pipeline-artifacts.md) now persists execution/comparison evidence and
-checks local runtime compatibility on replay. Next: genuine reviewed-contract promotion and durable
+checks local runtime compatibility on replay. A separate [review evidence API](notebook-human-review.md)
+now binds external declarations without modifying this draft. Next: actual human review and durable
 execution/campaign accounting. Recheck source
 identity before future I/O/execution gates; this in-memory binding does not lock files between them.
 Live measurement remains gated by human review and the remaining

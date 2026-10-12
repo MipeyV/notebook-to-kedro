@@ -38,8 +38,11 @@ from notebook_to_kedro.evaluation import (
     create_notebook_pipeline_artifact,
     create_notebook_source_binding,
     load_notebook_body_capture,
+    load_notebook_human_review,
     load_notebook_pipeline_artifact,
     prepare_notebook_body_requests,
+    prepare_notebook_human_review,
+    promote_notebook_pipeline_artifact,
     record_notebook_body_response,
     replay_notebook_body_capture,
     replay_notebook_pipeline_artifact,
@@ -47,6 +50,7 @@ from notebook_to_kedro.evaluation import (
     run_notebook_pipeline_capture,
     validate_notebook_body_batch,
     validate_source_bound_notebook_body_batch,
+    write_notebook_human_review,
     write_notebook_pipeline_artifact,
 )
 from notebook_to_kedro.evaluation.behavioral_worker import _serialize
@@ -516,6 +520,27 @@ def _persist_pilot_artifact(
     assert load_notebook_pipeline_artifact(path, binding, capture, project_root=ROOT) == artifact
 
 
+def _pending_pilot_review(path: Path, binding: NotebookSourceBinding, capture: Path) -> None:
+    baseline = load_notebook_pipeline_artifact(path, binding, capture, project_root=ROOT)
+    request = prepare_notebook_human_review(
+        baseline, fixture_author_ids=("assistant-authored-fixture",)
+    )
+    review_path = write_notebook_human_review(path.with_name("pending-review.json"), request)
+    assert load_notebook_human_review(review_path, project_root=ROOT) == request
+    assert request.decision == "pending"
+    assert not any(check.completed for check in request.checks)
+    with pytest.raises(ValueError, match="approved independent human"):
+        promote_notebook_pipeline_artifact(
+            path,
+            binding,
+            capture,
+            review_path,
+            project_root=ROOT,
+            operator_id="synthetic-test-operator",
+            accept_human_review_evidence=True,
+        )
+
+
 def _replay_pilot_artifact(
     path: Path, binding: NotebookSourceBinding, capture: Path
 ) -> NotebookPipelineRun:
@@ -523,6 +548,7 @@ def _replay_pilot_artifact(
         path, binding, capture, project_root=ROOT, allow_untrusted_code_execution=True
     )
     _persist_pilot_artifact(path.with_name("replay.json"), replay, binding, capture)
+    _pending_pilot_review(path, binding, capture)
     assert replay.source_artifact_sha256 is not None
     return replay.run
 

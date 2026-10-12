@@ -33,8 +33,11 @@ approval or OS sandbox is claimed.
 A separate [draft artifact API](../evaluation/notebook-pipeline-artifacts.md) now publishes complete
 execution/comparison evidence exclusively, records selected local runtime controls before/after,
 inspects reports without execution and requires compatible controls plus renewed consent for replay.
-Unknown identities and observed drift block replay. Human-reviewed promotion, durable execution
-attempt accounting, verified model controls and live collection remain outstanding.
+Unknown identities and observed drift block replay. A separate [human review evidence API](../evaluation/notebook-human-review.md)
+now prepares unchecked requests, binds externally supplied declarations/proof bytes to the complete
+reference and validates explicit operator-accepted wrappers. It authenticates neither identity nor
+independence; the actual fixture still has no recorded independent human approval. Actual review,
+durable execution attempt accounting, verified model controls and live collection remain outstanding.
 
 The deterministic V1 pipeline is operational for the supported notebook subset. It can analyze a notebook, build and validate a reviewable conversion plan, render a Markdown report, and generate a minimal Kedro project whose observable outputs are checked against reference notebooks.
 
