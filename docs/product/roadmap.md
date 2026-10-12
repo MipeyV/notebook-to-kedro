@@ -26,8 +26,10 @@ A [draft source-binding increment](../evaluation/notebook-source-binding.md) now
 CSV, contract and expected-catalog bytes plus exact deterministic plan/request reconstruction.
 Pending review is retained. A [draft durable capture](../evaluation/notebook-body-capture.md) now
 persists the binding, exclusive reservations and raw outcomes, with offline static replay and
-explicit missing/unfinished inventory. Next are reviewed-contract promotion and a consent-gated
-whole-pipeline worker with behavioral replay; no live adapter is added. Existing roadmap checkboxes
+explicit missing/unfinished inventory. A [draft pipeline worker](../evaluation/notebook-pipeline-worker.md)
+now executes a complete statically valid capture after renewed consent, with bounded snapshots,
+typed observations and offline behavioral replay/comparison. Next are persisted runtime/comparison
+evidence, frozen runtime controls and reviewed-contract promotion; no live adapter is added. Existing roadmap checkboxes
 are not promoted by this preparation work.
 
 ## V1 roadmap: deterministic foundation

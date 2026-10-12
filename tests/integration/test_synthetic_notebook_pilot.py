@@ -27,7 +27,13 @@ from notebook_to_kedro import (
     validate_conversion_plan,
 )
 from notebook_to_kedro.evaluation import (
+    ArrayBehaviorValue,
+    ComparisonSpec,
+    ExpectedBehaviorOutput,
     NotebookBodyRecord,
+    NotebookObservation,
+    TableBehaviorValue,
+    compare_notebook_pipeline_run,
     create_notebook_body_capture,
     create_notebook_source_binding,
     load_notebook_body_capture,
@@ -35,9 +41,11 @@ from notebook_to_kedro.evaluation import (
     record_notebook_body_response,
     replay_notebook_body_capture,
     reserve_notebook_body_request,
+    run_notebook_pipeline_capture,
     validate_notebook_body_batch,
     validate_source_bound_notebook_body_batch,
 )
+from notebook_to_kedro.evaluation.behavioral_worker import _serialize
 from notebook_to_kedro.exceptions import NodeCodeProviderError
 from notebook_to_kedro.generation.code import NodeBodyResponse, NodeCodeRequest
 
@@ -287,6 +295,135 @@ class _FixedPilotBodyProvider:
         return response
 
 
+def _worker_observations() -> tuple[NotebookObservation, ...]:
+    return (
+        *(NotebookObservation(name) for name in TABLE_NAMES),
+        *(NotebookObservation(name, "series") for name in ("y", "y_train", "y_test", "holdout")),
+        NotebookObservation("model", "decision_tree"),
+        *(NotebookObservation(name) for name in ("predictions", "confusion", "accuracy")),
+    )
+
+
+def _worker_expectations(snapshot: dict[str, Any]) -> tuple[ExpectedBehaviorOutput, ...]:
+    table_policy = ComparisonSpec(
+        "table", 1e-12, 0.0, equal_nan=False, check_dtype=True, check_order=True, check_index=True
+    )
+    array_policy = ComparisonSpec("array", 1e-12, 0.0, equal_nan=False, check_dtype=True)
+    values = []
+    for name in TABLE_NAMES:
+        table = snapshot["tables"][name]
+        values.append(
+            ExpectedBehaviorOutput(
+                name,
+                TableBehaviorValue(
+                    tuple(table["columns"]),
+                    tuple(table["dtypes"]),
+                    tuple(tuple(row) for row in table["data"]),
+                    tuple(table["index"]),
+                ),
+                table_policy,
+            )
+        )
+    for name in ("y", "y_train", "y_test", "holdout"):
+        metadata = snapshot["series_metadata"][name]
+        values.append(
+            ExpectedBehaviorOutput(
+                name,
+                TableBehaviorValue(
+                    ("value",),
+                    (metadata["dtype"],),
+                    tuple((value,) for value in snapshot[name]),
+                    tuple(metadata["index"]),
+                ),
+                table_policy,
+            )
+        )
+    model = snapshot["model"]
+    values.append(
+        ExpectedBehaviorOutput(
+            "model",
+            _serialize(
+                {
+                    key: model[key]
+                    for key in (
+                        "class",
+                        "max_depth",
+                        "random_state",
+                        "classes",
+                        "training_samples",
+                        "feature_count",
+                    )
+                }
+            ),
+            ComparisonSpec("exact"),
+        )
+    )
+    values.extend(
+        (
+            ExpectedBehaviorOutput(
+                "predictions",
+                ArrayBehaviorValue(
+                    snapshot["prediction_dtype"],
+                    (len(snapshot["predictions"]),),
+                    tuple(snapshot["predictions"]),
+                ),
+                array_policy,
+            ),
+            ExpectedBehaviorOutput(
+                "confusion",
+                ArrayBehaviorValue(
+                    snapshot["confusion_dtype"],
+                    (2, 2),
+                    tuple(v for row in snapshot["confusion"] for v in row),
+                ),
+                array_policy,
+            ),
+            ExpectedBehaviorOutput(
+                "accuracy",
+                _serialize(snapshot["accuracy"]),
+                ComparisonSpec("numeric", 1e-12, 0.0, equal_nan=False),
+            ),
+        )
+    )
+    return tuple(values)
+
+
+def _hand_expected_snapshot() -> dict[str, Any]:
+    features = _frame(CONTRACT["expected_tables"]["features"])
+    x = features[CONTRACT["feature_columns"]]
+    return {
+        "tables": {
+            **CONTRACT["expected_tables"],
+            "X": _frame_snapshot(x),
+            "X_train": _frame_snapshot(x.loc[CONTRACT["train_indices"]]),
+            "X_test": _frame_snapshot(x.loc[CONTRACT["test_indices"]]),
+        },
+        "series_metadata": {
+            "y": {"index": features.index.tolist(), "dtype": "int64"},
+            "y_train": {"index": CONTRACT["train_indices"], "dtype": "int64"},
+            "y_test": {"index": CONTRACT["test_indices"], "dtype": "int64"},
+            "holdout": {"index": features.index.tolist(), "dtype": "bool"},
+        },
+        "y": features["churned"].tolist(),
+        "y_train": CONTRACT["train_targets"],
+        "y_test": CONTRACT["test_targets"],
+        "holdout": [index in CONTRACT["test_indices"] for index in features.index],
+        "model": {
+            "class": "DecisionTreeClassifier",
+            "max_depth": 2,
+            "random_state": 7,
+            "classes": [0, 1],
+            "training_samples": 8,
+            "feature_count": 4,
+        },
+        "predictions": CONTRACT["predictions"],
+        "confusion": CONTRACT["confusion"],
+        "accuracy": CONTRACT["accuracy"],
+        "prediction_dtype": "int64",
+        "confusion_dtype": "int64",
+    }
+
+
 def _fixed_records(
     requests: tuple[NodeCodeRequest, ...], provider: _FixedPilotBodyProvider
 ) -> tuple[NotebookBodyRecord, ...]:
@@ -395,6 +532,36 @@ def test_pilot_fixed_bodies_execute_complete_pipeline_and_real_catalog(
     assert len(capture.records) == 9
     assert capture.unfinished_request_ids == ()
     assert replay_notebook_body_capture(capture_path, binding, project_root=ROOT) == bound
+    source_expectations = _worker_expectations(notebook_snapshot)
+    hand_expectations = _worker_expectations(_hand_expected_snapshot())
+    previous = None
+    for _ in range(2):
+        run = run_notebook_pipeline_capture(
+            capture_path,
+            binding,
+            _worker_observations(),
+            project_root=ROOT,
+            allow_untrusted_code_execution=True,
+        )
+        assert run.execution is not None
+        assert run.execution.status == "success", (
+            run.execution.exception,
+            run.execution.diagnostic_message,
+            run.execution.stdout,
+        )
+        source_comparison = compare_notebook_pipeline_run(run, source_expectations)
+        hand_comparison = compare_notebook_pipeline_run(run, hand_expectations)
+        assert source_comparison.status == hand_comparison.status == "matched"
+        assert len(source_comparison.outputs) == 17
+        assert all(item.status == "matched" for item in source_comparison.outputs)
+        assert json.loads(run.capture.binding.review_json)["status"] == "pending"
+        assert run.module_sha256 is not None
+        assert run.request_sha256 is not None
+        if previous is not None:
+            assert previous.execution is not None
+            assert run.execution.outputs == previous.execution.outputs
+            assert run.request_sha256 == previous.request_sha256
+        previous = run
     assert bound.binding == binding
     assert json.loads(binding.review_json)["independent_human_review"] is False
     report = bound.batch

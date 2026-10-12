@@ -118,8 +118,9 @@ uv run --locked --python 3.12 pytest -o addopts= \
   tests/integration/test_synthetic_notebook_pilot.py
 ```
 
-Next: build on the separate draft capture layer with a dedicated
-consent-gated worker with bounded immutable input snapshots and network-free replay. Recheck source
+A separate [draft pipeline worker](notebook-pipeline-worker.md) now rechecks this binding, snapshots
+source/project bytes and runs complete valid captures after explicit consent. Next: durable runtime
+evidence and frozen controls. Recheck source
 identity before future I/O/execution gates; this in-memory binding does not lock files between them.
 Live measurement remains gated by human review and the remaining
 [whole-notebook protocol](whole-notebook-experiment.md).

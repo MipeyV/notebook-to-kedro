@@ -113,6 +113,7 @@ uv run --locked --python 3.12 pytest -o addopts= \
 
 Draft notebook/CSV/review identity binding is available in the separate wrapper, and
 [durable draft capture](notebook-body-capture.md) now records reservations/raw outcomes and supports
-offline static replay. Next: bounded observations and a dedicated consent-gated whole-pipeline
-worker with behavioral replay. Live model
+offline static replay. A [draft pipeline worker](notebook-pipeline-worker.md) now adds consent-gated
+complete DAG execution, typed observations and behavioral replay/comparison. Next: durable runtime
+evidence and frozen controls. Live model
 measurement remains gated by recorded human approval and the remaining protocol acceptance tests.

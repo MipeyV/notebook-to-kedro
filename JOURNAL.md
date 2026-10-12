@@ -40,6 +40,55 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-10-12 - Draft complete-pipeline worker and behavioral replay
+
+### Completed
+
+- Added a separate consent-gated execution API for draft notebook captures. Every replay requires
+  explicit consent, current source/capture verification and unchanged complete body validation.
+  A single missing/error/rejected slot prevents all pipeline execution without fallback.
+- Added bounded source/project byte snapshots and request hashing. Used the existing deterministic
+  renderer with snapshot-backed CSV copies, required exact expected-catalog bytes and substituted
+  only the statically assembled node module in a private evaluation project.
+- Added a fresh Python worker that verifies snapshot bytes, checks frozen node wiring, loads the
+  real CSV catalog and runs the complete Kedro DAG. Reused existing environment/process-tree/cleanup
+  machinery while keeping its lack of OS-sandbox guarantees explicit.
+- Added typed table, series, array, scalar and DecisionTreeClassifier-summary observations before
+  dataset release. Models stay in the worker; only bounded typed JSON crosses into the parent.
+- Added exact inventory/identity checks, distinct setup/business/observation/process/timeout outcomes,
+  caller-supplied expectation hashes and bounded per-output comparisons. Failed runs have only
+  not-evaluated checks, never partial matches or completed model scores.
+- Extended the trusted complete pilot to execute and replay all nine captured bodies in fresh
+  workers and compare seventeen observations against both notebook execution and hand expectations.
+  Preserved pending review, all source fixtures, six sensitivity controls and historical evidence.
+- Added 59 deterministic worker unit cases and three real subprocess failure cases for timeout,
+  oversized results and unsupported observations. The final Python 3.12.14 suite passed 1,528 tests
+  with 100% line/branch coverage (6,552 statements, 1,888 branches). Python 3.11.16 and 3.13.14 each
+  passed 1,484 deterministic tests with 44 deselected and 100% coverage.
+- Strict mypy passed for 136 files; Ruff lint/format and source/wheel builds passed. No dependency,
+  lockfile, fixture, prompt, validator or Windows security-policy changes were made.
+
+### Decisions
+
+- Keep this an offline draft execution path, not a live adapter or approval mechanism. Reuse typed
+  subprocess transport and value comparators without creating fake approved BehavioralCase records.
+- Normalize missing table cells to JSON null while retaining dtype; explicitly exclude arbitrary
+  pandas/Spark/model metadata guarantees. Observe series as one-column tables and only the existing
+  pilot's limited decision-tree summary, not a parent-loaded pickle or full estimator proof.
+- Treat snapshots as frozen transport bytes/private copies, not OS-immutable or race-proof files.
+  Execution/comparison results are transient and runtime identity is not frozen by request hashes.
+
+### Open questions
+
+- Independent human review, reviewed-contract promotion and frozen runtime/model controls are still
+  required before live measurement. The source notebook oracle remains trusted test-only execution.
+- Complete runtime/comparison artifact publication and campaign accounting remain separate gates.
+
+### Next step
+
+- Bind and publish complete runtime/comparison evidence with explicit runtime compatibility controls,
+  then support genuine reviewed-contract promotion before any opt-in live whole-notebook collection.
+
 ## 2026-10-12 - Durable draft notebook body evidence
 
 ### Completed
