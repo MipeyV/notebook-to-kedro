@@ -141,6 +141,8 @@ uv run --locked --python 3.12 pytest -o addopts= \
   tests/integration/test_synthetic_notebook_pilot.py
 ```
 
-Next: support genuine human-reviewed contract promotion and durable execution/campaign accounting.
+A separate [review evidence API](notebook-human-review.md) now supports external declarations and
+operator-accepted wrappers, without granting actual pilot approval. Next: actual independent review
+and durable execution/campaign accounting.
 Live collection still requires those gates and
 the remaining [whole-notebook protocol](whole-notebook-experiment.md); no model calls while pending.

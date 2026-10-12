@@ -93,5 +93,7 @@ data or forge worker observations. The subprocess is not an OS sandbox, and raw 
 may contain sensitive data. Operator-managed isolation, storage permissions and privacy controls
 remain required; no cloud loader, tracker or secret handling is added.
 
-Next: genuine human-reviewed contract promotion and durable execution/campaign accounting before
+A separate [human-review evidence API](notebook-human-review.md) now binds declarations to the exact
+reference and accepts wrappers only after explicit operator trust and complete structural checks.
+No actual pilot approval is recorded. Next: actual review and durable execution/campaign accounting before
 the [whole-notebook live experiment](whole-notebook-experiment.md).

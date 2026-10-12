@@ -104,9 +104,12 @@ Decision: <approved / changes requested>
 Evidence reference: <review comment, PR or committed review record>
 ```
 
-For approval, update the contract's review metadata with the reviewer and evidence reference
-in the same PR, and replace the tests' pending-only assertions with checks of that explicit
-evidence. Keep assistant authorship and prior exposure history. Any schema extension or corpus
-promotion needs explicit validation; do not simply rename `pilot-draft-1` to a gold schema.
+The [human-review evidence API](notebook-human-review.md) now prepares a pending request bound to
+the complete reference, source files and typed expectations. Record the actual human decision and
+local proof in a separate reviewed change. An operator must externally verify the declaration and
+explicitly accept it before producing a separate reviewed-contract wrapper. Keep the original draft
+contract/reference pending and unchanged; preserve assistant authorship and exposure history.
+Do not replace pending-only assertions with synthetic approval. Any schema extension or legacy
+corpus promotion needs explicit validation; do not rename `pilot-draft-1` to a gold schema.
 Until then, this remains a development fixture and the live experiment gate stays closed.
 The [experiment proposal](whole-notebook-experiment.md) can be prepared and tested offline.

@@ -16,6 +16,10 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Separate human-review evidence API for complete notebook references: pending unchecked requests,
+  exact source/reference/expectation identities, local proof-file binding, strict declared reviewer/
+  worksheet gates and explicit operator-accepted reviewed-contract wrappers. No authenticated human
+  identity, real fixture approval, legacy corpus migration, code execution or model calls are claimed.
 - Separate draft complete-notebook execution artifacts: exclusive bounded publication, exact raw/
   static/runtime/comparison evidence, before/after local runtime identities, read-only inspection
   and consent-gated compatible offline replay. Unknown controls and observed drift block replay;

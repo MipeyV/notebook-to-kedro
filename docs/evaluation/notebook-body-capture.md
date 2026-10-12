@@ -136,6 +136,7 @@ uv run --locked --python 3.12 pytest -o addopts= \
 A separate [draft pipeline worker](notebook-pipeline-worker.md) now uses this evidence for
 consent-gated execution, typed observations and fresh behavioral replay. A separate
 [draft artifact API](notebook-pipeline-artifacts.md) now publishes runtime/comparison reports and
-checks local before/after controls for compatible replay. Next: reviewed-contract promotion and
+checks local before/after controls for compatible replay. The separate [review evidence API](notebook-human-review.md)
+now prepares pending requests and checks operator-accepted wrappers. Next: actual human review and
 durable execution/campaign accounting. Live measurements still require human review
 and the remaining [whole-notebook protocol](whole-notebook-experiment.md) controls.
