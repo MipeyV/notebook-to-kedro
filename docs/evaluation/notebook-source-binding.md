@@ -99,8 +99,9 @@ does not bypass reconstruction. Direct unbound batch APIs remain available with 
 
 The returned `SourceBoundNotebookBodyReport` contains the binding and ordinary static `batch`.
 `static_ready` still does not mean runtime equivalence or execution consent. The binding has an
-experimental draft version but no persisted JSON loader/writer, durable raw-response capture,
-collection-history inventory, provider/runtime provenance or replay interface yet.
+experimental draft version. A separate [draft capture API](notebook-body-capture.md) now persists
+the complete binding and raw outcomes and verifies them against an explicitly supplied binding.
+It adds reservation inventory and static replay, not reviewed-contract or behavioral execution support.
 
 ## Verification and next step
 
@@ -117,7 +118,7 @@ uv run --locked --python 3.12 pytest -o addopts= \
   tests/integration/test_synthetic_notebook_pilot.py
 ```
 
-Next: design durable request reservation/raw evidence using this source identity, then a dedicated
+Next: build on the separate draft capture layer with a dedicated
 consent-gated worker with bounded immutable input snapshots and network-free replay. Recheck source
 identity before future I/O/execution gates; this in-memory binding does not lock files between them.
 Live measurement remains gated by human review and the remaining

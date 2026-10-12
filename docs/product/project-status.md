@@ -18,10 +18,13 @@ They do not approve the fixture, implement a live runner or measure a model; the
 experiment holds source interpretation and task boundaries fixed to evaluate code proposals.
 An [offline static batch API](../evaluation/offline-notebook-body-batch.md) now prepares and
 validates all recorded bodies without provider or execution I/O. Trusted fixed bodies match the
-complete pilot in tests; notebook-bound capture, the untrusted worker and live measurement are pending.
+complete pilot in tests; the untrusted worker and live measurement are pending.
 The [draft source-binding wrapper](../evaluation/notebook-source-binding.md) now rechecks exact
 local file identities and deterministic reconstruction before response validation. It preserves
 pending review and adds neither approval, artifact persistence nor live execution.
+A separate [draft capture API](../evaluation/notebook-body-capture.md) now persists that binding,
+request reservations and raw outcomes, verifies missing/unfinished inventory, and replays static
+validation offline. It does not contact a provider, execute proposals or approve the draft.
 
 The deterministic V1 pipeline is operational for the supported notebook subset. It can analyze a notebook, build and validate a reviewable conversion plan, render a Markdown report, and generate a minimal Kedro project whose observable outputs are checked against reference notebooks.
 
