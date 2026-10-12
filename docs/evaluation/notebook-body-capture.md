@@ -133,6 +133,7 @@ uv run --locked --python 3.12 pytest -o addopts= \
   tests/integration/test_synthetic_notebook_pilot.py
 ```
 
-Next: a dedicated consent-gated whole-pipeline worker with bounded immutable input snapshots and
-typed observations, followed by behavioral replay. Live measurements still require human review
+A separate [draft pipeline worker](notebook-pipeline-worker.md) now uses this evidence for
+consent-gated execution, typed observations and fresh behavioral replay. Next: persisted runtime
+reports and frozen runtime controls. Live measurements still require human review
 and the remaining [whole-notebook protocol](whole-notebook-experiment.md) controls.

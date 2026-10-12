@@ -16,6 +16,9 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Separate consent-gated draft notebook pipeline worker: bounded source/project snapshots, full
+  statically validated DAG execution, typed JSON observations, explicit draft comparison and fresh
+  offline behavioral replay. No model calls, approval, OS sandbox or default generator changes.
 - Separate offline draft notebook-body capture: persisted source/plan/request binding, exclusive
   reservations and raw response/error publication, incomplete inventory inspection and source-bound
   static replay. No model calls, approval, worker, CLI or historical corpus-format changes.

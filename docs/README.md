@@ -68,10 +68,11 @@ the dedicated experiment reports for their frozen settings, decisions and limita
 | [Fresh node corpus v3](evaluation/fresh-node-corpus-v3.md) | Four additional tasks, twelve scenarios and independent controls. |
 | [Synthetic whole-notebook pilot](evaluation/synthetic-notebook-pilot.md) | Simulation plus real CSV catalog loading, full-workflow checks and negative controls; human review pending. |
 | [Synthetic pilot review](evaluation/synthetic-pilot-review.md) | Pending human checklist, hand calculations and explicit approval evidence. |
-| [Whole-notebook experiment](evaluation/whole-notebook-experiment.md) | Proposed offline harness and opt-in nine-node LLM measurement; not implemented. |
+| [Whole-notebook experiment](evaluation/whole-notebook-experiment.md) | Full experiment proposal: review gates, frozen controls and opt-in nine-node LLM measurement; no live runner. |
 | [Offline notebook body batch](evaluation/offline-notebook-body-batch.md) | Implemented recorded-response static preflight/assembly and trusted pilot execution; no live runner. |
 | [Draft notebook source binding](evaluation/notebook-source-binding.md) | Read-only file hashes, deterministic reconstruction and drift rejection; human review stays pending. |
 | [Draft notebook body capture](evaluation/notebook-body-capture.md) | Exclusive request/raw-outcome inventory and offline static replay; no model calls or worker. |
+| [Draft notebook pipeline worker](evaluation/notebook-pipeline-worker.md) | Consent-gated complete DAG execution, typed observations and offline behavioral replay/comparison; review pending. |
 | [Node code benchmark](evaluation/node-code-benchmark.md) | Static acceptance, AST fidelity and historical prompt/validator experiments. |
 | [Behavioral code benchmark](evaluation/behavioral-code-benchmark.md) | Consent-gated execution, observable comparisons and archived runs. |
 | [Body-only benchmark and replay](evaluation/node-body-benchmark.md) | Body artifacts, replay and compatible comparisons. |
