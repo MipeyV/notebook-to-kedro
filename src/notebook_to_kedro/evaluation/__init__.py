@@ -166,6 +166,15 @@ from notebook_to_kedro.evaluation.node_code_corpus import (
     node_code_case_to_json,
     verify_node_code_case_source,
 )
+from notebook_to_kedro.evaluation.notebook_artifacts import (
+    NOTEBOOK_PIPELINE_ARTIFACT_VERSION,
+    NotebookPipelineArtifact,
+    create_notebook_pipeline_artifact,
+    load_notebook_pipeline_artifact,
+    notebook_pipeline_artifact_to_dict,
+    replay_notebook_pipeline_artifact,
+    write_notebook_pipeline_artifact,
+)
 from notebook_to_kedro.evaluation.notebook_body import (
     NotebookBodyBatchReport,
     NotebookBodyProposal,
@@ -190,6 +199,11 @@ from notebook_to_kedro.evaluation.notebook_execution import (
     NotebookPipelineRun,
     compare_notebook_pipeline_run,
     run_notebook_pipeline_capture,
+)
+from notebook_to_kedro.evaluation.notebook_runtime import (
+    NotebookRuntimeIdentity,
+    collect_notebook_runtime_identity,
+    require_notebook_runtime_compatibility,
 )
 from notebook_to_kedro.evaluation.notebook_sources import (
     NotebookSourceBinding,
@@ -236,6 +250,7 @@ __all__ = [
     "NODE_CODE_BENCHMARK_SCHEMA_VERSION",
     "NODE_CODE_CASE_SCHEMA_VERSION",
     "NOTEBOOK_BODY_CAPTURE_VERSION",
+    "NOTEBOOK_PIPELINE_ARTIFACT_VERSION",
     "NOTEBOOK_PIPELINE_EXECUTION_VERSION",
     "PLANNING_BENCHMARK_SCHEMA_VERSION",
     "PLANNING_CASE_SCHEMA_VERSION",
@@ -283,8 +298,10 @@ __all__ = [
     "NotebookBodyRecord",
     "NotebookObservableComparison",
     "NotebookObservation",
+    "NotebookPipelineArtifact",
     "NotebookPipelineComparison",
     "NotebookPipelineRun",
+    "NotebookRuntimeIdentity",
     "NotebookSourceBinding",
     "NotebookSourceFile",
     "ObjectBehaviorValue",
@@ -321,6 +338,7 @@ __all__ = [
     "behavioral_proposal_evaluation_to_dict",
     "behavioral_proposal_evaluation_to_json",
     "collect_environment_provenance",
+    "collect_notebook_runtime_identity",
     "compare_behavioral_benchmark_artifacts",
     "compare_behavioral_corpus",
     "compare_behavioral_result",
@@ -334,6 +352,7 @@ __all__ = [
     "create_corpus_bound_code_artifact",
     "create_node_body_benchmark_artifact",
     "create_notebook_body_capture",
+    "create_notebook_pipeline_artifact",
     "create_notebook_source_binding",
     "create_response_capture",
     "evaluate_behavioral_proposal",
@@ -350,6 +369,7 @@ __all__ = [
     "load_node_code_case",
     "load_node_code_corpus",
     "load_notebook_body_capture",
+    "load_notebook_pipeline_artifact",
     "load_planning_case",
     "load_planning_corpus",
     "load_response_capture",
@@ -364,6 +384,7 @@ __all__ = [
     "node_code_case_from_json",
     "node_code_case_to_dict",
     "node_code_case_to_json",
+    "notebook_pipeline_artifact_to_dict",
     "planning_benchmark_to_dict",
     "planning_benchmark_to_json",
     "planning_case_from_dict",
@@ -377,6 +398,8 @@ __all__ = [
     "replay_corpus_bound_code_benchmark",
     "replay_node_body_benchmark",
     "replay_notebook_body_capture",
+    "replay_notebook_pipeline_artifact",
+    "require_notebook_runtime_compatibility",
     "reserve_notebook_body_request",
     "response_capture_summary",
     "run_behavioral_code_benchmark",
@@ -395,4 +418,5 @@ __all__ = [
     "write_corpus_bound_code_artifact",
     "write_json_exclusive",
     "write_node_body_benchmark_artifact",
+    "write_notebook_pipeline_artifact",
 ]

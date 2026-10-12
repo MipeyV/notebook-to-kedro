@@ -10,8 +10,8 @@ command, automatic model injection, production feature or V2 release threshold.
 The first [offline static batch increment](offline-notebook-body-batch.md) is implemented:
 complete plan/graph/parameter preflight, recorded-response validation, full-slot rejection
 accounting and all-or-nothing module assembly. Trusted fixed bodies execute the pilot in tests.
-Reviewed notebook-bound artifacts, persisted runtime reports and live
-measurements remain outstanding; the test-only fixture path is not that runner.
+Reviewed notebook-bound artifacts and live measurements remain outstanding; the test-only fixture
+path is not that runner.
 A [draft source binding](notebook-source-binding.md) now freezes file identities and pending review
 metadata, checks exact deterministic reconstruction and rejects drift before response validation.
 It does not implement the approved notebook/review-bound artifact required for live measurement.
@@ -21,8 +21,10 @@ This is not the live collector, reviewed artifact or consent-gated behavioral wo
 A separate [draft pipeline worker](notebook-pipeline-worker.md) now executes complete valid captured
 batches after explicit consent and returns bounded typed observations. It supports fresh offline
 behavioral replay and caller-declared comparisons; the trusted pilot checks seventeen observables.
-The complete experiment's reviewed-contract gate, frozen runtime/model controls, durable execution
-reports and live collection remain outstanding. No prior roadmap milestone is promoted.
+A [draft artifact API](notebook-pipeline-artifacts.md) now persists runtime reports and caller-declared
+comparisons, records selected runtime controls before/after and refuses incompatible offline replay.
+The complete experiment's reviewed-contract gate, verified model controls, durable execution/campaign
+accounting and live collection remain outstanding. No prior roadmap milestone is promoted.
 
 ## Question and frozen scope
 

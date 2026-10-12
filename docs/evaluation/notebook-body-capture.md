@@ -134,6 +134,8 @@ uv run --locked --python 3.12 pytest -o addopts= \
 ```
 
 A separate [draft pipeline worker](notebook-pipeline-worker.md) now uses this evidence for
-consent-gated execution, typed observations and fresh behavioral replay. Next: persisted runtime
-reports and frozen runtime controls. Live measurements still require human review
+consent-gated execution, typed observations and fresh behavioral replay. A separate
+[draft artifact API](notebook-pipeline-artifacts.md) now publishes runtime/comparison reports and
+checks local before/after controls for compatible replay. Next: reviewed-contract promotion and
+durable execution/campaign accounting. Live measurements still require human review
 and the remaining [whole-notebook protocol](whole-notebook-experiment.md) controls.

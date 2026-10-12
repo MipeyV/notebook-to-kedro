@@ -28,9 +28,11 @@ Pending review is retained. A [draft durable capture](../evaluation/notebook-bod
 persists the binding, exclusive reservations and raw outcomes, with offline static replay and
 explicit missing/unfinished inventory. A [draft pipeline worker](../evaluation/notebook-pipeline-worker.md)
 now executes a complete statically valid capture after renewed consent, with bounded snapshots,
-typed observations and offline behavioral replay/comparison. Next are persisted runtime/comparison
-evidence, frozen runtime controls and reviewed-contract promotion; no live adapter is added. Existing roadmap checkboxes
-are not promoted by this preparation work.
+typed observations and offline behavioral replay/comparison. A [draft artifact API](../evaluation/notebook-pipeline-artifacts.md)
+now publishes runtime/comparison evidence with local before/after identities and strict compatible
+offline replay. Next are genuine reviewed-contract promotion, durable execution/campaign accounting
+and verified model controls; no live adapter is added. Existing roadmap checkboxes are not promoted
+by this preparation work.
 
 ## V1 roadmap: deterministic foundation
 
