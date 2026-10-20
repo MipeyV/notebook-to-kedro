@@ -257,6 +257,20 @@ def load_notebook_pipeline_artifact(
         json.loads(raw, object_pairs_hook=_unique_object, parse_constant=_reject_constant),
         "artifact",
     )
+    return notebook_pipeline_artifact_from_dict(
+        data, binding, capture_directory, project_root=project_root
+    )
+
+
+def notebook_pipeline_artifact_from_dict(
+    payload: object,
+    binding: NotebookSourceBinding,
+    capture_directory: str | Path,
+    *,
+    project_root: str | Path,
+) -> NotebookPipelineArtifact:
+    """Recheck structured artifact evidence against current sources without executing it."""
+    data = _object(payload, "artifact")
     keys = frozenset(
         {
             "schema_version",

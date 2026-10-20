@@ -117,6 +117,7 @@ offline static replay. A [draft pipeline worker](notebook-pipeline-worker.md) no
 complete DAG execution, typed observations and behavioral replay/comparison. A separate
 [draft artifact API](notebook-pipeline-artifacts.md) now publishes that evidence, records selected
 runtime controls before/after and refuses incompatible replay. A separate [review evidence API](notebook-human-review.md)
-now checks externally declared, operator-accepted wrappers. Next: actual human review
-and durable execution/campaign accounting. Live model
+now checks externally declared, operator-accepted wrappers. A separate [draft execution ledger](notebook-execution-ledger.md)
+now retains offline pre-worker reservations and all outcomes. Next: actual human review,
+verified model controls and reviewed live collection. Live model
 measurement remains gated by recorded human approval and the remaining protocol acceptance tests.

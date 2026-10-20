@@ -32,8 +32,11 @@ typed observations and offline behavioral replay/comparison. A [draft artifact A
 now publishes runtime/comparison evidence with local before/after identities and strict compatible
 offline replay. A [human-review evidence API](../evaluation/notebook-human-review.md) now supports
 unchecked pending requests and externally declared, operator-accepted contract wrappers. The real
-pilot remains pending; no human identity is authenticated or approval invented. Next are actual human
-review, durable execution/campaign accounting and verified model controls; no live adapter is added.
+pilot remains pending; no human identity is authenticated or approval invented. A separate
+[draft execution ledger](../evaluation/notebook-execution-ledger.md) now reserves attempts before
+worker I/O and retains every published or unfinished outcome for one frozen capture/setup.
+This is local offline accounting, not the reviewed live campaign collector. Next are actual human
+review, verified model controls and reviewed live collection; no live adapter is added.
 Existing roadmap checkboxes are not promoted
 by this preparation work.
 

@@ -34,6 +34,7 @@ from notebook_to_kedro.evaluation import (
 )
 from notebook_to_kedro.evaluation import notebook_artifacts as artifacts
 from notebook_to_kedro.evaluation import notebook_execution as execution_module
+from notebook_to_kedro.evaluation import notebook_ledger as ledger_module
 from notebook_to_kedro.evaluation import notebook_worker as worker
 from notebook_to_kedro.evaluation.behavioral_artifacts import _json_sha256, write_json_exclusive
 from notebook_to_kedro.evaluation.behavioral_execution import _result_from_worker
@@ -1075,3 +1076,534 @@ def test_public_worker_runtime_failures_on_trusted_capture(prepared: _Prepared, 
     assert run.execution.status == ("timeout" if mode == "timeout" else "serialization_failure")
     assert run.execution.outputs == ()
     assert compare_notebook_pipeline_run(run, EXPECTED).status == "not_evaluated"
+
+
+def _ledger(tmp_path: Path, prepared: _Prepared, **kwargs: Any) -> Path:
+    return ledger_module.create_notebook_execution_ledger(
+        tmp_path / "ledger",
+        prepared.binding,
+        prepared.directory,
+        TARGETS,
+        EXPECTED,
+        project_root=ROOT,
+        **kwargs,
+    )
+
+
+def _inspect_ledger(
+    path: Path, prepared: _Prepared, **kwargs: Any
+) -> ledger_module.NotebookExecutionLedger:
+    return ledger_module.load_notebook_execution_ledger(
+        path, prepared.binding, prepared.directory, project_root=ROOT, **kwargs
+    )
+
+
+def _attempt(
+    path: Path, prepared: _Prepared, identifier: str = "attempt-1", **kwargs: Any
+) -> ledger_module.NotebookPipelineAttempt:
+    return ledger_module.run_notebook_pipeline_attempt(
+        path,
+        prepared.binding,
+        prepared.directory,
+        identifier,
+        project_root=ROOT,
+        allow_untrusted_code_execution=True,
+        **kwargs,
+    )
+
+
+def _reserve(
+    path: Path, prepared: _Prepared, identifier: str = "attempt-1"
+) -> ledger_module.NotebookPipelineAttempt:
+    return ledger_module.reserve_notebook_pipeline_attempt(
+        path, prepared.binding, prepared.directory, identifier, project_root=ROOT
+    )
+
+
+def _ledger_worker(
+    monkeypatch: pytest.MonkeyPatch, prepared: _Prepared, run: NotebookPipelineRun | None = None
+) -> None:
+    monkeypatch.setattr(
+        ledger_module, "run_notebook_pipeline_capture", lambda *_a, **_k: run or prepared.run
+    )
+
+
+def _rewrite_ledger(path: Path, **changes: Any) -> None:
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    path.write_text(json.dumps(_resign({**payload, **changes})), encoding="utf-8")
+
+
+def test_ledger_reserves_before_worker_and_counts_unfinished(
+    tmp_path: Path, prepared: _Prepared, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    path = _ledger(tmp_path, prepared)
+    assert _inspect_ledger(path, prepared).attempts == ()
+    first = _reserve(path, prepared, "interrupted")
+    assert first.status == "unfinished"
+
+    def execute(*_args: Any, **kwargs: Any) -> NotebookPipelineRun:
+        ledger = _inspect_ledger(path, prepared)
+        assert {item.attempt_id for item in ledger.attempts} == {"interrupted", "complete"}
+        assert all(item.status == "unfinished" for item in ledger.attempts)
+        assert kwargs["allow_untrusted_code_execution"] is True
+        assert kwargs["expected_capture_sha256"] == prepared.run.capture.content_sha256
+        assert kwargs["config"] == prepared.run.configuration
+        return prepared.run
+
+    monkeypatch.setattr(ledger_module, "run_notebook_pipeline_capture", execute)
+    complete = _attempt(path, prepared, "complete")
+    assert complete.status == "matched"
+    monkeypatch.setattr(
+        ledger_module,
+        "run_notebook_pipeline_capture",
+        lambda *_a, **_k: pytest.fail("inspection must not execute"),
+    )
+    ledger = _inspect_ledger(path, prepared)
+    assert set(ledger.attempts) == {first, complete}
+    summary = ledger_module.notebook_execution_ledger_summary(ledger)
+    assert summary["total_reserved"] == 2
+    assert summary["published"] == summary["unfinished"] == 1
+    assert summary["status_counts"] == {"unfinished": 1, "matched": 1}
+    assert json.loads(prepared.binding.review_json)["status"] == "pending"
+    before = {item: item.read_bytes() for item in (path / "results").iterdir()}
+    for identifier in ("interrupted", "complete"):
+        with pytest.raises(BehavioralBenchmarkArtifactError, match="already exists"):
+            _attempt(path, prepared, identifier)
+    assert all(item.read_bytes() == content for item, content in before.items())
+    with pytest.raises(FileExistsError):
+        _ledger(tmp_path, prepared)
+
+
+@pytest.mark.parametrize("consent", [False, None, 1])
+def test_ledger_consent_precedes_all_io(tmp_path: Path, prepared: _Prepared, consent: Any) -> None:
+    with pytest.raises(ValueError, match="allow_untrusted_code_execution=True"):
+        ledger_module.run_notebook_pipeline_attempt(
+            tmp_path / "missing",
+            prepared.binding,
+            tmp_path / "missing",
+            "attempt",
+            project_root=tmp_path,
+            allow_untrusted_code_execution=consent,
+        )
+    assert not (tmp_path / "missing").exists()
+
+
+@pytest.mark.parametrize("failure", ["exception", "interrupt", "publication"])
+def test_ledger_failures_leave_reservation_without_retry(
+    tmp_path: Path, prepared: _Prepared, monkeypatch: pytest.MonkeyPatch, failure: str
+) -> None:
+    path = _ledger(tmp_path, prepared)
+    _ledger_worker(monkeypatch, prepared)
+    expected_error: type[BaseException]
+    if failure == "publication":
+        original = ledger_module._write
+
+        def write(destination: Path, payload: dict[str, object], limit: int) -> None:
+            if destination.parent.name == "results":
+                raise OSError("synthetic publication failure")
+            return original(destination, payload, limit)
+
+        monkeypatch.setattr(ledger_module, "_write", write)
+        expected_error = OSError
+    else:
+        expected_error = KeyboardInterrupt if failure == "interrupt" else RuntimeError
+
+        def execute(*_args: Any, **_kwargs: Any) -> NotebookPipelineRun:
+            raise expected_error("synthetic interruption")
+
+        monkeypatch.setattr(ledger_module, "run_notebook_pipeline_capture", execute)
+    with pytest.raises(expected_error):
+        _attempt(path, prepared)
+    assert _inspect_ledger(path, prepared).attempts[0].status == "unfinished"
+    assert list((path / "results").iterdir()) == []
+    with pytest.raises(BehavioralBenchmarkArtifactError, match="already exists"):
+        _attempt(path, prepared)
+
+
+@pytest.mark.parametrize(
+    "status",
+    [
+        "matched",
+        "mismatch",
+        "timeout",
+        "exception",
+        "setup_failure",
+        "process_failure",
+        "serialization_failure",
+        "static_rejected",
+    ],
+)
+def test_ledger_retains_each_observed_outcome(
+    tmp_path: Path, prepared: _Prepared, monkeypatch: pytest.MonkeyPatch, status: str
+) -> None:
+    current = prepared
+    run = prepared.run
+    if status == "static_rejected":
+        directory = create_notebook_body_capture(
+            tmp_path / "incomplete",
+            prepared.binding,
+            project_root=ROOT,
+            provider_name="offline",
+            model_name="missing",
+            prompt_version="fixture-1",
+        )
+        run = _run(prepared, directory)
+        current = replace(prepared, directory=directory, run=run)
+    elif status != "matched":
+        result = _successful(prepared.binding, prepared.run.capture.content_sha256)
+        if status == "mismatch":
+            result["outputs"] = [
+                {"output_name": "accuracy", "value": {"kind": "scalar", "value": 0.0}}
+            ]
+        else:
+            result.update(status=status, outputs=[], diagnostic_message="synthetic failure")
+            if status == "exception":
+                result["exception"] = {"type_name": "ValueError", "message": "synthetic"}
+        run = replace(run, execution=_result_from_worker(result, 0.0))
+    path = _ledger(tmp_path, current)
+    _ledger_worker(monkeypatch, current, run)
+    attempt = _attempt(path, current)
+    assert attempt.status == status
+    assert _inspect_ledger(path, current).attempts == (attempt,)
+    summary = ledger_module.notebook_execution_ledger_summary(_inspect_ledger(path, current))
+    assert summary["total_reserved"] == summary["published"] == 1
+    assert summary["unfinished"] == 0
+    assert summary["status_counts"] == {status: 1}
+
+
+@pytest.mark.parametrize(
+    "mode",
+    [
+        "version",
+        "source",
+        "extra",
+        "missing",
+        "observation_keys",
+        "observation_kind",
+        "expectations",
+        "config",
+        "boolean_timeout",
+    ],
+)
+def test_ledger_rejects_bad_manifest_even_when_rehashed(
+    tmp_path: Path, prepared: _Prepared, mode: str
+) -> None:
+    path = _ledger(tmp_path, prepared)
+    target = path / "manifest.json"
+    payload = json.loads(target.read_text(encoding="utf-8"))
+    if mode == "version":
+        payload["schema_version"] = "future"
+    elif mode == "source":
+        payload["binding_sha256"] = "0" * 64
+    elif mode == "extra":
+        payload["extra"] = True
+    elif mode == "missing":
+        del payload["observations"]
+    elif mode == "observation_keys":
+        payload["observations"][0]["extra"] = True
+    elif mode == "observation_kind":
+        payload["observations"][0]["kind"] = "pickle"
+    elif mode == "expectations":
+        payload["expectations"] = []
+    elif mode == "config":
+        payload["configuration"]["extra"] = 1
+    else:
+        payload["configuration"]["timeout_seconds"] = True
+    target.write_text(json.dumps(_resign(payload)), encoding="utf-8")
+    with pytest.raises(ValueError, match=r"ledger|fields|observation|timeout_seconds"):
+        _inspect_ledger(path, prepared)
+
+
+@pytest.mark.parametrize(
+    "mode", ["timestamp", "naive_date", "noncanonical_date", "manifest", "filename", "extra"]
+)
+def test_ledger_rejects_bad_reservation(tmp_path: Path, prepared: _Prepared, mode: str) -> None:
+    path = _ledger(tmp_path, prepared)
+    _reserve(path, prepared)
+    target = next((path / "attempts").iterdir())
+    changes: dict[str, dict[str, object]] = {
+        "timestamp": {"reserved_at": "not a date"},
+        "naive_date": {"reserved_at": "2026-10-17T12:00:00"},
+        "noncanonical_date": {"reserved_at": "2026-10-17T12:00:00Z"},
+        "manifest": {"manifest_sha256": "0" * 64},
+        "filename": {"attempt_id": "different"},
+        "extra": {"extra": 1},
+    }
+    _rewrite_ledger(target, **changes[mode])
+    with pytest.raises(ValueError, match=r"isoformat|UTC|identity mismatch|fields"):
+        _inspect_ledger(path, prepared)
+
+
+@pytest.mark.parametrize("mode", ["reservation", "extra", "artifact", "settings", "replay"])
+def test_ledger_rejects_changed_result_even_when_rehashed(
+    tmp_path: Path, prepared: _Prepared, monkeypatch: pytest.MonkeyPatch, mode: str
+) -> None:
+    path = _ledger(tmp_path, prepared)
+    _ledger_worker(monkeypatch, prepared)
+    _attempt(path, prepared)
+    target = next((path / "results").iterdir())
+    payload = json.loads(target.read_text(encoding="utf-8"))
+    if mode == "reservation":
+        payload["reservation_sha256"] = "0" * 64
+    elif mode == "extra":
+        payload["extra"] = 1
+    elif mode == "artifact":
+        payload["artifact"]["comparison"]["status"] = "mismatch"
+        _resign(payload["artifact"])
+    else:
+        run = (
+            replace(
+                prepared.run, configuration=replace(prepared.run.configuration, timeout_seconds=3)
+            )
+            if mode == "settings"
+            else prepared.run
+        )
+        payload["artifact"] = artifacts.notebook_pipeline_artifact_to_dict(
+            artifacts.create_notebook_pipeline_artifact(
+                run, EXPECTED, source_artifact_sha256="1" * 64 if mode == "replay" else None
+            )
+        )
+    target.write_text(json.dumps(_resign(payload)), encoding="utf-8")
+    with pytest.raises(ValueError, match=r"ledger|artifact|invalid result fields"):
+        _inspect_ledger(path, prepared)
+
+
+@pytest.mark.parametrize(
+    "mode",
+    [
+        "layout",
+        "directory",
+        "entry",
+        "short",
+        "hex",
+        "regular",
+        "orphan",
+        "digest",
+        "json",
+        "duplicate",
+        "nonfinite",
+    ],
+)
+def test_ledger_rejects_invalid_layout_and_bytes(
+    tmp_path: Path, prepared: _Prepared, mode: str
+) -> None:
+    path = _ledger(tmp_path, prepared)
+    if mode == "layout":
+        (path / "unexpected").touch()
+    elif mode == "directory":
+        (path / "results").rmdir()
+        (path / "results").touch()
+    elif mode in ("entry", "short", "hex", "regular"):
+        filename = (
+            "bad.txt"
+            if mode == "entry"
+            else "short.json"
+            if mode == "short"
+            else ("z" if mode == "hex" else "0") * 64 + ".json"
+        )
+        target = path / "attempts" / filename
+        if mode == "regular":
+            target.mkdir()
+        else:
+            target.touch()
+    elif mode == "orphan":
+        (path / "results" / ("0" * 64 + ".json")).touch()
+    else:
+        target = path / "manifest.json"
+        raw = {
+            "digest": '{"content_sha256":"' + "0" * 64 + '"}',
+            "json": "{",
+            "duplicate": '{"x":1,"x":2}',
+            "nonfinite": '{"x":NaN}',
+        }[mode]
+        target.write_text(raw, encoding="utf-8")
+    with pytest.raises(ValueError, match=r"ledger|SHA256|property name|duplicate|non-finite"):
+        _inspect_ledger(path, prepared)
+
+
+@pytest.mark.parametrize("mode", ["empty", "duplicate", "unknown", "expected", "bool", "limit"])
+def test_ledger_preflight_does_not_create_invalid_setup(
+    tmp_path: Path, prepared: _Prepared, mode: str
+) -> None:
+    targets = (
+        ()
+        if mode == "empty"
+        else TARGETS * 2
+        if mode == "duplicate"
+        else (NotebookObservation("unknown"),)
+        if mode == "unknown"
+        else TARGETS
+    )
+    options = (
+        {"config": replace(prepared.run.configuration, timeout_seconds=True)}
+        if mode == "bool"
+        else {"max_file_bytes": 1}
+        if mode == "limit"
+        else {}
+    )
+    with pytest.raises(ValueError, match=r"ledger|timeout_seconds"):
+        ledger_module.create_notebook_execution_ledger(
+            tmp_path / "invalid",
+            prepared.binding,
+            prepared.directory,
+            targets,
+            () if mode == "expected" else EXPECTED,
+            project_root=ROOT,
+            **options,
+        )
+    assert not (tmp_path / "invalid").exists()
+
+
+def test_ledger_bounds_and_invalid_attempt_ids(
+    tmp_path: Path, prepared: _Prepared, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    path = _ledger(tmp_path, prepared, config=prepared.run.configuration)
+    for limit in (0, True, 1):
+        with pytest.raises(ValueError, match="max_file_bytes"):
+            _inspect_ledger(path, prepared, max_file_bytes=limit)
+    for limit in (0, True):
+        with pytest.raises(ValueError, match="max_attempts"):
+            _inspect_ledger(path, prepared, max_attempts=limit)
+    with pytest.raises(ValueError, match="attempt_id"):
+        _reserve(path, prepared, " ")
+    _reserve(path, prepared, "one")
+    _reserve(path, prepared, "two")
+    with pytest.raises(ValueError, match="max_attempts"):
+        _inspect_ledger(path, prepared, max_attempts=1)
+    monkeypatch.setattr(ledger_module, "DEFAULT_NOTEBOOK_LEDGER_ATTEMPTS", 2)
+    with pytest.raises(ValueError, match="max_attempts"):
+        _reserve(path, prepared, "three")
+    with pytest.raises(ValueError, match="max_file_bytes"):
+        ledger_module._write(tmp_path / "not-written", {}, 1)
+    assert not (tmp_path / "not-written").exists()
+
+
+@pytest.mark.parametrize("mode", ["settings", "capture", "reservation", "manifest"])
+def test_ledger_refuses_worker_or_reservation_drift(
+    tmp_path: Path, prepared: _Prepared, monkeypatch: pytest.MonkeyPatch, mode: str
+) -> None:
+    path = _ledger(tmp_path, prepared)
+
+    def execute(*_args: Any, **_kwargs: Any) -> NotebookPipelineRun:
+        if mode == "settings":
+            return replace(
+                prepared.run, configuration=replace(prepared.run.configuration, timeout_seconds=3)
+            )
+        if mode == "capture":
+            changed = replace(prepared.run.capture, content_sha256="0" * 64)
+            assert prepared.run.execution is not None
+            return replace(
+                prepared.run,
+                capture=changed,
+                execution=replace(prepared.run.execution, node_code_case_id=changed.content_sha256),
+            )
+        if mode == "reservation":
+            target = next((path / "attempts").iterdir())
+            _rewrite_ledger(target, reserved_at="2026-10-17T00:00:00+00:00")
+        else:
+            target = path / "manifest.json"
+            config = json.loads(target.read_text(encoding="utf-8"))["configuration"]
+            config["timeout_seconds"] = 3.0
+            _rewrite_ledger(target, configuration=config)
+            reservation = next((path / "attempts").iterdir())
+            _rewrite_ledger(
+                reservation,
+                manifest_sha256=json.loads(target.read_text(encoding="utf-8"))["content_sha256"],
+            )
+        return prepared.run
+
+    monkeypatch.setattr(ledger_module, "run_notebook_pipeline_capture", execute)
+    with pytest.raises(ValueError, match=r"ledger|binding|statically ready capture"):
+        _attempt(path, prepared)
+    assert not list((path / "results").iterdir())
+
+
+def test_ledger_drift_between_reservation_and_execution_stops_worker(
+    tmp_path: Path, prepared: _Prepared, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    path = _ledger(tmp_path, prepared)
+    original = ledger_module.reserve_notebook_pipeline_attempt
+
+    def reserve(*args: Any, **kwargs: Any) -> ledger_module.NotebookPipelineAttempt:
+        attempt = original(*args, **kwargs)
+        _rewrite_ledger(
+            next((path / "attempts").iterdir()), reserved_at="2026-10-17T00:00:00+00:00"
+        )
+        return attempt
+
+    monkeypatch.setattr(ledger_module, "reserve_notebook_pipeline_attempt", reserve)
+    monkeypatch.setattr(
+        ledger_module,
+        "run_notebook_pipeline_capture",
+        lambda *_a, **_k: pytest.fail("must not execute"),
+    )
+    with pytest.raises(ValueError, match="before execution"):
+        _attempt(path, prepared)
+
+
+@pytest.mark.parametrize("mode", ["symlink_directory", "escaped_directory", "escaped_file"])
+def test_ledger_rejects_inventory_redirection(
+    tmp_path: Path, prepared: _Prepared, monkeypatch: pytest.MonkeyPatch, mode: str
+) -> None:
+    path = _ledger(tmp_path, prepared)
+    target = path / ("manifest.json" if mode == "escaped_file" else "attempts")
+    if mode == "symlink_directory":
+        original_symlink = Path.is_symlink
+        monkeypatch.setattr(
+            Path, "is_symlink", lambda value: value == target or original_symlink(value)
+        )
+    else:
+        original_resolve = Path.resolve
+        monkeypatch.setattr(
+            Path,
+            "resolve",
+            lambda value, *args, **kwargs: (
+                tmp_path if value == target else original_resolve(value, *args, **kwargs)
+            ),
+        )
+    with pytest.raises(ValueError, match=r"ledger.*(local|contained)"):
+        _inspect_ledger(path, prepared)
+
+
+@pytest.mark.integration
+def test_ledger_reservation_survives_abrupt_parent_exit(
+    tmp_path: Path, prepared: _Prepared
+) -> None:
+    path = _ledger(tmp_path, prepared)
+    script = """
+import os
+import sys
+from pathlib import Path
+from notebook_to_kedro import plan_notebook_path
+from notebook_to_kedro.evaluation import (
+    create_notebook_source_binding, reserve_notebook_pipeline_attempt,
+)
+root, ledger, capture = map(Path, sys.argv[1:])
+contract = root / 'tests/fixtures/evaluation/pilots/customer_churn_v1/contract.json'
+binding = create_notebook_source_binding(
+    plan_notebook_path(
+        root / 'tests/fixtures/notebooks/pilots/customer_churn_v1/customer_churn.ipynb',
+        project_root=root,
+    ),
+    project_root=root, contract_path=contract,
+    expected_catalog_path=contract.with_name('expected_catalog.yml'),
+)
+reserve_notebook_pipeline_attempt(ledger, binding, capture, 'abrupt-exit', project_root=root)
+os._exit(17)
+"""
+    result = subprocess.run(
+        [sys.executable, "-c", script, str(ROOT), str(path), str(prepared.directory)],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+        timeout=60,
+        check=False,
+    )
+    assert result.returncode == 17, result.stderr
+    ledger = _inspect_ledger(path, prepared)
+    assert [(item.attempt_id, item.status) for item in ledger.attempts] == [
+        ("abrupt-exit", "unfinished")
+    ]
+    assert ledger_module.notebook_execution_ledger_summary(ledger)["total_reserved"] == 1
+    with pytest.raises(BehavioralBenchmarkArtifactError, match="already exists"):
+        _attempt(path, prepared, "abrupt-exit")

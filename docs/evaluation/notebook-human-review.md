@@ -136,5 +136,6 @@ The actual nine-node pilot prepares only a pending request and verifies promotio
 despite seventeen matched observations. Its committed review remains pending, with no real proof
 record or reviewed wrapper published and no whole-notebook LLM call.
 
-Next: obtain actual independent human review, and implement durable execution/campaign accounting
+Next: obtain actual independent human review, and build reviewed live campaign collection on the
+[offline execution ledger](notebook-execution-ledger.md)
 and verified model controls before the [live experiment](whole-notebook-experiment.md).

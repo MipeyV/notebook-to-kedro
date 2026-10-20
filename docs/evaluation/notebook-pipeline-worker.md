@@ -101,7 +101,7 @@ does not trust cached runtime outputs. Request hashes identify bytes, not runtim
 The [draft artifact API](notebook-pipeline-artifacts.md) now records local runtime controls before/after,
 publishes execution/comparison reports and checks compatible controls for its separate replay entry
 point. Calling this worker directly remains a new run, not a compatibility-checked artifact replay.
-Verified model controls, hardware limits and durable campaign accounting remain later gates.
+Verified model controls, hardware limits and reviewed live campaign collection remain later gates.
 
 ```python
 from notebook_to_kedro.evaluation import (
@@ -142,7 +142,8 @@ uv run --locked --python 3.12 pytest -o addopts= \
 ```
 
 A separate [review evidence API](notebook-human-review.md) now supports external declarations and
-operator-accepted wrappers, without granting actual pilot approval. Next: actual independent review
-and durable execution/campaign accounting.
+operator-accepted wrappers, without granting actual pilot approval. A separate [draft execution
+ledger](notebook-execution-ledger.md) now wraps offline runs with pre-worker reservations and
+all-attempt accounting. Next: actual independent review, verified model controls and reviewed live collection.
 Live collection still requires those gates and
 the remaining [whole-notebook protocol](whole-notebook-experiment.md); no model calls while pending.

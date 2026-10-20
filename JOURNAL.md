@@ -40,6 +40,60 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-10-21 - Offline notebook execution reservations and all-attempt accounting
+
+### Completed
+
+- Added a separate draft execution ledger for one exact source/body capture, ordered observation
+  adapters, typed draft expectations/comparison policies and frozen execution budgets. Creation
+  performs source/capture checks without body parsing, worker execution or model calls.
+- Added exclusively published reservations before static validation or worker preparation, with
+  explicit attempt IDs, UTC timestamps and manifest hashes. Completed result envelopes bind an
+  existing complete pipeline artifact to that exact reservation without overwriting evidence.
+- Added consent before execution I/O, frozen-capture checks, pre-publication source/reservation/setup
+  rechecks and offline inspection that reconstructs static/comparison evidence. Exposed the existing
+  artifact decoder for structured nested payloads without changing its format or validation.
+- Retained every reservation in summaries: unfinished, statically rejected, mismatched, matched and
+  typed worker failures. Interrupted callers and publication failures do not silently become
+  successful outcomes or get retried under the same identifier.
+- Added 62 targeted tests, including a fresh process that reserves and then exits abruptly without
+  cleanup. Its reservation survives inspection and cannot be reused. Negative tests retain all typed
+  failure states and reject changed setup, evidence, reservations, malformed inventories and JSON.
+- Routed the actual nine-node synthetic pilot through the ledger: seventeen observable matches
+  coexist with a deliberately unfinished reservation, both retained in the denominator. The original
+  source notebook, CSV, hand expectations, oracle controls and pending review metadata are unchanged.
+- Verified the complete Python 3.12.14 suite: 1,727 tests passed with 100% line/branch coverage
+  (7,165 statements, 2,090 branches, 76 completely covered files). A subsequent 62-case ledger run
+  also passed, including two boundary cases added during the complete run. Ruff, strict mypy
+  (142 files) and source/wheel builds pass.
+- Verified the final deterministic suites on Python 3.11.16 and 3.13.14: 1,684 passed and
+  45 deselected on each, with the same 100% line/branch coverage. The real abrupt-exit test is
+  integration-marked and runs in the primary suite; no live provider was called.
+
+### Decisions
+
+- Keep this local offline accounting separate from a reviewed live campaign collector. No model,
+  cloud, secret handling, prompt, default conversion or release-threshold change is introduced.
+- Reserve once and execute at most once per ID. An explicit new execution needs a new reservation;
+  existing standalone execution/replay APIs are not retroactively registered or imported as attempts.
+- `unfinished` means no published result, not proof of crash, timeout or termination. A running
+  process and an interrupted one cannot be distinguished from stored evidence alone.
+- Reuse canonical JSON, bounded reads and exclusive publication. This is not an authenticated,
+  append-only log, transactional database, OS sandbox or universal power-loss durability guarantee.
+  Concurrent writers and hard-crash temporary-file recovery still need operator care.
+
+### Open questions
+
+- The actual independent human review is still absent. Successful tests, matching outputs and
+  synthetic declarations do not approve the pilot or authorize whole-notebook model calls.
+- Reviewed live collection still needs verified model/server controls, campaign-wide identities,
+  registered provider/execution budgets and appropriate operator isolation/privacy policies.
+
+### Next step
+
+- Obtain the actual independent review and add verified local model controls before designing the
+  reviewed live collector. Preserve every registered attempt and all nine request slots there too.
+
 ## 2026-10-12 - Human-declared notebook review and explicit contract promotion
 
 ### Completed

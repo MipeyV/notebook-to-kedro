@@ -137,6 +137,7 @@ A separate [draft pipeline worker](notebook-pipeline-worker.md) now uses this ev
 consent-gated execution, typed observations and fresh behavioral replay. A separate
 [draft artifact API](notebook-pipeline-artifacts.md) now publishes runtime/comparison reports and
 checks local before/after controls for compatible replay. The separate [review evidence API](notebook-human-review.md)
-now prepares pending requests and checks operator-accepted wrappers. Next: actual human review and
-durable execution/campaign accounting. Live measurements still require human review
+now prepares pending requests and checks operator-accepted wrappers. A separate [draft execution
+ledger](notebook-execution-ledger.md) retains pre-worker reservations and all outcomes offline.
+Next: actual human review, verified model controls and reviewed live collection. Live measurements still require human review
 and the remaining [whole-notebook protocol](whole-notebook-experiment.md) controls.

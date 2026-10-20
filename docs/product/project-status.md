@@ -36,8 +36,12 @@ inspects reports without execution and requires compatible controls plus renewed
 Unknown identities and observed drift block replay. A separate [human review evidence API](../evaluation/notebook-human-review.md)
 now prepares unchecked requests, binds externally supplied declarations/proof bytes to the complete
 reference and validates explicit operator-accepted wrappers. It authenticates neither identity nor
-independence; the actual fixture still has no recorded independent human approval. Actual review,
-durable execution attempt accounting, verified model controls and live collection remain outstanding.
+independence; the actual fixture still has no recorded independent human approval.
+A separate [draft execution ledger](../evaluation/notebook-execution-ledger.md) now freezes one
+capture/observation/expectation/configuration setup, reserves every attempt before worker I/O and
+counts unfinished, rejected, failed and matched attempts without dropping reservations. It is
+offline local accounting, not an authenticated log or live campaign collector. Actual review,
+verified model controls and reviewed live collection remain outstanding.
 
 The deterministic V1 pipeline is operational for the supported notebook subset. It can analyze a notebook, build and validate a reviewable conversion plan, render a Markdown report, and generate a minimal Kedro project whose observable outputs are checked against reference notebooks.
 

@@ -25,10 +25,11 @@ Default serialized-file limit is 32 MiB, checked before publication; reads use a
 bounded read and strict JSON with duplicate-key/non-finite-constant rejection. A canonical SHA256
 binds the complete payload. Existing oversized/incomplete/corrupt files are never overwritten.
 
-Publication is an explicit step **after** execution. This increment does not reserve an execution
-attempt before starting the worker. A crash before publication leaves no complete runtime report;
-saved request reservations/raw responses remain in the capture. Durable campaign accounting and
-interrupted execution-attempt inventory are still separate future work.
+Publication through these standalone functions is an explicit step **after** execution; they do
+not reserve an attempt before starting the worker. A separate [draft execution ledger](notebook-execution-ledger.md)
+now wraps new offline executions with pre-worker reservations and exclusive linked results.
+A crash before result publication leaves no complete runtime report, but a completed ledger
+reservation remains unfinished. Existing standalone artifacts are not retroactively registered.
 
 ```python
 from notebook_to_kedro.evaluation import (
@@ -95,5 +96,5 @@ remain required; no cloud loader, tracker or secret handling is added.
 
 A separate [human-review evidence API](notebook-human-review.md) now binds declarations to the exact
 reference and accepts wrappers only after explicit operator trust and complete structural checks.
-No actual pilot approval is recorded. Next: actual review and durable execution/campaign accounting before
-the [whole-notebook live experiment](whole-notebook-experiment.md).
+No actual pilot approval is recorded. Next: actual review, verified model controls and reviewed
+campaign collection before the [whole-notebook live experiment](whole-notebook-experiment.md).

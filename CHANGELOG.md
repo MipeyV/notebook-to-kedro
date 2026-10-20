@@ -16,6 +16,10 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Separate draft notebook execution ledger: frozen capture/observation/expectation/budget setup,
+  exclusive pre-worker reservations, linked artifact publication and all-attempt offline summaries.
+  Unfinished attempts remain visible without inferred crash status or retries. No live collection,
+  fixture approval, authenticated audit log, OS sandbox or conversion-default change.
 - Separate human-review evidence API for complete notebook references: pending unchecked requests,
   exact source/reference/expectation identities, local proof-file binding, strict declared reviewer/
   worksheet gates and explicit operator-accepted reviewed-contract wrappers. No authenticated human
