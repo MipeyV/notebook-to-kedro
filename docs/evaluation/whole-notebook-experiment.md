@@ -25,9 +25,10 @@ A [draft artifact API](notebook-pipeline-artifacts.md) now persists runtime repo
 comparisons, records selected runtime controls before/after and refuses incompatible offline replay.
 A separate [human-review evidence API](notebook-human-review.md) now prepares pending requests and
 validates externally declared, operator-accepted review wrappers. The actual pilot remains pending;
-identity/independence are not authenticated. Actual independent review, verified model controls,
-durable execution/campaign accounting and live collection remain outstanding. No prior roadmap
-milestone is promoted.
+identity/independence are not authenticated. A separate [draft execution ledger](notebook-execution-ledger.md)
+now reserves offline pipeline attempts before worker I/O and retains every unfinished/published
+outcome for a frozen capture/setup. Actual independent review, verified model controls and reviewed
+live campaign collection remain outstanding. No prior roadmap milestone is promoted.
 
 ## Question and frozen scope
 

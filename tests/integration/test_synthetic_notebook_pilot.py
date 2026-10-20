@@ -35,11 +35,14 @@ from notebook_to_kedro.evaluation import (
     TableBehaviorValue,
     compare_notebook_pipeline_run,
     create_notebook_body_capture,
+    create_notebook_execution_ledger,
     create_notebook_pipeline_artifact,
     create_notebook_source_binding,
     load_notebook_body_capture,
+    load_notebook_execution_ledger,
     load_notebook_human_review,
     load_notebook_pipeline_artifact,
+    notebook_execution_ledger_summary,
     prepare_notebook_body_requests,
     prepare_notebook_human_review,
     promote_notebook_pipeline_artifact,
@@ -47,7 +50,8 @@ from notebook_to_kedro.evaluation import (
     replay_notebook_body_capture,
     replay_notebook_pipeline_artifact,
     reserve_notebook_body_request,
-    run_notebook_pipeline_capture,
+    reserve_notebook_pipeline_attempt,
+    run_notebook_pipeline_attempt,
     validate_notebook_body_batch,
     validate_source_bound_notebook_body_batch,
     write_notebook_human_review,
@@ -553,6 +557,36 @@ def _replay_pilot_artifact(
     return replay.run
 
 
+def _run_pilot_ledger(
+    directory: Path,
+    binding: NotebookSourceBinding,
+    capture: Path,
+    expectations: tuple[ExpectedBehaviorOutput, ...],
+) -> NotebookPipelineRun:
+    ledger_path = create_notebook_execution_ledger(
+        directory, binding, capture, _worker_observations(), expectations, project_root=ROOT
+    )
+    reserve_notebook_pipeline_attempt(
+        ledger_path, binding, capture, "synthetic-unfinished", project_root=ROOT
+    )
+    attempt = run_notebook_pipeline_attempt(
+        ledger_path,
+        binding,
+        capture,
+        "trusted-pipeline",
+        project_root=ROOT,
+        allow_untrusted_code_execution=True,
+    )
+    ledger = load_notebook_execution_ledger(ledger_path, binding, capture, project_root=ROOT)
+    summary = notebook_execution_ledger_summary(ledger)
+    assert summary["total_reserved"] == 2
+    assert summary["status_counts"] == {"unfinished": 1, "matched": 1}
+    assert attempt.artifact is not None
+    assert attempt.artifact.comparison.status == "matched"
+    assert len(attempt.artifact.comparison.outputs) == 17
+    return attempt.artifact.run
+
+
 @pytest.mark.end_to_end
 def test_pilot_fixed_bodies_execute_complete_pipeline_and_real_catalog(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, notebook_snapshot: dict[str, Any]
@@ -593,13 +627,7 @@ def test_pilot_fixed_bodies_execute_complete_pipeline_and_real_catalog(
     artifact_path = tmp_path / "execution.json"
     for iteration in range(2):
         if iteration == 0:
-            run = run_notebook_pipeline_capture(
-                capture_path,
-                binding,
-                _worker_observations(),
-                project_root=ROOT,
-                allow_untrusted_code_execution=True,
-            )
+            run = _run_pilot_ledger(tmp_path / "ledger", binding, capture_path, hand_expectations)
             _persist_pilot_artifact(
                 artifact_path,
                 create_notebook_pipeline_artifact(run, hand_expectations),
