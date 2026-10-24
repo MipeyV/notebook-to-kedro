@@ -40,6 +40,64 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-10-23 - Metadata-only notebook Ollama identity controls
+
+### Completed
+
+- Added a separate draft Ollama controls API with five recorded metadata responses: server version
+  and model inventory before/after one model-details query. Offline reconstruction retains exact
+  UTF-8 JSON strings, selected-target fingerprints and the complete show fingerprint.
+- Separated caller-requested temperature/seed/context/prediction controls, advertised opaque model
+  parameters/context capacity and explicitly unknown effective inference settings. These metadata
+  requests neither apply generation options nor load, download, invoke or choose a model.
+- Added consent before collection I/O, literal loopback normalization, proxy bypass and refused
+  redirects. Duplicate selected models, disagreeing aliases, cloud-style tags, reported remote
+  mappings, malformed metadata and transport errors fail closed without retries.
+- Shared the existing version/digest decoder while leaving legacy transport, node provenance and
+  artifact formats unchanged. Added bounded exclusive publication, strict JSON/shape checks and
+  reconstruction of all derived fields; rehashing a false summary does not bypass those checks.
+- Added identity-only compatibility checks for known stable version/digest samples, selected model
+  metadata, requested options and endpoints. Explicit context requests require sufficient known
+  advertised capacity. Effective settings remain unknown even when this identity gate passes.
+- Added five additional refusal cases during final review and centralized the same remote-marker
+  check for every recorded response, so offline reconstruction cannot bypass the collector's policy.
+- Verified 97 metadata-only tests with 100% line/branch coverage of the new module
+  (208 statements, 68 branches).
+  All metadata and HTTP openers are synthetic; no actual installed model/server was queried.
+  Ruff and strict mypy pass on 144 source/test files.
+- Verified the complete final Python 3.12.14 suite: 1,827 tests passed with 100% line/branch coverage
+  (7,376 statements, 2,158 branches, 77 completely covered files). Existing pilot, worker,
+  review and ledger tests remain unchanged and pass without model calls.
+- Verified the final deterministic suites on Python 3.11.16 and 3.13.14: 1,782 passed and
+  45 deselected on each, with 100% line/branch coverage (7,376 statements, 2,158 branches).
+- Restored the locked Python 3.12.14 development environment after the matrix.
+- Built the source distribution and wheel successfully; all 47 documentation navigation checks pass.
+
+### Decisions
+
+- Keep this proof separate from the execution ledger and future live campaign envelope. No notebook,
+  prompt, generation request or credentials are sent by this collector; no default provider,
+  prompt, static validator, fixture review or historical measurement is modified.
+- Retain unknown and observed drifting identities for inspection rather than inventing defaults.
+  Exact metadata fingerprints are conservative; unrelated model inventory and raw JSON whitespace
+  affect record integrity but not selected-control compatibility.
+- Treat samples as server advertisements, not authentication of the server, model blob bytes,
+  effective runner options or hardware. Point-in-time reads do not lock the server, and hashes do
+  not protect against a same-user adversary who can rewrite all evidence.
+
+### Open questions
+
+- Actual operator-selected metadata sampling and its binding to source/review/request identities
+  still belong to the reviewed campaign envelope. The existing ledger does not consume this proof.
+- Independent human review of the actual synthetic pilot is still absent. Tests, metadata agreement
+  and identity compatibility do not approve that fixture or authorize notebook-level model calls.
+
+### Next step
+
+- Obtain the actual review and implement the offline reviewed campaign envelope/preflight before
+  adding any live collection. Preserve all nine request slots, every registered attempt and explicit
+  provider/execution consent and budgets; do not retroactively upgrade earlier measurements.
+
 ## 2026-10-21 - Offline notebook execution reservations and all-attempt accounting
 
 ### Completed

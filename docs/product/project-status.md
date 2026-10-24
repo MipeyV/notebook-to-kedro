@@ -40,8 +40,12 @@ independence; the actual fixture still has no recorded independent human approva
 A separate [draft execution ledger](../evaluation/notebook-execution-ledger.md) now freezes one
 capture/observation/expectation/configuration setup, reserves every attempt before worker I/O and
 counts unfinished, rejected, failed and matched attempts without dropping reservations. It is
-offline local accounting, not an authenticated log or live campaign collector. Actual review,
-verified model controls and reviewed live collection remain outstanding.
+offline local accounting, not an authenticated log or live campaign collector. A separate
+[metadata-only Ollama controls API](../evaluation/notebook-ollama-controls.md) now preserves five
+server responses, selected model identities and requested/advertised settings, with offline
+reconstruction and identity-drift checks. Effective inference settings remain unknown; tests use
+only synthetic responses. Actual review, operator-selected model samples and their binding into
+reviewed live collection remain outstanding.
 
 The deterministic V1 pipeline is operational for the supported notebook subset. It can analyze a notebook, build and validate a reviewable conversion plan, render a Markdown report, and generate a minimal Kedro project whose observable outputs are checked against reference notebooks.
 

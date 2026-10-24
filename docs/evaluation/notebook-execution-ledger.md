@@ -124,5 +124,8 @@ Operator isolation, storage access and sensitive-data policies remain necessary.
 
 Trusted offline tests retain unfinished reservations, typed failures and actual nine-node pilot
 execution with seventeen matched observables. They do not approve the pilot or measure a model.
-Next gates are actual independent human review, verified local model controls and a separately
-designed reviewed live collector/campaign envelope. Keep all registered attempts visible there too.
+A separate [metadata-only Ollama controls API](notebook-ollama-controls.md) now records selected
+model advertisements and identity compatibility without inference. This ledger does not yet bind
+those controls or approve a model campaign. Next gates are actual independent human review,
+operator-selected metadata samples and a separately designed reviewed live collector/campaign
+envelope. Keep all registered attempts visible there too.

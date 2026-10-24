@@ -16,6 +16,12 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Separate draft notebook Ollama controls API: opt-in metadata-only loopback collection, bounded
+  raw response evidence, requested/advertised settings with effective options explicitly unknown,
+  exclusive offline publication and strict selected-identity compatibility checks. The new collector
+  bypasses environment proxies and rejects redirects/reported remote models. No inference, model
+  download, actual pilot approval, ledger/provider reconfiguration or historical-artifact migration
+  is introduced.
 - Separate draft notebook execution ledger: frozen capture/observation/expectation/budget setup,
   exclusive pre-worker reservations, linked artifact publication and all-attempt offline summaries.
   Unfinished attempts remain visible without inferred crash status or retries. No live collection,

@@ -506,6 +506,13 @@ def _ollama_metadata(base_url: str, model_name: str, timeout_seconds: float) -> 
     base = _normalize_local_base_url(base_url)
     version_payload = _http_json(f"{base}/api/version", timeout_seconds)
     tags_payload = _http_json(f"{base}/api/tags", timeout_seconds)
+    return _ollama_model_identity(version_payload, tags_payload, model_name)
+
+
+def _ollama_model_identity(
+    version_payload: dict[str, object], tags_payload: dict[str, object], model_name: str
+) -> tuple[str, str]:
+    """Decode the existing version/tag identity without transport or inference I/O."""
     version = _string(version_payload.get("version"), "Ollama version")
     models = tags_payload.get("models")
     if not isinstance(models, list):

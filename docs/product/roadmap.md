@@ -35,8 +35,12 @@ unchecked pending requests and externally declared, operator-accepted contract w
 pilot remains pending; no human identity is authenticated or approval invented. A separate
 [draft execution ledger](../evaluation/notebook-execution-ledger.md) now reserves attempts before
 worker I/O and retains every published or unfinished outcome for one frozen capture/setup.
-This is local offline accounting, not the reviewed live campaign collector. Next are actual human
-review, verified model controls and reviewed live collection; no live adapter is added.
+This is local offline accounting, not the reviewed live campaign collector. A separate
+[metadata-only Ollama controls API](../evaluation/notebook-ollama-controls.md) now captures
+server-reported identities and selected settings with offline compatibility checks. It does not
+verify effective inference options or integrate model calls into the ledger. Next are actual human
+review, operator-selected metadata samples and the reviewed live collection envelope; no live
+notebook-generation adapter is added.
 Existing roadmap checkboxes are not promoted
 by this preparation work.
 

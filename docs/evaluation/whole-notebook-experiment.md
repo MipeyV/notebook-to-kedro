@@ -27,8 +27,11 @@ A separate [human-review evidence API](notebook-human-review.md) now prepares pe
 validates externally declared, operator-accepted review wrappers. The actual pilot remains pending;
 identity/independence are not authenticated. A separate [draft execution ledger](notebook-execution-ledger.md)
 now reserves offline pipeline attempts before worker I/O and retains every unfinished/published
-outcome for a frozen capture/setup. Actual independent review, verified model controls and reviewed
-live campaign collection remain outstanding. No prior roadmap milestone is promoted.
+outcome for a frozen capture/setup. A separate [metadata-only Ollama controls API](notebook-ollama-controls.md)
+now preserves server-reported identities, requested/advertised settings and unknown effective
+options, with offline reconstruction and identity compatibility. Actual independent review,
+operator-selected samples and their binding into reviewed live campaign collection remain
+outstanding. No prior roadmap milestone is promoted.
 
 ## Question and frozen scope
 
