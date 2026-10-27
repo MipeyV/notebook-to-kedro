@@ -77,6 +77,7 @@ the dedicated experiment reports for their frozen settings, decisions and limita
 | [Notebook human review evidence](evaluation/notebook-human-review.md) | Pending requests, externally declared review proofs and explicit operator-accepted contract wrappers; no automatic fixture approval. |
 | [Draft notebook execution ledger](evaluation/notebook-execution-ledger.md) | Pre-worker reservations, exclusive linked outcomes and all-attempt offline accounting, including unfinished attempts; no live campaign runner. |
 | [Draft notebook Ollama controls](evaluation/notebook-ollama-controls.md) | Opt-in metadata-only samples, raw evidence, requested/advertised/unknown effective settings and offline identity compatibility; no inference. |
+| [Offline notebook campaign preflight](evaluation/notebook-campaign-preflight.md) | Reviewed evidence, exact proposed chat requests/budgets and exclusive all-slot capture accounting; no dispatcher or inference. |
 | [Node code benchmark](evaluation/node-code-benchmark.md) | Static acceptance, AST fidelity and historical prompt/validator experiments. |
 | [Behavioral code benchmark](evaluation/behavioral-code-benchmark.md) | Consent-gated execution, observable comparisons and archived runs. |
 | [Body-only benchmark and replay](evaluation/node-body-benchmark.md) | Body artifacts, replay and compatible comparisons. |

@@ -114,8 +114,9 @@ cannot prove that a local server itself never proxies traffic or lies about remo
 Operator isolation, actual server configuration and privacy controls remain necessary.
 
 Tests use synthetic metadata and fake HTTP openers only. Actual independent human review of the
-[pilot](synthetic-pilot-review.md) remains pending. Next: collect operator-selected model controls
-explicitly and design the reviewed campaign envelope binding their hashes to source/review,
-prompt/request identity and [all registered attempts](notebook-execution-ledger.md). The existing
+[pilot](synthetic-pilot-review.md) remains pending. An [offline campaign envelope](notebook-campaign-preflight.md)
+now binds a supplied reviewed reference and model sample to exact proposed requests, budgets and
+all-slot capture accounting. Next: actual review, operator-selected samples and consent-gated
+dispatch linked to [all registered execution attempts](notebook-execution-ledger.md). The existing
 execution ledger does not yet consume these model controls or send model requests.
 No whole-notebook model calls are authorized by this increment.

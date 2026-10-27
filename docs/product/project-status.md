@@ -44,8 +44,11 @@ offline local accounting, not an authenticated log or live campaign collector. A
 [metadata-only Ollama controls API](../evaluation/notebook-ollama-controls.md) now preserves five
 server responses, selected model identities and requested/advertised settings, with offline
 reconstruction and identity-drift checks. Effective inference settings remain unknown; tests use
-only synthetic responses. Actual review, operator-selected model samples and their binding into
-reviewed live collection remain outstanding.
+only synthetic responses. An [offline campaign envelope](../evaluation/notebook-campaign-preflight.md)
+now binds externally reviewed reference evidence, supplied model controls, exact proposed chat
+bodies and budgets to an exclusive all-slot capture. Reinspection rechecks source/review evidence;
+missing, unfinished and failed requests remain visible. No requests are dispatched or workers run.
+Actual review, operator-selected samples and consent-gated linked live collection remain outstanding.
 
 The deterministic V1 pipeline is operational for the supported notebook subset. It can analyze a notebook, build and validate a reviewable conversion plan, render a Markdown report, and generate a minimal Kedro project whose observable outputs are checked against reference notebooks.
 

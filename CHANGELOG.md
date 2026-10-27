@@ -16,6 +16,10 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Separate offline notebook campaign preflight: reverified reviewed reference/proof/source bindings,
+  selected model metadata, exact proposed chat bodies/options, fixed budgets and exclusive all-slot
+  response/error accounting. Interrupted reservations remain visible. No provider dispatch, worker
+  execution, actual pilot approval or changes to prompts, validators and existing artifact formats.
 - Separate draft notebook Ollama controls API: opt-in metadata-only loopback collection, bounded
   raw response evidence, requested/advertised settings with effective options explicitly unknown,
   exclusive offline publication and strict selected-identity compatibility checks. The new collector
