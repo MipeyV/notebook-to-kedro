@@ -40,6 +40,67 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-10-27 - Offline reviewed notebook campaign preflight
+
+### Completed
+
+- Added a separate draft campaign envelope tying operator-accepted review, reference artifact,
+  sources/catalog/data, hand expectations, worker configuration and supplied Ollama metadata to
+  one fixed, ordered body request per task and one complete-pipeline attempt budget.
+- Frozen exact proposed chat JSON and byte hashes: prompt, schema, assembly, parameter-evidence
+  and validator versions, model, loopback endpoint, requested generation options and budgets.
+  Context/prediction budgets must be explicit, positive and compatible with advertised capacity.
+- Added exclusive campaign directories, existing-format body captures, reference/proof/source
+  rechecks before reservations and raw/error publication without parsing the new outcomes.
+  Inventory summaries retain every planned, reserved, published and unfinished request. Complete
+  inventory is not static readiness, behavioral success or evidence of actual provider dispatch.
+- Added synthetic gate/fake-provider tests reusing the existing review fixture. Tests cover exact
+  request reconstruction, rehashed request tampering, changed evidence/model settings, unknown
+  identities, incompatible context, bounded files, duplicate writes and publication interruption.
+- Added a dedicated indexed protocol document and updated current status, roadmap and related
+  evaluation documents without promoting existing roadmap checkboxes or changing measurements.
+- Verified the final complete Python 3.12.14 suite: 1,872 passed with 100% line/branch coverage
+  (7,507 statements, 2,186 branches, 78 completely covered files). The new module contributes
+  131 statements and 28 branches, fully covered by 44 added synthetic campaign cases.
+- Verified the deterministic Python 3.13.14 suite with the installed Microsoft Store interpreter:
+  1,827 passed, 45 deselected, with the same 100% line/branch coverage. Restored the locked
+  Python 3.12.14 development environment afterward (98 installed packages).
+- Initial complete execution had two existing Jupyter import-cell timeouts (1,870 passed,
+  2 failed, still 100% coverage). All four existing end-to-end tests then passed separately
+  in 21.64 seconds; the subsequent complete run passed without changing their 60-second timeout.
+- Ruff check/format and strict mypy pass (145 source/test files); 48 documentation navigation
+  checks pass. Source distribution and wheel build successfully and include the campaign module.
+
+### Decisions
+
+- Keep this an offline preflight/capture increment. No HTTP or inference dispatcher, worker,
+  automatic retry/resume, metadata refresh, CLI or conversion-default change. Prompts, strict AST
+  validation, provider behavior, original fixture metadata and historical formats stay unchanged.
+- Actual independent human review of the pilot is still pending. Synthetic declarations test
+  gates only; they neither authenticate a reviewer nor approve the fixture. Supplied metadata
+  remains an advertisement, not effective inference options or a freshness attestation.
+- Reuse existing review and capture validators; do not duplicate artifact parsing. Inspection
+  revalidates reference static evidence but never parses or executes newly collected outcomes.
+- Directory creation is not transactional. Partial layouts fail closed; no overwrite/resume is
+  added. Capture files have a 16 MiB hard ceiling, with independent per-file/request limits.
+- The separate execution ledger is not automatically attached. A campaign inventory describes
+  one directory, not an authenticated registry of every experiment or an enforced global budget.
+
+### Open questions
+
+- Windows Application Control refused the installed Python 3.11.16 process (OS error 4551),
+  through both the pytest launcher and `python -m pytest`. No 3.11 result is claimed for this
+  increment, no security policy is changed and no alternate interpreter is downloaded. The
+  existing Linux PR matrix remains responsible for confirming this version.
+- Real review, current/post-generation model samples, renewed provider/execution consent,
+  request dispatch and linked all-attempt execution evidence remain separate next gates.
+
+### Next step
+
+- Implement an offline-tested dispatcher that consumes the frozen request bytes, enforces renewed
+  consent and records controls before/after collection, then links complete capture to execution
+  accounting. Do not start actual model calls until independently reviewed pilot evidence exists.
+
 ## 2026-10-23 - Metadata-only notebook Ollama identity controls
 
 ### Completed

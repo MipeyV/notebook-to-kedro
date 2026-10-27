@@ -38,9 +38,12 @@ worker I/O and retains every published or unfinished outcome for one frozen capt
 This is local offline accounting, not the reviewed live campaign collector. A separate
 [metadata-only Ollama controls API](../evaluation/notebook-ollama-controls.md) now captures
 server-reported identities and selected settings with offline compatibility checks. It does not
-verify effective inference options or integrate model calls into the ledger. Next are actual human
-review, operator-selected metadata samples and the reviewed live collection envelope; no live
-notebook-generation adapter is added.
+verify effective inference options or integrate model calls into the ledger. An
+[offline campaign envelope](../evaluation/notebook-campaign-preflight.md) now binds a supplied
+reviewed reference and model sample to exact proposed chat bodies, budgets and all-slot capture
+inventory. It refuses pending review; synthetic tests do not approve the actual pilot. Next are
+actual human review, operator-selected metadata samples and a consent-gated dispatcher consuming
+those exact requests with linked execution evidence; no live notebook-generation adapter is added.
 Existing roadmap checkboxes are not promoted
 by this preparation work.
 

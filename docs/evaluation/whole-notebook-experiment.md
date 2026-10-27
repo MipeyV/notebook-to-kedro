@@ -29,9 +29,12 @@ identity/independence are not authenticated. A separate [draft execution ledger]
 now reserves offline pipeline attempts before worker I/O and retains every unfinished/published
 outcome for a frozen capture/setup. A separate [metadata-only Ollama controls API](notebook-ollama-controls.md)
 now preserves server-reported identities, requested/advertised settings and unknown effective
-options, with offline reconstruction and identity compatibility. Actual independent review,
-operator-selected samples and their binding into reviewed live campaign collection remain
-outstanding. No prior roadmap milestone is promoted.
+options, with offline reconstruction and identity compatibility. An
+[offline campaign envelope](notebook-campaign-preflight.md) now binds externally reviewed reference
+evidence, supplied metadata, exact proposed chat requests and budgets to exclusive all-slot capture
+accounting. It does not dispatch requests, run a worker or approve the actual pilot. Actual review,
+operator-selected samples and consent-gated linked live collection remain outstanding. No prior
+roadmap milestone is promoted.
 
 ## Question and frozen scope
 

@@ -18,19 +18,30 @@ from notebook_to_kedro.evaluation import (
     ComparisonSpec,
     ExpectedBehaviorOutput,
     NotebookBodyRecord,
+    NotebookCampaignInputs,
     NotebookObservation,
+    NotebookOllamaControls,
+    NotebookOllamaResponse,
+    NotebookOllamaSettings,
     NotebookPipelineArtifact,
     NotebookPipelineRun,
     NotebookSourceBinding,
     ScalarBehaviorValue,
     collect_notebook_runtime_identity,
     create_notebook_body_capture,
+    create_notebook_campaign,
+    create_notebook_ollama_controls,
     create_notebook_pipeline_artifact,
     create_notebook_source_binding,
     load_notebook_body_capture,
+    load_notebook_campaign,
+    notebook_campaign_summary,
+    prepare_notebook_campaign,
     record_notebook_body_response,
+    record_notebook_campaign_response,
     replay_notebook_body_capture,
     reserve_notebook_body_request,
+    reserve_notebook_campaign_request,
     write_notebook_pipeline_artifact,
 )
 from notebook_to_kedro.evaluation import notebook_review as review
@@ -39,6 +50,7 @@ from notebook_to_kedro.evaluation.behavioral_execution import _result_from_worke
 from notebook_to_kedro.evaluation.notebook_execution import NOTEBOOK_PIPELINE_EXECUTION_VERSION
 from notebook_to_kedro.exceptions import BehavioralBenchmarkArtifactError
 from notebook_to_kedro.generation.code import NodeBodyResponse
+from notebook_to_kedro.generation.code.body_prompting import render_node_body_prompt
 
 ROOT = Path(__file__).resolve().parents[3]
 EXPECTED = (ExpectedBehaviorOutput("accuracy", ScalarBehaviorValue(1.0), ComparisonSpec("exact")),)
@@ -494,3 +506,354 @@ def test_wrapper_integrity_reference_and_proof_checks(fixture: _Fixture) -> None
         review.load_reviewed_notebook_contract(
             path, fixture.baseline_path, fixture.binding, fixture.capture, project_root=fixture.root
         )
+
+
+def _campaign_controls(**kwargs: Any) -> NotebookOllamaControls:
+    model = "synthetic-campaign-model:test-only"
+    payloads = {
+        "version_before": {"version": "synthetic-server"},
+        "version_after": {"version": "synthetic-server"},
+        "tags_before": {"models": [{"name": model, "digest": "1" * 64}]},
+        "tags_after": {"models": [{"name": model, "digest": "1" * 64}]},
+        "show": {"model_info": {"general.architecture": "test", "test.context_length": 8192}},
+    }
+    return create_notebook_ollama_controls(
+        model,
+        tuple(
+            NotebookOllamaResponse(role, json.dumps(payloads[role]))
+            for role in ("version_before", "tags_before", "show", "version_after", "tags_after")
+        ),
+        requested=kwargs.pop(
+            "requested", NotebookOllamaSettings(seed=7, num_ctx=4096, num_predict=1024)
+        ),
+        **kwargs,
+    )
+
+
+@pytest.fixture
+def campaign_inputs(fixture: _Fixture) -> NotebookCampaignInputs:
+    wrapper = fixture.promote(fixture.recorded())
+    path = review.write_reviewed_notebook_contract(fixture.root / "reviewed.json", wrapper)
+    return NotebookCampaignInputs(
+        fixture.binding, path, fixture.baseline_path, fixture.capture, fixture.root
+    )
+
+
+def test_campaign_freezes_exact_requests_without_inference(
+    campaign_inputs: NotebookCampaignInputs, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def forbidden(*_args: Any, **_kwargs: Any) -> None:
+        pytest.fail("campaign preparation must not execute code or query any service")
+
+    monkeypatch.setattr("urllib.request.urlopen", forbidden)
+    monkeypatch.setattr("notebook_to_kedro.evaluation.notebook_ollama._fetch_metadata", forbidden)
+    monkeypatch.setattr("notebook_to_kedro.evaluation.notebook_execution._start_worker", forbidden)
+    controls = _campaign_controls()
+    prepared = prepare_notebook_campaign(campaign_inputs, controls)
+    root = create_notebook_campaign(
+        Path(campaign_inputs.project_root) / "campaign", campaign_inputs, controls
+    )
+    inspected = load_notebook_campaign(root, campaign_inputs, controls)
+    assert inspected.campaign == prepared
+    assert prepared.pipeline_attempt_budget == 1
+    assert prepared.source_binding_sha256 == campaign_inputs.binding.content_sha256
+    assert prepared.ollama_controls_sha256 == controls.content_sha256
+    request = prepared.requests[0]
+    body = json.loads(request.chat_body_json)
+    assert body["model"] == controls.model_name
+    assert body["options"] == {"temperature": 0.0, "seed": 7, "num_ctx": 4096, "num_predict": 1024}
+    assert body["messages"] == [
+        {"role": "user", "content": render_node_body_prompt(campaign_inputs.binding.requests[0])}
+    ]
+    assert body["format"]["type"] == "object"
+    assert body["think"] is body["stream"] is False
+    assert request.chat_body_sha256 == hashlib.sha256(request.chat_body_json.encode()).hexdigest()
+    summary = notebook_campaign_summary(inspected)
+    assert summary["planned_requests"] == 1
+    assert summary["reserved_requests"] == summary["published_outcomes"] == 0
+    assert summary["slots"] == [
+        {"request_id": request.request_id, "task_id": request.task_id, "status": "not_requested"}
+    ]
+    assert summary["missing_request_ids"] == [request.request_id]
+    assert summary["unfinished_request_ids"] == []
+    assert not summary["complete_inventory"]
+    assert (
+        json.loads((Path(campaign_inputs.project_root) / "contract.json").read_text())["review"][
+            "status"
+        ]
+        == "pending"
+    )
+    with pytest.raises(FileExistsError):
+        create_notebook_campaign(root, campaign_inputs, controls)
+
+
+@pytest.mark.parametrize("mode", ["response", "error", "interrupted", "publication_failure"])
+def test_campaign_retains_every_reserved_outcome(
+    campaign_inputs: NotebookCampaignInputs, monkeypatch: pytest.MonkeyPatch, mode: str
+) -> None:
+    controls = _campaign_controls()
+    root = create_notebook_campaign(
+        Path(campaign_inputs.project_root) / "campaign", campaign_inputs, controls
+    )
+    request = campaign_inputs.binding.requests[0]
+    record = NotebookBodyRecord(request.request_id, raw_response="not even valid JSON")
+    with pytest.raises(ValueError, match="reservation"):
+        record_notebook_campaign_response(root, campaign_inputs, controls, record)
+    reserve_notebook_campaign_request(root, campaign_inputs, controls, request.request_id)
+    with pytest.raises(BehavioralBenchmarkArtifactError, match="already exists"):
+        reserve_notebook_campaign_request(root, campaign_inputs, controls, request.request_id)
+    if mode == "error":
+        record = NotebookBodyRecord(
+            request.request_id, provider_error=("synthetic_timeout", "test")
+        )
+    if mode == "publication_failure":
+
+        def failed_write(*_args: Any, **_kwargs: Any) -> None:
+            raise OSError("synthetic disk failure")
+
+        with monkeypatch.context() as patch:
+            patch.setattr("notebook_to_kedro.evaluation.notebook_capture._write", failed_write)
+            with pytest.raises(OSError, match="synthetic disk"):
+                record_notebook_campaign_response(root, campaign_inputs, controls, record)
+    elif mode != "interrupted":
+        # A fake provider result is persisted without schema/static validation or replacement.
+        record_notebook_campaign_response(root, campaign_inputs, controls, record)
+        with pytest.raises(BehavioralBenchmarkArtifactError, match="already exists"):
+            record_notebook_campaign_response(root, campaign_inputs, controls, record)
+    evidence = load_notebook_campaign(root, campaign_inputs, controls)
+    summary = notebook_campaign_summary(evidence)
+    unfinished = mode in ("interrupted", "publication_failure")
+    assert summary["reserved_requests"] == 1
+    assert summary["published_outcomes"] == (0 if unfinished else 1)
+    assert summary["complete_inventory"] is not unfinished
+    assert summary["unfinished_request_ids"] == ([request.request_id] if unfinished else [])
+    slots = cast("list[dict[str, str]]", summary["slots"])
+    assert slots[0]["status"] == (
+        "unfinished" if unfinished else "provider_error" if mode == "error" else "raw_response"
+    )
+    assert evidence.capture.records == (() if unfinished else (record,))
+
+
+@pytest.mark.parametrize("field", ["num_ctx", "num_predict"])
+def test_campaign_requires_explicit_generation_budgets(
+    campaign_inputs: NotebookCampaignInputs, field: str
+) -> None:
+    controls = _campaign_controls(
+        requested=NotebookOllamaSettings(
+            num_ctx=None if field == "num_ctx" else 4096,
+            num_predict=None if field == "num_predict" else 1024,
+        )
+    )
+    with pytest.raises(ValueError, match="explicit num_ctx and num_predict"):
+        prepare_notebook_campaign(campaign_inputs, controls)
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("provider_timeout_seconds", True),
+        ("provider_timeout_seconds", 0),
+        ("provider_timeout_seconds", float("inf")),
+        ("provider_timeout_seconds", float("nan")),
+        ("provider_timeout_seconds", "120"),
+        ("max_request_bytes", False),
+        ("max_request_bytes", 0),
+        ("max_request_bytes", 1),
+        ("max_response_bytes", 0),
+        ("max_capture_file_bytes", 16_777_217),
+        ("max_capture_file_bytes", 1),
+        ("max_file_bytes", True),
+        ("max_file_bytes", 1),
+    ],
+)
+def test_campaign_rejects_invalid_budgets_before_creating_directory(
+    campaign_inputs: NotebookCampaignInputs, field: str, value: Any
+) -> None:
+    path = Path(campaign_inputs.project_root) / "invalid-campaign"
+    with pytest.raises(ValueError, match=r"number|finite|positive|max_|hard limit"):
+        create_notebook_campaign(path, campaign_inputs, _campaign_controls(), **{field: value})
+    assert not path.exists()
+
+
+@pytest.mark.parametrize(
+    "target", ["proof.md", "reference.ipynb", "baseline.json", "reviewed.json"]
+)
+def test_campaign_rechecks_external_evidence_before_reservation(
+    campaign_inputs: NotebookCampaignInputs, target: str
+) -> None:
+    controls = _campaign_controls()
+    root = create_notebook_campaign(
+        Path(campaign_inputs.project_root) / "campaign", campaign_inputs, controls
+    )
+    file = Path(campaign_inputs.project_root) / target
+    file.write_bytes(file.read_bytes() + b"changed")
+    with pytest.raises(ValueError, match=r"changed|Extra data|source hash"):
+        reserve_notebook_campaign_request(
+            root, campaign_inputs, controls, campaign_inputs.binding.requests[0].request_id
+        )
+    assert not list((root / "capture" / "attempts").iterdir())
+
+
+def test_campaign_refuses_pending_review_and_changed_model_controls(
+    fixture: _Fixture, campaign_inputs: NotebookCampaignInputs
+) -> None:
+    controls = _campaign_controls()
+    root = create_notebook_campaign(fixture.root / "campaign", campaign_inputs, controls)
+    changed = _campaign_controls(requested=NotebookOllamaSettings(num_ctx=4096, num_predict=512))
+    with pytest.raises(ValueError, match="reconstructed evidence"):
+        load_notebook_campaign(root, campaign_inputs, changed)
+    data = json.loads(Path(campaign_inputs.reviewed_contract_path).read_text())
+    data["review"] = review.notebook_human_review_to_dict(fixture.pending())
+    Path(campaign_inputs.reviewed_contract_path).write_text(json.dumps(review._seal(data)))
+    with pytest.raises(ValueError, match="approved independent human"):
+        load_notebook_campaign(root, campaign_inputs, controls)
+
+
+@pytest.mark.parametrize(
+    "field",
+    ["schema_version", "content_sha256", "ollama_controls_sha256", "requests", "extra"],
+)
+def test_campaign_rejects_rehashed_tampering(
+    campaign_inputs: NotebookCampaignInputs, field: str
+) -> None:
+    controls = _campaign_controls()
+    root = create_notebook_campaign(
+        Path(campaign_inputs.project_root) / "campaign", campaign_inputs, controls
+    )
+    path = root / "manifest.json"
+    data = json.loads(path.read_text())
+    data[field] = [] if field == "requests" else "changed"
+    data = review._seal(data) if field != "content_sha256" else data
+    path.write_text(json.dumps(data))
+    with pytest.raises(ValueError, match="reconstructed evidence"):
+        load_notebook_campaign(root, campaign_inputs, controls)
+
+
+@pytest.mark.parametrize(
+    "mode", ["layout", "escape", "manifest_size", "capture_controls", "unknown"]
+)
+def test_campaign_inventory_guards(
+    campaign_inputs: NotebookCampaignInputs, monkeypatch: pytest.MonkeyPatch, mode: str
+) -> None:
+    controls = _campaign_controls()
+    root = create_notebook_campaign(
+        Path(campaign_inputs.project_root) / "campaign", campaign_inputs, controls
+    )
+    if mode == "layout":
+        (root / "unexpected").touch()
+    elif mode == "escape":
+        original = Path.resolve
+        monkeypatch.setattr(
+            Path,
+            "resolve",
+            lambda self: root.parent if self == root / "capture" else original(self),
+        )
+    elif mode == "manifest_size":
+        with pytest.raises(ValueError, match="max_file_bytes"):
+            load_notebook_campaign(root, campaign_inputs, controls, max_file_bytes=1)
+        return
+    elif mode == "capture_controls":
+        path = root / "capture" / "manifest.json"
+        data = json.loads(path.read_text())
+        data["model_name"] = "wrong-model"
+        path.write_text(json.dumps(data))
+    else:
+        with pytest.raises(ValueError, match="unknown"):
+            reserve_notebook_campaign_request(root, campaign_inputs, controls, "unknown")
+        return
+    with pytest.raises(ValueError, match=r"layout|contained|controls mismatch"):
+        load_notebook_campaign(root, campaign_inputs, controls)
+
+
+def test_campaign_fake_provider_reference_flow_preserves_raw_before_static_validation(
+    campaign_inputs: NotebookCampaignInputs,
+) -> None:
+    controls = _campaign_controls()
+    root = create_notebook_campaign(
+        Path(campaign_inputs.project_root) / "campaign", campaign_inputs, controls
+    )
+    planned = load_notebook_campaign(root, campaign_inputs, controls).campaign.requests
+    calls = []
+    sources = {
+        item.chat_body_json: source
+        for item, source in zip(planned, campaign_inputs.binding.requests, strict=True)
+    }
+
+    def fake_provider(body_json: str) -> str:
+        inspected = load_notebook_campaign(root, campaign_inputs, controls)
+        source_request = sources[body_json]
+        assert source_request.request_id in inspected.capture.unfinished_request_ids
+        calls.append(source_request.request_id)
+        return NodeBodyResponse(
+            "1.0", source_request.request_id, source_request.task_id, source_request.raw_source
+        ).to_json()
+
+    for planned_request in planned:
+        reserve_notebook_campaign_request(
+            root, campaign_inputs, controls, planned_request.request_id
+        )
+
+        raw = fake_provider(planned_request.chat_body_json)
+        record_notebook_campaign_response(
+            root, campaign_inputs, controls, NotebookBodyRecord(planned_request.request_id, raw)
+        )
+    evidence = load_notebook_campaign(root, campaign_inputs, controls)
+    assert calls == [request.request_id for request in planned]
+    assert notebook_campaign_summary(evidence)["complete_inventory"] is True
+    replayed = replay_notebook_body_capture(
+        root / "capture", campaign_inputs.binding, project_root=campaign_inputs.project_root
+    )
+    assert replayed.batch.accepted_count == replayed.batch.planned_count == len(planned)
+    assert replayed.batch.static_ready
+
+
+@pytest.mark.parametrize("mode", ["unknown", "drift", "insufficient"])
+def test_campaign_model_identity_gate_precedes_publication(
+    campaign_inputs: NotebookCampaignInputs, mode: str
+) -> None:
+    controls = _campaign_controls()
+    records = list(controls.responses)
+    index = 1 if mode == "unknown" else 3
+    data = json.loads(records[index].raw_response)
+    if mode == "unknown":
+        data["models"] = []
+    elif mode == "drift":
+        data["version"] = "changed"
+    if mode != "insufficient":
+        records[index] = replace(records[index], raw_response=json.dumps(data))
+    controls = create_notebook_ollama_controls(
+        controls.model_name,
+        records,
+        requested=replace(controls.requested, num_ctx=16384)
+        if mode == "insufficient"
+        else controls.requested,
+    )
+    path = Path(campaign_inputs.project_root) / "invalid-model"
+    with pytest.raises(ValueError, match=r"known versions|changed|sufficient"):
+        create_notebook_campaign(path, campaign_inputs, controls)
+    assert not path.exists()
+
+
+@pytest.mark.parametrize(
+    "field", ["options", "messages", "stream", "format", "source_request_sha256"]
+)
+def test_campaign_reconstructs_tampered_requests_even_with_new_hashes(
+    campaign_inputs: NotebookCampaignInputs, field: str
+) -> None:
+    controls = _campaign_controls()
+    root = create_notebook_campaign(
+        Path(campaign_inputs.project_root) / "campaign", campaign_inputs, controls
+    )
+    path = root / "manifest.json"
+    data = json.loads(path.read_text())
+    request = data["requests"][0]
+    if field == "source_request_sha256":
+        request[field] = "0" * 64
+    else:
+        body = json.loads(request["chat_body_json"])
+        body[field] = {"temperature": 1} if field == "options" else True
+        request["chat_body_json"] = json.dumps(body)
+        request["chat_body_sha256"] = hashlib.sha256(request["chat_body_json"].encode()).hexdigest()
+    path.write_text(json.dumps(review._seal(data)))
+    with pytest.raises(ValueError, match="reconstructed evidence"):
+        load_notebook_campaign(root, campaign_inputs, controls)

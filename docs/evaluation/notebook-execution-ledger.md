@@ -126,6 +126,8 @@ Trusted offline tests retain unfinished reservations, typed failures and actual 
 execution with seventeen matched observables. They do not approve the pilot or measure a model.
 A separate [metadata-only Ollama controls API](notebook-ollama-controls.md) now records selected
 model advertisements and identity compatibility without inference. This ledger does not yet bind
-those controls or approve a model campaign. Next gates are actual independent human review,
-operator-selected metadata samples and a separately designed reviewed live collector/campaign
-envelope. Keep all registered attempts visible there too.
+those controls or approve a model campaign. An [offline campaign envelope](notebook-campaign-preflight.md)
+now binds a supplied reviewed reference and model sample to exact proposed requests and all-slot
+capture inventory; it does not run or automatically attach this ledger. Next gates are actual
+review, operator-selected samples and a consent-gated dispatcher with linked execution evidence.
+Keep all registered attempts visible there too.
