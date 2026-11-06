@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import ast
+import json
 from dataclasses import dataclass
 from keyword import iskeyword
 from pathlib import Path
@@ -10,11 +11,18 @@ from textwrap import indent
 from typing import TYPE_CHECKING, cast
 
 from notebook_to_kedro.exceptions import ConversionPlanValidationError, ProjectGenerationError
+from notebook_to_kedro.generation.kedro.profiles import (
+    DEFAULT_KEDRO_PROFILE,
+    KedroArchitectureProfile,
+    resolve_node_names,
+)
 from notebook_to_kedro.generation.parameters import ParameterReplacement
 from notebook_to_kedro.generation.writer import write_project
 from notebook_to_kedro.semantic.validation import validate_conversion_plan
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from notebook_to_kedro.ir import ConversionPlan, JsonPrimitive, ParameterValue, TaskCandidate
 
 DEFAULT_PACKAGE_NAME = "generated_notebook"
@@ -31,6 +39,7 @@ def generate_kedro_project(
     output_path: str | Path,
     *,
     package_name: str = DEFAULT_PACKAGE_NAME,
+    architecture_profile: KedroArchitectureProfile | None = None,
 ) -> tuple[Path, ...]:
     """Validate, compile and publish a minimal project without executing source code."""
     try:
@@ -38,21 +47,27 @@ def generate_kedro_project(
     except ConversionPlanValidationError as error:
         raise ProjectGenerationError(str(error)) from error
     _require_valid_package_name(package_name)
+    profile = DEFAULT_KEDRO_PROFILE if architecture_profile is None else architecture_profile
+    node_names = None if architecture_profile is None else resolve_node_names(plan, profile)
 
     root = Path(output_path)
     package_root = Path("src") / package_name
-    pipeline_root = package_root / "pipelines" / "notebook_pipeline"
+    pipeline_root = package_root / "pipelines" / profile.pipeline_name
     files = {
         Path("pyproject.toml"): _pyproject(package_name),
         package_root / "__init__.py": _package_init(),
         package_root / "settings.py": _settings(),
-        package_root / "pipeline_registry.py": _pipeline_registry(package_name),
+        package_root / "pipeline_registry.py": _pipeline_registry(
+            package_name, profile.pipeline_name
+        ),
         package_root / "pipelines" / "__init__.py": _package_init(),
-        pipeline_root / "__init__.py": _notebook_pipeline_init(package_name),
-        pipeline_root / "pipeline.py": _pipeline(plan, package_name),
+        pipeline_root / "__init__.py": _notebook_pipeline_init(package_name, profile.pipeline_name),
+        pipeline_root / "pipeline.py": _pipeline(
+            plan, package_name, profile.pipeline_name, node_names
+        ),
     }
     try:
-        files[pipeline_root / "nodes.py"] = _nodes(plan)
+        files[pipeline_root / "nodes.py"] = _nodes(plan, node_names)
         for path, content in files.items():
             if path.suffix == ".py":
                 compile(content, path.as_posix(), "exec", dont_inherit=True)
@@ -62,6 +77,8 @@ def generate_kedro_project(
         files[Path("conf/base/catalog.yml")] = _catalog(plan)
     if plan.parameters:
         files[Path("conf/base/parameters.yml")] = _parameters(plan)
+    if architecture_profile is not None:
+        files[Path("architecture-profile.json")] = _profile_manifest(plan, profile)
     copies = tuple(
         (Path(dataset.source_filepath), Path(dataset.filepath))
         for dataset in plan.catalog_datasets
@@ -97,34 +114,60 @@ def _settings() -> str:
     return '"""Kedro settings for the generated project."""\n'
 
 
-def _pipeline_registry(package_name: str) -> str:
+def _pipeline_registry(package_name: str, pipeline_name: str = "notebook_pipeline") -> str:
     return f'''"""Project pipeline registry."""
 
 from kedro.pipeline import Pipeline
 
-from {package_name}.pipelines.notebook_pipeline import create_pipeline
+from {package_name}.pipelines.{pipeline_name} import create_pipeline
 
 
 def register_pipelines() -> dict[str, Pipeline]:
     """Register generated project pipelines."""
     pipeline = create_pipeline()
-    return {{"__default__": pipeline, "notebook_pipeline": pipeline}}
+    return {{"__default__": pipeline, "{pipeline_name}": pipeline}}
 '''
 
 
-def _notebook_pipeline_init(package_name: str) -> str:
+def _notebook_pipeline_init(package_name: str, pipeline_name: str = "notebook_pipeline") -> str:
     return f'''"""Generated notebook pipeline."""
 
-from {package_name}.pipelines.notebook_pipeline.pipeline import create_pipeline
+from {package_name}.pipelines.{pipeline_name}.pipeline import create_pipeline
 
 __all__ = ["create_pipeline"]
 '''
 
 
-def _nodes(plan: ConversionPlan) -> str:
+def _nodes(plan: ConversionPlan, node_names: Mapping[str, str] | None = None) -> str:
     sections = [*plan.imports, ""]
-    sections.extend(render_node_function(task) for task in plan.task_candidates)
+    sections.extend(
+        render_node_function(
+            task, function_name=None if node_names is None else node_names[task.id]
+        )
+        for task in plan.task_candidates
+    )
     return "\n\n".join(section for section in sections if section).rstrip() + "\n"
+
+
+def _profile_manifest(plan: ConversionPlan, profile: KedroArchitectureProfile) -> str:
+    names = resolve_node_names(plan, profile)
+    manifest = {
+        "schema_version": "1.0",
+        "profile": profile.to_dict(),
+        "profile_sha256": profile.sha256,
+        "notebook_path": plan.notebook_path,
+        "nodes": [
+            {
+                "task_id": task.id,
+                "source_name": task.name,
+                "generated_name": names[task.id],
+                "source_cell_ids": task.source_cell_ids,
+                "statement_ids": task.statement_ids,
+            }
+            for task in plan.task_candidates
+        ],
+    }
+    return json.dumps(manifest, sort_keys=True, indent=2) + "\n"
 
 
 def _catalog(plan: ConversionPlan) -> str:
@@ -195,12 +238,13 @@ def _parameter_sequence(value: object) -> str:
     return "[" + ", ".join(_parameter_value(item) for item in items) + "]"
 
 
-def render_node_function(task: TaskCandidate) -> str:
+def render_node_function(task: TaskCandidate, *, function_name: str | None = None) -> str:
     """Render one validated plan task using V1 rules, without execution or file I/O."""
     function_parameters = ", ".join((*task.inputs, *_parameter_arguments(task)))
     body = indent(_parameterized_source(task).rstrip(), "    ")
     return_statement = _return_statement(task.outputs)
-    return f"""def {task.name}({function_parameters}):
+    name = task.name if function_name is None else function_name
+    return f"""def {name}({function_parameters}):
 {body}
     {return_statement}
 """
@@ -214,13 +258,21 @@ def _return_statement(outputs: tuple[str, ...]) -> str:
     return f"return {', '.join(outputs)}"
 
 
-def _pipeline(plan: ConversionPlan, package_name: str) -> str:
-    node_entries = "\n".join(_node_entry(entry) for entry in _pipeline_entries(plan))
+def _pipeline(
+    plan: ConversionPlan,
+    package_name: str,
+    pipeline_name: str = "notebook_pipeline",
+    node_names: Mapping[str, str] | None = None,
+) -> str:
+    node_entries = "\n".join(
+        _node_entry(entry, None if node_names is None else node_names[entry.task.id])
+        for entry in _pipeline_entries(plan)
+    )
     return f'''"""Generated Kedro pipeline."""
 
 from kedro.pipeline import Pipeline, node
 
-from {package_name}.pipelines.notebook_pipeline import nodes
+from {package_name}.pipelines.{pipeline_name} import nodes
 
 
 def create_pipeline(**kwargs: object) -> Pipeline:
@@ -233,14 +285,15 @@ def create_pipeline(**kwargs: object) -> Pipeline:
 '''
 
 
-def _node_entry(entry: _PipelineEntry) -> str:
+def _node_entry(entry: _PipelineEntry, node_name: str | None = None) -> str:
     inputs = _inputs_argument(entry)
     outputs = _outputs_argument(entry.outputs)
+    name = entry.task.name if node_name is None else node_name
     return f"""            node(
-                func=nodes.{entry.task.name},
+                func=nodes.{name},
                 inputs={inputs},
                 outputs={outputs},
-                name="{entry.task.name}",
+                name="{name}",
             ),"""
 
 

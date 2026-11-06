@@ -76,7 +76,8 @@ src/notebook_to_kedro/
 │   │   ├── validation.py
 │   │   └── service.py
 │   └── kedro/
-│       └── generator.py
+│       ├── generator.py
+│       └── profiles.py
 └── evaluation/
     ├── behavioral_comparison.py
     ├── behavioral_execution.py
@@ -254,9 +255,23 @@ separate experiments and do not supply code to normal project generation. Compil
 preflight is structural evidence; it does not check installed dependencies, arbitrary
 globals, runtime equivalence, a clean `kedro run` bootstrap or production readiness.
 
+### Initial architecture profiles
+
+`generation/kedro/profiles.py` owns the [schema-1.0 profile contract](../guides/kedro-profiles.md).
+Immutable profiles select one pipeline directory/import/registry name and a function/node prefix.
+Resolution checks normalized-name and import/builtin collisions without changing the plan.
+The renderer keeps source bodies, interfaces, dataset versioning and parameter identities intact.
+Both CLI commands accept `--architecture-profile`; reporting and generation accept the same object.
+Explicit profiles add review mappings and `architecture-profile.json` with normalized profile
+identity/hash and stable task/cell/statement references. Omitted profiles preserve output bytes
+and inventory; the explicit default adds only the manifest. This is not a full source-byte binding
+or an enterprise policy engine. No provider is involved in profile loading or name resolution.
+
 ### Reporting
 
-`reporting.py` renders review artifacts from `ConversionPlan` without importing Kedro or reading notebook files. The first report format is deterministic Markdown covering summary metadata, proposed tasks, catalog datasets, extracted parameters, plan diagnostics, and blocking diagnostics.
+`reporting.py` renders review artifacts from `ConversionPlan` without importing Kedro or reading
+notebook files. Deterministic Markdown covers tasks, catalog, parameters and diagnostics. An
+explicit architecture profile adds its configuration identity and source/generated node names.
 
 ### CLI
 
@@ -322,9 +337,11 @@ reviewable generation plan and the Kedro renderer. Keep profile rules separate f
 semantics, and retain source/code references rather than pretending configuration encodes all
 Python behavior.
 
-First demonstrate a narrow default/custom Kedro profile, then a greenfield slice. Derive the
-common typed/versioned project representation from both. No `ProjectSpec`, profile engine,
-greenfield API, remote provider, extra backend or enterprise service is introduced here.
+The initial default/custom Kedro naming/organization profile is now implemented as recorded in
+[ADR 0003](../decisions/0003-minimal-kedro-profiles.md). Broader standards and the greenfield slice
+remain future work; derive the common typed/versioned project representation from those actual
+requirements. No `ProjectSpec`, general template engine, greenfield API, remote provider, extra
+backend or enterprise service is introduced here.
 Generation, structural checks, behavioral observations, human review and operational acceptance
 remain separate evidence dimensions. See the [roadmap](../product/roadmap.md) for dependencies.
 

@@ -1,0 +1,7 @@
+{
+  "schema_version": "1.0",
+  "profile_id": "example.team-training",
+  "profile_version": "1.0.0",
+  "pipeline_name": "training",
+  "node_name_prefix": "ml_"
+}

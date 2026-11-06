@@ -36,6 +36,7 @@ The compatibility policy is authoritative for supported runtimes and library-sup
 
 | Document | Purpose |
 | --- | --- |
+| [Kedro architecture profiles](guides/kedro-profiles.md) | Versioned JSON conventions, default/custom generation, compatibility and source mappings. |
 | [Hybrid planning](guides/hybrid-planning.md) | Supported suggestions, assembly and deterministic fallback. |
 | [Local Ollama provider](guides/ollama-provider.md) | Provider setup, Python usage and loopback safety boundary. |
 | [Body-only Ollama provider](guides/ollama-node-body.md) | Body-generation API, provenance and limitations. |
@@ -97,6 +98,8 @@ the dedicated experiment reports for their frozen settings, decisions and limita
 - [ADR 0001: use uv](decisions/0001-use-uv.md): accepted dependency-management decision.
 - [ADR 0002: incremental platform evolution](decisions/0002-incremental-platform-evolution.md):
   shared-core direction, two entrypoints and the bounded generation-reliability milestone.
+- [ADR 0003: minimal Kedro profiles](decisions/0003-minimal-kedro-profiles.md): deterministic
+  naming/organization, opt-in adoption and preservation of computational contracts.
 - [Agent instructions](../AGENTS.md): development conventions, verification and project memory.
 - [Changelog](../CHANGELOG.md): release-facing changes.
 - [Development journal](../JOURNAL.md): chronological work, decisions and unresolved questions.

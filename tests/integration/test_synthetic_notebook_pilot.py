@@ -21,8 +21,10 @@ from nbclient import NotebookClient
 from nbformat import NotebookNode
 
 from notebook_to_kedro import (
+    KedroArchitectureProfile,
     analyze_notebook_path,
     generate_kedro_project,
+    load_kedro_profile,
     plan_notebook_path,
     validate_conversion_plan,
 )
@@ -227,9 +229,14 @@ def _run_project(
     control: dict[str, Any] | None = None,
     *,
     reference_module: str | None = None,
+    architecture_profile: KedroArchitectureProfile | None = None,
 ) -> dict[str, Any]:
     plan = plan_notebook_path(NOTEBOOK)
     package = "pilot_baseline"
+    if architecture_profile is not None:
+        assert control is None
+        assert reference_module is None
+        package = "pilot_profiled"
     if control is not None:
         package = "pilot_" + control["id"].replace("-", "_")
         original = next(task for task in plan.task_candidates if task.name == control["task"])
@@ -245,7 +252,9 @@ def _run_project(
     if reference_module is not None:
         assert control is None
         package = "pilot_fixed_bodies"
-    generate_kedro_project(plan, destination, package_name=package)
+    generate_kedro_project(
+        plan, destination, package_name=package, architecture_profile=architecture_profile
+    )
     if reference_module is not None:
         # Trusted fixture bodies only: this is not a consent-gated untrusted-code runner.
         (destination / "src" / package / "pipelines/notebook_pipeline/nodes.py").write_text(
@@ -255,12 +264,18 @@ def _run_project(
     monkeypatch.chdir(destination)
     module = importlib.import_module(f"{package}.pipeline_registry")
     registered = module.register_pipelines()
-    pipeline = registered[CONTRACT["pipeline_id"]]
+    pipeline_id = (
+        CONTRACT["pipeline_id"]
+        if architecture_profile is None
+        else architecture_profile.pipeline_name
+    )
+    node_prefix = "" if architecture_profile is None else architecture_profile.node_name_prefix
+    pipeline = registered[pipeline_id]
     assert registered["__default__"] is pipeline
     nodes = {node.name: node for node in pipeline.nodes}
-    assert set(nodes) == {task["name"] for task in CONTRACT["tasks"]}
+    assert set(nodes) == {node_prefix + task["name"] for task in CONTRACT["tasks"]}
     for expected in CONTRACT["tasks"]:
-        node = nodes[expected["name"]]
+        node = nodes[node_prefix + expected["name"]]
         assert node.inputs == expected["inputs"] + [
             f"params:{name}" for name in expected["parameters"]
         ]
@@ -772,6 +787,19 @@ def test_pilot_generated_project_matches_notebook_and_expectations(
 ) -> None:
     """Real CSV catalog loading and all nine generated nodes preserve the whole workflow."""
     generated = _snapshot(_run_project(tmp_path / "project", monkeypatch))
+    _assert_expected(generated)
+    assert generated == notebook_snapshot
+
+
+@pytest.mark.end_to_end
+def test_custom_architecture_profile_preserves_the_complete_pilot(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, notebook_snapshot: dict[str, Any]
+) -> None:
+    """A second organization preserves real CSV loading and every declared observable."""
+    profile = load_kedro_profile(ROOT / "examples/kedro_profiles/team_training.json")
+    generated = _snapshot(
+        _run_project(tmp_path / "profiled", monkeypatch, architecture_profile=profile)
+    )
     _assert_expected(generated)
     assert generated == notebook_snapshot
 

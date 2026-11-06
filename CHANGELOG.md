@@ -21,6 +21,11 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Initial versioned Kedro architecture profiles for a single pipeline name and function/node
+  prefix, with strict declarative JSON, CLI/API selection, compatibility diagnostics, review
+  mappings and an opt-in generated manifest. Default output remains byte-identical; dataset,
+  parameter and body semantics are preserved. Includes a reusable example and complete draft-pilot
+  regression with real CSV loading; no human approval, live model call or general policy engine.
 - Aligned product vision and delivery priorities for existing-project transformation and future
   greenfield generation, reusable enterprise standards and project-level evidence. Added agent
   conventions and ADR 0002; profiles, shared project specifications and enterprise infrastructure

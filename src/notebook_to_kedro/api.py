@@ -7,6 +7,11 @@ from typing import TYPE_CHECKING
 from notebook_to_kedro.analysis import analyze_notebook
 from notebook_to_kedro.exceptions import PlannerConfigurationError
 from notebook_to_kedro.generation import generate_kedro_project
+from notebook_to_kedro.generation.kedro.profiles import (
+    DEFAULT_KEDRO_PROFILE,
+    KedroArchitectureProfile,
+    load_kedro_profile,
+)
 from notebook_to_kedro.notebook import load_notebook
 from notebook_to_kedro.reporting import render_conversion_report
 from notebook_to_kedro.semantic import (
@@ -83,9 +88,12 @@ def _select_planner(
 
 
 __all__ = [
+    "DEFAULT_KEDRO_PROFILE",
+    "KedroArchitectureProfile",
     "analyze_notebook_path",
     "create_semantic_planner",
     "generate_kedro_project",
+    "load_kedro_profile",
     "plan_notebook_path",
     "render_conversion_report",
     "validate_conversion_plan",

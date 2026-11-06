@@ -13,7 +13,7 @@ Historical measurements retain their original corpus, runtime and limitations.
 | Generation reliability | Public API enforces plan validation and compile-only Python preflight; contained/nonoverlapping copied targets and regular sources are checked before private preparation and rename publication. No overwrite option. |
 | Behavioral evidence | Controlled fixtures, independent task corpora and a draft complete-notebook pilot; no general equivalence or production-readiness claim. |
 | AI assistance | Constrained hybrid planning is opt-in; code/body proposals and campaign preparation remain experimental and separate from normal generation. |
-| Enterprise architecture profiles | Proposed; no executable profile engine. |
+| Architecture profiles | Initial deterministic Kedro naming/organization slice: versioned JSON, one pipeline name, function/node prefix, review mappings and opt-in manifest. Broader enterprise standards remain proposed. |
 | Greenfield project generation | Proposed; no specification-driven entrypoint or shared `ProjectSpec`. |
 | MLOps / enterprise platform | Future integrations, governance and packaging require validated needs and separate contracts. |
 
@@ -23,6 +23,12 @@ and abrupt termination are outside the writer's guarantees. See the
 [architecture](../reference/architecture.md#filesystem-writing) and
 [delivery priorities](roadmap.md#product-delivery-priorities). The original `ready` conversion-report
 label means no blocking plan diagnostics; it is not a consolidated validation or release status.
+
+The [profile guide](../guides/kedro-profiles.md) documents CLI/API use and strict compatibility.
+Default/custom tests preserve task AST bodies, dataset/parameter identities and the complete
+draft pilot's observable outputs with real CSV loading. This does not change its pending human
+review or establish arbitrary-notebook coverage. No common project specification or new backend
+is introduced by the naming/organization slice.
 
 A [draft complete-notebook pilot](../evaluation/synthetic-notebook-pilot.md) now checks a
 seeded simulation and real local CSV catalog loading through nine generated nodes, with

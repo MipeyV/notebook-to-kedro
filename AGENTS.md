@@ -51,5 +51,6 @@ result for an unavailable interpreter or service.
 - Keep product direction in the vision, priorities in the roadmap, current capabilities in
   status/reference docs, work history in `JOURNAL.md`, and release changes in `CHANGELOG.md`.
 - Preserve original corpus/runtime limitations and pending human review in experiment reports.
-- Architecture profiles, greenfield generation and a shared project specification remain
-  future work until implemented and validated. Do not create empty framework abstractions.
+- The [initial Kedro profiles](docs/guides/kedro-profiles.md) cover one pipeline name and
+  function/node prefixes only. Broader standards, greenfield generation and a shared project
+  specification remain future work. Do not create empty framework abstractions.

@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING
 from notebook_to_kedro.api import (
     create_semantic_planner,
     generate_kedro_project,
+    load_kedro_profile,
     plan_notebook_path,
     render_conversion_report,
     validate_conversion_plan,
@@ -126,7 +127,7 @@ def _parser() -> argparse.ArgumentParser:
         default=None,
         help="root used to normalize notebook-relative paths",
     )
-    _add_planner_arguments(plan_parser)
+    _add_conversion_arguments(plan_parser)
     generate_parser = subparsers.add_parser(
         "generate",
         help="generate a minimal Kedro project from a notebook",
@@ -144,7 +145,7 @@ def _parser() -> argparse.ArgumentParser:
         default="generated_notebook",
         help="Python package name for the generated Kedro project",
     )
-    _add_planner_arguments(generate_parser)
+    _add_conversion_arguments(generate_parser)
     benchmark_parser = subparsers.add_parser(
         "benchmark",
         help="compare planners over a reviewed planning corpus",
@@ -261,6 +262,13 @@ def _parser() -> argparse.ArgumentParser:
     return parser
 
 
+def _add_conversion_arguments(parser: argparse.ArgumentParser) -> None:
+    _add_planner_arguments(parser)
+    parser.add_argument(
+        "--architecture-profile", type=Path, help="versioned JSON Kedro architecture profile"
+    )
+
+
 def _add_behavioral_corpus_arguments(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("behavioral_corpus", type=Path, help="reviewed behavioral case directory")
     parser.add_argument("node_code_corpus", type=Path, help="reviewed node-code case directory")
@@ -332,18 +340,25 @@ def _plan_from_args(args: argparse.Namespace) -> ConversionPlan:
 
 
 def _plan(args: argparse.Namespace) -> int:
+    profile = (
+        None if args.architecture_profile is None else load_kedro_profile(args.architecture_profile)
+    )
     plan = _plan_from_args(args)
-    sys.stdout.write(render_conversion_report(plan))
+    sys.stdout.write(render_conversion_report(plan, architecture_profile=profile))
     return 0
 
 
 def _generate(args: argparse.Namespace) -> int:
+    profile = (
+        None if args.architecture_profile is None else load_kedro_profile(args.architecture_profile)
+    )
     plan = _plan_from_args(args)
     validate_conversion_plan(plan)
     created_files = generate_kedro_project(
         plan,
         args.output_dir,
         package_name=args.package_name,
+        architecture_profile=profile,
     )
     sys.stdout.write(f"Created Kedro project at `{args.output_dir}`\n")
     for path in created_files:

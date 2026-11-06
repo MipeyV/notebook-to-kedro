@@ -145,7 +145,9 @@ artifacts, data contracts, configuration, logging, testing, documentation and in
 Profiles need identities, versions, validation and compatibility checks. Apply them without
 silently inserting computational steps or renaming business variables in ways that change logic.
 Start with one small Kedro profile and a default preserving today's output; broader customization
-and migration support require their own demonstrated needs. No executable profile engine exists yet.
+and migration support require their own demonstrated needs. The [initial Kedro profile slice](../guides/kedro-profiles.md)
+now implements a versioned pipeline name and function/node prefix, with explicit source mappings.
+All broader standard-enforcement capabilities described here remain future work.
 
 Proposed enterprise profiles select execution environment, storage adapters, dependency
 constraints, secret references, tracking backend, allowed network destinations and data
