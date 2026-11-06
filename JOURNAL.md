@@ -40,6 +40,48 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-11-06 - Explicit functional inspection for Python and notebooks
+
+### Completed
+
+- Added immutable source units, statement accounting, function interfaces, reference/call
+  dependencies and static diagnostics for a bounded explicit-function subset. The pure analyzer
+  shares AST primitives with the existing notebook analyzer without changing conversion schemas.
+- Added real Python-file and notebook-cell frontends, preserving document/text identities,
+  encoding, source and line/UTF-8-column provenance. Python files are read once with a 1 MiB bound;
+  notebooks retain existing loader behavior and physical cell IDs.
+- Exposed `analyze_functional_blocks_path` and `inspect-blocks` JSON inspection. Unsupported
+  constructs remain visible and block completeness; no source/dependency execution or provider
+  call is introduced. Added paired script/notebook examples with matching static fingerprints.
+- Updated status, roadmap, architecture, compatibility and indexed reference/ADR 0005.
+- Python 3.12.14 full offline validation: 2,096 tests passed with 100% line/branch coverage
+  (8,144 statements, 2,364 branches, 85 modules). After the final multiline-decorator span
+  refinement, all 108 functional/documentation checks passed; the three functional modules
+  retained 100% coverage (269 statements, 74 branches). The final offline unit suite passed
+  2,052 tests (47 integration/end-to-end cases deselected). Ruff, formatting, strict mypy and
+  source/wheel builds passed. These are deterministic development checks, not runtime evidence
+  for the paired workflow.
+
+### Decisions
+
+- E2 is split into analysis/provenance first, then explicit entrypoint/data wiring and checked
+  Kedro generation. Function-reference edges are not a dataset DAG; static fingerprints and
+  `complete` do not prove behavior or authorize execution.
+- Keep `NotebookFacts`, `ConversionPlan` and source-accounted notebook conversion separate.
+  No fake notebook cells, universal project specification, new runtime dependency or UI layer.
+
+### Open questions
+
+- Define the narrow workflow entrypoint, input/output wiring, import handling and source
+  accounting needed by the next generator adapter. Arbitrary Python, procedural cell splitting,
+  multi-file reconstruction and generated-project tests are still outstanding.
+- Independent human review of the whole-notebook pilot remains pending.
+
+### Next step
+
+- Generate a checked Kedro project from the paired explicit-function workflow and compare
+  reviewed observable behavior for notebook and script presentations; keep E2 open until then.
+
 ## 2026-11-06 - Shared-engine roadmap and first source-accounting guard
 
 ### Completed

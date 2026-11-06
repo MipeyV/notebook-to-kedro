@@ -15,6 +15,10 @@ class ProjectGenerationError(ValueError):
     """Raised when a generated project cannot be written safely."""
 
 
+class FunctionalSourceError(ValueError):
+    """Raised when functional inspection cannot load a supported source document."""
+
+
 class KedroProfileError(ProjectGenerationError):
     """Raised for an invalid or incompatible declarative Kedro architecture profile."""
 

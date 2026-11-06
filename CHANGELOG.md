@@ -25,6 +25,12 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Analysis-only explicit functional blocks from structured Python files and real notebook code
+  cells, with immutable source/provenance, interfaces, function-reference edges, diagnostics and
+  JSON API/CLI inspection. Includes paired examples with matching static fingerprints; script
+  generation, data wiring and behavioral equivalence remain the next E2 slice. ADR 0005 records
+  the boundary; existing notebook conversion contracts and runtime dependencies are preserved.
+
 - Initial recomputed source-accounting audit with per-statement destinations and source/plan
   identities, plus AST/provenance/import/catalog/parameter/dependency checks. High-level notebook
   planning blocks unsupported or omitted instructions; direct generation can opt in with supplied

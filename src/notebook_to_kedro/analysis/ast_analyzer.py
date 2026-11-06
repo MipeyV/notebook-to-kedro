@@ -3,13 +3,18 @@
 from __future__ import annotations
 
 import ast
-import builtins
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
 
 from notebook_to_kedro.analysis.dependencies import resolve_dependencies
+from notebook_to_kedro.analysis.python_ast import (
+    BUILTIN_NAMES,
+    DYNAMIC_CALLS,
+    MUTATING_METHODS,
+    qualified_name,
+)
 from notebook_to_kedro.ir import (
     CallFacts,
     CellFacts,
@@ -26,10 +31,6 @@ from notebook_to_kedro.ir import (
     StatementFacts,
 )
 from notebook_to_kedro.notebook import LoadedCell, LoadedNotebook, NotebookCellKind
-
-BUILTIN_NAMES = frozenset(dir(builtins))
-DYNAMIC_CALLS = frozenset({"exec", "eval", "compile", "globals", "locals"})
-MUTATING_METHODS = frozenset({"fit", "fit_transform", "partial_fit"})
 
 
 def analyze_notebook(notebook: LoadedNotebook) -> NotebookFacts:
@@ -332,14 +333,7 @@ def _method_parts(node: ast.expr) -> tuple[str | None, str | None]:
 
 
 def _qualified_name(node: ast.expr) -> str:
-    if isinstance(node, ast.Name):
-        return node.id
-    if isinstance(node, ast.Attribute):
-        parent = _qualified_name(node.value)
-        return f"{parent}.{node.attr}" if parent else node.attr
-    if isinstance(node, ast.Call):
-        return _qualified_name(node.func)
-    return type(node).__name__
+    return qualified_name(node)
 
 
 def _source_receiver(node: ast.expr) -> str | None:

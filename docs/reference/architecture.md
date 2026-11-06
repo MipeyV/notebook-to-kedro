@@ -22,6 +22,13 @@ Notebook source
 
 Each boundary has a typed contract. Source facts, semantic inferences, and accepted transformations must never be mixed in the same model.
 
+A separate [functional inspection path](functional-blocks.md) now accepts a `.py` module or real
+notebook code cells: source adapters -> `SourceUnit` -> pure analysis -> `FunctionalAnalysis`.
+It records explicit function interfaces, reference edges, source spans and blockers without
+execution or framework imports. Small AST primitives are shared with notebook analysis.
+It does not feed `ConversionPlan` or generation yet; [ADR 0005](../decisions/0005-explicit-functional-block-inspection.md)
+records this analysis-first E2 boundary.
+
 ## Design rules
 
 - Notebook code is never executed by the static analyzer.

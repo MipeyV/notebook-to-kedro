@@ -17,7 +17,8 @@ Historical measurements retain their original corpus, runtime and limitations.
 | Architecture profiles | Initial deterministic Kedro naming/organization slice: versioned JSON, one pipeline name, function/node prefix, review mappings and opt-in manifest. Broader enterprise standards remain proposed. |
 | Greenfield project generation | Proposed; no specification-driven entrypoint or shared `ProjectSpec`. |
 | MLOps / enterprise platform | Future integrations, governance and packaging require validated needs and separate contracts. |
-| Shared engine / local interface | Existing core is being strengthened for multiple operations. Structured-script input, a general project model, operation UI/local app or VS Code extension remain future work. |
+| Functional block inspection | Analysis-only API/CLI for explicit straight-line functions in `.py` and real notebook cells, with interfaces, function-reference graph, provenance and blockers. Paired inputs have matching static structure; Kedro wiring and paired runtime checks remain next. |
+| Shared engine / local interface | Existing core now includes a bounded structured-script inspection frontend. A general project model, script-to-Kedro conversion, operation UI/local app or VS Code extension remain future work. |
 
 Generation reliability does not verify a fresh dependency installation, full DAG semantics or
 runtime behavior. Parent directories can remain after a failure; concurrent filesystem edits
@@ -25,6 +26,10 @@ and abrupt termination are outside the writer's guarantees. See the
 [architecture](../reference/architecture.md#filesystem-writing) and
 [delivery priorities](roadmap.md#product-delivery-priorities). The original `ready` conversion-report
 label means no blocking plan diagnostics; it is not a consolidated validation or release status.
+
+See [functional inspection](../reference/functional-blocks.md) for the first E2 subset.
+Its `complete` and structural fingerprint describe static inspection only, without execution,
+behavioral proof or generation eligibility. Existing notebook conversion remains separate.
 
 See [source accounting](../reference/source-accounting.md) for the exact initial guard. It
 rejects omissions instead of automatically repairing them, preserves fully accounted plan bytes

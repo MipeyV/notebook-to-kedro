@@ -18,7 +18,7 @@ remains open. Transformation logic stays in the reusable core and is exercised t
 | --- | --- | --- | --- |
 | 0 | Preserve the existing conversion foundation | Deterministic notebook analysis/generation, safe publication and default/custom Kedro naming profiles. | Implemented; scope and evidence remain bounded. |
 | E1 | Source completeness and graph fidelity | Every parsed statement has a supported destination or blocks conversion. Cross-check task AST/provenance, imports, selected parameter values, catalog relocation and source dependencies. Exercise the first rewrite of a catalog input. | Initial source-accounting/API guard and dataset-graph correction implemented in this increment; arbitrary semantics remain unsupported. |
-| E2 | Functional blocks and a structured Python input | Reuse immutable facts; demonstrate one workflow presented as notebook and structured script reaching the same checked Kedro behavior. Derive a small source-independent representation from these actual cases. | Proposed; no universal ProjectSpec or multi-file analysis guarantee yet. |
+| E2 | Functional blocks and a structured Python input | Reuse immutable facts; demonstrate one workflow presented as notebook and structured script reaching the same checked Kedro behavior. Derive a small source-independent representation from these actual cases. | Analysis slice implemented: explicit functions, Python/notebook frontends, provenance, blockers and matching static structures. Generation wiring and checked paired Kedro behavior remain next; no universal ProjectSpec or multi-file guarantee. |
 | E3 | Tests delivered with generated projects | Reviewed observable contracts/fixtures, pytest regression generation and fresh-environment bootstrap checks. Preserve missing expectations as explicit gaps; generated tests alone do not validate business intent. | Proposed. |
 | E4 | Local operation contracts and first interface | Stable typed API/CLI requests/results for implemented tasks, local configuration, plan/diff inspection and explicit execution controls. Prototype a local app or VS Code extension with conversion/audit/profile operations first. | Proposed; UI choice open. Does not depend on completing every future operation. |
 | E5 | Existing Kedro project inspection and standardization | Read-only node/pipeline/catalog/config reconstruction, standards diagnostics, reviewable change plans and idempotence tests. Initially generate into a new destination; safe patch application requires its own conflict/ownership contract. | Proposed. |
@@ -31,9 +31,10 @@ review effort, failures/unfinished attempts, latency and cost. Actual human revi
 whole-notebook model campaign; it does not block deterministic core development. Customer discovery
 and broader source/library contracts accompany the relevant slices.
 
-The current first engine milestone is explicit source accounting and supported graph checks;
-the next is the notebook/script functional-block slice. Generated-project tests are a reusable
-validation capability. Optimization retains a separate later acceptance contract.
+Source accounting and supported graph checks are implemented. E2 now has its first
+[analysis-only slice](../reference/functional-blocks.md). Next define entrypoint/data wiring,
+source-accounted Kedro generation from explicit blocks and paired notebook/script behavioral
+checks. Generated-project tests remain E3. Optimization retains a separate acceptance contract.
 
 ## Whole-notebook evaluation next gate
 
