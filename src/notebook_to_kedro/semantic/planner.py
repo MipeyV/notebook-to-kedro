@@ -37,7 +37,7 @@ SUPPORTED_PARAMETER_KEYWORDS = {
 
 def plan_tasks(facts: NotebookFacts) -> ConversionPlan:
     """Propose one task candidate per analyzable code cell with data outputs."""
-    catalog_datasets = _catalog_datasets(facts)
+    catalog_datasets, catalog_statement_ids = _catalog_entries(facts)
     catalog_dataset_names = {dataset.name for dataset in catalog_datasets}
     import_names = {symbol.name for symbol in facts.symbols if symbol.kind is SymbolKind.IMPORT}
     data_symbols = {symbol.name for symbol in facts.symbols if symbol.kind is not SymbolKind.IMPORT}
@@ -45,7 +45,7 @@ def plan_tasks(facts: NotebookFacts) -> ConversionPlan:
         facts,
         import_names=import_names,
         data_symbols=data_symbols,
-        catalog_dataset_names=catalog_dataset_names,
+        catalog_statement_ids=catalog_statement_ids,
     )
     parameters = _parameters(facts, task_names_by_cell)
     blocking_codes = _blocking_diagnostic_codes(facts)
@@ -79,7 +79,7 @@ def plan_tasks(facts: NotebookFacts) -> ConversionPlan:
                     import_names=import_names,
                     data_symbols=data_symbols,
                     dependency_inputs_by_cell=dependency_inputs_by_cell,
-                    catalog_dataset_names=catalog_dataset_names,
+                    catalog_statement_ids=catalog_statement_ids,
                     parameters_by_cell=parameters_by_cell,
                     task_names_by_cell=task_names_by_cell,
                 ),
@@ -112,7 +112,7 @@ class _PlanningContext:
     import_names: set[str]
     data_symbols: set[str]
     dependency_inputs_by_cell: dict[int, set[str]]
-    catalog_dataset_names: set[str]
+    catalog_statement_ids: frozenset[str]
     parameters_by_cell: dict[str, tuple[str, ...]]
     task_names_by_cell: dict[str, str]
 
@@ -128,7 +128,7 @@ def _task_candidate(
         cell,
         import_names=context.import_names,
         data_symbols=context.data_symbols,
-        catalog_dataset_names=context.catalog_dataset_names,
+        catalog_statement_ids=context.catalog_statement_ids,
     )
     if not outputs:
         return None
@@ -162,7 +162,7 @@ def _task_names_by_cell(
     *,
     import_names: set[str],
     data_symbols: set[str],
-    catalog_dataset_names: set[str],
+    catalog_statement_ids: frozenset[str],
 ) -> dict[str, str]:
     names_by_cell: dict[str, str] = {}
     used_names: dict[str, int] = {}
@@ -175,7 +175,7 @@ def _task_names_by_cell(
             cell,
             import_names=import_names,
             data_symbols=data_symbols,
-            catalog_dataset_names=catalog_dataset_names,
+            catalog_statement_ids=catalog_statement_ids,
         ):
             continue
         base_name = _pattern_name(cell) or current_heading or f"cell_{cell.index:04d}"
@@ -188,14 +188,20 @@ def _task_outputs(
     *,
     import_names: set[str],
     data_symbols: set[str],
-    catalog_dataset_names: set[str],
+    catalog_statement_ids: frozenset[str],
 ) -> tuple[str, ...]:
     if cell.kind is not CellKind.CODE or not cell.statements:
         return ()
+    catalog_writes = {
+        name
+        for statement in cell.statements
+        if statement.id in catalog_statement_ids
+        for name in statement.writes
+    }
     return tuple(
         name
         for name in cell.writes
-        if name in data_symbols and name not in import_names and name not in catalog_dataset_names
+        if name in data_symbols and name not in import_names and name not in catalog_writes
     )
 
 
@@ -339,8 +345,9 @@ def _imports(facts: NotebookFacts) -> tuple[str, ...]:
     )
 
 
-def _catalog_datasets(facts: NotebookFacts) -> tuple[CatalogDataset, ...]:
+def _catalog_entries(facts: NotebookFacts) -> tuple[tuple[CatalogDataset, ...], frozenset[str]]:
     datasets: list[CatalogDataset] = []
+    statement_ids: set[str] = set()
     for cell in facts.cells:
         calls_by_id = {call.id: call for call in cell.calls}
         for statement in cell.statements:
@@ -348,6 +355,7 @@ def _catalog_datasets(facts: NotebookFacts) -> tuple[CatalogDataset, ...]:
                 continue
             call = calls_by_id[statement.call_ids[0]]
             if _is_csv_loader_call(call):
+                statement_ids.add(statement.id)
                 source_filepath = _source_filepath(facts.notebook.path, _csv_filepath(call))
                 datasets.append(
                     CatalogDataset(
@@ -357,7 +365,7 @@ def _catalog_datasets(facts: NotebookFacts) -> tuple[CatalogDataset, ...]:
                         source_filepath=source_filepath,
                     )
                 )
-    return tuple(datasets)
+    return tuple(datasets), frozenset(statement_ids)
 
 
 def _parameters(

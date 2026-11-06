@@ -2,30 +2,38 @@
 
 [Documentation index](../README.md)
 
-Status: delivery priorities aligned on 2026-11-06; historical V1/V2 checkboxes are preserved.
+Status: engine/operations/local-interface delivery priorities aligned on 2026-11-06;
+historical V1/V2 checkboxes are preserved.
 The broader product direction is recorded in [Product vision](product-vision.md).
 
 ## Product delivery priorities
 
-These priorities follow [ADR 0002](../decisions/0002-incremental-platform-evolution.md).
-They are acceptance gates, not dates or authorization to implement every phase.
+These priorities extend [ADR 0002](../decisions/0002-incremental-platform-evolution.md)
+with the shared-engine direction in [ADR 0004](../decisions/0004-shared-engine-and-local-interface.md).
+They are acceptance gates, not dates or authorization to implement every phase. The product
+will expose operations through a local application or VS Code extension; the exact UI choice
+remains open. Transformation logic stays in the reusable core and is exercised through API/CLI first.
 
 | Order | Deliverable | Dependencies and acceptance gate | Status |
 | --- | --- | --- | --- |
-| 0 | Align project memory and harden generation | Shared API validation, compile-only preflight, contained copy targets and prepared publication; regression and failure-path checks. | Implemented in this increment; runtime equivalence remains separately scoped. |
-| 1 | Reviewed project-level evidence | Actual independent pilot review before live model calls; frozen dispatcher/execution evidence, then an authorized real notebook. Compare deterministic, assisted and general coding-agent workflows including corrections, review effort, failures and cost. | Pending; offline infrastructure exists. |
-| 2 | Minimal versioned Kedro architecture profile | Reliable generator and reviewed baseline; default output plus one alternative convention set, preserved behavior/source mappings, explicit incompatibility diagnostics. | Initial naming/organization slice implemented; controlled/default/custom and draft-pilot checks pass. Independent review and real-project evidence remain pending. |
-| 3 | First greenfield generation slice | Narrow explicit ML specification and profile resolution; coherent scaffold with missing business logic and unverified behavior visible. Derive shared representation from both entrypoints. | Proposed. |
-| 4 | Selected MLOps artifacts/integrations | Validated team requirements; generated tests, CI, tracking or deployment preparation with integration-specific evidence. | Proposed; ordering may change with demonstrated need. |
-| 5 | Enterprise application/governance | Repeated multi-project use and commercial evidence; add independent hosting, identity/jobs or shared policy management only when justified. | Proposed. |
+| 0 | Preserve the existing conversion foundation | Deterministic notebook analysis/generation, safe publication and default/custom Kedro naming profiles. | Implemented; scope and evidence remain bounded. |
+| E1 | Source completeness and graph fidelity | Every parsed statement has a supported destination or blocks conversion. Cross-check task AST/provenance, imports, selected parameter values, catalog relocation and source dependencies. Exercise the first rewrite of a catalog input. | Initial source-accounting/API guard and dataset-graph correction implemented in this increment; arbitrary semantics remain unsupported. |
+| E2 | Functional blocks and a structured Python input | Reuse immutable facts; demonstrate one workflow presented as notebook and structured script reaching the same checked Kedro behavior. Derive a small source-independent representation from these actual cases. | Proposed; no universal ProjectSpec or multi-file analysis guarantee yet. |
+| E3 | Tests delivered with generated projects | Reviewed observable contracts/fixtures, pytest regression generation and fresh-environment bootstrap checks. Preserve missing expectations as explicit gaps; generated tests alone do not validate business intent. | Proposed. |
+| E4 | Local operation contracts and first interface | Stable typed API/CLI requests/results for implemented tasks, local configuration, plan/diff inspection and explicit execution controls. Prototype a local app or VS Code extension with conversion/audit/profile operations first. | Proposed; UI choice open. Does not depend on completing every future operation. |
+| E5 | Existing Kedro project inspection and standardization | Read-only node/pipeline/catalog/config reconstruction, standards diagnostics, reviewable change plans and idempotence tests. Initially generate into a new destination; safe patch application requires its own conflict/ownership contract. | Proposed. |
+| E6 | Project creation from prompt and configuration | Convert prompt into reviewed structured requirements, then generate one narrow ML scaffold using the common generation/validation core. Distinguish missing business logic, inferred code and verified behavior. | Proposed; requirements-based acceptance differs from faithful conversion. |
+| E7 | Further targets, MLOps and enterprise governance | Validated needs and operation-specific tests; introduce another backend, integrations, portfolio policies or hosting only when justified. | Proposed; no premature backend/service abstraction. |
 
-Deterministic profile development need not wait for the live LLM experiment. Customer discovery
-can accompany the reviewed evaluation. Broader source contracts and library patterns remain
-targeted increments; completing all V2 items is not a prerequisite for a greenfield slice.
+Independent pilot review, an authorized real notebook and matched comparisons with general coding
+agents remain a parallel evidence workstream. Include full-project success, manual corrections,
+review effort, failures/unfinished attempts, latency and cost. Actual human review gates the live
+whole-notebook model campaign; it does not block deterministic core development. Customer discovery
+and broader source/library contracts accompany the relevant slices.
 
-The smallest implementation milestone is a dependable generation boundary. The first profile
-milestone tests the enterprise proposition: one reviewed workflow, two reusable standards profiles,
-preserved checked behavior. Optimization has a separate later acceptance contract.
+The current first engine milestone is explicit source accounting and supported graph checks;
+the next is the notebook/script functional-block slice. Generated-project tests are a reusable
+validation capability. Optimization retains a separate later acceptance contract.
 
 ## Whole-notebook evaluation next gate
 

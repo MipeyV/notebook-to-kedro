@@ -56,6 +56,7 @@ The compatibility policy is authoritative for supported runtimes and library-sup
 | [Node body contract](reference/node-body-contract.md) | Body-only responses and deterministic function assembly. |
 | [Exact parameter evidence](reference/node-parameter-evidence.md) | Supported source-expression substitutions and their evidence. |
 | [Behavioral comparison contract](reference/behavioral-comparison-contract.md) | Observable values, comparators, execution and consent boundaries. |
+| [Source accounting](reference/source-accounting.md) | Statement destinations, AST/catalog/parameter/dependency checks and high-level conversion enforcement. |
 
 ## Evaluation
 
@@ -100,6 +101,8 @@ the dedicated experiment reports for their frozen settings, decisions and limita
   shared-core direction, two entrypoints and the bounded generation-reliability milestone.
 - [ADR 0003: minimal Kedro profiles](decisions/0003-minimal-kedro-profiles.md): deterministic
   naming/organization, opt-in adoption and preservation of computational contracts.
+- [ADR 0004: shared engine and local interface](decisions/0004-shared-engine-and-local-interface.md):
+  reusable operation core, future local app/VS Code surfaces and the first source-accounting slice.
 - [Agent instructions](../AGENTS.md): development conventions, verification and project memory.
 - [Changelog](../CHANGELOG.md): release-facing changes.
 - [Development journal](../JOURNAL.md): chronological work, decisions and unresolved questions.

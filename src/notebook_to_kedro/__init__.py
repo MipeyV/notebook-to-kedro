@@ -2,8 +2,10 @@
 
 from notebook_to_kedro.api import (
     DEFAULT_KEDRO_PROFILE,
+    ConversionSourceAudit,
     KedroArchitectureProfile,
     analyze_notebook_path,
+    audit_conversion_source,
     create_semantic_planner,
     generate_kedro_project,
     load_kedro_profile,
@@ -17,10 +19,12 @@ __version__ = "0.1.0"
 
 __all__ = [
     "DEFAULT_KEDRO_PROFILE",
+    "ConversionSourceAudit",
     "KedroArchitectureProfile",
     "PlannerMode",
     "__version__",
     "analyze_notebook_path",
+    "audit_conversion_source",
     "create_semantic_planner",
     "generate_kedro_project",
     "load_kedro_profile",

@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+import os
 import shutil
 from pathlib import Path, PureWindowsPath
 from tempfile import TemporaryDirectory
+from time import sleep
 from typing import TYPE_CHECKING
 
 from notebook_to_kedro.exceptions import ProjectGenerationError
@@ -17,6 +19,27 @@ _WINDOWS_DEVICES = frozenset(
     | {f"{prefix}{digit}" for prefix in ("COM", "LPT") for digit in "123456789¹²³"}
 )
 _FIRST_PRINTABLE_CHARACTER = 32
+_WINDOWS = os.name == "nt"
+_RENAME_ATTEMPTS = 3
+_RENAME_DELAY_SECONDS = 0.05
+
+
+def _publish(staging: Path, root: Path) -> None:
+    attempt = 0
+    while True:
+        _require_new_destination(root)
+        try:
+            staging.rename(root)
+            return
+        except PermissionError as error:
+            attempt += 1
+            if (
+                not _WINDOWS
+                or getattr(error, "winerror", None) not in {5, 32, 33}
+                or attempt == _RENAME_ATTEMPTS
+            ):
+                raise
+            sleep(_RENAME_DELAY_SECONDS)
 
 
 def _require_new_destination(root: Path) -> None:
@@ -86,8 +109,7 @@ def write_project(
                 target = staging / path
                 target.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copyfile(source, target)
-            _require_new_destination(root)
-            staging.rename(root)
+            _publish(staging, root)
     except OSError as error:
         raise ProjectGenerationError(f"Cannot publish project at {root}: {error}") from error
     return tuple(root / path for path in paths)

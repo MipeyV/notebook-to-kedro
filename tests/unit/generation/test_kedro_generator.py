@@ -494,6 +494,26 @@ def test_generator_rejects_escaping_or_overlapping_catalog_copies(
     assert list(tmp_path.iterdir()) == [source]
 
 
+@pytest.mark.parametrize("collision", ["duplicate_outputs", "versioned_name"])
+def test_generator_rejects_multiple_producers_for_resolved_dataset_names(
+    tmp_path: Path, collision: str
+) -> None:
+    first = TaskCandidate("one", "first", ("c0",), ("s0",), (), ("x",), "x = 1")
+    tasks: tuple[TaskCandidate, ...]
+    if collision == "duplicate_outputs":
+        tasks = (replace(first, outputs=("x", "x")),)
+    else:
+        tasks = (
+            first,
+            TaskCandidate("two", "clean", ("c1",), ("s1",), ("x",), ("x",), "x = x + 1"),
+            TaskCandidate("three", "final", ("c2",), ("s2",), (), ("x__clean",), "x__clean = 1"),
+        )
+    plan = ConversionPlan("1.0", "0.1.0", "example.ipynb", tasks)
+    with pytest.raises(ProjectGenerationError, match="multiple producers"):
+        generate_kedro_project(plan, tmp_path / "project")
+    assert list(tmp_path.iterdir()) == []
+
+
 def test_generator_ast_helper_fallbacks_cover_uncommon_shapes() -> None:
     fillna_statement = ast.parse("df.fillna(value=0)").body[0]
     generic_statement = ast.parse("func(**kwargs)").body[0]

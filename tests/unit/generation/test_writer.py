@@ -8,6 +8,12 @@ from notebook_to_kedro.exceptions import ProjectGenerationError
 from notebook_to_kedro.generation import writer
 
 
+class _WindowsPermissionError(PermissionError):
+    def __init__(self, winerror: int, message: str) -> None:
+        super().__init__(message)
+        self.winerror = winerror
+
+
 def test_writer_publishes_complete_files_and_returns_final_paths(tmp_path: Path) -> None:
     source = tmp_path / "source.csv"
     source.write_bytes(b"value\n1\n")
@@ -145,3 +151,72 @@ def test_writer_preserves_destination_created_during_preparation(
     assert (root / "keep").read_bytes() == b"keep"
     assert list(root.iterdir()) == [root / "keep"]
     assert not list(tmp_path.glob(".notebook-to-kedro-*"))
+
+
+@pytest.mark.parametrize("winerror", [5, 32, 33])
+def test_writer_retries_only_windows_sharing_failures(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, winerror: int
+) -> None:
+    root = tmp_path / "project"
+    rename = Path.rename
+    attempts = 0
+    waits: list[float] = []
+
+    def transient(path: Path, target: Path) -> Path:
+        nonlocal attempts
+        attempts += 1
+        if attempts == 1:
+            raise _WindowsPermissionError(winerror, "Windows sharing failure")
+        return rename(path, target)
+
+    monkeypatch.setattr("notebook_to_kedro.generation.writer._WINDOWS", True)
+    monkeypatch.setattr("notebook_to_kedro.generation.writer.sleep", waits.append)
+    monkeypatch.setattr(Path, "rename", transient)
+    writer.write_project(root, {Path("main.py"): "pass"})
+    assert attempts == 2
+    assert waits == [0.05]
+    assert (root / "main.py").read_text(encoding="utf-8") == "pass"
+
+
+@pytest.mark.parametrize(
+    ("windows", "winerror", "expected"), [(True, 5, 3), (True, 99, 1), (False, 5, 1)]
+)
+def test_writer_limits_rename_retries_and_keeps_failure_visible(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, *, windows: bool, winerror: int, expected: int
+) -> None:
+    attempts = 0
+
+    def persistent(*_args: object) -> None:
+        nonlocal attempts
+        attempts += 1
+        raise _WindowsPermissionError(winerror, "persistent refusal")
+
+    monkeypatch.setattr("notebook_to_kedro.generation.writer._WINDOWS", windows)
+    monkeypatch.setattr("notebook_to_kedro.generation.writer.sleep", lambda _: None)
+    monkeypatch.setattr(Path, "rename", persistent)
+    with pytest.raises(ProjectGenerationError, match="persistent refusal"):
+        writer.write_project(tmp_path / "project", {Path("main.py"): "pass"})
+    assert attempts == expected
+    assert list(tmp_path.iterdir()) == []
+
+
+def test_writer_rechecks_concurrent_destination_before_rename_retry(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    root = tmp_path / "project"
+    attempts = 0
+
+    def concurrent(*_args: object) -> None:
+        nonlocal attempts
+        attempts += 1
+        root.mkdir()
+        (root / "keep").write_bytes(b"keep")
+        raise _WindowsPermissionError(5, "sharing")
+
+    monkeypatch.setattr("notebook_to_kedro.generation.writer._WINDOWS", True)
+    monkeypatch.setattr("notebook_to_kedro.generation.writer.sleep", lambda _: None)
+    monkeypatch.setattr(Path, "rename", concurrent)
+    with pytest.raises(ProjectGenerationError, match="Destination already exists"):
+        writer.write_project(root, {Path("main.py"): "pass"})
+    assert attempts == 1
+    assert (root / "keep").read_bytes() == b"keep"

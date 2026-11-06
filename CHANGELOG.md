@@ -9,6 +9,10 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- Later rewrites of catalog-backed variables now become nodes and receive distinct generated
+  dataset versions, preserving catalog input identities. Resolved output-name collisions fail
+  before publication. Windows rename refusals 5/32/33 allow at most three attempts with destination
+  rechecks; persistent/other errors remain visible and no writes, providers or execution are retried.
 - The public Kedro generator now enforces plan validation, rejects keyword task/package names
   and compiles rendered Python without execution. Copied targets cannot escape or overlap
   generated files. Source checks and private staging prevent routine preparation failures from
@@ -21,6 +25,13 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Initial recomputed source-accounting audit with per-statement destinations and source/plan
+  identities, plus AST/provenance/import/catalog/parameter/dependency checks. High-level notebook
+  planning blocks unsupported or omitted instructions; direct generation can opt in with supplied
+  `source_facts`. Existing facts/plan/artifact schemas and fully accounted plan bytes are preserved.
+- Shared-engine/operations/local-interface roadmap and ADR 0004. Future app/VS Code choice stays
+  open; Python input, project test generation, prompt-driven creation and safe project patches
+  remain future operations rather than empty framework abstractions.
 - Initial versioned Kedro architecture profiles for a single pipeline name and function/node
   prefix, with strict declarative JSON, CLI/API selection, compatibility diagnostics, review
   mappings and an opt-in generated manifest. Default output remains byte-identical; dataset,
