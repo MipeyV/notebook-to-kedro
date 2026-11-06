@@ -28,9 +28,9 @@ The compatibility policy is authoritative for supported runtimes and library-sup
 | Document | Status | Purpose |
 | --- | --- | --- |
 | [Project overview](product/overview.md) | Original design | Context, intended interfaces, scope and principles extracted from the old README. |
-| [Detailed project status](product/project-status.md) | Snapshot: 2026-10-11 | Implemented APIs, progress and historical measurement context. |
+| [Detailed project status](product/project-status.md) | Reviewed: 2026-11-06 | Current capability matrix, implemented APIs and historical measurement context. |
 | [Conversion roadmap](product/roadmap.md) | V1 completed; V2 ongoing | Existing milestones and checkboxes, without changing completion claims. |
-| [Product vision](product/product-vision.md) | Proposal | Multiple usage modes, templates, sources/catalog, optimization and enterprise profiles. |
+| [Product vision](product/product-vision.md) | Direction; future features proposed | Existing-project and greenfield entrypoints, reusable enterprise standards, evidence and commercial hypotheses. |
 
 ## Guides
 
@@ -95,6 +95,9 @@ the dedicated experiment reports for their frozen settings, decisions and limita
 ## Decisions and history
 
 - [ADR 0001: use uv](decisions/0001-use-uv.md): accepted dependency-management decision.
+- [ADR 0002: incremental platform evolution](decisions/0002-incremental-platform-evolution.md):
+  shared-core direction, two entrypoints and the bounded generation-reliability milestone.
+- [Agent instructions](../AGENTS.md): development conventions, verification and project memory.
 - [Changelog](../CHANGELOG.md): release-facing changes.
 - [Development journal](../JOURNAL.md): chronological work, decisions and unresolved questions.
 
@@ -106,6 +109,8 @@ the dedicated experiment reports for their frozen settings, decisions and limita
 - Keep measurements bound to their original corpus/runtime; do not rewrite them as new accuracy.
 - Update inbound and outbound links when moving a document, including fragments.
 - Keep historical evidence and roadmap completion states intact during navigation changes.
+- Maintain vision, architecture, status and roadmap in their existing documents; record
+  significant approved decisions in ADRs rather than duplicating journal history.
 - Run the offline navigation checks with `uv run pytest -o addopts= tests/unit/test_documentation.py`.
 
 The 2026-10-11 reorganization changes document paths on the current branch. Earlier commits

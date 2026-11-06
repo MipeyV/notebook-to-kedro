@@ -55,6 +55,9 @@ notebook-to-kedro generate \
 
 Generation refuses to overwrite an existing destination. Review the generated project and report,
 install the generated project's dependencies, then use `kedro run` from its root.
+Both the API and CLI enforce plan validation. Rendered Python is compiled without execution,
+and files/data are prepared privately before publication. These structural checks do not establish
+behavioral equivalence or a verified fresh-environment installation.
 
 Deterministic planning remains the default. After installing Ollama and downloading a local model,
 opt into hybrid semantic planning explicitly:
@@ -77,9 +80,9 @@ The root `README.md` remains the repository and package entry point. The
 
 - [Product overview](docs/product/overview.md): original scope, goals and design principles.
 - [Conversion roadmap](docs/product/roadmap.md): completed V1 milestones and remaining V2 work.
-- [Product vision](docs/product/product-vision.md): proposed faithful reproduction,
-  industrialization and explicit optimization, including templates, broader catalog inference,
-  CV/Bayesian search, segmented KPIs, tracking profiles and MDL-inspired experiments.
+- [Product vision](docs/product/product-vision.md): ML engineering automation through existing-project
+  transformation and future greenfield generation, with reusable enterprise standards.
+  Profiles, broader integrations and explicit optimization remain proposed capabilities.
 - [Architecture](docs/reference/architecture.md): module boundaries and test strategy.
 - [Evaluation and experiments](docs/README.md#evaluation): protocols, corpora and measured evidence.
 
@@ -107,6 +110,7 @@ Release history is recorded in [CHANGELOG.md](CHANGELOG.md). Maintainers should 
 [release process](docs/guides/releasing.md) when preparing tags and GitHub artifacts.
 Development history remains in [JOURNAL.md](JOURNAL.md). See the documentation index's
 [maintenance rules](docs/README.md#maintaining-documentation) when adding or moving documents.
+Repository agents should follow [AGENTS.md](AGENTS.md).
 
 ## Project name
 

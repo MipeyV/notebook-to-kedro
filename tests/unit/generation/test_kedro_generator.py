@@ -2,6 +2,7 @@
 
 import ast
 import importlib
+from dataclasses import replace
 from pathlib import Path
 
 import pytest
@@ -355,6 +356,7 @@ def test_generate_kedro_project_rejects_missing_catalog_source(tmp_path: Path) -
 
     with pytest.raises(ProjectGenerationError, match="Catalog source file does not exist"):
         generate_kedro_project(plan, tmp_path / "generated")
+    assert not (tmp_path / "generated").exists()
 
 
 def test_generate_kedro_project_allows_catalog_without_source_copy(tmp_path: Path) -> None:
@@ -405,7 +407,10 @@ def test_generate_kedro_project_rejects_blocked_plan(tmp_path: Path) -> None:
         generate_kedro_project(plan, tmp_path / "generated")
 
 
-def test_generate_kedro_project_rejects_invalid_package_name(tmp_path: Path) -> None:
+@pytest.mark.parametrize("package_name", ["bad-name", "_private", "class", "None"])
+def test_generate_kedro_project_rejects_invalid_package_name(
+    tmp_path: Path, package_name: str
+) -> None:
     plan = ConversionPlan(
         schema_version="1.0",
         planner_version="0.1.0",
@@ -414,10 +419,79 @@ def test_generate_kedro_project_rejects_invalid_package_name(tmp_path: Path) -> 
     )
 
     with pytest.raises(ProjectGenerationError, match="Invalid generated package name"):
-        generate_kedro_project(plan, tmp_path / "generated", package_name="bad-name")
+        generate_kedro_project(plan, tmp_path / "generated", package_name=package_name)
+    assert not (tmp_path / "generated").exists()
 
-    with pytest.raises(ProjectGenerationError, match="Invalid generated package name"):
-        generate_kedro_project(plan, tmp_path / "generated", package_name="_private")
+
+@pytest.mark.parametrize("invalid", ["duplicate", "keyword", "parameter"])
+def test_public_generator_validates_plans_before_writing(tmp_path: Path, invalid: str) -> None:
+    plan = plan_notebook_path(REFERENCE_NOTEBOOK)
+    task = plan.task_candidates[0]
+    if invalid == "duplicate":
+        plan = replace(plan, task_candidates=(*plan.task_candidates, task))
+    elif invalid == "keyword":
+        plan = replace(plan, task_candidates=(replace(task, name="class"),))
+    else:
+        plan = replace(plan, task_candidates=(replace(task, parameters=("unknown",)),))
+    with pytest.raises(ProjectGenerationError, match="Invalid conversion plan"):
+        generate_kedro_project(plan, tmp_path / "generated")
+    assert list(tmp_path.iterdir()) == []
+
+
+@pytest.mark.parametrize("source", ["broken syntax =", "return 1", "yield 1"])
+def test_generator_compiles_rendered_python_without_executing(tmp_path: Path, source: str) -> None:
+    plan = plan_notebook_path(REFERENCE_NOTEBOOK)
+    plan = replace(plan, imports=(source,))
+    with pytest.raises(ProjectGenerationError, match="Cannot render valid project Python"):
+        generate_kedro_project(plan, tmp_path / "generated")
+    assert list(tmp_path.iterdir()) == []
+
+
+def test_generator_preflights_parameter_rendering(tmp_path: Path) -> None:
+    plan = plan_notebook_path(REFERENCE_NOTEBOOK)
+    task = replace(plan.task_candidates[0], source="not valid python", parameters=("p.size",))
+    parameter = ParameterValue("p.size", 1, "p_size", task.source_cell_ids[0])
+    plan = replace(plan, task_candidates=(task,), parameters=(parameter,))
+    with pytest.raises(ProjectGenerationError, match="Cannot render valid project Python"):
+        generate_kedro_project(plan, tmp_path / "generated")
+    assert list(tmp_path.iterdir()) == []
+
+
+def test_generator_never_executes_source_during_preflight(tmp_path: Path) -> None:
+    plan = plan_notebook_path(REFERENCE_NOTEBOOK)
+    task = replace(plan.task_candidates[0], source="raise RuntimeError('must not run')")
+    plan = replace(plan, task_candidates=(task,))
+    created = generate_kedro_project(plan, tmp_path / "generated")
+    assert all(path.is_file() for path in created)
+
+
+def test_generator_rejects_ambiguous_parameter_rendering_before_io(tmp_path: Path) -> None:
+    plan = plan_notebook_path(REFERENCE_NOTEBOOK)
+    task = replace(plan.task_candidates[0], parameters=("p.size", "q.size"))
+    parameters = tuple(
+        ParameterValue(name, 1, name.replace(".", "_"), task.source_cell_ids[0])
+        for name in task.parameters
+    )
+    plan = replace(plan, task_candidates=(task,), parameters=parameters)
+    with pytest.raises(ProjectGenerationError, match="ambiguous parameter suffixes"):
+        generate_kedro_project(plan, tmp_path / "generated")
+    assert list(tmp_path.iterdir()) == []
+
+
+@pytest.mark.parametrize("target", ["../escaped.csv", "pyproject.toml", "src", "DATA/../bad.csv"])
+def test_generator_rejects_escaping_or_overlapping_catalog_copies(
+    tmp_path: Path, target: str
+) -> None:
+    source = tmp_path / "source.csv"
+    source.write_text("value\n1\n", encoding="utf-8")
+    plan = plan_notebook_path(REFERENCE_NOTEBOOK)
+    dataset = CatalogDataset("df", "CSVDataset", target, str(source))
+    plan = replace(plan, catalog_datasets=(dataset,))
+    with pytest.raises(
+        ProjectGenerationError, match=r"relative contained path|destinations overlap"
+    ):
+        generate_kedro_project(plan, tmp_path / "generated")
+    assert list(tmp_path.iterdir()) == [source]
 
 
 def test_generator_ast_helper_fallbacks_cover_uncommon_shapes() -> None:

@@ -1,22 +1,39 @@
-# Product vision: notebook-to-production workflows
+# Product vision: ML engineering automation
 
 [Documentation index](../README.md)
 
-Status: proposed product direction, recorded on 2026-10-11. This document is not a
+Status: product direction aligned on 2026-11-06; unimplemented capabilities remain proposals.
+See [ADR 0002](../decisions/0002-incremental-platform-evolution.md). This document is not a
 supported-feature list, an executable configuration contract, or a release commitment.
 The [compatibility guide](../reference/compatibility.md) and [README](../../README.md#project-status)
 remain authoritative for current capabilities.
 
 ## Objective
 
-Build a reusable notebook-to-production foundation for data teams, with multiple usage
-modes rather than a single conversion workflow. Starting from a notebook and an explicit
-business contract, produce a traceable, reproducible project that fits the organization's
-data systems, evaluation requirements and experiment-tracking policies.
+Build an ML Engineering Automation Platform that reduces repetitive engineering work and
+applies reusable organizational standards to heterogeneous ML projects. Notebook-to-Kedro
+is the first use case. The goal is traceable, maintainable, reproducible projects with
+reviewable requirements and evidence, not merely faster Python generation.
 
 The intended surfaces are a Python API and CLI first, with a possible application or
 enterprise API later. Product names, commercial packaging and hosting are undecided.
 Kedro is the initial execution target; other targets would need separate contracts and tests.
+
+## Two entrypoints
+
+| Entrypoint | Input and intended result | Current boundary |
+| --- | --- | --- |
+| Industrialize an existing project | Analyze notebooks, later scripts/pipelines/repositories; propose a transformation plan, preserve provenance, generate and check a standardized project. | Controlled Python notebooks to minimal Kedro projects are implemented; broader sources remain future work. |
+| Create a new project | Explicit data/schema, objective, task, preprocessing, model strategy, metrics, training/inference and integration requirements become a coherent scaffold. | No greenfield entrypoint or specification contract is implemented. |
+
+Both entrypoints should eventually share project requirements, architecture-profile resolution,
+generation and validation contracts. Keep source facts separate. Introduce a typed, versioned
+common project representation only when real slices of both workflows establish its needs;
+a small configuration object cannot express arbitrary notebook semantics.
+
+Scaffolding, inferred implementation and verified behavior must remain distinguishable.
+Missing business logic or a trained/validated model cannot be invented by a scaffold generator.
+The usage modes below describe permitted changes, independently of the chosen entrypoint.
 
 ## Usage modes
 
@@ -122,6 +139,14 @@ pandas replacement.
 
 ## Enterprise profiles and experiment tracking
 
+Reusable architecture standards are a central product differentiator. Proposed declarative,
+version-controlled profiles cover layout, node/pipeline/dataset naming, required stages and
+artifacts, data contracts, configuration, logging, testing, documentation and integrations.
+Profiles need identities, versions, validation and compatibility checks. Apply them without
+silently inserting computational steps or renaming business variables in ways that change logic.
+Start with one small Kedro profile and a default preserving today's output; broader customization
+and migration support require their own demonstrated needs. No executable profile engine exists yet.
+
 Proposed enterprise profiles select execution environment, storage adapters, dependency
 constraints, secret references, tracking backend, allowed network destinations and data
 disclosure policies. They must be supplied or reviewed, not inferred from a company name.
@@ -144,6 +169,31 @@ credentials in generated source, catalog files or reports. Restrict raw data, ro
 predictions, sensitive segments and model artifacts according to the enterprise policy.
 Define failure handling, retention and artifact transfer limits before enabling an adapter.
 Generating a project is not the same as deploying, serving or monitoring it in production.
+
+## Evidence and product differentiation
+
+Report independent evidence dimensions: generated files, structural checks, behavior checked on
+declared cases, human review, integration requirements and externally validated operational
+readiness. A generic success flag or a passing finite test suite must not become a production-ready
+claim. Unsupported patterns, uncertainties and required manual actions remain visible.
+
+Build around interchangeable models rather than training a foundation model. Existing node-code
+checks deliberately require source AST fidelity; acceptance measures constrained reproduction,
+not general refactoring ability. Use AI only where its measured contribution exceeds deterministic
+rendering. Current Ollama measurements do not establish support for remote providers.
+
+Compare deterministic and assisted workflows with general coding agents on identical authorized
+cases and standards. Measure complete-project success, manual corrections, review time, reproducibility,
+latency and total cost. Include rejected/unfinished attempts. Validate consistency and maintenance
+benefits across projects; model scores alone do not demonstrate a commercial advantage.
+
+## Commercial hypotheses
+
+B2B packaging may include an open-source core, enterprise integrations/support, managed or
+self-hosted deployments, or SaaS. These remain hypotheses to test with teams rather than settled
+tiers. The existing repository remains MIT-licensed; this direction does not change that license.
+Confidentiality, access control, auditability, supply-chain security and multi-project governance
+should inform boundaries without introducing enterprise infrastructure before it is needed.
 
 ## Optimization and minimum description length
 
@@ -184,27 +234,11 @@ product tiers remain open decisions; they do not require separate model training
 
 ## Staged roadmap and acceptance gates
 
-These milestones extend, rather than replace, the unfinished V2 roadmap. None is marked
-complete by this documentation change.
-
-1. **Complete-notebook pilot:** create a reproducible synthetic workflow and independently
-   review source acquisition, expected catalog, task boundaries, intermediate tables,
-   predictions and metrics. Keep its review status pending until actual human approval.
-   Follow with an authorized, redacted real notebook; synthetic success is not general accuracy.
-2. **Source contracts:** version source descriptors and diagnostics; cover simulation/sklearn
-   and local reads before isolated Kaggle, Spark/Databricks and AWS/GCP adapters. Test both
-   recognition and real loading separately with explicit credentials/network consent.
-3. **Faithful template adaptation:** render versioned skeletons and fill bounded slots;
-   validate generated projects against independently reviewed baseline outputs and negative
-   controls. Add review-gated project integration without automatically accepting LLM proposals.
-4. **Industrialization profiles:** add optional tracking and environment adapters with local
-   no-tracking coverage, backend-specific integration tests and privacy/failure policies.
-5. **Explicit optimization:** introduce reviewed change plans, leakage-safe CV/search,
-   KPI/segment contracts and complexity/runtime benchmarks under bounded execution budgets.
-   Rejections and regressions must remain in reports, not disappear from success denominators.
-6. **Product packaging:** validate team workflows, coverage, review burden, latency and cost;
-   choose library/API/application packaging and repository boundaries from demonstrated needs.
-   Serving, deployment and monitoring require their own acceptance gates if added.
+The [roadmap](roadmap.md#product-delivery-priorities) owns priority, dependency and acceptance
+gates. Preserve unfinished V2 work and historical completion claims. Reliability and project-level
+evidence precede broad abstraction; a narrow profile and greenfield slice precede general platform
+infrastructure. Source connectors and MLOps integrations are selected by validated needs. Explicit
+optimization remains a separate later contract, not a prerequisite for either entrypoint.
 
 The [draft complete-notebook pilot](../evaluation/synthetic-notebook-pilot.md) now covers one
 controlled simulation-plus-local-CSV workflow. Its independent source/catalog and behavioral

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import keyword
 from typing import TYPE_CHECKING
 
 from notebook_to_kedro.exceptions import ConversionPlanValidationError
@@ -49,7 +50,11 @@ def _task_name_errors(plan: ConversionPlan) -> tuple[str, ...]:
     return tuple(
         f"task name must be a public Python identifier: {task.name}"
         for task in plan.task_candidates
-        if not task.name.isidentifier() or task.name.startswith("_")
+        if (
+            not task.name.isidentifier()
+            or task.name.startswith("_")
+            or keyword.iskeyword(task.name)
+        )
     )
 
 
