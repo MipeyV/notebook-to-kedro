@@ -23,6 +23,11 @@ from notebook_to_kedro.semantic import (
     create_semantic_planner,
     validate_conversion_plan,
 )
+from notebook_to_kedro.semantic.source_accounting import (
+    ConversionSourceAudit,
+    audit_conversion_source,
+    enforce_source_accounting,
+)
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -56,7 +61,8 @@ def plan_notebook_path(  # noqa: PLR0913
         ollama_base_url=ollama_base_url,
         ollama_timeout_seconds=ollama_timeout_seconds,
     )
-    return selected_planner.create_plan(analyze_notebook_path(path, project_root=project_root))
+    facts = analyze_notebook_path(path, project_root=project_root)
+    return enforce_source_accounting(facts, selected_planner.create_plan(facts))
 
 
 def _select_planner(
@@ -89,8 +95,10 @@ def _select_planner(
 
 __all__ = [
     "DEFAULT_KEDRO_PROFILE",
+    "ConversionSourceAudit",
     "KedroArchitectureProfile",
     "analyze_notebook_path",
+    "audit_conversion_source",
     "create_semantic_planner",
     "generate_kedro_project",
     "load_kedro_profile",

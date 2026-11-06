@@ -78,6 +78,15 @@ The first milestone focuses on:
 
 Complex scopes, conditional writes, dynamic execution, shell commands, and Jupyter magics follow the policy in [mvp-contract.md](mvp-contract.md).
 
+The high-level planning/generation path now applies [source accounting](source-accounting.md).
+Standalone expressions/assertions/side-effect cells that the cell-oriented planner cannot place,
+mixed import/task or catalog/task cells, unresolved inputs and non-exact catalog relocation block
+conversion rather than disappear silently. Current catalog relocation accepts an earlier bound
+pandas reader with one positional literal local CSV path and no options. Retaining a loader in
+task code is distinct from inferring a catalog entry. These stricter checks do not establish
+arbitrary Python equivalence; low-level planners remain proposals and direct generation needs
+supplied `source_facts` to check completeness against the source.
+
 ## Library support levels
 
 ### Level 0 — syntactic observation

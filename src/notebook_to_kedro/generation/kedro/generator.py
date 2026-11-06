@@ -18,12 +18,19 @@ from notebook_to_kedro.generation.kedro.profiles import (
 )
 from notebook_to_kedro.generation.parameters import ParameterReplacement
 from notebook_to_kedro.generation.writer import write_project
+from notebook_to_kedro.semantic.source_accounting import enforce_source_accounting
 from notebook_to_kedro.semantic.validation import validate_conversion_plan
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
 
-    from notebook_to_kedro.ir import ConversionPlan, JsonPrimitive, ParameterValue, TaskCandidate
+    from notebook_to_kedro.ir import (
+        ConversionPlan,
+        JsonPrimitive,
+        NotebookFacts,
+        ParameterValue,
+        TaskCandidate,
+    )
 
 DEFAULT_PACKAGE_NAME = "generated_notebook"
 PARAMETER_MAPPING_ITEM_LENGTH = 2
@@ -40,8 +47,11 @@ def generate_kedro_project(
     *,
     package_name: str = DEFAULT_PACKAGE_NAME,
     architecture_profile: KedroArchitectureProfile | None = None,
+    source_facts: NotebookFacts | None = None,
 ) -> tuple[Path, ...]:
     """Validate, compile and publish a minimal project without executing source code."""
+    if source_facts is not None:
+        plan = enforce_source_accounting(source_facts, plan)
     try:
         validate_conversion_plan(plan)
     except ConversionPlanValidationError as error:
@@ -307,12 +317,16 @@ class _PipelineEntry:
 
 def _pipeline_entries(plan: ConversionPlan) -> tuple[_PipelineEntry, ...]:
     entries: list[_PipelineEntry] = []
-    latest_dataset_by_symbol: dict[str, str] = {}
+    latest_dataset_by_symbol = {dataset.name: dataset.name for dataset in plan.catalog_datasets}
+    produced = set(latest_dataset_by_symbol)
     for task in plan.task_candidates:
         inputs = {symbol: latest_dataset_by_symbol.get(symbol, symbol) for symbol in task.inputs}
         outputs = tuple(
             _output_dataset(symbol, task, latest_dataset_by_symbol) for symbol in task.outputs
         )
+        if len(outputs) != len(set(outputs)) or set(outputs) & produced:
+            raise ProjectGenerationError("Generated dataset names have multiple producers")
+        produced.update(outputs)
         latest_dataset_by_symbol.update(zip(task.outputs, outputs, strict=True))
         entries.append(
             _PipelineEntry(

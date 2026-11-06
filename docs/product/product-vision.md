@@ -15,9 +15,30 @@ applies reusable organizational standards to heterogeneous ML projects. Notebook
 is the first use case. The goal is traceable, maintainable, reproducible projects with
 reviewable requirements and evidence, not merely faster Python generation.
 
-The intended surfaces are a Python API and CLI first, with a possible application or
-enterprise API later. Product names, commercial packaging and hosting are undecided.
+The target product experience is a local application or VS Code extension where users open
+an ML project, load local configuration, choose an operation, inspect its plan/diff, apply it
+and review validation evidence. The precise UI choice remains open. Build the Python API/CLI
+core first; product names, commercial packaging and hosting remain undecided.
 Kedro is the initial execution target; other targets would need separate contracts and tests.
+
+## Shared engine, operations and local interfaces
+
+Keep three responsibilities separate as recorded in
+[ADR 0004](../decisions/0004-shared-engine-and-local-interface.md):
+
+- **Engine:** deterministic source analysis, provenance, functional workflow representation,
+  transformation planning, generation and validation. Models may propose bounded changes.
+- **Operations:** notebook conversion, later script conversion, new-project creation,
+  existing-project refactoring/standardization and inspection. Each has explicit inputs,
+  permitted changes and acceptance criteria; a shared core does not imply identical validation.
+- **Interfaces:** API/CLI and later a local app or VS Code extension selecting implemented
+  operations, local configuration and review/execution workflows. Keep transformation logic out of UI.
+
+Reuse the current notebook-to-Kedro components incrementally. First account for source statements
+and supported graph transformations, then exercise notebook and Python inputs before introducing
+a common representation. Do not add empty engine/task registries, an HTTP service or a universal
+configuration model ahead of working slices. A first interface can expose a small reliable subset;
+it need not wait for prompt-driven project creation or all future backends.
 
 ## Two entrypoints
 

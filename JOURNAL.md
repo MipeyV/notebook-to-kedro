@@ -40,6 +40,61 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-11-06 - Shared-engine roadmap and first source-accounting guard
+
+### Completed
+
+- Recorded the shared-engine/operation/interface direction in ADR 0004 and the existing vision
+  and roadmap. The intended product is a local app or VS Code extension with local configuration;
+  UI choice stays open. Next slices cover functional blocks/Python input, generated-project tests,
+  local operation interfaces, existing-project standards/refactoring and prompt-based scaffolding.
+- Added a separate immutable schema-1.0 source audit: one record per parsed statement, supplied
+  notebook identity, plan fingerprint and explicit destination/failure. Reused existing plan
+  validation and deterministic parameter extraction; checked task AST/order/cell provenance,
+  imports, catalog relocation, selected parameter values/bindings and source dependency interfaces.
+- Enforced the guard in high-level notebook planning, preserving passing plan bytes and adding
+  blocking diagnostics for omissions/drift. Exposed read-only `audit_conversion_source` and optional
+  `source_facts` enforcement for direct generation. No existing facts/plan/artifact schema changes.
+- Fixed catalog-backed variable rewrites: exclude loader statements rather than every later write
+  of the catalog symbol; seed renderer versioning with catalog inputs. A real CSV/assignment/metric
+  pipeline now executes with distinct original/rewritten dataset names. Resolved output collisions
+  fail before publication instead of creating ambiguous graph producers.
+- Initial regression execution encountered four Windows final-rename refusals (632 tests passed);
+  one refusal recurred on targeted retry. Added at most three attempts for Windows errors 5/32/33,
+  rechecking destination existence before every rename. Writes/copies/providers/execution are not
+  retried, and permanent/non-Windows/other errors remain visible. Tests cover success, exhaustion
+  and a concurrent destination appearing between attempts.
+- Added source-omission, import/body/provenance drift, catalog-option/binding, parameter and
+  graph negative controls, no-I/O evidence, API/CLI refusal tests and an audit-schema contract.
+  Updated reference/compatibility/status/agent documents and indexed new references/ADR.
+
+### Verification
+
+- Final targeted audit/writer/generator/schema/documentation/CSV execution suite: 169 passed,
+  with 100% line/branch coverage of the audit and writer modules (237 statements, 74 branches).
+- Ruff and strict mypy pass on 156 source/test files.
+- Complete offline Python 3.12.14 suite: 2,045 passed in 448.94 seconds, with 100% line/branch
+  coverage (7,861 statements, 2,288 branches, 81 completely covered files). Formatting and
+  source/wheel builds pass; the new audit module/reference/ADR are included in distributions.
+  Other Python versions were not rerun locally; no real model was called.
+
+### Decisions and limitations
+
+- Work is isolated on `feat/conversion-source-accounting`; review/merge remain separate.
+- This is an initial source-accounting/name-flow slice, not a universal workflow representation,
+  complete side-effect/alias model, runtime-equivalence proof, UI or general refactoring engine.
+- Unsupported standalone assertions/effects and mixed cells block rather than being silently
+  dropped or automatically repaired. Low-level planners remain proposals; absent supplied source
+  facts, direct generation cannot establish source completeness. Audit JSON is not approval.
+- Preserve the pending independent human pilot review, historical benchmark evidence and strict
+  node-code fidelity checks. No real model calls or new foundation-model/backend infrastructure.
+
+### Next step
+
+- Review this engine increment, then prove shared functional blocks with a structured Python
+  frontend alongside notebooks. Continue the independent-review/authorized-real-project evidence
+  stream; derive the next representation and interface contracts from those concrete cases.
+
 ## 2026-11-06 - Initial versioned Kedro architecture profiles
 
 ### Completed

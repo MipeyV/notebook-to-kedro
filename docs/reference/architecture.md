@@ -66,6 +66,7 @@ src/notebook_to_kedro/
 │   ├── hybrid.py
 │   ├── orchestration.py
 │   ├── ollama.py
+│   ├── source_accounting.py
 │   └── validation.py
 ├── generation/
 │   ├── writer.py
@@ -239,6 +240,14 @@ and unresolved parameter references. This is not a complete semantic or graph-eq
 proof. Cell-oriented planning, unknown inputs, mutation and side-effect-only cells still
 require the supported-subset limitations and explicit review.
 
+The high-level `plan_notebook_path` use case additionally calls
+[`source_accounting.py`](source-accounting.md). A separate immutable audit accounts for every
+parsed statement and cross-checks task AST/provenance, ordered imports, exact catalog relocation,
+selected parameter evidence and source dependencies. Passing plans are unchanged; failures add
+blocking diagnostics. Root `audit_conversion_source(facts, plan)` exposes recomputed JSON evidence
+without I/O. Low-level candidate planners remain proposals. A direct generator caller can bind
+`source_facts` to request the same guard; a plan alone cannot establish absent-source completeness.
+
 ### Kedro generation
 
 `generation/kedro/` consumes only a validated `ConversionPlan`:
@@ -247,6 +256,7 @@ require the supported-subset limitations and explicit review.
 - render the Kedro package and pipeline files;
 - generate configuration and catalog entries;
 - register the pipeline;
+- version catalog-backed symbols on their first node rewrite and reject resolved output collisions;
 - compile rendered Python before filesystem writes, without importing or executing it;
 - hand rendered files and source-copy instructions to the shared writer.
 
@@ -301,6 +311,9 @@ New parent directories can remain. Publication/cleanup errors are reported; abru
 termination can leave staging data. Rechecks are not a filesystem lock against concurrent
 edits, and OS rename behavior does not establish crash durability or hostile-filesystem safety.
 Catalog entries without a source copy remain configuration only, with no claimed data existence.
+On Windows only, final rename errors 5/32/33 allow at most three attempts with 50 ms waits and
+destination rechecks. Other/persistent failures remain errors; preparation writes, source copies,
+model calls and code execution are not retried by this mechanism.
 
 ## Dependency direction
 
@@ -311,7 +324,7 @@ api
 ├── notebook → ir
 ├── analysis → ir
 ├── semantic → ir
-└── generation → semantic.validation → ir
+└── generation → semantic validation/accounting → ir
     └── writer → filesystem
 ```
 
@@ -328,6 +341,11 @@ Experimental evaluation may orchestrate generation and runtime execution, while 
 analysis and normal generation remain free of notebook/model execution.
 
 ## Proposed evolution
+
+[ADR 0004](../decisions/0004-shared-engine-and-local-interface.md) defines a reusable engine
+composed into operations, exposed first through API/CLI and later a local app or VS Code extension.
+The UI choice is open and must not own transformation logic. Local configuration and reviewable
+plans/diffs precede application/execution. No UI or operation registry is implemented in this slice.
 
 [ADR 0002](../decisions/0002-incremental-platform-evolution.md) records the incremental
 direction. Two future entrypoints should eventually converge on shared project requirements:

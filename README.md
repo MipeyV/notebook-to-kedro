@@ -58,6 +58,9 @@ install the generated project's dependencies, then use `kedro run` from its root
 Both the API and CLI enforce plan validation. Rendered Python is compiled without execution,
 and files/data are prepared privately before publication. These structural checks do not establish
 behavioral equivalence or a verified fresh-environment installation.
+High-level notebook planning also performs [source accounting](docs/reference/source-accounting.md):
+omitted or duplicated statements, changed task/import evidence and unsupported CSV relocation
+block generation. Unsupported standalone assertions/side-effect cells are reported for review.
 
 Apply a reusable [Kedro architecture profile](docs/guides/kedro-profiles.md) explicitly with
 `--architecture-profile examples/kedro_profiles/team_training.json` on both `plan` and `generate`.
@@ -90,6 +93,8 @@ The root `README.md` remains the repository and package entry point. The
   Initial naming/organization profiles are available; broader standards, integrations and
   explicit optimization remain proposed capabilities.
 - [Architecture](docs/reference/architecture.md): module boundaries and test strategy.
+- [Source accounting](docs/reference/source-accounting.md): inspect statement destinations and
+  the initial source-fidelity/graph guard reused by notebook conversion.
 - [Evaluation and experiments](docs/README.md#evaluation): protocols, corpora and measured evidence.
 
 Product objectives are not supported-feature claims. Optimization requires a separate approved

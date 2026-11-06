@@ -11,11 +11,13 @@ Historical measurements retain their original corpus, runtime and limitations.
 | --- | --- |
 | Deterministic notebook conversion | Operational for the controlled subset in the compatibility policy. |
 | Generation reliability | Public API enforces plan validation and compile-only Python preflight; contained/nonoverlapping copied targets and regular sources are checked before private preparation and rename publication. No overwrite option. |
+| Source completeness | High-level notebook planning blocks unhandled/duplicated statements, task/import drift, unsupported catalog relocation and inconsistent source-derived parameters/dependencies. A separate read-only audit exposes every parsed statement. |
 | Behavioral evidence | Controlled fixtures, independent task corpora and a draft complete-notebook pilot; no general equivalence or production-readiness claim. |
 | AI assistance | Constrained hybrid planning is opt-in; code/body proposals and campaign preparation remain experimental and separate from normal generation. |
 | Architecture profiles | Initial deterministic Kedro naming/organization slice: versioned JSON, one pipeline name, function/node prefix, review mappings and opt-in manifest. Broader enterprise standards remain proposed. |
 | Greenfield project generation | Proposed; no specification-driven entrypoint or shared `ProjectSpec`. |
 | MLOps / enterprise platform | Future integrations, governance and packaging require validated needs and separate contracts. |
+| Shared engine / local interface | Existing core is being strengthened for multiple operations. Structured-script input, a general project model, operation UI/local app or VS Code extension remain future work. |
 
 Generation reliability does not verify a fresh dependency installation, full DAG semantics or
 runtime behavior. Parent directories can remain after a failure; concurrent filesystem edits
@@ -23,6 +25,13 @@ and abrupt termination are outside the writer's guarantees. See the
 [architecture](../reference/architecture.md#filesystem-writing) and
 [delivery priorities](roadmap.md#product-delivery-priorities). The original `ready` conversion-report
 label means no blocking plan diagnostics; it is not a consolidated validation or release status.
+
+See [source accounting](../reference/source-accounting.md) for the exact initial guard. It
+rejects omissions instead of automatically repairing them, preserves fully accounted plan bytes
+and leaves low-level planners as proposals. Direct generation can bind supplied `source_facts`.
+The first rewrite of a catalog-backed variable now becomes a node with a distinct dataset version;
+resolved output-name collisions fail before publication. Windows rename refusals are retried at
+most three times with destination rechecks; no model or code execution is retried.
 
 The [profile guide](../guides/kedro-profiles.md) documents CLI/API use and strict compatibility.
 Default/custom tests preserve task AST bodies, dataset/parameter identities and the complete

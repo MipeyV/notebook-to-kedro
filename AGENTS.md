@@ -14,6 +14,11 @@
 - Use English for repository documentation, code, diagnostics and commit messages.
 - Keep analysis deterministic and free of notebook execution. Separate source facts,
   semantic proposals, generated artifacts and validation evidence.
+- Treat the product as a shared engine composed into operations, with a future local app or
+  VS Code interface. Implement concrete working slices; UI must not own transformation rules.
+- Preserve [source accounting](docs/reference/source-accounting.md) at the notebook use-case
+  boundary. Do not silently omit instructions or replace unsupported reader options. Candidate
+  planners and serialized audits alone do not establish source completeness or execution consent.
 - Preserve the minimal runtime dependency surface. Kedro, ML libraries and provider SDKs
   must not become analysis dependencies merely to support an integration.
 - Keep faithful conversion independently usable. Do not silently optimize or repair source
