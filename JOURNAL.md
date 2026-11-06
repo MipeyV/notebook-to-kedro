@@ -40,6 +40,51 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-11-06 - Initial versioned Kedro architecture profiles
+
+### Completed
+
+- Added immutable schema-1.0 profiles with explicit identity/version, one pipeline name and
+  an optional function/node prefix. Strict bounded UTF-8 JSON loading rejects unknown/duplicate
+  fields and unsupported conventions; no provider, runtime package import or template execution.
+- Added matching CLI `--architecture-profile` selection for review/generation and public Python
+  configuration/loading APIs. Profile resolution preserves the original plan and reports invalid,
+  normalized duplicate and import/builtin-shadowing names before output publication.
+- Kept source bodies/interfaces, dataset versioning and parameter identities intact. Omitted
+  profiles preserve existing inventory/bytes; explicit profiles add an architecture-profile manifest
+  with normalized configuration/hash and stable task/source-name/cell/statement mappings.
+- Added a reusable team-training example, schema contract, strict-loader/name regressions,
+  byte-identical explicit-default checks, AST/body/configuration preservation and reproducible
+  custom generation. The complete draft pilot matches all declared observables under the example
+  profile while loading its actual catalog CSV. Its independent human review stays pending.
+- Added an indexed guide and ADR 0003; synchronized architecture, status, roadmap, vision,
+  changelog and agent instructions with the implemented slice and its remaining limitations.
+
+### Verification
+
+- Targeted generation/profile/reporting/CLI suite: 121 passed, with 100% line/branch coverage of
+  the new profile module. The custom complete-pilot regression passed independently.
+- Final profile/schema/documentation checks: 105 passed. Ruff and strict mypy (152 files) pass.
+- Complete offline Python 3.12.14 suite: 1,990 passed in 492.55 seconds, with 100% line/branch
+  coverage (7,658 statements, 2,226 branches, 80 completely covered files). Source/wheel builds
+  and final formatting pass; the wheel contains the profile module and the source archive
+  contains the guide/example. Other Python versions were not rerun locally; no real model ran.
+
+### Decisions
+
+- Work is isolated on `feat/kedro-architecture-profiles`; review and merging remain separate.
+- Derive generated names from stable task IDs without renaming plan tasks, datasets, parameters
+  or business variables. Keep legacy output unchanged unless profiles are explicitly selected.
+- Metadata declares configuration/source mappings, not signed review, full source-byte binding,
+  an immutable version registry, arbitrary-notebook equivalence or enterprise compliance.
+- Multi-pipeline decomposition, general layout/templates, broader standards, greenfield
+  specifications and live model experiments remain outside this increment.
+
+### Next step
+
+- Review this profile slice and obtain the actual independent pilot review. Apply approved
+  conventions to an authorized real project before broadening standards or shared project models.
+
 ## 2026-11-06 - Product alignment and dependable Kedro generation
 
 ### Completed

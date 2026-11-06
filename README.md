@@ -59,6 +59,11 @@ Both the API and CLI enforce plan validation. Rendered Python is compiled withou
 and files/data are prepared privately before publication. These structural checks do not establish
 behavioral equivalence or a verified fresh-environment installation.
 
+Apply a reusable [Kedro architecture profile](docs/guides/kedro-profiles.md) explicitly with
+`--architecture-profile examples/kedro_profiles/team_training.json` on both `plan` and `generate`.
+This initial schema configures the single pipeline's name and a function/node prefix, with
+reviewable source mappings and a generated profile manifest. Omitting it preserves today's output.
+
 Deterministic planning remains the default. After installing Ollama and downloading a local model,
 opt into hybrid semantic planning explicitly:
 
@@ -82,7 +87,8 @@ The root `README.md` remains the repository and package entry point. The
 - [Conversion roadmap](docs/product/roadmap.md): completed V1 milestones and remaining V2 work.
 - [Product vision](docs/product/product-vision.md): ML engineering automation through existing-project
   transformation and future greenfield generation, with reusable enterprise standards.
-  Profiles, broader integrations and explicit optimization remain proposed capabilities.
+  Initial naming/organization profiles are available; broader standards, integrations and
+  explicit optimization remain proposed capabilities.
 - [Architecture](docs/reference/architecture.md): module boundaries and test strategy.
 - [Evaluation and experiments](docs/README.md#evaluation): protocols, corpora and measured evidence.
 

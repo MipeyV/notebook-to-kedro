@@ -15,6 +15,10 @@ class ProjectGenerationError(ValueError):
     """Raised when a generated project cannot be written safely."""
 
 
+class KedroProfileError(ProjectGenerationError):
+    """Raised for an invalid or incompatible declarative Kedro architecture profile."""
+
+
 class ConversionPlanValidationError(ValueError):
     """Raised when a conversion plan is not safe to generate."""
 

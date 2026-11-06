@@ -4,7 +4,10 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, cast
 
+from notebook_to_kedro.generation.kedro.profiles import resolve_node_names
+
 if TYPE_CHECKING:
+    from notebook_to_kedro.generation.kedro.profiles import KedroArchitectureProfile
     from notebook_to_kedro.ir import (
         CatalogDataset,
         ConversionPlan,
@@ -18,11 +21,14 @@ if TYPE_CHECKING:
 PARAMETER_MAPPING_ITEM_LENGTH = 2
 
 
-def render_conversion_report(plan: ConversionPlan) -> str:
+def render_conversion_report(
+    plan: ConversionPlan, *, architecture_profile: KedroArchitectureProfile | None = None
+) -> str:
     """Render a deterministic Markdown review report for a conversion plan."""
     sections = [
         "# Notebook to Kedro Conversion Report",
         _summary(plan),
+        "" if architecture_profile is None else _architecture_profile(plan, architecture_profile),
         _tasks(plan.task_candidates),
         _catalog_datasets(plan.catalog_datasets),
         _parameters(plan.parameters),
@@ -30,6 +36,26 @@ def render_conversion_report(plan: ConversionPlan) -> str:
         _blocking_diagnostics(plan.blocking_diagnostic_codes),
     ]
     return "\n\n".join(section for section in sections if section).rstrip() + "\n"
+
+
+def _architecture_profile(plan: ConversionPlan, profile: KedroArchitectureProfile) -> str:
+    names = resolve_node_names(plan, profile)
+    lines = [
+        "## Kedro Architecture Profile",
+        f"- Profile: `{profile.profile_id}` version `{profile.profile_version}`",
+        f"- Profile SHA-256: `{profile.sha256}`",
+        f"- Pipeline directory and registry key: `{profile.pipeline_name}`",
+        "- Dataset and parameter names remain those in the source plan.",
+        "",
+        "| Task ID | Source node | Generated function/node | Source cells |",
+        "| --- | --- | --- | --- |",
+    ]
+    lines.extend(
+        f"| `{_escape_table_text(task.id)}` | `{_escape_table_text(task.name)}` "
+        f"| `{_escape_table_text(names[task.id])}` | {_code_list(task.source_cell_ids)} |"
+        for task in plan.task_candidates
+    )
+    return "\n".join(lines)
 
 
 def _summary(plan: ConversionPlan) -> str:
