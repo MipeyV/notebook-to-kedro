@@ -2,11 +2,32 @@
 
 [Documentation index](../README.md)
 
-Status: completed V1 milestones and ongoing V2 roadmap, extracted on 2026-10-11.
-Checkboxes retain their previous state; this reorganization does not complete milestones.
+Status: delivery priorities aligned on 2026-11-06; historical V1/V2 checkboxes are preserved.
 The broader product direction is recorded in [Product vision](product-vision.md).
 
-## Current next step
+## Product delivery priorities
+
+These priorities follow [ADR 0002](../decisions/0002-incremental-platform-evolution.md).
+They are acceptance gates, not dates or authorization to implement every phase.
+
+| Order | Deliverable | Dependencies and acceptance gate | Status |
+| --- | --- | --- | --- |
+| 0 | Align project memory and harden generation | Shared API validation, compile-only preflight, contained copy targets and prepared publication; regression and failure-path checks. | Implemented in this increment; runtime equivalence remains separately scoped. |
+| 1 | Reviewed project-level evidence | Actual independent pilot review before live model calls; frozen dispatcher/execution evidence, then an authorized real notebook. Compare deterministic, assisted and general coding-agent workflows including corrections, review effort, failures and cost. | Pending; offline infrastructure exists. |
+| 2 | Minimal versioned Kedro architecture profile | Reliable generator and reviewed baseline; default output plus one alternative convention set, preserved behavior/source mappings, explicit incompatibility diagnostics. | Proposed. |
+| 3 | First greenfield generation slice | Narrow explicit ML specification and profile resolution; coherent scaffold with missing business logic and unverified behavior visible. Derive shared representation from both entrypoints. | Proposed. |
+| 4 | Selected MLOps artifacts/integrations | Validated team requirements; generated tests, CI, tracking or deployment preparation with integration-specific evidence. | Proposed; ordering may change with demonstrated need. |
+| 5 | Enterprise application/governance | Repeated multi-project use and commercial evidence; add independent hosting, identity/jobs or shared policy management only when justified. | Proposed. |
+
+Deterministic profile development need not wait for the live LLM experiment. Customer discovery
+can accompany the reviewed evaluation. Broader source contracts and library patterns remain
+targeted increments; completing all V2 items is not a prerequisite for a greenfield slice.
+
+The smallest implementation milestone is a dependable generation boundary. The first profile
+milestone tests the enterprise proposition: one reviewed workflow, two reusable standards profiles,
+preserved checked behavior. Optimization has a separate later acceptance contract.
+
+## Whole-notebook evaluation next gate
 
 A [draft complete synthetic notebook](../evaluation/synthetic-notebook-pilot.md) now exercises
 simulation, local CSV catalog loading and generated pipeline equivalence with negative controls.

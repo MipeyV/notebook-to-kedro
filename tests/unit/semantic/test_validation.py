@@ -103,7 +103,7 @@ def test_validate_conversion_plan_rejects_duplicate_names() -> None:
     assert "duplicate parameter function argument: prepare_size" in message
 
 
-@pytest.mark.parametrize("task_name", ["bad-name", "_private"])
+@pytest.mark.parametrize("task_name", ["bad-name", "_private", "class", "None"])
 def test_validate_conversion_plan_rejects_invalid_task_names(task_name: str) -> None:
     plan = ConversionPlan(
         schema_version="1.0",

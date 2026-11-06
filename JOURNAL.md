@@ -40,6 +40,50 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-11-06 - Product alignment and dependable Kedro generation
+
+### Completed
+
+- Aligned the existing vision/roadmap with two entrypoints: existing-project transformation
+  and future greenfield generation. Prioritized reliability, reviewed project evidence,
+  minimal Kedro profiles and a first specification-driven slice before enterprise infrastructure.
+- Added root agent instructions and ADR 0002, indexed both, and corrected architecture examples,
+  current module boundaries and the distinction between implemented and proposed capabilities.
+- Made the public generator enforce plan validation and reject keyword node/package names.
+  Rendered Python is compiled without execution; syntax and parameter-rendering failures precede I/O.
+- Added a shared writer with relative/nonoverlapping target checks, Windows alias/device checks,
+  regular source-file preflight, private same-filesystem preparation, destination rechecks and
+  rename publication. Routine write/copy/publish failures clean temporary preparation and raise
+  `ProjectGenerationError`; existing destination content is preserved when observed.
+- Added direct API regressions, no-execution checks, missing/invalid copy sources, traversal,
+  collisions and simulated write/copy/publication/concurrent-destination failures. Documentation
+  navigation now includes `AGENTS.md`.
+
+### Verification
+
+- Targeted final generator/writer/plan/documentation suite: 120 passed.
+- Ruff lint/format, strict mypy (147 source/test files) and source/wheel builds pass.
+- An initial complete run passed all 1,917 collected tests, but its coverage result was invalidated
+  by editing the writer while that run was active. The final fresh Python 3.12.14 suite passes
+  all 1,925 tests in 453.66 seconds with 100% line/branch coverage (7,541 statements, 2,192 branches,
+  79 completely covered files). No real provider was called; other Python versions were not rerun.
+
+### Decisions
+
+- Work is isolated on `feat/generation-reliability-product-alignment`; merging is deferred to review.
+- Preserve the generated project layout and deterministic computational transformations. Profiles,
+  a common project representation, greenfield generation and integrations remain future work.
+- Do not promote the actual pilot's pending human review, run a model, change source fixtures,
+  weaken AST-fidelity validation or reinterpret historical measurements.
+- Publication checks are not filesystem locks, crash-durability guarantees or an OS sandbox.
+  New parent directories or abruptly interrupted staging may remain; runtime/environment
+  verification and full semantic source coverage remain separate requirements.
+
+### Next step
+
+- Review this bounded reliability/documentation milestone before merging. Obtain the actual
+  independent pilot review and define the first concrete architecture-profile conventions.
+
 ## 2026-10-27 - Offline reviewed notebook campaign preflight
 
 ### Completed

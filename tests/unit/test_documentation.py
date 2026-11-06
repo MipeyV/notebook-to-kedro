@@ -12,6 +12,7 @@ DOCS = ROOT / "docs"
 INDEX = DOCS / "README.md"
 DOCUMENTS = (
     ROOT / "README.md",
+    ROOT / "AGENTS.md",
     ROOT / "CHANGELOG.md",
     ROOT / "JOURNAL.md",
     *sorted(DOCS.rglob("*.md")),

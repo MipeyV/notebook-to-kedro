@@ -2,6 +2,9 @@
 
 [Documentation index](../README.md)
 
+Status: implementation boundaries reviewed on 2026-11-06. The
+[proposed evolution](#proposed-evolution) is separate from current capabilities.
+
 ## Objective
 
 Notebook to Kedro is designed as a staged compiler assisted by an optional semantic planner:
@@ -31,14 +34,17 @@ Each boundary has a typed contract. Source facts, semantic inferences, and accep
 - Provider-specific integrations remain optional and replaceable.
 - Filesystem writes protect existing destinations by default.
 
-## Source layout
+## Current source layout
+
+Selected files showing implemented responsibilities (not an exhaustive file inventory):
 
 ```text
 src/notebook_to_kedro/
 ├── __init__.py
 ├── api.py
-├── diagnostics.py
 ├── exceptions.py
+├── cli.py
+├── reporting.py
 ├── notebook/
 │   ├── __init__.py
 │   ├── loader.py
@@ -46,10 +52,7 @@ src/notebook_to_kedro/
 ├── analysis/
 │   ├── __init__.py
 │   ├── ast_analyzer.py
-│   ├── calls.py
-│   ├── dependencies.py
-│   ├── scopes.py
-│   └── symbols.py
+│   └── dependencies.py
 ├── ir/
 │   ├── __init__.py
 │   ├── facts.py
@@ -58,32 +61,46 @@ src/notebook_to_kedro/
 ├── semantic/
 │   ├── __init__.py
 │   ├── planner.py
-│   ├── protocol.py
+│   ├── protocols.py
+│   ├── contracts.py
+│   ├── hybrid.py
+│   ├── orchestration.py
+│   ├── ollama.py
 │   └── validation.py
-└── generation/
-    ├── __init__.py
-    ├── writer.py
-    └── kedro/
-        ├── __init__.py
-        ├── generator.py
-        ├── renderer.py
-        ├── validator.py
-        └── templates/
+├── generation/
+│   ├── writer.py
+│   ├── parameters.py
+│   ├── code/
+│   │   ├── contracts.py
+│   │   ├── assembly.py
+│   │   ├── validation.py
+│   │   └── service.py
+│   └── kedro/
+│       └── generator.py
+└── evaluation/
+    ├── behavioral_comparison.py
+    ├── behavioral_execution.py
+    ├── response_capture.py
+    ├── notebook_body.py
+    ├── notebook_execution.py
+    └── notebook_campaign.py
 ```
 
 Directories are introduced only when their first implementation is added. Empty architectural placeholders are avoided.
 
 ## Public API
 
-The package root will expose a deliberately small API:
+The package root exposes a small conversion API:
 
 ```python
-from notebook_to_kedro import analyze, convert
-```
+from notebook_to_kedro import (
+    analyze_notebook_path,
+    generate_kedro_project,
+    plan_notebook_path,
+    render_conversion_report,
+    validate_conversion_plan,
+)
 
-Initial milestone:
-
-```python
 facts = analyze_notebook_path("notebooks/model.ipynb")
 plan = plan_notebook_path("notebooks/model.ipynb")
 report = render_conversion_report(plan)
@@ -91,21 +108,16 @@ validate_conversion_plan(plan)
 created_files = generate_kedro_project(plan, "generated/model_project")
 ```
 
-Initial command-line entrypoint:
+Current command-line entrypoints:
 
 ```bash
 notebook-to-kedro plan notebooks/model.ipynb
 notebook-to-kedro generate notebooks/model.ipynb generated/model_project
 ```
 
-Target API:
-
-```python
-report = convert(
-    input_path="notebooks/model.ipynb",
-    output_path="generated/my_kedro_project",
-)
-```
+There is no package-root `analyze` or `convert` function. Such convenience APIs remain
+historical proposals in the original overview. Explicit plan validation is useful for
+review; the generator also enforces it itself and reports failures as `ProjectGenerationError`.
 
 `api.py` orchestrates the use cases. It must not contain AST traversal, prompt construction, or template-rendering logic.
 
@@ -161,12 +173,16 @@ source fragments
 proposed inputs and outputs
 parameters
 conversion diagnostics
-confidence
-assumptions
-review status
+blocking diagnostic codes
+schema and planner versions
 ```
 
 Serialization must be deterministic and versioned. DataFrames may be exposed as inspection views but are not canonical storage.
+
+`NotebookFacts` has canonical JSON round trips. `ConversionPlan` is currently a frozen
+notebook/Kedro-oriented dataclass; a general project specification, profile identity and
+shared review/readiness model are not implemented. Experimental evaluation contracts track
+their own explicit review and evidence status rather than adding those fields to the plan.
 
 ### Semantic planning
 
@@ -216,7 +232,11 @@ The deterministic planner assigns stable, valid Python identifiers to task candi
 
 It also emits `PlanDiagnostic` review notes for conversion risks that should be visible but not necessarily blocking, including fallback task names, inherited source diagnostics, unresolved external inputs, and tasks without data outputs.
 
-`semantic/validation.py` validates `ConversionPlan` invariants before generation. It rejects blocked plans, duplicate task or configuration names, invalid Python task identifiers, and task parameter references that do not resolve to extracted parameters.
+`semantic/validation.py` validates `ConversionPlan` invariants before generation. It rejects
+blocked plans, duplicate task/configuration names, invalid or keyword Python task names,
+and unresolved parameter references. This is not a complete semantic or graph-equivalence
+proof. Cell-oriented planning, unknown inputs, mutation and side-effect-only cells still
+require the supported-subset limitations and explicit review.
 
 ### Kedro generation
 
@@ -226,9 +246,13 @@ It also emits `PlanDiagnostic` review notes for conversion risks that should be 
 - render the Kedro package and pipeline files;
 - generate configuration and catalog entries;
 - register the pipeline;
-- validate generated Python and project structure.
+- compile rendered Python before filesystem writes, without importing or executing it;
+- hand rendered files and source-copy instructions to the shared writer.
 
-Repetitive Kedro boilerplate is rendered deterministically. An optional code transformer may assist with complex source refactoring, but its output must pass deterministic validation.
+Repetitive boilerplate and source wrapping are deterministic. Code/body proposal APIs are
+separate experiments and do not supply code to normal project generation. Compile-only
+preflight is structural evidence; it does not check installed dependencies, arbitrary
+globals, runtime equivalence, a clean `kedro run` bootstrap or production readiness.
 
 ### Reporting
 
@@ -248,11 +272,20 @@ Expected notebook loading and project generation failures are formatted by the C
 
 `generation/writer.py` handles side effects:
 
-- reject existing destinations unless overwrite is explicit;
-- write to a temporary sibling directory;
-- publish only complete output;
-- report created files;
-- clean partial output after failure when safe.
+- reject existing destinations, including observed broken symlinks; there is no overwrite option;
+- reject absolute, drive-relative, traversing and overlapping written targets, including
+  collisions between copied data and generated files, case-insensitive aliases, trailing
+  dot/space components and Windows device names;
+- require copied sources to be regular files before preparing output;
+- stage files and data in a private temporary directory on the destination filesystem;
+- recheck the destination and rename the complete prepared project into place;
+- return final paths and clean temporary preparation after routine failures.
+
+Source-copy and write failures therefore do not expose a partially written final project.
+New parent directories can remain. Publication/cleanup errors are reported; abrupt process
+termination can leave staging data. Rechecks are not a filesystem lock against concurrent
+edits, and OS rename behavior does not establish crash durability or hostile-filesystem safety.
+Catalog entries without a source copy remain configuration only, with no claimed data existence.
 
 ## Dependency direction
 
@@ -263,7 +296,8 @@ api
 ├── notebook → ir
 ├── analysis → ir
 ├── semantic → ir
-└── generation → ir
+└── generation → semantic.validation → ir
+    └── writer → filesystem
 ```
 
 Forbidden dependencies include:
@@ -273,6 +307,26 @@ Forbidden dependencies include:
 - `semantic` importing the Kedro generator;
 - the static analyzer importing packages referenced by a notebook;
 - provider-neutral protocols importing provider SDKs.
+
+The generator reuses the existing plan validator; it does not invoke semantic providers.
+Experimental evaluation may orchestrate generation and runtime execution, while static
+analysis and normal generation remain free of notebook/model execution.
+
+## Proposed evolution
+
+[ADR 0002](../decisions/0002-incremental-platform-evolution.md) records the incremental
+direction. Two future entrypoints should eventually converge on shared project requirements:
+source analysis reconstructs existing logic; greenfield specifications declare required logic
+and unresolved slots. A versioned architecture profile then maps those requirements to a
+reviewable generation plan and the Kedro renderer. Keep profile rules separate from business
+semantics, and retain source/code references rather than pretending configuration encodes all
+Python behavior.
+
+First demonstrate a narrow default/custom Kedro profile, then a greenfield slice. Derive the
+common typed/versioned project representation from both. No `ProjectSpec`, profile engine,
+greenfield API, remote provider, extra backend or enterprise service is introduced here.
+Generation, structural checks, behavioral observations, human review and operational acceptance
+remain separate evidence dimensions. See the [roadmap](../product/roadmap.md) for dependencies.
 
 ## Test architecture
 
@@ -358,17 +412,8 @@ report containing corpus hashes and per-model labels. Live model runs are manual
 
 ## Delivery increments
 
-1. [x] Project tooling and package skeleton.
-2. [x] Typed `NotebookFacts` models and deterministic serialization.
-3. [x] Notebook loader.
-4. [x] Cell-level AST analysis.
-5. [x] Cross-cell dependency resolution.
-6. [x] Public analysis API.
-7. [x] Deterministic task planning.
-8. [x] Minimal Kedro project skeleton generation.
-9. [x] Reference notebook-to-Kedro equivalence testing.
-10. [x] File-backed CSV catalog fixture.
-11. [x] Selected literal parameter extraction.
-12. [ ] Optional real LLM provider integration.
+The [roadmap](../product/roadmap.md) owns historical milestones and current priorities;
+the [project status](../product/project-status.md) owns supported versus experimental scope.
+Avoid maintaining a second completion checklist here.
 
 Each increment must leave the repository linted, typed, tested, and documented.

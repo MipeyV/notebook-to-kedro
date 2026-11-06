@@ -9,6 +9,11 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- The public Kedro generator now enforces plan validation, rejects keyword task/package names
+  and compiles rendered Python without execution. Copied targets cannot escape or overlap
+  generated files. Source checks and private staging prevent routine preparation failures from
+  exposing a partial final project; existing destinations remain protected by pre-publication
+  checks. This is not a concurrent-filesystem lock or a runtime-equivalence guarantee.
 - Windows behavioral-worker directory cleanup retries permission errors at most three times.
   Persistent failures log the remaining path without discarding observed outcomes or masking
   execution-body exceptions; other cleanup errors still propagate. No worker/model retry,
@@ -16,6 +21,10 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Aligned product vision and delivery priorities for existing-project transformation and future
+  greenfield generation, reusable enterprise standards and project-level evidence. Added agent
+  conventions and ADR 0002; profiles, shared project specifications and enterprise infrastructure
+  remain future work. Existing measurement/review status and the MIT license are unchanged.
 - Separate offline notebook campaign preflight: reverified reviewed reference/proof/source bindings,
   selected model metadata, exact proposed chat bodies/options, fixed budgets and exclusive all-slot
   response/error accounting. Interrupted reservations remain visible. No provider dispatch, worker

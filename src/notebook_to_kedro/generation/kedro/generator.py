@@ -3,14 +3,16 @@
 from __future__ import annotations
 
 import ast
-import shutil
 from dataclasses import dataclass
+from keyword import iskeyword
 from pathlib import Path
 from textwrap import indent
 from typing import TYPE_CHECKING, cast
 
-from notebook_to_kedro.exceptions import ProjectGenerationError
+from notebook_to_kedro.exceptions import ConversionPlanValidationError, ProjectGenerationError
 from notebook_to_kedro.generation.parameters import ParameterReplacement
+from notebook_to_kedro.generation.writer import write_project
+from notebook_to_kedro.semantic.validation import validate_conversion_plan
 
 if TYPE_CHECKING:
     from notebook_to_kedro.ir import ConversionPlan, JsonPrimitive, ParameterValue, TaskCandidate
@@ -30,45 +32,42 @@ def generate_kedro_project(
     *,
     package_name: str = DEFAULT_PACKAGE_NAME,
 ) -> tuple[Path, ...]:
-    """Write a minimal Kedro project and return created file paths."""
-    if plan.blocking_diagnostic_codes:
-        codes = ", ".join(plan.blocking_diagnostic_codes)
-        message = f"Cannot generate a project while blocking diagnostics are present: {codes}"
-        raise ProjectGenerationError(message)
+    """Validate, compile and publish a minimal project without executing source code."""
+    try:
+        validate_conversion_plan(plan)
+    except ConversionPlanValidationError as error:
+        raise ProjectGenerationError(str(error)) from error
     _require_valid_package_name(package_name)
 
     root = Path(output_path)
-    if root.exists():
-        message = f"Destination already exists: {root}"
-        raise ProjectGenerationError(message)
-
-    package_root = root / "src" / package_name
+    package_root = Path("src") / package_name
     pipeline_root = package_root / "pipelines" / "notebook_pipeline"
     files = {
-        root / "pyproject.toml": _pyproject(package_name),
+        Path("pyproject.toml"): _pyproject(package_name),
         package_root / "__init__.py": _package_init(),
         package_root / "settings.py": _settings(),
         package_root / "pipeline_registry.py": _pipeline_registry(package_name),
         package_root / "pipelines" / "__init__.py": _package_init(),
         pipeline_root / "__init__.py": _notebook_pipeline_init(package_name),
-        pipeline_root / "nodes.py": _nodes(plan),
         pipeline_root / "pipeline.py": _pipeline(plan, package_name),
     }
+    try:
+        files[pipeline_root / "nodes.py"] = _nodes(plan)
+        for path, content in files.items():
+            if path.suffix == ".py":
+                compile(content, path.as_posix(), "exec", dont_inherit=True)
+    except (SyntaxError, ValueError) as error:
+        raise ProjectGenerationError(f"Cannot render valid project Python: {error}") from error
     if plan.catalog_datasets:
-        files[root / "conf" / "base" / "catalog.yml"] = _catalog(plan)
+        files[Path("conf/base/catalog.yml")] = _catalog(plan)
     if plan.parameters:
-        files[root / "conf" / "base" / "parameters.yml"] = _parameters(plan)
-
-    created_paths: list[Path] = []
-    for path, content in files.items():
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(content, encoding="utf-8", newline="\n")
-        created_paths.append(path)
-    for source_path, target_path in _catalog_file_copies(plan, root):
-        target_path.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copyfile(source_path, target_path)
-        created_paths.append(target_path)
-    return tuple(created_paths)
+        files[Path("conf/base/parameters.yml")] = _parameters(plan)
+    copies = tuple(
+        (Path(dataset.source_filepath), Path(dataset.filepath))
+        for dataset in plan.catalog_datasets
+        if dataset.source_filepath is not None
+    )
+    return write_project(root, files, copies)
 
 
 def _pyproject(package_name: str) -> str:
@@ -194,19 +193,6 @@ def _is_parameter_sequence(value: object) -> bool:
 def _parameter_sequence(value: object) -> str:
     items = cast("tuple[JsonPrimitive, ...]", value)
     return "[" + ", ".join(_parameter_value(item) for item in items) + "]"
-
-
-def _catalog_file_copies(plan: ConversionPlan, root: Path) -> tuple[tuple[Path, Path], ...]:
-    copies: list[tuple[Path, Path]] = []
-    for dataset in plan.catalog_datasets:
-        if dataset.source_filepath is None:
-            continue
-        source_path = Path(dataset.source_filepath)
-        if not source_path.exists():
-            message = f"Catalog source file does not exist: {dataset.source_filepath}"
-            raise ProjectGenerationError(message)
-        copies.append((source_path, root / dataset.filepath))
-    return tuple(copies)
 
 
 def render_node_function(task: TaskCandidate) -> str:
@@ -436,6 +422,6 @@ def _quoted_sequence(values: tuple[str, ...]) -> str:
 
 
 def _require_valid_package_name(package_name: str) -> None:
-    if not package_name.isidentifier() or package_name.startswith("_"):
+    if not package_name.isidentifier() or package_name.startswith("_") or iskeyword(package_name):
         message = f"Invalid generated package name: {package_name}"
         raise ProjectGenerationError(message)

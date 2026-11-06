@@ -2,10 +2,27 @@
 
 [Documentation index](../README.md)
 
-Status: implementation and measurement snapshot, extracted on 2026-10-11.
+Status: current implementation summary reviewed on 2026-11-06; historical evidence follows.
 Historical measurements retain their original corpus, runtime and limitations.
 
 ## Project status
+
+| Capability | Current status |
+| --- | --- |
+| Deterministic notebook conversion | Operational for the controlled subset in the compatibility policy. |
+| Generation reliability | Public API enforces plan validation and compile-only Python preflight; contained/nonoverlapping copied targets and regular sources are checked before private preparation and rename publication. No overwrite option. |
+| Behavioral evidence | Controlled fixtures, independent task corpora and a draft complete-notebook pilot; no general equivalence or production-readiness claim. |
+| AI assistance | Constrained hybrid planning is opt-in; code/body proposals and campaign preparation remain experimental and separate from normal generation. |
+| Enterprise architecture profiles | Proposed; no executable profile engine. |
+| Greenfield project generation | Proposed; no specification-driven entrypoint or shared `ProjectSpec`. |
+| MLOps / enterprise platform | Future integrations, governance and packaging require validated needs and separate contracts. |
+
+Generation reliability does not verify a fresh dependency installation, full DAG semantics or
+runtime behavior. Parent directories can remain after a failure; concurrent filesystem edits
+and abrupt termination are outside the writer's guarantees. See the
+[architecture](../reference/architecture.md#filesystem-writing) and
+[delivery priorities](roadmap.md#product-delivery-priorities). The original `ready` conversion-report
+label means no blocking plan diagnostics; it is not a consolidated validation or release status.
 
 A [draft complete-notebook pilot](../evaluation/synthetic-notebook-pilot.md) now checks a
 seeded simulation and real local CSV catalog loading through nine generated nodes, with
