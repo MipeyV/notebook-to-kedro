@@ -83,6 +83,16 @@ merges, hybrid mode returns the deterministic plan without contacting Ollama.
 
 ## Documentation
 
+Inspect explicit functions in a structured script or notebook without executing code:
+
+```bash
+notebook-to-kedro inspect-blocks examples/functional_blocks/workflow.py
+```
+
+The [functional inspection contract](docs/reference/functional-blocks.md) describes interfaces,
+function dependencies, retained source/provenance and blockers. This first E2 slice is analysis
+only; conversion of structured scripts to Kedro remains the next increment.
+
 The root `README.md` remains the repository and package entry point. The
 [documentation index](docs/README.md) provides reading paths and a categorized document list.
 

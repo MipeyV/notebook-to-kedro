@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from notebook_to_kedro.analysis import analyze_notebook
+from notebook_to_kedro.analysis.functional_sources import analyze_functional_blocks_path
 from notebook_to_kedro.exceptions import PlannerConfigurationError
 from notebook_to_kedro.generation import generate_kedro_project
 from notebook_to_kedro.generation.kedro.profiles import (
@@ -97,6 +98,7 @@ __all__ = [
     "DEFAULT_KEDRO_PROFILE",
     "ConversionSourceAudit",
     "KedroArchitectureProfile",
+    "analyze_functional_blocks_path",
     "analyze_notebook_path",
     "audit_conversion_source",
     "create_semantic_planner",

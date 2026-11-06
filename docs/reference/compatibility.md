@@ -1,5 +1,10 @@
 # Compatibility Policy
 
+Structured `.py` input is supported only by the separate analysis-only
+[`inspect-blocks` operation](functional-blocks.md), alongside explicit function-based notebooks.
+The conversion support described below still applies to the existing notebook path. Static
+functional inspection does not imply script-to-Kedro generation or arbitrary-Python support.
+
 [Documentation index](../README.md)
 
 ## Purpose

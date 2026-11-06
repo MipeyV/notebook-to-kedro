@@ -57,6 +57,7 @@ The compatibility policy is authoritative for supported runtimes and library-sup
 | [Exact parameter evidence](reference/node-parameter-evidence.md) | Supported source-expression substitutions and their evidence. |
 | [Behavioral comparison contract](reference/behavioral-comparison-contract.md) | Observable values, comparators, execution and consent boundaries. |
 | [Source accounting](reference/source-accounting.md) | Statement destinations, AST/catalog/parameter/dependency checks and high-level conversion enforcement. |
+| [Functional block inspection](reference/functional-blocks.md) | Analysis-only explicit functions from Python/notebook inputs, source provenance, dependencies and supported-subset diagnostics. |
 
 ## Evaluation
 
@@ -106,6 +107,8 @@ the dedicated experiment reports for their frozen settings, decisions and limita
 - [Agent instructions](../AGENTS.md): development conventions, verification and project memory.
 - [Changelog](../CHANGELOG.md): release-facing changes.
 - [Development journal](../JOURNAL.md): chronological work, decisions and unresolved questions.
+- [ADR 0005: explicit functional block inspection](decisions/0005-explicit-functional-block-inspection.md):
+  analysis first, honest Python/notebook origins and a later generation/behavior increment.
 
 ## Maintaining documentation
 

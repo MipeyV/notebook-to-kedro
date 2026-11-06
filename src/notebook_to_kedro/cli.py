@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from notebook_to_kedro.api import (
+    analyze_functional_blocks_path,
     create_semantic_planner,
     generate_kedro_project,
     load_kedro_profile,
@@ -58,6 +59,7 @@ from notebook_to_kedro.evaluation import (
 from notebook_to_kedro.exceptions import (
     BehavioralBenchmarkArtifactError,
     ConversionPlanValidationError,
+    FunctionalSourceError,
     NotebookLoadError,
     PlannerConfigurationError,
     PlanningBenchmarkError,
@@ -89,6 +91,10 @@ def main(argv: list[str] | None = None) -> int:
     parser = _parser()
     args = parser.parse_args(argv)
     try:
+        if args.command == "inspect-blocks":
+            analysis = analyze_functional_blocks_path(args.source, project_root=args.project_root)
+            sys.stdout.write(analysis.to_json())
+            return 0 if analysis.complete else ERROR_EXIT_CODE
         if args.command == "plan":
             return _plan(args)
         if args.command == "generate":
@@ -100,6 +106,7 @@ def main(argv: list[str] | None = None) -> int:
     except (
         BehavioralBenchmarkArtifactError,
         ConversionPlanValidationError,
+        FunctionalSourceError,
         NotebookLoadError,
         PlannerConfigurationError,
         PlanningBenchmarkError,
@@ -116,6 +123,38 @@ def _parser() -> argparse.ArgumentParser:
         description="Analyze structured notebooks and render Kedro conversion plans.",
     )
     subparsers = parser.add_subparsers(dest="command")
+    _add_source_parsers(subparsers)
+    benchmark_parser = subparsers.add_parser(
+        "benchmark",
+        help="compare planners over a reviewed planning corpus",
+    )
+    benchmark_parser.add_argument(
+        "corpus", type=Path, help="directory containing reviewed planning case JSON files"
+    )
+    benchmark_parser.add_argument(
+        "--project-root", type=Path, default=Path(), help="root used to resolve case notebook paths"
+    )
+    benchmark_parser.add_argument(
+        "--planners",
+        type=PlannerMode,
+        choices=tuple(PlannerMode),
+        nargs="+",
+        default=(PlannerMode.DETERMINISTIC,),
+        help="planning modes to compare (default: deterministic)",
+    )
+    _add_ollama_arguments(benchmark_parser)
+    _add_behavioral_parsers(subparsers)
+    return parser
+
+
+def _add_source_parsers(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
+    inspect_parser = subparsers.add_parser(
+        "inspect-blocks", help="inspect explicit Python functions without execution"
+    )
+    inspect_parser.add_argument("source", type=Path, help="source .py or .ipynb file")
+    inspect_parser.add_argument(
+        "--project-root", type=Path, default=None, help="root used to label source paths"
+    )
     plan_parser = subparsers.add_parser(
         "plan",
         help="render a Markdown conversion report for a notebook",
@@ -146,30 +185,11 @@ def _parser() -> argparse.ArgumentParser:
         help="Python package name for the generated Kedro project",
     )
     _add_conversion_arguments(generate_parser)
-    benchmark_parser = subparsers.add_parser(
-        "benchmark",
-        help="compare planners over a reviewed planning corpus",
-    )
-    benchmark_parser.add_argument(
-        "corpus",
-        type=Path,
-        help="directory containing reviewed planning case JSON files",
-    )
-    benchmark_parser.add_argument(
-        "--project-root",
-        type=Path,
-        default=Path(),
-        help="root used to resolve case notebook paths",
-    )
-    benchmark_parser.add_argument(
-        "--planners",
-        type=PlannerMode,
-        choices=tuple(PlannerMode),
-        nargs="+",
-        default=(PlannerMode.DETERMINISTIC,),
-        help="planning modes to compare (default: deterministic)",
-    )
-    _add_ollama_arguments(benchmark_parser)
+
+
+def _add_behavioral_parsers(
+    subparsers: argparse._SubParsersAction[argparse.ArgumentParser],
+) -> None:
     behavioral_parser = subparsers.add_parser(
         "behavioral-benchmark",
         help="run, capture, recover, replay or compare behavioral benchmark evidence",
@@ -259,7 +279,6 @@ def _parser() -> argparse.ArgumentParser:
     format_compare.add_argument(
         "--output", type=Path, default=None, help="new comparison JSON path"
     )
-    return parser
 
 
 def _add_conversion_arguments(parser: argparse.ArgumentParser) -> None:
