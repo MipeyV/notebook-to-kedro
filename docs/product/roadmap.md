@@ -2,7 +2,7 @@
 
 [Documentation index](../README.md)
 
-Status: engine/operations/local-interface delivery priorities aligned on 2026-11-06;
+Status: engine/operations/local-interface delivery priorities updated on 2026-11-12;
 historical V1/V2 checkboxes are preserved.
 The broader product direction is recorded in [Product vision](product-vision.md).
 
@@ -18,7 +18,7 @@ remains open. Transformation logic stays in the reusable core and is exercised t
 | --- | --- | --- | --- |
 | 0 | Preserve the existing conversion foundation | Deterministic notebook analysis/generation, safe publication and default/custom Kedro naming profiles. | Implemented; scope and evidence remain bounded. |
 | E1 | Source completeness and graph fidelity | Every parsed statement has a supported destination or blocks conversion. Cross-check task AST/provenance, imports, selected parameter values, catalog relocation and source dependencies. Exercise the first rewrite of a catalog input. | Initial source-accounting/API guard and dataset-graph correction implemented in this increment; arbitrary semantics remain unsupported. |
-| E2 | Functional blocks and a structured Python input | Reuse immutable facts; demonstrate one workflow presented as notebook and structured script reaching the same checked Kedro behavior. Derive a small source-independent representation from these actual cases. | Analysis slice implemented: explicit functions, Python/notebook frontends, provenance, blockers and matching static structures. Generation wiring and checked paired Kedro behavior remain next; no universal ProjectSpec or multi-file guarantee. |
+| E2 | Functional blocks and a structured Python input | Reuse immutable facts; demonstrate one workflow presented as notebook and structured script reaching the same checked Kedro behavior. Derive a small source-independent representation from these actual cases. | Initial bounded slice implemented: explicit-function analysis, linear entrypoint wiring, JSON catalog/scalar parameters, shared generation and checked paired fixture behavior with default/custom profiles. General DAGs, richer I/O and multi-file analysis remain unsupported; no universal ProjectSpec. |
 | E3 | Tests delivered with generated projects | Reviewed observable contracts/fixtures, pytest regression generation and fresh-environment bootstrap checks. Preserve missing expectations as explicit gaps; generated tests alone do not validate business intent. | Proposed. |
 | E4 | Local operation contracts and first interface | Stable typed API/CLI requests/results for implemented tasks, local configuration, plan/diff inspection and explicit execution controls. Prototype a local app or VS Code extension with conversion/audit/profile operations first. | Proposed; UI choice open. Does not depend on completing every future operation. |
 | E5 | Existing Kedro project inspection and standardization | Read-only node/pipeline/catalog/config reconstruction, standards diagnostics, reviewable change plans and idempotence tests. Initially generate into a new destination; safe patch application requires its own conflict/ownership contract. | Proposed. |
@@ -31,10 +31,11 @@ review effort, failures/unfinished attempts, latency and cost. Actual human revi
 whole-notebook model campaign; it does not block deterministic core development. Customer discovery
 and broader source/library contracts accompany the relevant slices.
 
-Source accounting and supported graph checks are implemented. E2 now has its first
-[analysis-only slice](../reference/functional-blocks.md). Next define entrypoint/data wiring,
-source-accounted Kedro generation from explicit blocks and paired notebook/script behavioral
-checks. Generated-project tests remain E3. Optimization retains a separate acceptance contract.
+Source accounting and supported graph checks are implemented. E2 now has
+[functional inspection](../reference/functional-blocks.md) and a bounded
+[linear workflow conversion](../reference/functional-workflows.md), with source-accounted
+generation and paired fixture behavior. Next is E3: reviewed observable contracts and tests
+delivered with generated projects. Optimization retains a separate acceptance contract.
 
 ## Whole-notebook evaluation next gate
 

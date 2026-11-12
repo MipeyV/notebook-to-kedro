@@ -40,6 +40,56 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-11-12 - Linear functional workflows generate checked Kedro projects
+
+### Completed
+
+- Added an explicit versioned workflow configuration for a selected entrypoint, contained JSON
+  input files, finite scalar parameters and one persisted JSON output. Planning recomputes
+  functional analysis and rejects unsupported source, drift, invalid argument binding,
+  reassignment, fan-out and independent branches before publication.
+- Added `plan-workflow`/`generate-workflow` commands and Python APIs. Original instruction ASTs
+  are retained in a normalized module, with captured source and per-statement destinations in
+  the workflow manifest. Only entrypoint calls become node wrappers; helper calls stay inside
+  owning functions. No fake notebook cells or automatic source execution are introduced.
+- Extracted the existing validated Kedro renderer from publication and reused it, profiles and
+  the shared staging writer. Assignment-mode intermediate datasets preserve object identity;
+  the single-use linear chain preserves order. Persisted output catalog entries are added
+  after graph rendering to avoid treating them as pre-existing inputs and renaming results.
+- Added paired script/notebook examples, real JSON catalog execution for three hand-specified
+  cases under default/custom profiles, call-count/order assertions and a separate mutable-list
+  identity/internal-helper case. Updated roadmap, status, architecture, compatibility and ADR 0006.
+- Final focused validation: 131 functional/documentation tests passed; all three new modules
+  reached 100% line/branch coverage (186 statements, 56 branches). Ruff, formatting, strict mypy
+  across 166 files and source/wheel builds passed. The main Windows mypy launcher/extension was
+  initially blocked; a locked isolated environment using the project's dependency interpreter
+  completed the unchanged type checks without weakening configuration or changing dependencies.
+- An initial complete-suite run reported 2,156 passing tests, ten failures and four setup errors
+  with notebook timeouts/worker failures, while reaching 100% coverage. The four affected
+  end-to-end conversions then passed independently; all 35 targeted worker/notebook/pilot
+  regressions also passed. The final complete offline run passed all 2,174 tests in 370.72 s
+  on Python 3.12.14, with 100% line/branch coverage (8,359 statements, 2,428 branches, 88 modules).
+  The built wheel was also checked to contain the new functional modules.
+
+### Decisions
+
+- Deliver the bounded E2 case with explicit JSON boundaries and source-derived wiring before
+  generalizing DAGs or project models. Runtime imports/effects, input JSON schemas and arbitrary
+  output serializability are not proven by static acceptance or fixture comparisons.
+- E3 remains the next milestone: reviewed observable contracts and tests delivered inside
+  generated projects. No fresh dependency-installation, live model or human-review claim.
+
+### Open questions
+
+- Broader datasets, branching/alias contracts, multi-file dependencies and more realistic ML
+  workflows need their own source-accounting and behavioral cases.
+- Independent human review of the existing complete-notebook pilot remains pending.
+
+### Next step
+
+- Add reviewed observable contracts and generated-project regression tests, retaining missing
+  business expectations as explicit gaps rather than automatically validating generated logic.
+
 ## 2026-11-06 - Explicit functional inspection for Python and notebooks
 
 ### Completed

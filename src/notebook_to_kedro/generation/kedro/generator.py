@@ -50,6 +50,23 @@ def generate_kedro_project(
     source_facts: NotebookFacts | None = None,
 ) -> tuple[Path, ...]:
     """Validate, compile and publish a minimal project without executing source code."""
+    files, copies = render_kedro_project(
+        plan,
+        package_name=package_name,
+        architecture_profile=architecture_profile,
+        source_facts=source_facts,
+    )
+    return write_project(Path(output_path), files, copies)
+
+
+def render_kedro_project(
+    plan: ConversionPlan,
+    *,
+    package_name: str = DEFAULT_PACKAGE_NAME,
+    architecture_profile: KedroArchitectureProfile | None = None,
+    source_facts: NotebookFacts | None = None,
+) -> tuple[dict[Path, str], tuple[tuple[Path, Path], ...]]:
+    """Validate and render shared Kedro scaffolding without publishing or executing it."""
     if source_facts is not None:
         plan = enforce_source_accounting(source_facts, plan)
     try:
@@ -60,7 +77,6 @@ def generate_kedro_project(
     profile = DEFAULT_KEDRO_PROFILE if architecture_profile is None else architecture_profile
     node_names = None if architecture_profile is None else resolve_node_names(plan, profile)
 
-    root = Path(output_path)
     package_root = Path("src") / package_name
     pipeline_root = package_root / "pipelines" / profile.pipeline_name
     files = {
@@ -94,7 +110,7 @@ def generate_kedro_project(
         for dataset in plan.catalog_datasets
         if dataset.source_filepath is not None
     )
-    return write_project(root, files, copies)
+    return files, copies
 
 
 def _pyproject(package_name: str) -> str:

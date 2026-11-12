@@ -2,7 +2,7 @@
 
 [Documentation index](../README.md)
 
-Status: implementation boundaries reviewed on 2026-11-06. The
+Status: implementation boundaries reviewed on 2026-11-12. The
 [proposed evolution](#proposed-evolution) is separate from current capabilities.
 
 ## Objective
@@ -26,8 +26,13 @@ A separate [functional inspection path](functional-blocks.md) now accepts a `.py
 notebook code cells: source adapters -> `SourceUnit` -> pure analysis -> `FunctionalAnalysis`.
 It records explicit function interfaces, reference edges, source spans and blockers without
 execution or framework imports. Small AST primitives are shared with notebook analysis.
-It does not feed `ConversionPlan` or generation yet; [ADR 0005](../decisions/0005-explicit-functional-block-inspection.md)
-records this analysis-first E2 boundary.
+Inspection remains independent of generation, as recorded in
+[ADR 0005](../decisions/0005-explicit-functional-block-inspection.md). A separate
+[functional workflow adapter](functional-workflows.md) now recomputes facts, validates explicit
+linear wiring and adapts calls to the shared Kedro renderer, profiles and writer. Original
+instruction ASTs live in a relocated module with a source manifest; Python tasks do not invent
+notebook cells. [ADR 0006](../decisions/0006-linear-functional-workflow-generation.md) records
+ordering, identity and bounded I/O decisions. The old notebook conversion contracts are unchanged.
 
 ## Design rules
 

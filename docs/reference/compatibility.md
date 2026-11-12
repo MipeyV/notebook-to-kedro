@@ -1,9 +1,10 @@
 # Compatibility Policy
 
-Structured `.py` input is supported only by the separate analysis-only
-[`inspect-blocks` operation](functional-blocks.md), alongside explicit function-based notebooks.
-The conversion support described below still applies to the existing notebook path. Static
-functional inspection does not imply script-to-Kedro generation or arbitrary-Python support.
+Structured `.py` input is supported by [`inspect-blocks`](functional-blocks.md) and the separate
+[linear workflow conversion](functional-workflows.md), alongside function-based notebooks.
+The latter requires an explicit entrypoint and JSON configuration and supports JSON file I/O,
+scalar parameters and a single-use linear chain only. The conversion support described below
+still applies to the original notebook path. Neither entrypoint supports arbitrary Python.
 
 [Documentation index](../README.md)
 

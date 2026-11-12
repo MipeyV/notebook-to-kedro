@@ -19,6 +19,10 @@ class FunctionalSourceError(ValueError):
     """Raised when functional inspection cannot load a supported source document."""
 
 
+class FunctionalWorkflowError(ProjectGenerationError):
+    """Raised when explicit workflow wiring cannot be converted faithfully."""
+
+
 class KedroProfileError(ProjectGenerationError):
     """Raised for an invalid or incompatible declarative Kedro architecture profile."""
 

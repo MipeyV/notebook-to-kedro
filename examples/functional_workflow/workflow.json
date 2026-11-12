@@ -1,0 +1,7 @@
+{
+  "schema_version": "1.0",
+  "entrypoint": "workflow",
+  "inputs": {"values": "examples/functional_workflow/input.json"},
+  "parameters": {"scale": 2.0},
+  "outputs": {"total": "data/08_reporting/total.json"}
+}
