@@ -99,7 +99,10 @@ notebook-to-kedro generate-workflow examples/functional_workflow/workflow.py exa
 ```
 
 This initial subset uses JSON file boundaries and scalar parameters. Internal helper calls
-remain inside their owning node; branching and generated-project tests remain future work.
+remain inside their owning node; branching remains future work. Supply
+`--regression-contract examples/functional_workflow/regression.json` to also deliver
+[pytest node/pipeline regressions](docs/reference/generated-workflow-tests.md) based on explicit
+expected values. Missing expectations are reported; generation never executes code to infer them.
 
 The root `README.md` remains the repository and package entry point. The
 [documentation index](docs/README.md) provides reading paths and a categorized document list.

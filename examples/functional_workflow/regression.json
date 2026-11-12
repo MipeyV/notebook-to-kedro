@@ -1,0 +1,17 @@
+{
+  "schema_version": "1.0",
+  "scenarios": [
+    {
+      "id": "negative_value",
+      "inputs": {"values": -3.0},
+      "parameters": {"scale": 2.0},
+      "expected": 6.0,
+      "nodes": {
+        "step_0000_prepare_values": {"inputs": {"values": -3.0, "scale": 2.0}, "expected": -6.0},
+        "step_0001_summarize": {"inputs": {"prepared": -6.0}, "expected": 6.0}
+      }
+    },
+    {"id": "zero", "inputs": {"values": 0.0}, "parameters": {"scale": 2.0}, "expected": 0.0},
+    {"id": "fractional", "inputs": {"values": 1.25}, "parameters": {"scale": 4.0}, "expected": 5.0}
+  ]
+}

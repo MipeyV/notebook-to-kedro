@@ -17,6 +17,10 @@ from notebook_to_kedro.generation.kedro.profiles import (
     KedroArchitectureProfile,
     load_kedro_profile,
 )
+from notebook_to_kedro.generation.kedro.regression_contract import (
+    WorkflowRegressionContract,
+    load_workflow_regression_contract,
+)
 from notebook_to_kedro.notebook import load_notebook
 from notebook_to_kedro.reporting import render_conversion_report
 from notebook_to_kedro.semantic import (
@@ -107,6 +111,7 @@ __all__ = [
     "ConversionSourceAudit",
     "FunctionalWorkflowConfiguration",
     "KedroArchitectureProfile",
+    "WorkflowRegressionContract",
     "analyze_functional_blocks_path",
     "analyze_notebook_path",
     "audit_conversion_source",
@@ -115,6 +120,7 @@ __all__ = [
     "generate_kedro_project",
     "load_functional_workflow_configuration",
     "load_kedro_profile",
+    "load_workflow_regression_contract",
     "plan_functional_workflow_path",
     "plan_notebook_path",
     "render_conversion_report",

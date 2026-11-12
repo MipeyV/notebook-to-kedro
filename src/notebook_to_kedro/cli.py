@@ -15,6 +15,7 @@ from notebook_to_kedro.api import (
     generate_kedro_project,
     load_functional_workflow_configuration,
     load_kedro_profile,
+    load_workflow_regression_contract,
     plan_functional_workflow_path,
     plan_notebook_path,
     render_conversion_report,
@@ -201,6 +202,11 @@ def _add_workflow_parsers(subparsers: argparse._SubParsersAction[argparse.Argume
             parser.add_argument("output_dir", type=Path)
             parser.add_argument("--package-name", default="generated_workflow")
             parser.add_argument("--architecture-profile", type=Path)
+            parser.add_argument(
+                "--regression-contract",
+                type=Path,
+                help="explicit JSON expectations; never inferred by executing source",
+            )
 
 
 def _functional_workflow(args: argparse.Namespace) -> int:
@@ -227,6 +233,9 @@ def _functional_workflow(args: argparse.Namespace) -> int:
             project_root=args.project_root,
             package_name=args.package_name,
             architecture_profile=profile,
+            regression_contract=None
+            if args.regression_contract is None
+            else load_workflow_regression_contract(args.regression_contract),
         )
         sys.stdout.write(
             f"Created functional Kedro project at {args.output_dir} ({len(files)} files)\n"

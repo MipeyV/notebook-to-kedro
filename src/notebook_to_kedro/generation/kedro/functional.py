@@ -12,12 +12,14 @@ from notebook_to_kedro.analysis.functional_sources import analyze_functional_blo
 from notebook_to_kedro.exceptions import FunctionalWorkflowError
 from notebook_to_kedro.generation.kedro.generator import render_kedro_project
 from notebook_to_kedro.generation.kedro.profiles import DEFAULT_KEDRO_PROFILE
+from notebook_to_kedro.generation.kedro.regression import render_workflow_regression_tests
 from notebook_to_kedro.generation.writer import write_project
 from notebook_to_kedro.ir import CatalogDataset, ConversionPlan, ParameterValue, TaskCandidate
 from notebook_to_kedro.semantic.functional_workflow import plan_functional_workflow
 
 if TYPE_CHECKING:
     from notebook_to_kedro.generation.kedro.profiles import KedroArchitectureProfile
+    from notebook_to_kedro.generation.kedro.regression_contract import WorkflowRegressionContract
     from notebook_to_kedro.semantic.functional_config import FunctionalWorkflowConfiguration
     from notebook_to_kedro.semantic.functional_workflow import FunctionalWorkflowPlan
 
@@ -91,6 +93,7 @@ def generate_functional_kedro_project(  # noqa: PLR0913
     project_root: str | Path | None = None,
     package_name: str = "generated_workflow",
     architecture_profile: KedroArchitectureProfile | None = None,
+    regression_contract: WorkflowRegressionContract | None = None,
 ) -> tuple[Path, ...]:
     """Recompute wiring and publish a new project; never execute source or a generated node."""
     root = Path.cwd() if project_root is None else Path(project_root).resolve()
@@ -142,4 +145,10 @@ def generate_functional_kedro_project(  # noqa: PLR0913
         "profile_sha256": profile.sha256,
     }
     files[Path("functional-workflow.json")] = json.dumps(manifest, sort_keys=True, indent=2) + "\n"
+    files.update(render_workflow_regression_tests(plan, profile, package_name, regression_contract))
+    if regression_contract is not None:
+        files[Path("pyproject.toml")] += (
+            '\n[project.optional-dependencies]\ntest = ["pytest>=9,<10"]\n'
+            '\n[tool.pytest.ini_options]\npythonpath = ["src"]\ntestpaths = ["tests"]\n'
+        )
     return write_project(Path(output_path), files, copies)

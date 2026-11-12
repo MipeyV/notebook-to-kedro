@@ -2,7 +2,7 @@
 
 [Documentation index](../README.md)
 
-Status: implementation boundaries reviewed on 2026-11-12. The
+Status: implementation boundaries reviewed on 2026-11-13. The
 [proposed evolution](#proposed-evolution) is separate from current capabilities.
 
 ## Objective
@@ -33,6 +33,12 @@ linear wiring and adapts calls to the shared Kedro renderer, profiles and writer
 instruction ASTs live in a relocated module with a source manifest; Python tasks do not invent
 notebook cells. [ADR 0006](../decisions/0006-linear-functional-workflow-generation.md) records
 ordering, identity and bounded I/O decisions. The old notebook conversion contracts are unchanged.
+
+An optional [regression contract](generated-workflow-tests.md) now renders standalone pytest
+node/pipeline tests and a gap snapshot before the same publication boundary. It never derives
+an oracle by execution or imports application code during generation. Expectations, generation
+status and later execution stay distinct; [ADR 0007](../decisions/0007-explicit-generated-regression-tests.md)
+records this first E3 slice. Fresh-environment bootstrap remains future work.
 
 ## Design rules
 

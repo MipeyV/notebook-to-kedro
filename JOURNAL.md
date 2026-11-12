@@ -40,6 +40,55 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-11-13 - Explicit regression tests shipped with functional projects
+
+### Completed
+
+- Added a bounded immutable JSON expectation contract with exact workflow/node argument
+  binding, duplicate/unknown-field rejection, finite JSON values, size/depth/case limits and
+  canonical identity. Expected results are supplied independently; generation never imports
+  source or executes it to infer an oracle.
+- Functional generation now always emits a gap snapshot and TESTING.md. With an explicit
+  contract it also ships standalone pytest node/pipeline tests, case data, an optional pytest
+  package extra and test/source paths. CLI/API selection leaves workflow/procedural schemas
+  and core runtime dependencies unchanged.
+- Shipped pipeline tests use real registration/catalog I/O in temporary directories, supplied
+  parameters and guarded generated JSON paths. Supplied node cases use copied inputs. Missing
+  node expectations remain explicit instead of creating passing or skipped stubs; generation
+  status and unauthenticated review remain separate from later pytest execution.
+- Added the three-case example and executed the emitted suites in fresh Python processes for
+  both source formats and default/custom profiles. Five assertions/tests pass per full example;
+  pipeline-only contracts produce three tests with node gaps. Independent code/oracle/path
+  negative controls cause four/one/three failures respectively. Source input/config files remain
+  unchanged and invalid catalog paths do not create external output files.
+- Updated roadmap, current status, architecture, the workflow reference and indexed ADR 0007.
+- Focused validation passed 49 tests with 100% coverage of the two new modules (118 statements,
+  46 branches). Ruff, formatting, strict mypy across 170 files and source/wheel builds passed.
+  Mypy used the previously validated locked isolated environment with project dependencies.
+  Final complete offline validation passed all 2,225 tests in 459.95 s on Python 3.12.14,
+  with 100% line/branch coverage (8,484 statements, 2,476 branches, 90 modules). The two new
+  regression modules were verified in the built wheel. No fresh-installation claim is made.
+
+### Decisions
+
+- This is the first E3 increment for linear functional projects only. Exact canonical-JSON
+  comparison distinguishes booleans/integers/floats and does not silently introduce tolerance.
+- Generation snapshots identify supplied expectations and gaps; they do not authenticate
+  review, prove business intent or claim tests have run. Editing/running emitted tests does
+  not automatically update that generation snapshot.
+
+### Open questions
+
+- Fresh dependency installation/bootstrap, richer comparators/error expectations and tests for
+  procedural notebook conversion still need separate increments. The new subprocess evidence
+  reuses development dependencies and is not fresh-installation or per-scenario isolation proof.
+- Independent human review of the existing whole-notebook pilot remains pending.
+
+### Next step
+
+- Verify installation and execution of a generated project's shipped tests in a clean environment
+  and define reproducible CI/bootstrap evidence without claiming unprovided business expectations.
+
 ## 2026-11-12 - Linear functional workflows generate checked Kedro projects
 
 ### Completed

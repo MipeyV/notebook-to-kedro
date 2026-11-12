@@ -25,6 +25,13 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Functional projects can ship standalone pytest node/pipeline regressions from an explicit,
+  bounded JSON expectation contract selected through CLI/API. Immutable expectations,
+  profile-aware bindings, temporary test workspaces and a gap snapshot preserve missing oracles
+  and separate expectations from execution/review evidence. Subprocess tests and deliberate
+  code/oracle/path regressions exercise emitted assertions. Runtime dependencies and procedural
+  conversion schemas are unchanged; fresh dependency bootstrap and richer comparators remain future.
+
 - Explicit linear functional workflows now generate Kedro projects from scripts or notebooks:
   versioned JSON I/O/scalar-parameter configuration, recomputed source accounting, reviewable
   plans/manifests, preserved helper functions and assignment-mode intermediate identity. New
