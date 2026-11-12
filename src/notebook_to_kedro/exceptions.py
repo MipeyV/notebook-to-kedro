@@ -23,6 +23,10 @@ class FunctionalWorkflowError(ProjectGenerationError):
     """Raised when explicit workflow wiring cannot be converted faithfully."""
 
 
+class WorkflowRegressionError(FunctionalWorkflowError):
+    """Raised for invalid or incompatible explicitly supplied test expectations."""
+
+
 class KedroProfileError(ProjectGenerationError):
     """Raised for an invalid or incompatible declarative Kedro architecture profile."""
 

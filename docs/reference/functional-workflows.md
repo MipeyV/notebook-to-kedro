@@ -4,7 +4,9 @@
 
 Status: bounded E2 generation slice implemented on 2026-11-12. It converts an explicit,
 single-use linear function workflow from a script or physical notebook cells. General DAGs,
-multi-file projects and automatically generated project tests remain outside this slice.
+multi-file projects remain outside this slice. The first
+[generated-test increment](generated-workflow-tests.md) now optionally delivers pytest
+regressions from explicit expectations; fresh dependency bootstrap remains outstanding.
 
 ## Review and generate
 
@@ -126,6 +128,7 @@ A separate mutable-list fixture checks receiver identity and an internal helper 
 inside its owning node. Negative tests block unsupported wiring, drift, source contexts and I/O
 configuration before publication. This is bounded fixture evidence, not arbitrary-code equivalence.
 
-Next are E3 reviewed observable contracts and tests delivered with generated projects. General
+The first E3 increment now supplies explicit JSON contracts and tests delivered with generated
+projects; fresh dependency bootstrap remains next. General
 branching, richer datasets, dependency inference and broader ML workflows need additional
 contracts and behavioral cases. The existing whole-notebook pilot's human review remains pending.

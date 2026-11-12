@@ -28,7 +28,7 @@ The compatibility policy is authoritative for supported runtimes and library-sup
 | Document | Status | Purpose |
 | --- | --- | --- |
 | [Project overview](product/overview.md) | Original design | Context, intended interfaces, scope and principles extracted from the old README. |
-| [Detailed project status](product/project-status.md) | Reviewed: 2026-11-12 | Current capability matrix, implemented APIs and historical measurement context. |
+| [Detailed project status](product/project-status.md) | Reviewed: 2026-11-13 | Current capability matrix, implemented APIs and historical measurement context. |
 | [Conversion roadmap](product/roadmap.md) | V1 completed; V2 ongoing | Existing milestones and checkboxes, without changing completion claims. |
 | [Product vision](product/product-vision.md) | Direction; future features proposed | Existing-project and greenfield entrypoints, reusable enterprise standards, evidence and commercial hypotheses. |
 
@@ -59,6 +59,7 @@ The compatibility policy is authoritative for supported runtimes and library-sup
 | [Source accounting](reference/source-accounting.md) | Statement destinations, AST/catalog/parameter/dependency checks and high-level conversion enforcement. |
 | [Functional block inspection](reference/functional-blocks.md) | Analysis-only explicit functions from Python/notebook inputs, source provenance, dependencies and supported-subset diagnostics. |
 | [Functional workflow to Kedro](reference/functional-workflows.md) | Explicit linear entrypoints, JSON I/O/scalar parameters, source accounting, generation and paired execution evidence. |
+| [Tests delivered with functional projects](reference/generated-workflow-tests.md) | Explicit expectations, standalone pytest node/pipeline tests, gap reporting and negative controls. |
 
 ## Evaluation
 
@@ -112,6 +113,8 @@ the dedicated experiment reports for their frozen settings, decisions and limita
   analysis first, honest Python/notebook origins and a later generation/behavior increment.
 - [ADR 0006: linear functional workflow generation](decisions/0006-linear-functional-workflow-generation.md):
   explicit wiring, preserved call order/object identity and reuse of the Kedro renderer/writer.
+- [ADR 0007: explicit generated regression tests](decisions/0007-explicit-generated-regression-tests.md):
+  supplied oracles, standalone tests, explicit gaps and separate execution evidence.
 
 ## Maintaining documentation
 

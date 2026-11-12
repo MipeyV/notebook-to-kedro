@@ -2,7 +2,7 @@
 
 [Documentation index](../README.md)
 
-Status: current implementation summary reviewed on 2026-11-12; historical evidence follows.
+Status: current implementation summary reviewed on 2026-11-13; historical evidence follows.
 Historical measurements retain their original corpus, runtime and limitations.
 
 ## Project status
@@ -16,6 +16,7 @@ Historical measurements retain their original corpus, runtime and limitations.
 | AI assistance | Constrained hybrid planning is opt-in; code/body proposals and campaign preparation remain experimental and separate from normal generation. |
 | Architecture profiles | Initial deterministic Kedro naming/organization slice: versioned JSON, one pipeline name, function/node prefix, review mappings and opt-in manifest. Broader enterprise standards remain proposed. |
 | Greenfield project generation | Proposed; no specification-driven entrypoint or shared `ProjectSpec`. |
+| Tests delivered in functional projects | Optional explicit JSON expectations produce standalone pytest node/pipeline regressions with missing expectations reported. Positive/negative controls exercise them in fresh processes using development dependencies; fresh dependency bootstrap remains pending. |
 | MLOps / enterprise platform | Future integrations, governance and packaging require validated needs and separate contracts. |
 | Functional block inspection | Analysis-only API/CLI for explicit straight-line functions in `.py` and real notebook cells, with interfaces, function-reference graph, provenance and blockers. |
 | Functional workflow conversion | Explicit single-use linear entrypoints now generate Kedro from scripts or notebooks, using JSON file I/O/scalar parameters and checked paired fixture behavior. Helpers remain inside owning nodes and intermediate identity is preserved. General DAGs and arbitrary Python remain unsupported. |
