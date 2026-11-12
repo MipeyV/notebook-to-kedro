@@ -11,8 +11,11 @@ from typing import TYPE_CHECKING
 from notebook_to_kedro.api import (
     analyze_functional_blocks_path,
     create_semantic_planner,
+    generate_functional_kedro_project,
     generate_kedro_project,
+    load_functional_workflow_configuration,
     load_kedro_profile,
+    plan_functional_workflow_path,
     plan_notebook_path,
     render_conversion_report,
     validate_conversion_plan,
@@ -91,10 +94,8 @@ def main(argv: list[str] | None = None) -> int:
     parser = _parser()
     args = parser.parse_args(argv)
     try:
-        if args.command == "inspect-blocks":
-            analysis = analyze_functional_blocks_path(args.source, project_root=args.project_root)
-            sys.stdout.write(analysis.to_json())
-            return 0 if analysis.complete else ERROR_EXIT_CODE
+        if args.command in ("inspect-blocks", "plan-workflow", "generate-workflow"):
+            return _functional_workflow(args)
         if args.command == "plan":
             return _plan(args)
         if args.command == "generate":
@@ -124,6 +125,7 @@ def _parser() -> argparse.ArgumentParser:
     )
     subparsers = parser.add_subparsers(dest="command")
     _add_source_parsers(subparsers)
+    _add_workflow_parsers(subparsers)
     benchmark_parser = subparsers.add_parser(
         "benchmark",
         help="compare planners over a reviewed planning corpus",
@@ -185,6 +187,51 @@ def _add_source_parsers(subparsers: argparse._SubParsersAction[argparse.Argument
         help="Python package name for the generated Kedro project",
     )
     _add_conversion_arguments(generate_parser)
+
+
+def _add_workflow_parsers(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
+    for command in ("plan-workflow", "generate-workflow"):
+        parser = subparsers.add_parser(
+            command, help="plan or generate an explicit linear functional workflow"
+        )
+        parser.add_argument("source", type=Path, help="source .py or .ipynb")
+        parser.add_argument("configuration", type=Path, help="explicit workflow JSON configuration")
+        parser.add_argument("--project-root", type=Path, default=None)
+        if command == "generate-workflow":
+            parser.add_argument("output_dir", type=Path)
+            parser.add_argument("--package-name", default="generated_workflow")
+            parser.add_argument("--architecture-profile", type=Path)
+
+
+def _functional_workflow(args: argparse.Namespace) -> int:
+    if args.command == "inspect-blocks":
+        analysis = analyze_functional_blocks_path(args.source, project_root=args.project_root)
+        sys.stdout.write(analysis.to_json())
+        return 0 if analysis.complete else ERROR_EXIT_CODE
+    configuration = load_functional_workflow_configuration(args.configuration)
+    if args.command == "plan-workflow":
+        plan = plan_functional_workflow_path(
+            args.source, configuration, project_root=args.project_root
+        )
+        sys.stdout.write(plan.to_json())
+    else:
+        profile = (
+            None
+            if args.architecture_profile is None
+            else load_kedro_profile(args.architecture_profile)
+        )
+        files = generate_functional_kedro_project(
+            args.source,
+            configuration,
+            args.output_dir,
+            project_root=args.project_root,
+            package_name=args.package_name,
+            architecture_profile=profile,
+        )
+        sys.stdout.write(
+            f"Created functional Kedro project at {args.output_dir} ({len(files)} files)\n"
+        )
+    return 0
 
 
 def _add_behavioral_parsers(

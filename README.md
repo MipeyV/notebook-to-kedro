@@ -91,7 +91,15 @@ notebook-to-kedro inspect-blocks examples/functional_blocks/workflow.py
 
 The [functional inspection contract](docs/reference/functional-blocks.md) describes interfaces,
 function dependencies, retained source/provenance and blockers. This first E2 slice is analysis
-only; conversion of structured scripts to Kedro remains the next increment.
+only. The separate [functional workflow conversion](docs/reference/functional-workflows.md)
+now generates Kedro projects from explicitly configured linear entrypoints in either format:
+
+```bash
+notebook-to-kedro generate-workflow examples/functional_workflow/workflow.py examples/functional_workflow/workflow.json generated/functional_project --project-root .
+```
+
+This initial subset uses JSON file boundaries and scalar parameters. Internal helper calls
+remain inside their owning node; branching and generated-project tests remain future work.
 
 The root `README.md` remains the repository and package entry point. The
 [documentation index](docs/README.md) provides reading paths and a categorized document list.

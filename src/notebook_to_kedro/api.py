@@ -8,6 +8,10 @@ from notebook_to_kedro.analysis import analyze_notebook
 from notebook_to_kedro.analysis.functional_sources import analyze_functional_blocks_path
 from notebook_to_kedro.exceptions import PlannerConfigurationError
 from notebook_to_kedro.generation import generate_kedro_project
+from notebook_to_kedro.generation.kedro.functional import (
+    generate_functional_kedro_project,
+    plan_functional_workflow_path,
+)
 from notebook_to_kedro.generation.kedro.profiles import (
     DEFAULT_KEDRO_PROFILE,
     KedroArchitectureProfile,
@@ -23,6 +27,10 @@ from notebook_to_kedro.semantic import (
     SemanticPlanner,
     create_semantic_planner,
     validate_conversion_plan,
+)
+from notebook_to_kedro.semantic.functional_config import (
+    FunctionalWorkflowConfiguration,
+    load_functional_workflow_configuration,
 )
 from notebook_to_kedro.semantic.source_accounting import (
     ConversionSourceAudit,
@@ -97,13 +105,17 @@ def _select_planner(
 __all__ = [
     "DEFAULT_KEDRO_PROFILE",
     "ConversionSourceAudit",
+    "FunctionalWorkflowConfiguration",
     "KedroArchitectureProfile",
     "analyze_functional_blocks_path",
     "analyze_notebook_path",
     "audit_conversion_source",
     "create_semantic_planner",
+    "generate_functional_kedro_project",
     "generate_kedro_project",
+    "load_functional_workflow_configuration",
     "load_kedro_profile",
+    "plan_functional_workflow_path",
     "plan_notebook_path",
     "render_conversion_report",
     "validate_conversion_plan",

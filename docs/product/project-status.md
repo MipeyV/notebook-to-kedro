@@ -2,7 +2,7 @@
 
 [Documentation index](../README.md)
 
-Status: current implementation summary reviewed on 2026-11-06; historical evidence follows.
+Status: current implementation summary reviewed on 2026-11-12; historical evidence follows.
 Historical measurements retain their original corpus, runtime and limitations.
 
 ## Project status
@@ -17,8 +17,9 @@ Historical measurements retain their original corpus, runtime and limitations.
 | Architecture profiles | Initial deterministic Kedro naming/organization slice: versioned JSON, one pipeline name, function/node prefix, review mappings and opt-in manifest. Broader enterprise standards remain proposed. |
 | Greenfield project generation | Proposed; no specification-driven entrypoint or shared `ProjectSpec`. |
 | MLOps / enterprise platform | Future integrations, governance and packaging require validated needs and separate contracts. |
-| Functional block inspection | Analysis-only API/CLI for explicit straight-line functions in `.py` and real notebook cells, with interfaces, function-reference graph, provenance and blockers. Paired inputs have matching static structure; Kedro wiring and paired runtime checks remain next. |
-| Shared engine / local interface | Existing core now includes a bounded structured-script inspection frontend. A general project model, script-to-Kedro conversion, operation UI/local app or VS Code extension remain future work. |
+| Functional block inspection | Analysis-only API/CLI for explicit straight-line functions in `.py` and real notebook cells, with interfaces, function-reference graph, provenance and blockers. |
+| Functional workflow conversion | Explicit single-use linear entrypoints now generate Kedro from scripts or notebooks, using JSON file I/O/scalar parameters and checked paired fixture behavior. Helpers remain inside owning nodes and intermediate identity is preserved. General DAGs and arbitrary Python remain unsupported. |
+| Shared engine / local interface | Existing core includes structured-script inspection and a bounded generation adapter reusing the Kedro renderer, profiles and writer. A general project model, operation UI/local app or VS Code extension remain future work. |
 
 Generation reliability does not verify a fresh dependency installation, full DAG semantics or
 runtime behavior. Parent directories can remain after a failure; concurrent filesystem edits
@@ -29,7 +30,10 @@ label means no blocking plan diagnostics; it is not a consolidated validation or
 
 See [functional inspection](../reference/functional-blocks.md) for the first E2 subset.
 Its `complete` and structural fingerprint describe static inspection only, without execution,
-behavioral proof or generation eligibility. Existing notebook conversion remains separate.
+behavioral proof or generation eligibility. The separate [workflow adapter](../reference/functional-workflows.md)
+requires stricter entrypoint/I/O contracts and records per-statement module destinations.
+Existing notebook conversion remains separate. Paired tests are bounded evidence, not a
+general runtime guarantee or a verified fresh dependency installation.
 
 See [source accounting](../reference/source-accounting.md) for the exact initial guard. It
 rejects omissions instead of automatically repairing them, preserves fully accounted plan bytes

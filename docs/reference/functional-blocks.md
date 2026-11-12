@@ -2,8 +2,9 @@
 
 [Documentation index](../README.md)
 
-Status: first E2 analysis slice, implemented on 2026-11-06. Kedro generation from this
-representation and behavioral comparison of the paired inputs remain the next slice.
+Status: first E2 analysis slice, implemented on 2026-11-06. A separate
+[linear workflow adapter](functional-workflows.md), implemented on 2026-11-12, now adds explicit
+entrypoints, JSON I/O and checked paired Kedro behavior without changing this inspection contract.
 
 ## Usage
 
@@ -103,6 +104,6 @@ semantic-equivalence metric.
 
 Existing `NotebookFacts`, `ConversionPlan`, `plan` and `generate` contracts remain separate.
 The analyzers share small AST naming/constants utilities; functional inspection does not bypass
-notebook source accounting or make a `.py` file eligible for Kedro generation. Next define
-entrypoint/data wiring and source accounting, then compare generated Kedro behavior from both
-presentations using reviewed observable contracts.
+notebook source accounting or automatically make a `.py` file eligible for generation. The
+separate workflow adapter requires additional configuration, recomputed facts and stricter
+linear wiring checks before rendering a project.

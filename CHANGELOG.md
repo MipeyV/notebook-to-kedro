@@ -25,6 +25,14 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Explicit linear functional workflows now generate Kedro projects from scripts or notebooks:
+  versioned JSON I/O/scalar-parameter configuration, recomputed source accounting, reviewable
+  plans/manifests, preserved helper functions and assignment-mode intermediate identity. New
+  `plan-workflow`/`generate-workflow` commands and Python APIs reuse the extracted Kedro renderer,
+  existing profiles and private-staging writer. Paired real-Kedro fixture tests check ordering,
+  persistence, expected results and mutable identity. General DAGs, multi-file reconstruction,
+  richer formats, fresh dependency installation and generated-project tests remain outstanding.
+
 - Analysis-only explicit functional blocks from structured Python files and real notebook code
   cells, with immutable source/provenance, interfaces, function-reference edges, diagnostics and
   JSON API/CLI inspection. Includes paired examples with matching static fingerprints; script
