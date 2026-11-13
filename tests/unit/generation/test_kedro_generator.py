@@ -2,6 +2,7 @@
 
 import ast
 import importlib
+import tomllib
 from dataclasses import replace
 from pathlib import Path
 
@@ -24,11 +25,21 @@ def test_generate_kedro_project_writes_importable_reference_project(
 
     created_files = generate_kedro_project(plan, output_path, package_name="generated_reference")
 
-    assert len(created_files) == 9
+    assert len(created_files) == 10
+    assert (output_path / "conf/local").is_dir()
     pyproject_source = (output_path / "pyproject.toml").read_text(encoding="utf-8")
     assert pyproject_source.startswith("[project]")
     assert '"kedro>=1.5,<2"' in pyproject_source
     assert '"scikit-learn>=1.7,<2"' in pyproject_source
+    assert '"kedro-datasets[pandas-csvdataset]>=8,<9"' in pyproject_source
+    metadata = tomllib.loads(pyproject_source)
+    assert metadata["build-system"] == {
+        "requires": ["hatchling>=1.27,<2"],
+        "build-backend": "hatchling.build",
+    }
+    assert metadata["tool"]["hatch"]["build"]["targets"]["wheel"]["packages"] == [
+        "src/generated_reference"
+    ]
     nodes_source = (
         output_path / "src" / "generated_reference" / "pipelines" / "notebook_pipeline" / "nodes.py"
     ).read_text(encoding="utf-8")

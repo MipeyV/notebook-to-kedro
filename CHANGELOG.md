@@ -9,6 +9,10 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- Generated projects now include `conf/local` so default `kedro run` can load its environment.
+  They declare Hatchling and explicit wheel package inclusion instead of relying on an implicit
+  build backend, and select the CSV dataset extra instead of all pandas connectors.
+
 - Later rewrites of catalog-backed variables now become nodes and receive distinct generated
   dataset versions, preserving catalog input identities. Resolved output-name collisions fail
   before publication. Windows rename refusals 5/32/33 allow at most three attempts with destination
@@ -25,12 +29,17 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Added an opt-in trusted functional-example bootstrap check: four script/notebook and
+  default/custom variants, fresh wheel installation, source-free shipped pytest/Kedro CLI
+  execution, actual runtime identities/hashes and retained logs/JUnit evidence. A separate
+  Linux CI matrix targets Python 3.11/3.12/3.13 without adding network checks to offline pytest.
+
 - Functional projects can ship standalone pytest node/pipeline regressions from an explicit,
   bounded JSON expectation contract selected through CLI/API. Immutable expectations,
   profile-aware bindings, temporary test workspaces and a gap snapshot preserve missing oracles
   and separate expectations from execution/review evidence. Subprocess tests and deliberate
   code/oracle/path regressions exercise emitted assertions. Runtime dependencies and procedural
-  conversion schemas are unchanged; fresh dependency bootstrap and richer comparators remain future.
+  conversion schemas are unchanged; richer comparators and wider fixture coverage remain future.
 
 - Explicit linear functional workflows now generate Kedro projects from scripts or notebooks:
   versioned JSON I/O/scalar-parameter configuration, recomputed source accounting, reviewable

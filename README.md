@@ -57,7 +57,9 @@ Generation refuses to overwrite an existing destination. Review the generated pr
 install the generated project's dependencies, then use `kedro run` from its root.
 Both the API and CLI enforce plan validation. Rendered Python is compiled without execution,
 and files/data are prepared privately before publication. These structural checks do not establish
-behavioral equivalence or a verified fresh-environment installation.
+behavioral equivalence or installation success. A separate
+[trusted-example bootstrap check](docs/reference/generated-workflow-tests.md#fresh-environment-bootstrap)
+builds and installs generated wheels in fresh environments and checks tests plus `kedro run`.
 High-level notebook planning also performs [source accounting](docs/reference/source-accounting.md):
 omitted or duplicated statements, changed task/import evidence and unsupported CSV relocation
 block generation. Unsupported standalone assertions/side-effect cells are reported for review.

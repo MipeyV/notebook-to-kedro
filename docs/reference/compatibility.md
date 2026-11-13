@@ -50,6 +50,15 @@ The generator will render one documented Kedro project format at a time. It will
 
 Kedro remains a test and backend compatibility dependency until the generator requires runtime imports from it. The deterministic notebook analyzer does not depend on Kedro.
 
+Generated projects declare Hatchling as their build backend and explicitly include their source
+package in wheels. The runtime dataset extra is `kedro-datasets[pandas-csvdataset]>=8,<9`,
+matching the supported CSV connector; JSON datasets require no additional connector extra.
+The scaffold includes `conf/local` for default Kedro CLI startup. A separate
+[trusted-example bootstrap check](generated-workflow-tests.md#fresh-environment-bootstrap)
+installs the actual wheel without development dependencies or source-path fallbacks.
+Its CI matrix targets Python 3.11/3.12/3.13; individual reports record observed versions/results.
+Generated dependency ranges are not a lock or proof of every allowed dependency combination.
+
 ## Notebook format
 
 Initial support:

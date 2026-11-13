@@ -40,6 +40,50 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-11-14 - Fresh-environment generated-project bootstrap
+
+### Completed
+
+- Added an explicit developer check for the committed functional example, in script/notebook
+  form with default/custom profiles. Each case builds the real wheel, installs its test extra
+  in a new standard venv, verifies site-packages imports and absence of the conversion engine,
+  then runs the five shipped regressions and normal Kedro CLI against a source-free project
+  copy. The expected persisted result is 6.0; input/parameter files are preserved.
+- Bootstrap exposed a real CLI failure: `conf/local` was missing even though the emitted
+  regression suite passed. The shared renderer now includes it. Generated packaging explicitly
+  declares Hatchling/source-package inclusion and uses the CSV connector extra instead of all
+  pandas dataset integrations (53 resolved runtime/test packages instead of 103 in this run).
+- Added a separate Linux CI bootstrap matrix for Python 3.11/3.12/3.13, generation with only
+  locked core dependencies, and retained logs, JUnit and version/hash evidence even on failure.
+  Offline pytest does not install packages or run this network-dependent check.
+- Updated status, compatibility, architecture, roadmap and generated-test instructions. Tooling
+  is included in strict mypy scope; the core runtime dependency surface remains unchanged.
+- All twelve Windows bootstrap cases passed: four variants on Python 3.11.16, 3.12.14 and
+  3.13.14, each with five passing regressions and persisted CLI result 6.0. Fresh resolution
+  selected Kedro 1.8.0, kedro-datasets 8.1.0, pandas 2.3.3, scikit-learn 1.9.1 and pytest 9.2.0.
+  Linux CI results remain separate. Focused checks passed 80 generation/regression tests and
+  91 documentation/scaffold checks; Ruff, strict mypy (171 files) and distribution build passed.
+- The final complete offline suite passed 2,225 tests in 417.50 seconds on Python 3.12.14,
+  with 100% line/branch coverage (8,484 statements and 2,476 branches across 90 modules).
+  A preliminary run overlapped scaffold edits and produced invalid coverage line mappings;
+  the final run used stable source files and satisfied the unchanged coverage gate.
+
+### Decisions
+
+- Dependency resolution is fresh against generated ranges; installed artifacts may be cached.
+  Runtime reports identify observed versions, without claiming a generated dependency lock or
+  universal installation support. Generation itself remains static and never runs this check.
+- Only the committed trusted example is executed. No arbitrary-source runner, user-code
+  sandbox, provider call, pilot review approval or production-readiness claim is introduced.
+- Windows application control blocked uv-created interpreter launchers. Standard-library venv
+  with CPython launchers worked. An early smoke run also hit Windows' default pytest temporary
+  directory permissions; an explicit contained basetemp resolved that tooling failure.
+
+### Next step
+
+- E4: define typed operation requests/results and local configuration around existing engine
+  tasks, keeping transformation rules in the engine before choosing the first UI surface.
+
 ## 2026-11-13 - Explicit regression tests shipped with functional projects
 
 ### Completed
