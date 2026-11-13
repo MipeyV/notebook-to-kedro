@@ -81,6 +81,7 @@ def render_kedro_project(
     pipeline_root = package_root / "pipelines" / profile.pipeline_name
     files = {
         Path("pyproject.toml"): _pyproject(package_name),
+        Path("conf/local/.gitkeep"): "",
         package_root / "__init__.py": _package_init(),
         package_root / "settings.py": _settings(),
         package_root / "pipeline_registry.py": _pipeline_registry(
@@ -120,7 +121,7 @@ version = "0.1.0"
 requires-python = ">=3.11,<3.14"
 dependencies = [
     "kedro>=1.5,<2",
-    "kedro-datasets[pandas]>=8,<9",
+    "kedro-datasets[pandas-csvdataset]>=8,<9",
     "pandas>=2.2,<4",
     "scikit-learn>=1.7,<2",
 ]
@@ -129,6 +130,13 @@ dependencies = [
 package_name = "{package_name}"
 project_name = "Generated Notebook"
 kedro_init_version = "1.5.0"
+
+[build-system]
+requires = ["hatchling>=1.27,<2"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/{package_name}"]
 """
 
 

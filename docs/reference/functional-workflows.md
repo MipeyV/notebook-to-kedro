@@ -6,7 +6,8 @@ Status: bounded E2 generation slice implemented on 2026-11-12. It converts an ex
 single-use linear function workflow from a script or physical notebook cells. General DAGs,
 multi-file projects remain outside this slice. The first
 [generated-test increment](generated-workflow-tests.md) now optionally delivers pytest
-regressions from explicit expectations; fresh dependency bootstrap remains outstanding.
+regressions from explicit expectations. A separate opt-in trusted-example bootstrap check
+now installs generated wheels and runs shipped tests plus the Kedro CLI in fresh environments.
 
 ## Review and generate
 
@@ -129,6 +130,6 @@ inside its owning node. Negative tests block unsupported wiring, drift, source c
 configuration before publication. This is bounded fixture evidence, not arbitrary-code equivalence.
 
 The first E3 increment now supplies explicit JSON contracts and tests delivered with generated
-projects; fresh dependency bootstrap remains next. General
+projects, followed by a separate trusted-example fresh dependency bootstrap check. General
 branching, richer datasets, dependency inference and broader ML workflows need additional
 contracts and behavioral cases. The existing whole-notebook pilot's human review remains pending.

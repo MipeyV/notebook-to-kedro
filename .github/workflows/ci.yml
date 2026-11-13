@@ -13,6 +13,48 @@ env:
   UV_VERSION: "0.12.5"
 
 jobs:
+  generated-bootstrap:
+    name: Generated project bootstrap on Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12", "3.13"]
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+        with:
+          version: ${{ env.UV_VERSION }}
+          enable-cache: true
+
+      - name: Install Python
+        run: uv python install ${{ matrix.python-version }}
+
+      - name: Install only locked engine dependencies
+        run: uv sync --locked --no-default-groups --python ${{ matrix.python-version }}
+
+      - name: Build, install and execute trusted generated examples
+        run: >-
+          uv run --no-default-groups --python ${{ matrix.python-version }}
+          python tools/check_generated_bootstrap.py generated/bootstrap
+
+      - name: Preserve bootstrap logs and runtime evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: generated-bootstrap-python-${{ matrix.python-version }}
+          path: |
+            generated/bootstrap/*/*.log
+            generated/bootstrap/*/runtime.json
+            generated/bootstrap/*/evidence.json
+            generated/bootstrap/*/pytest.xml
+          if-no-files-found: warn
+          retention-days: 14
+
   quality:
     name: Quality and build
     runs-on: ubuntu-latest

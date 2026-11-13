@@ -2,9 +2,10 @@
 
 [Documentation index](../README.md)
 
-Status: initial E3 slice implemented on 2026-11-13. Explicit JSON expectations produce
-standalone pytest node/pipeline tests for linear functional workflows. Fresh dependency
-installation/bootstrap, richer comparators and procedural-notebook test generation remain future.
+Status: E3 functional regression and bootstrap slices implemented by 2026-11-14. Explicit JSON
+expectations produce standalone pytest node/pipeline tests for linear functional workflows.
+An opt-in trusted-example check verifies wheel installation and Kedro startup in fresh environments.
+Richer comparators and procedural-notebook test generation remain future.
 
 ## Generate and run
 
@@ -28,7 +29,7 @@ Generation validates data and compiles the emitted test module; it never imports
 dependencies, executes code, measures outputs or infers an expected result. Running pytest
 executes project code in the current process: it is not a sandbox. Generated tests need pytest
 and the project's runtime dependencies, with no Notebook to Kedro import. `TESTING.md` records
-instructions and limits. Installation instructions are not verified fresh-installation evidence.
+instructions and limits. Generation does not itself perform or certify installation.
 
 ## Expectation contract
 
@@ -100,6 +101,48 @@ Shipped files are `tests/test_workflow_regressions.py`, `tests/regression_cases.
 `TESTING.md` and the gap snapshot. With expectations, the package declares an optional pytest
 extra and pytest source/test paths. All validation precedes the existing staging writer.
 
+## Fresh-environment bootstrap
+
+From the repository root, explicitly run the network/install check:
+
+```bash
+uv run python tools/check_generated_bootstrap.py generated/bootstrap-local
+```
+
+The destination must not exist. This developer tool executes only the committed functional
+example, presented as `.py` and `.ipynb`, with default and custom profiles. It is separate from
+normal generation and the offline pytest suite; it does not accept arbitrary source paths or
+provide a general project execution service. It builds each project's wheel using the declared
+Hatchling backend, creates a separate standard-library venv without system packages or pip,
+and installs the wheel's `[test]` extra with `uv pip` and fresh dependency resolution.
+Downloaded artifacts may come from uv's cache; installed environments are new.
+
+An isolated Python probe checks that the package imports from the venv and that
+`notebook_to_kedro` is unavailable, and records actual installed distribution versions.
+Tests and `python -m kedro run` then use a copy of the generated configuration, data and tests
+with an **empty source directory**. Pytest's `pythonpath` setting is overridden to empty.
+Both commands must therefore use the installed wheel rather than the generated source tree.
+The check requires all five tests to execute successfully, verifies the persisted CLI result
+`6.0`, and checks input/parameter preservation. Execution is trusted fixture code, not a sandbox.
+
+The check keeps build/install/command logs, JUnit XML, runtime identity and per-case
+`evidence.json` with source/configuration/expectation/wheel hashes and stage outcomes.
+It stops at the first failure; later variants have not run. Failure logs remain available.
+It refuses to reuse an existing evidence destination and does not change generation's
+`regression-coverage.json` execution/review snapshot.
+
+The separate CI bootstrap job configures Python 3.11/3.12/3.13 on Linux. Its generation environment
+installs only locked core dependencies, and reports/logs are uploaded even on failure.
+Generated dependencies are resolved from declared ranges, independently of the engine's
+development lock; recorded versions identify a run, not a committed generated-project lock.
+This checks one synthetic example and selected resolved versions, not arbitrary dependencies,
+every version in the supported ranges, production readiness or independent human review.
+
+Generated projects now declare a build backend and explicit source-package inclusion, use the
+CSV-specific dataset extra, and include `conf/local` for Kedro's default environment.
+The wheel contains application code; configuration, data and tests stay in the generated
+project directory and must accompany it when running the project.
+
 ## Evidence and remaining E3 work
 
 Trusted tests execute the shipped suites in fresh Python processes for both source formats
@@ -108,6 +151,12 @@ a pipeline-only contract produces three, with explicit node gaps. Changing multi
 addition causes four failures; changing one expected result causes one. An escaping catalog
 path fails before external writes. These controls show active assertions, not general coverage.
 
-The subprocesses reuse locked development dependencies. Fresh-environment installation and CI
-bootstrap are next. The procedural notebook path and the whole-notebook pilot's pending human
-review retain their separate contracts.
+Those subprocess tests reuse locked development dependencies; the separate bootstrap check
+above verifies installation independently. Local Windows runs passed all four variants on each
+of Python 3.11.16, 3.12.14 and 3.13.14: twelve new installed environments, each with five passing
+tests and the expected persisted CLI result. These runs resolved Kedro 1.8.0, kedro-datasets
+8.1.0, pandas 2.3.3, scikit-learn 1.9.1 and pytest 9.2.0; this differs from the locked development
+runtime. Linux CI results are recorded separately by the workflow, not inferred from Windows.
+The procedural notebook path and the whole-notebook
+pilot's pending human review retain their separate contracts. Richer comparators, dependency
+inference/locking and wider fixture coverage remain outstanding.

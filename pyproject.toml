@@ -115,7 +115,7 @@ line-ending = "lf"
 [tool.mypy]
 python_version = "3.12"
 strict = true
-files = ["src", "tests"]
+files = ["src", "tests", "tools"]
 exclude = ["tests/fixtures"]
 warn_unreachable = true
 
