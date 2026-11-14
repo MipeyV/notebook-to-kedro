@@ -24,6 +24,11 @@ apply contract can build on concrete UI requirements.
 
 ## Consequences
 
+The setup increment adds a native dialog assistant that creates a new settings file after the
+Python loader/inspector validates it. Functional sources can start with inspection and add I/O
+before planning/generation. The assistant selects existing optional profile/expectation files,
+preserves existing settings and publishes its generated settings through an exclusive file open.
+
 - Node build/test dependencies live in the extension package and lockfile. Engine dependencies
   remain defined by the existing Python project.
 - The initial release uses explicit interpreter selection and JSON editing. Additional setup

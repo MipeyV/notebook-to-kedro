@@ -60,6 +60,10 @@ requests and confirms the generation destination before invoking the existing wr
 Node tooling has its own lockfile and CI job. [ADR 0009](../decisions/0009-vscode-operation-interface.md)
 records this first interface decision.
 
+The setup assistant authors local settings through native dialogs and validates them with
+the Python loader/inspector before writing a new file exclusively. Inspection can precede
+workflow I/O definition. The planning/generation boundary enforces the required data wiring.
+
 ## Design rules
 
 - Notebook code is never executed by the static analyzer.

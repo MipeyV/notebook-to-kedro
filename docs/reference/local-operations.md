@@ -42,7 +42,9 @@ executable configuration, plugin loading or implicit project selection.
 Required fields are `schema_version`, `project_root`, `source_kind` and `source`.
 `package_name` defaults to `generated_project`; the optional profile retains the existing
 limited naming/organization contract. `source_kind` is exactly `notebook` or `functional`.
-Functional configuration requires `workflow_configuration`; `regression_contract` is optional.
+Functional inspection accepts settings before `workflow_configuration` is defined. Planning
+and generation require it and report `LO001` before publication when it is missing.
+`regression_contract` is optional.
 The notebook kind refuses workflow/regression settings rather than silently ignoring them.
 Existing workflow/profile/regression loaders remain authoritative for their separate schemas.
 Inspection loads source facts only; planning/generation also load the relevant settings/data.

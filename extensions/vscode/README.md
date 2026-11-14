@@ -10,11 +10,17 @@ Kedro project from the Explorer's **Notebook to Kedro** view.
    into the environment you choose.
 2. Install the VSIX through **Extensions: Install from VSIX**.
 3. Open the project folder and the **Notebook to Kedro** view in Explorer.
-4. Choose a local project configuration JSON and the Python executable containing the engine.
+4. Choose the Python executable containing the engine. Use **Create Project Configuration**
+   for guided setup, or choose an existing configuration JSON.
    Interpreter selection is saved in VS Code's folder settings, or user settings when the
    configuration belongs to no workspace folder.
 
 The repository provides `examples/local_operations/functional.json` and `notebook.json`.
+The setup assistant selects the project folder, source, source interpretation, package name
+and optional naming profile or test expectations. For functional sources, choose **Inspect
+functions first** to start before defining workflow I/O, or select an existing I/O configuration.
+The Python engine inspects saved source before a new settings file is written. Existing
+settings files are preserved. A blocked source retains its diagnostics for review.
 Use **Edit Project Configuration** to edit the source, source kind, workflow configuration,
 architecture profile and optional regression expectations with the normal JSON editor.
 
@@ -49,7 +55,7 @@ npm test
 npm run package
 ```
 
-The package command creates `generated/notebook-to-kedro-0.1.0.vsix` at the repository root.
+The package command creates `generated/notebook-to-kedro-0.2.0.vsix` at the repository root.
 Set `NTK_TEST_PYTHON` to the engine interpreter and run `npm run test:host` for real VS Code
 extension-host checks. `VSCODE_EXECUTABLE_PATH` can select an installed Code executable.
 Otherwise the runner downloads the pinned test version. Tests use a private generated fixture
