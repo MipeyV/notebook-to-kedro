@@ -11,8 +11,8 @@ The broader product direction is recorded in [Product vision](product-vision.md)
 These priorities extend [ADR 0002](../decisions/0002-incremental-platform-evolution.md)
 with the shared-engine direction in [ADR 0004](../decisions/0004-shared-engine-and-local-interface.md).
 They are acceptance gates, not dates or authorization to implement every phase. The product
-will expose operations through a local application or VS Code extension; the exact UI choice
-remains open. Transformation logic stays in the reusable core and is exercised through API/CLI first.
+exposes its initial operations through a VS Code extension. Transformation logic stays in the
+reusable core and is exercised through API/CLI first.
 
 | Order | Deliverable | Dependencies and acceptance gate | Status |
 | --- | --- | --- | --- |
@@ -20,7 +20,7 @@ remains open. Transformation logic stays in the reusable core and is exercised t
 | E1 | Source completeness and graph fidelity | Every parsed statement has a supported destination or blocks conversion. Cross-check task AST/provenance, imports, selected parameter values, catalog relocation and source dependencies. Exercise the first rewrite of a catalog input. | Initial source-accounting/API guard and dataset-graph correction implemented in this increment; arbitrary semantics remain unsupported. |
 | E2 | Functional blocks and a structured Python input | Reuse immutable facts; demonstrate one workflow presented as notebook and structured script reaching the same checked Kedro behavior. Derive a small source-independent representation from these actual cases. | Initial bounded slice implemented: explicit-function analysis, linear entrypoint wiring, JSON catalog/scalar parameters, shared generation and checked paired fixture behavior with default/custom profiles. General DAGs, richer I/O and multi-file analysis remain unsupported; no universal ProjectSpec. |
 | E3 | Tests delivered with generated projects | Reviewed observable contracts/fixtures, pytest regression generation and fresh-environment bootstrap checks. Preserve missing expectations as explicit gaps; generated tests alone do not validate business intent. | Initial functional-workflow slices implemented: explicit JSON expectations, shipped node/pipeline pytest tests, gaps/negative controls, plus trusted-example wheel installation and CLI bootstrap in fresh environments with a separate CI matrix. Broader comparators, dependency inference/locking and procedural-notebook tests remain outstanding. |
-| E4 | Local operation contracts and first interface | Stable typed API/CLI requests/results for implemented tasks, local configuration, plan/diff inspection and explicit execution controls. Prototype a local app or VS Code extension with conversion/audit/profile operations first. | Initial contracts implemented: explicit JSON settings, typed inspect/plan/generate operations for both deterministic engines, real new-file previews and contained no-overwrite publication. First UI, existing-project diffs and any approval-bound apply/execution contracts remain proposed; UI choice open. |
+| E4 | Local operation contracts and first interface | Stable typed API/CLI requests/results for implemented tasks, local configuration, plan/diff inspection and explicit execution controls. Prototype a local app or VS Code extension with conversion/audit/profile operations first. | Initial contracts and VS Code prototype implemented: explicit settings, typed operations, real file previews and destination-confirmed publication through the Python engine. Setup wizards, user workflow validation, existing-project diffs and any approval-bound apply/execution contracts remain proposed. |
 | E5 | Existing Kedro project inspection and standardization | Read-only node/pipeline/catalog/config reconstruction, standards diagnostics, reviewable change plans and idempotence tests. Initially generate into a new destination; safe patch application requires its own conflict/ownership contract. | Proposed. |
 | E6 | Project creation from prompt and configuration | Convert prompt into reviewed structured requirements, then generate one narrow ML scaffold using the common generation/validation core. Distinguish missing business logic, inferred code and verified behavior. | Proposed; requirements-based acceptance differs from faithful conversion. |
 | E7 | Further targets, MLOps and enterprise governance | Validated needs and operation-specific tests; introduce another backend, integrations, portfolio policies or hosting only when justified. | Proposed; no premature backend/service abstraction. |
@@ -37,9 +37,9 @@ Source accounting and supported graph checks are implemented. E2 now has
 generation and paired fixture behavior. E3 now has [explicit contracts and shipped regression
 tests](../reference/generated-workflow-tests.md), plus an opt-in fresh-environment wheel/bootstrap
 check and CI job. E4 now has [typed local operations](../reference/local-operations.md) and
-configuration for the implemented engines. Next select and prototype the first local app or
-VS Code surface, starting with source/configuration inspection and new-file previews before
-adding UI publication controls. Optimization retains a separate acceptance contract.
+configuration for the implemented engines and an initial [VS Code interface](../guides/vscode-extension.md).
+Next validate the complete setup-to-generation workflow with users and simplify configuration
+and interpreter setup around observed friction. Optimization retains a separate acceptance contract.
 
 ## Whole-notebook evaluation next gate
 

@@ -20,7 +20,7 @@ Historical measurements retain their original corpus, runtime and limitations.
 | MLOps / enterprise platform | Future integrations, governance and packaging require validated needs and separate contracts. |
 | Functional block inspection | Analysis-only API/CLI for explicit straight-line functions in `.py` and real notebook cells, with interfaces, function-reference graph, provenance and blockers. |
 | Functional workflow conversion | Explicit single-use linear entrypoints now generate Kedro from scripts or notebooks, using JSON file I/O/scalar parameters and checked paired fixture behavior. Helpers remain inside owning nodes and intermediate identity is preserved. General DAGs and arbitrary Python remain unsupported. |
-| Shared engine / local interface | Initial local operation contracts now compose both deterministic engines through typed inspect/plan/generate requests, explicit JSON settings and JSON result envelopes. Planning previews actual rendered files without writing. An app/VS Code interface, existing-project patches and a general project model remain future work. |
+| Shared engine / local interface | Typed operations now feed an initial desktop VS Code Explorer view with explicit configuration/interpreter selection, diagnostics, read-only file previews and destination-confirmed generation. Existing-project patches and broader setup automation remain future work. |
 
 Generation itself does not verify dependency installation, full DAG semantics or runtime behavior.
 The [explicit bootstrap check](../reference/generated-workflow-tests.md#fresh-environment-bootstrap)
@@ -42,8 +42,8 @@ See [local operations](../reference/local-operations.md) for the first E4 slice.
 the declared working root to the configuration file, constrain source/configuration/input/output
 paths to that root, and retain the separate workflow/profile/expectation schemas. Generation
 recomputes current inputs and uses the shared staging writer. A preview is neither runtime
-evidence nor an authenticated apply token; no installation, code execution, provider call or UI
-is introduced. Existing API/CLI entrypoints remain independently usable.
+evidence nor an authenticated apply token. The [VS Code guide](../guides/vscode-extension.md)
+describes the first interface composing these operations and its installation/runtime boundaries.
 
 See [source accounting](../reference/source-accounting.md) for the exact initial guard. It
 rejects omissions instead of automatically repairing them, preserves fully accounted plan bytes

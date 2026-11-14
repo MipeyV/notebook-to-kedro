@@ -1,0 +1,158 @@
+{
+  "name": "notebook-to-kedro",
+  "displayName": "Notebook to Kedro",
+  "description": "Inspect, preview and generate local Kedro projects using the Notebook to Kedro Python engine.",
+  "version": "0.1.0",
+  "publisher": "mipeyv",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MipeyV/notebook-to-kedro.git",
+    "directory": "extensions/vscode"
+  },
+  "engines": {
+    "vscode": "^1.145.0",
+    "node": ">=22"
+  },
+  "categories": [
+    "Data Science",
+    "Other"
+  ],
+  "extensionKind": [
+    "workspace"
+  ],
+  "main": "./dist/src/extension.js",
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": false,
+      "description": "This extension starts the selected local Python interpreter."
+    },
+    "virtualWorkspaces": {
+      "supported": false,
+      "description": "The Python engine reads and writes local project files."
+    }
+  },
+  "activationEvents": [
+    "onView:notebookToKedro.project"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "notebookToKedro.selectConfiguration",
+        "title": "Choose Project Configuration",
+        "category": "Notebook to Kedro",
+        "icon": "$(folder-opened)"
+      },
+      {
+        "command": "notebookToKedro.selectPython",
+        "title": "Choose Python Interpreter",
+        "category": "Notebook to Kedro",
+        "icon": "$(terminal)"
+      },
+      {
+        "command": "notebookToKedro.editConfiguration",
+        "title": "Edit Project Configuration",
+        "category": "Notebook to Kedro",
+        "icon": "$(edit)"
+      },
+      {
+        "command": "notebookToKedro.inspect",
+        "title": "Inspect Source",
+        "category": "Notebook to Kedro",
+        "icon": "$(search)"
+      },
+      {
+        "command": "notebookToKedro.preview",
+        "title": "Preview Generated Files",
+        "category": "Notebook to Kedro",
+        "icon": "$(open-preview)"
+      },
+      {
+        "command": "notebookToKedro.generate",
+        "title": "Generate Kedro Project",
+        "category": "Notebook to Kedro",
+        "icon": "$(new-folder)"
+      },
+      {
+        "command": "notebookToKedro.showReport",
+        "title": "Open Operation Report",
+        "category": "Notebook to Kedro"
+      },
+      {
+        "command": "notebookToKedro.showLogs",
+        "title": "Show Engine Output",
+        "category": "Notebook to Kedro",
+        "icon": "$(output)"
+      }
+    ],
+    "configuration": {
+      "title": "Notebook to Kedro",
+      "properties": {
+        "notebookToKedro.pythonPath": {
+          "type": "string",
+          "default": "",
+          "scope": "machine-overridable",
+          "description": "Absolute path to the Python interpreter containing the Notebook to Kedro engine.",
+          "restricted": true
+        }
+      }
+    },
+    "views": {
+      "explorer": [
+        {
+          "id": "notebookToKedro.project",
+          "name": "Notebook to Kedro",
+          "icon": "$(symbol-method)"
+        }
+      ]
+    },
+    "viewsWelcome": [
+      {
+        "view": "notebookToKedro.project",
+        "contents": "Open a local project configuration to inspect its source and preview Kedro files.\n[Choose configuration](command:notebookToKedro.selectConfiguration)\n[Choose Python interpreter](command:notebookToKedro.selectPython)"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "notebookToKedro.selectConfiguration",
+          "when": "view == notebookToKedro.project",
+          "group": "navigation@1"
+        },
+        {
+          "command": "notebookToKedro.selectPython",
+          "when": "view == notebookToKedro.project",
+          "group": "navigation@2"
+        },
+        {
+          "command": "notebookToKedro.showLogs",
+          "when": "view == notebookToKedro.project",
+          "group": "navigation@3"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "notebookToKedro.showReport",
+          "when": "notebookToKedro.hasResult"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p .",
+    "format": "prettier --write src test scripts package.json tsconfig.json .prettierrc.json",
+    "format:check": "prettier --check src test scripts package.json tsconfig.json .prettierrc.json",
+    "test": "npm run compile && node --test dist/test/bridge.test.js",
+    "test:host": "npm run compile && node scripts/test-host.cjs",
+    "package": "npm run compile && node scripts/package.cjs",
+    "vscode:prepublish": "npm run compile"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.5",
+    "@types/vscode": "1.145.0",
+    "@vscode/test-electron": "3.1.0",
+    "@vscode/vsce": "4.1.1",
+    "prettier": "3.10.1",
+    "typescript": "7.0.2"
+  }
+}

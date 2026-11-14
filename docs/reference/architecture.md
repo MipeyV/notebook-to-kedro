@@ -50,9 +50,15 @@ resolves a declared working root, reuses current source-accounted planning and r
 previews exact new files/copy hashes, and publishes through the existing writer. Read-only
 file validation is shared with the writer; functional rendering is separate from publication
 and revalidates captured wiring. The CLI presents JSON results without owning conversion rules.
-No UI, provider transport, execution service or universal project model is added.
 [ADR 0008](../decisions/0008-local-operation-contracts.md) records the working-root and preview
 boundaries; an approval-bound apply contract is separate future work.
+
+The initial [VS Code extension](../guides/vscode-extension.md) lives in `extensions/vscode`.
+Its TypeScript adapter uses the selected local interpreter and the existing `project` CLI,
+checks result envelopes and renders native Explorer/virtual-document views. It serializes
+requests and confirms the generation destination before invoking the existing writer path.
+Node tooling has its own lockfile and CI job. [ADR 0009](../decisions/0009-vscode-operation-interface.md)
+records this first interface decision.
 
 ## Design rules
 

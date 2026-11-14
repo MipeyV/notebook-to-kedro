@@ -40,6 +40,48 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-11-14 - Initial VS Code operation interface
+
+### Completed
+
+- Added a native Explorer view with configuration/interpreter selection, normal JSON editing,
+  static inspection and diagnostics, read-only file previews, operation reports and confirmed
+  generation into a new directory. The extension composes the existing Python project CLI.
+- Added isolated process invocation with separate arguments, response limits, cancellation,
+  request serialization and schema/status/path/content-hash checks. The existing engine
+  owns source interpretation, rendering and contained/no-overwrite publication.
+- Added locked TypeScript tooling, 24 passing protocol tests, real VS Code extension-host
+  checks and VSIX packaging. Actual host checks passed on Windows with VS Code 1.145.3,
+  including read-only user typing, canceled generation, confirmed generation, procedural
+  notebook commands and blocked diagnostics. The VSIX contains the manifest, license,
+  README and compiled adapter, with no Node runtime package dependencies.
+- Added the extension CI job with locked core-only Python setup, Node 24, pinned VS Code
+  host checks under Xvfb and an installable VSIX artifact. Linux CI results are separate
+  from the observed Windows run.
+- Added indexed installation/reference guidance and ADR 0009. Updated current capabilities,
+  roadmap, architecture, compatibility, README and changelog for the first interface.
+- Python-side checks passed Ruff, format, strict mypy and 124 documentation/local-operation
+  tests. Node compilation, all 24 protocol tests and Prettier checks passed.
+
+### Decisions and limits
+
+- Interpreter selection and existing JSON settings form the first setup path. Additional
+  source/profile wizards and automatic Python-extension integration follow observed user needs.
+- Generation refreshes planning and confirms the destination, then recomputes current saved
+  inputs. Review-hash binding and ML project execution retain their separate future contracts.
+- The installed VS Code executable was locked by an updater, so host checks used the isolated
+  pinned archive. The harness removes inherited Electron Node mode. Read-only behavior is
+  verified through the actual editor typing command.
+- Native visual capture remained unverified after the Windows helper rejected the portable
+  window handle and subsequent attempts were stopped through the tool's Escape signal.
+  Automated extension-host checks completed successfully.
+- The existing synthetic pilot still awaits independent human review.
+
+### Next step
+
+- Try the packaged extension on a user-selected project and simplify configuration/interpreter
+  setup from observed friction before extending operations or existing-project patching.
+
 ## 2026-11-14 - Explicit local operation contracts
 
 ### Completed

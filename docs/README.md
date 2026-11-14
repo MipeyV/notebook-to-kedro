@@ -37,6 +37,7 @@ The compatibility policy is authoritative for supported runtimes and library-sup
 | Document | Purpose |
 | --- | --- |
 | [Kedro architecture profiles](guides/kedro-profiles.md) | Versioned JSON conventions, default/custom generation, compatibility and source mappings. |
+| [VS Code extension](guides/vscode-extension.md) | Build/install the desktop prototype, choose configuration/Python, inspect, preview and confirm generation. |
 | [Hybrid planning](guides/hybrid-planning.md) | Supported suggestions, assembly and deterministic fallback. |
 | [Local Ollama provider](guides/ollama-provider.md) | Provider setup, Python usage and loopback safety boundary. |
 | [Body-only Ollama provider](guides/ollama-node-body.md) | Body-generation API, provenance and limitations. |
@@ -118,6 +119,8 @@ the dedicated experiment reports for their frozen settings, decisions and limita
   supplied oracles, standalone tests, explicit gaps and separate execution evidence.
 - [ADR 0008: local operation contracts](decisions/0008-local-operation-contracts.md): existing
   deterministic engines, explicit local settings, shared rendering and preview/publication boundaries.
+- [ADR 0009: VS Code operation interface](decisions/0009-vscode-operation-interface.md): native
+  Explorer/editor controls, the local Python bridge and explicit destination confirmation.
 
 ## Maintaining documentation
 

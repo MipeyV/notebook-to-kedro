@@ -3,8 +3,8 @@
 [Documentation index](../README.md)
 
 Status: first E4 slice implemented on 2026-11-14. Explicit local configuration and typed
-inspect/plan/generate operations compose the existing deterministic engine. No local app,
-VS Code extension, existing-project patching, provider selection or code execution is included.
+inspect/plan/generate operations compose the existing deterministic engine. The separate
+[VS Code interface](../guides/vscode-extension.md) now exposes these contracts through native controls.
 
 ## Configure once, choose an operation
 
@@ -130,6 +130,6 @@ Kedro and pytest absent. The built engine wheel includes the operation modules a
 nbformat as its only runtime dependency.
 Normal operations never run pytest, install dependencies, invoke Kedro, execute source or
 contact a model. The separate [bootstrap check](generated-workflow-tests.md#fresh-environment-bootstrap)
-retains its explicit trusted-example execution contract. E4 still needs a first interface,
-destination/conflict presentation and any approval-bound apply contract selected for that UI.
+retains its explicit trusted-example execution contract. E4 now has an initial VS Code interface.
+Setup simplification and any approval-bound apply contract remain further work.
 The independent whole-notebook pilot review remains pending.
