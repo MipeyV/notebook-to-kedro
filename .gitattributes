@@ -9,3 +9,4 @@
 *.yml text eol=lf
 *.ipynb text eol=lf
 uv.lock text eol=lf
+extensions/vscode/** text eol=lf

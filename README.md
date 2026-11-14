@@ -119,6 +119,10 @@ notebook-to-kedro project generate examples/local_operations/functional.json gen
 publishes a new contained destination. Python callers use the same typed requests/results.
 These operations do not execute project code, install dependencies or contact a model.
 
+The initial [VS Code extension](docs/guides/vscode-extension.md) exposes these operations from
+Explorer with configuration/interpreter selection, diagnostics, read-only previews and confirmed
+generation. Build its installable VSIX with `npm ci` and `npm run package` in `extensions/vscode`.
+
 The root `README.md` remains the repository and package entry point. The
 [documentation index](docs/README.md) provides reading paths and a categorized document list.
 

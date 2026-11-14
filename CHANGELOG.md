@@ -29,6 +29,11 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Added an initial VS Code extension with native Explorer controls for local configuration
+  and interpreter selection, static inspection, read-only file previews and destination-confirmed
+  generation. The TypeScript adapter calls the existing Python CLI with bounded isolated
+  processes. Includes locked tooling, transport/real-host checks, VSIX packaging and CI artifacts.
+
 - Added explicit local JSON settings and immutable inspect/plan/generate operation contracts
   for the existing deterministic notebook and functional workflow engines, exposed through
   Python and `project` CLI actions. Actual rendered file/copy previews perform no writes;

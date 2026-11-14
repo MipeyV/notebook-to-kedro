@@ -10,6 +10,10 @@ The [local operation layer](local-operations.md) configures these same determini
 through typed inspection, new-file preview and generation requests. It adds an explicit contained
 working root and local JSON settings, without broadening source/library support or executing code.
 
+The initial [VS Code extension](../guides/vscode-extension.md) targets desktop VS Code 1.145+
+and local file workspaces, with host tests pinned to 1.145.3. Its selected interpreter requires
+an installed engine with schema 1.0 local operations. Build tooling requires Node 22+ and npm.
+
 [Documentation index](../README.md)
 
 ## Purpose
