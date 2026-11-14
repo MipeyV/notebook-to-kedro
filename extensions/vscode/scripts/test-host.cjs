@@ -36,6 +36,10 @@ async function main() {
   };
   await fs.writeFile(path.join(workspace, "project.json"), JSON.stringify(config));
   await fs.writeFile(
+    path.join(workspace, "expression-returns.json"),
+    JSON.stringify({ ...config, source: "examples/functional_workflow/expression_returns.py" }),
+  );
+  await fs.writeFile(
     path.join(workspace, "blocked.json"),
     JSON.stringify({ ...config, source: "blocked.py" }),
   );

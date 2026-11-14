@@ -88,6 +88,14 @@ to one new public ASCII name. Arguments must be bound names, positional or expli
 and match the called function signature. Expressions, literals, expansion, extra assertions,
 reassignments, tuple targets and passthrough/earlier-result returns block conversion.
 
+Called functions and their helpers can return expressions directly, for example
+`return values * scale` or `return math.fabs(prepared)`. Those original return ASTs stay in
+the relocated module without introducing a temporary assignment or evaluating the expression
+during generation. Call order, short-circuit evaluation and exception behavior remain in the
+original Python function. The wrapper's dataset name comes from the explicit entrypoint
+assignment, not from a fabricated return name. The entrypoint itself still requires a named
+final call result; a direct `return summarize(prepared)` there needs a separate wiring extension.
+
 Every call after the first must consume its predecessor's result. Data values can be consumed
 at most once across the workflow, including within a call; scalar parameters can be reused.
 These restrictions reject fan-out, aliases at the orchestration boundary and independent branches
@@ -125,8 +133,13 @@ writer retain validation, compile preflight, profile compatibility and no-overwr
 Trusted tests execute the paired committed fixtures and generated pipelines through real Kedro
 and JSON catalog loading/saving. Three hand-specified numeric cases run for both source formats
 and default/custom profiles. Call counters require exactly two orchestration calls in order.
+The paired [expression-return script](../../examples/functional_workflow/expression_returns.py)
+and [notebook](../../examples/functional_workflow/expression_returns.ipynb) reuse `workflow.json`
+and `regression.json`. They check direct arithmetic/library-call returns, unchanged source ASTs,
+the same runtime results and shipped pytest node/pipeline expectations for both profiles.
 A separate mutable-list fixture checks receiver identity and an internal helper executing once
-inside its owning node. Negative tests block unsupported wiring, drift, source contexts and I/O
+inside its owning node, including a direct helper-call return. Negative tests block unsupported
+return constructs, wiring, drift, source contexts and I/O
 configuration before publication. This is bounded fixture evidence, not arbitrary-code equivalence.
 
 The first E3 increment now supplies explicit JSON contracts and tests delivered with generated

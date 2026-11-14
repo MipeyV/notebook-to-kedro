@@ -73,6 +73,7 @@ class FunctionalBlock:
     global_reads: tuple[str, ...]
     calls: tuple[str, ...]
     possible_mutation_targets: tuple[str, ...]
+    return_expression: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -93,7 +94,7 @@ class FunctionalAnalysis:
     blocks: tuple[FunctionalBlock, ...]
     dependencies: tuple[BlockDependency, ...]
     diagnostics: tuple[BlockDiagnostic, ...]
-    schema_version: str = "1.0"
+    schema_version: str = "1.1"
 
     @property
     def complete(self) -> bool:

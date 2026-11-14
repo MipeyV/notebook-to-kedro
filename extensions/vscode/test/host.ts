@@ -22,6 +22,14 @@ export async function run(): Promise<void> {
   await command("selectConfiguration", vscode.Uri.file(path.join(root, "project.json")));
   const inspection = await command("inspect");
   assert.equal(inspection?.status, "inspected");
+  await command("selectConfiguration", vscode.Uri.file(path.join(root, "expression-returns.json")));
+  const expressions = await command("inspect");
+  assert.equal(expressions?.schema_version, "1.0");
+  assert.equal(expressions?.analysis?.schema_version, "1.1");
+  assert.equal(expressions?.status, "inspected");
+  assert.equal((await command("preview"))?.status, "planned");
+  await command("selectConfiguration", vscode.Uri.file(path.join(root, "project.json")));
+  await command("inspect");
   assert.ok(project.getChildren().some((item) => item.label === "Source"));
   const preview = await command("preview");
   assert.equal(preview?.status, "planned");

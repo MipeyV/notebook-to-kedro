@@ -101,7 +101,8 @@ notebook-to-kedro generate-workflow examples/functional_workflow/workflow.py exa
 ```
 
 This initial subset uses JSON file boundaries and scalar parameters. Internal helper calls
-remain inside their owning node; branching remains future work. Supply
+remain inside their owning node, including direct expression returns; the entrypoint keeps
+explicit named linear wiring. Branching remains future work. Supply
 `--regression-contract examples/functional_workflow/regression.json` to also deliver
 [pytest node/pipeline regressions](docs/reference/generated-workflow-tests.md) based on explicit
 expected values. Missing expectations are reported; generation never executes code to infer them.

@@ -34,6 +34,11 @@ instruction ASTs live in a relocated module with a source manifest; Python tasks
 notebook cells. [ADR 0006](../decisions/0006-linear-functional-workflow-generation.md) records
 ordering, identity and bounded I/O decisions. The old notebook conversion contracts are unchanged.
 
+Functional analysis schema 1.1 observes a terminal `return_expression` independently of
+named `outputs`. Called functions may return supported expressions directly; their ASTs stay
+in the source module. The entrypoint's explicit call assignments own dataset naming and linear
+wiring. The shared analyzer retains all body/dependency blockers and performs no evaluation.
+
 An optional [regression contract](generated-workflow-tests.md) now renders standalone pytest
 node/pipeline tests and a gap snapshot before the same publication boundary. It never derives
 an oracle by execution or imports application code during generation. Expectations, generation
