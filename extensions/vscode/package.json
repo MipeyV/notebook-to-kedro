@@ -2,7 +2,7 @@
   "name": "notebook-to-kedro",
   "displayName": "Notebook to Kedro",
   "description": "Inspect, preview and generate local Kedro projects using the Notebook to Kedro Python engine.",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "publisher": "mipeyv",
   "license": "MIT",
   "repository": {
@@ -37,6 +37,12 @@
   ],
   "contributes": {
     "commands": [
+      {
+        "command": "notebookToKedro.createConfiguration",
+        "title": "Create Project Configuration",
+        "category": "Notebook to Kedro",
+        "icon": "$(new-file)"
+      },
       {
         "command": "notebookToKedro.selectConfiguration",
         "title": "Choose Project Configuration",
@@ -109,11 +115,16 @@
     "viewsWelcome": [
       {
         "view": "notebookToKedro.project",
-        "contents": "Open a local project configuration to inspect its source and preview Kedro files.\n[Choose configuration](command:notebookToKedro.selectConfiguration)\n[Choose Python interpreter](command:notebookToKedro.selectPython)"
+        "contents": "Create or open a project configuration to inspect its source and preview Kedro files.\n[Create configuration](command:notebookToKedro.createConfiguration)\n[Choose configuration](command:notebookToKedro.selectConfiguration)\n[Choose Python interpreter](command:notebookToKedro.selectPython)"
       }
     ],
     "menus": {
       "view/title": [
+        {
+          "command": "notebookToKedro.createConfiguration",
+          "when": "view == notebookToKedro.project",
+          "group": "navigation@0"
+        },
         {
           "command": "notebookToKedro.selectConfiguration",
           "when": "view == notebookToKedro.project",

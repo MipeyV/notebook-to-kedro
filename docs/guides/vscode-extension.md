@@ -17,10 +17,11 @@ npm ci
 npm run package
 ```
 
-Install `generated/notebook-to-kedro-0.1.0.vsix` using **Extensions: Install from VSIX**.
+Install `generated/notebook-to-kedro-0.2.0.vsix` using **Extensions: Install from VSIX**.
 The initial extension targets desktop VS Code 1.145+. Open Explorer's **Notebook to Kedro**
-view, choose an existing local project JSON file, and choose the Python executable containing
-the engine. The command palette exposes the same actions under **Notebook to Kedro**.
+view and choose the Python executable containing the engine. **Create Project Configuration**
+provides guided setup, and **Choose Project Configuration** opens an existing JSON file.
+The command palette exposes the same actions under **Notebook to Kedro**.
 Folder settings store the interpreter choice when the configuration belongs to a workspace
 folder. User settings are used otherwise. The selected configuration is remembered per workspace.
 
@@ -28,6 +29,28 @@ The repository's [functional example](../../examples/local_operations/functional
 [notebook example](../../examples/local_operations/notebook.json) are ready to use. **Edit Project
 Configuration** opens the normal JSON editor for source, profile, I/O and expectation settings.
 The [local operations contract](../reference/local-operations.md) defines those authoritative fields.
+
+## Create a configuration
+
+The assistant asks for the project folder, saved source, package name and optional profile.
+Notebook inputs offer procedural or functional interpretation. A Python script selects the
+functional path. Source/profile/expectation paths stay relative to the chosen project root.
+
+For functional inputs, **Inspect functions first** allows static inspection before workflow
+I/O is defined. Choose an existing workflow I/O file when those boundaries are available.
+Planning and generation require that file. Optional regression expectations keep their
+existing explicit-oracle contract. The assistant preserves missing expectations as gaps.
+
+Choose a new JSON filename to finish. A temporary settings file is checked through the Python
+configuration loader and source inspector before the destination is created exclusively.
+Canceling a dialog creates no project settings. Existing files are preserved. The created file
+is selected and opened, and static diagnostics appear even for blocked source. The selected
+interpreter is applied to the new configuration's VS Code settings scope. Source files retain
+their saved contents. Inspection validates source and local settings. Referenced workflow,
+profile and expectation contents are checked by the existing planning/generation loaders.
+
+Use an engine built from this revision for inspection without workflow I/O. Existing fully
+configured operations keep their schema 1.0 behavior. Settings stay editable in the JSON editor.
 
 ## Inspect, preview and generate
 
@@ -82,6 +105,7 @@ preview and blocked diagnostics. Protocol tests cover malformed/schema-incompati
 exit codes, traversal, content drift and argument separation. CI runs host checks under Xvfb
 with locked Node tooling and locked core-only Python dependencies, then packages a VSIX artifact.
 
-This first release uses explicit JSON editing and interpreter selection. Source/profile wizards,
-automatic Python-extension environment integration, remote-workspace validation, Marketplace
+The initial setup assistant creates project settings and selects existing profile/I/O files.
+Authoring business-specific I/O mappings, automatic Python-extension environment integration,
+remote-workspace validation, Marketplace
 publication, requirements generation and existing-project patching have their own later scope.

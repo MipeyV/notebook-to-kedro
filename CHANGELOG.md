@@ -29,6 +29,11 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Added the VS Code 0.2 setup assistant for source/project selection, optional profile and
+  expectation files, Python-validated settings creation and immediate inspection. Functional
+  inspection now accepts settings before workflow I/O is defined. Planning/generation require
+  that contract explicitly. Canceled setup preserves project files and existing settings.
+
 - Added an initial VS Code extension with native Explorer controls for local configuration
   and interpreter selection, static inspection, read-only file previews and destination-confirmed
   generation. The TypeScript adapter calls the existing Python CLI with bounded isolated

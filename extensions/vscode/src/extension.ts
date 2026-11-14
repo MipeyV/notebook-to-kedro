@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 import * as path from "node:path";
 import { createHash } from "node:crypto";
 import { Envelope, Operation, PreviewFile, PreviewCopy, runEngine } from "./bridge";
+import { createConfiguration } from "./setup";
 
 interface Entry {
   label: string;
@@ -92,19 +93,57 @@ export class ProjectController
       )?.[0];
     if (!selected) return;
     if (selected.scheme !== "file") throw new Error("Choose a local Python interpreter.");
+    await this.savePython(selected.fsPath);
+    this.reset();
+  }
+
+  private async savePython(filename: string): Promise<void> {
     const folder = this.scope() && vscode.workspace.getWorkspaceFolder(this.scope()!);
     await vscode.workspace
       .getConfiguration("notebookToKedro", this.scope())
       .update(
         "pythonPath",
-        selected.fsPath,
+        filename,
         folder ? vscode.ConfigurationTarget.WorkspaceFolder : vscode.ConfigurationTarget.Global,
       );
-    this.reset();
   }
 
   settingsChanged(): void {
     this.reset();
+  }
+
+  async createConfiguration(): Promise<Envelope | undefined> {
+    if (!this.available()) return;
+    if (!this.python()) await this.selectPython();
+    if (!this.python()) return;
+    const python = this.python();
+    this.busy = true;
+    const controller = new AbortController();
+    this.activeEngine = controller;
+    try {
+      const created = await createConfiguration(
+        python,
+        vscode.workspace.workspaceFolders?.[0]?.uri,
+        controller.signal,
+      );
+      if (!created) return;
+      this.configuration = created.uri;
+      await this.context.workspaceState.update("configuration", created.uri.fsPath);
+      await this.savePython(python);
+      this.result = created.inspection;
+      this.status =
+        created.inspection.status === "blocked"
+          ? "Inspection blocked · review diagnostics"
+          : "Source inspected";
+      await vscode.commands.executeCommand("setContext", "notebookToKedro.hasResult", true);
+      this.changed.fire(undefined);
+      await vscode.window.showTextDocument(await vscode.workspace.openTextDocument(created.uri));
+      return created.inspection;
+    } finally {
+      this.activeEngine = undefined;
+      this.busy = false;
+      this.changed.fire(undefined);
+    }
   }
 
   async editConfiguration(): Promise<void> {
@@ -410,6 +449,7 @@ export function activate(context: vscode.ExtensionContext): ProjectController {
       ),
     );
   command("selectConfiguration", (uri?: vscode.Uri) => project.selectConfiguration(uri));
+  command("createConfiguration", () => project.createConfiguration());
   command("selectPython", (uri?: vscode.Uri) => project.selectPython(uri));
   command("editConfiguration", () => project.editConfiguration());
   command("inspect", () => project.operate("inspect"));

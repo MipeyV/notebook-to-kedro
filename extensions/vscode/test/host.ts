@@ -5,6 +5,7 @@ import { mock } from "node:test";
 import * as vscode from "vscode";
 import type { Envelope, PreviewFile } from "../src/bridge";
 import type { ProjectController } from "../src/extension";
+import { checkConfigurationWizard } from "./setup-host";
 
 export async function run(): Promise<void> {
   const root = process.env.NTK_TEST_WORKSPACE!;
@@ -17,6 +18,8 @@ export async function run(): Promise<void> {
     vscode.commands.executeCommand<Envelope | undefined>(`notebookToKedro.${name}`, ...args);
   await command("selectConfiguration", vscode.Uri.file(path.join(root, "project.json")));
   await command("selectPython", vscode.Uri.file(python));
+  await checkConfigurationWizard(root);
+  await command("selectConfiguration", vscode.Uri.file(path.join(root, "project.json")));
   const inspection = await command("inspect");
   assert.equal(inspection?.status, "inspected");
   assert.ok(project.getChildren().some((item) => item.label === "Source"));

@@ -40,6 +40,51 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-11-14 - Guided local configuration and inspection before workflow setup
+
+### Completed
+
+- Added a native VS Code configuration wizard for project/source selection, notebook
+  interpretation, package naming and existing optional workflow, profile and regression
+  files. The shared Python loader and inspection operation validate settings and source
+  before exclusive creation of a new JSON configuration. Existing files are not overwritten.
+- Allowed functional inspection without workflow I/O settings. Planning and generation
+  still require them and report LO001 before publication. The wizard saves blocked source
+  inspections so users can review diagnostics before specifying workflow boundaries.
+- Preserved interpreter selection when the chosen project is outside the open workspace.
+  Bumped extension packaging to version 0.2.0 and updated existing guides and architecture
+  records. The local VSIX built successfully with no added runtime dependencies.
+- Inspected a user-selected, multi-module Python ML project without executing or modifying
+  its source. Its three functions return expressions directly and each receives BL003;
+  this is evidence of a current conversion boundary, not a successful conversion or a
+  reason to silently rewrite source logic. Source hashes and Git state remained unchanged.
+- Validation passed: 2,291 offline Python tests with 100% line and branch coverage
+  (8,715 statements, 2,534 branches), Ruff lint/format, strict mypy on 177 files,
+  documentation checks, source/wheel builds, 24 Node protocol tests and Prettier.
+- Real Windows VS Code 1.145.3 extension-host checks passed for wizard defaults,
+  source interpretations, optional files, cancellation, invalid settings, no overwrite,
+  inspection without workflow settings, projects outside the workspace and the existing
+  inspection/preview/generation commands. Visual layout review remains unverified.
+
+### Decisions
+
+- Keep configuration collection in the interface and interpretation, validation and
+  generation in the shared engine. Optional referenced settings contents are validated
+  by planning/generation; selecting them does not establish executable workflow consent.
+- Separate initial source inspection from workflow I/O configuration. Do not invent I/O
+  boundaries or regression expectations for unsupported real source.
+
+### Open questions
+
+- Direct expression returns, cross-module dependencies and typed domain objects in the
+  inspected project exceed the current functional conversion subset.
+- Actual pilot human review and any live provider/execution consent remain pending.
+
+### Next step
+
+- Choose a bounded engine extension grounded in the observed expression-return cases,
+  preserving source fidelity and explicit workflow I/O before attempting real conversion.
+
 ## 2026-11-14 - Initial VS Code operation interface
 
 ### Completed

@@ -2,7 +2,8 @@ const fs = require("node:fs");
 const path = require("node:path");
 const { spawnSync } = require("node:child_process");
 const repository = path.resolve(__dirname, "../../..");
-const output = path.join(repository, "generated/notebook-to-kedro-0.1.0.vsix");
+const { version } = require("../package.json");
+const output = path.join(repository, `generated/notebook-to-kedro-${version}.vsix`);
 fs.mkdirSync(path.dirname(output), { recursive: true });
 const manifest = require("@vscode/vsce/package.json");
 const executable = path.join(

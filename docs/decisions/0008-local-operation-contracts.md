@@ -34,6 +34,12 @@ Kedro, pytest, ML packages, provider SDKs and live experiments.
 
 ## Consequences
 
+The inspection-first increment moves the functional workflow-I/O requirement to planning and
+generation. Source inspection can therefore use local settings before data wiring is available.
+The schema remains 1.0, existing configured requests retain their behavior, and missing wiring
+blocks planning/generation before publication. This follows a concrete read-only user-project
+inspection where source diagnostics were needed before choosing conversion boundaries.
+
 - The new operation boundary has an explicit working-root contract, including procedural CSV
   copy paths; outside-root data blocks these operations instead of being silently copied.
 - A preview is a review snapshot, not an authenticated approval or apply capability. Changed

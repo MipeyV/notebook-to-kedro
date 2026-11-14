@@ -20,7 +20,7 @@ Historical measurements retain their original corpus, runtime and limitations.
 | MLOps / enterprise platform | Future integrations, governance and packaging require validated needs and separate contracts. |
 | Functional block inspection | Analysis-only API/CLI for explicit straight-line functions in `.py` and real notebook cells, with interfaces, function-reference graph, provenance and blockers. |
 | Functional workflow conversion | Explicit single-use linear entrypoints now generate Kedro from scripts or notebooks, using JSON file I/O/scalar parameters and checked paired fixture behavior. Helpers remain inside owning nodes and intermediate identity is preserved. General DAGs and arbitrary Python remain unsupported. |
-| Shared engine / local interface | Typed operations now feed an initial desktop VS Code Explorer view with explicit configuration/interpreter selection, diagnostics, read-only file previews and destination-confirmed generation. Existing-project patches and broader setup automation remain future work. |
+| Shared engine / local interface | Typed operations feed a desktop VS Code Explorer view with guided settings creation, inspection before workflow I/O, interpreter/profile selection, diagnostics, read-only previews and confirmed generation. Existing-project patches and automatic environment integration remain future work. |
 
 Generation itself does not verify dependency installation, full DAG semantics or runtime behavior.
 The [explicit bootstrap check](../reference/generated-workflow-tests.md#fresh-environment-bootstrap)

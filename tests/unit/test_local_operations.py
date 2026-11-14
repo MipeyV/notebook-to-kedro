@@ -106,7 +106,6 @@ def test_configuration_is_explicit_anchored_and_immutable(
         _settings(package_name="not-valid"),
         _settings(package_name="_private"),
         _settings(package_name="class"),
-        {key: value for key, value in _settings().items() if key != "workflow_configuration"},
         _settings(source_kind="notebook"),
         {
             **{key: value for key, value in _settings().items() if key != "workflow_configuration"},
@@ -148,6 +147,20 @@ def test_bounded_configuration_loading(tmp_path: Path, content: bytes) -> None:
 def test_missing_configuration_is_a_typed_error(tmp_path: Path) -> None:
     with pytest.raises(LocalOperationError, match="Cannot read local configuration"):
         load_local_project_configuration(tmp_path / "missing.json")
+
+
+def test_functional_inspection_can_precede_workflow_configuration(tmp_path: Path) -> None:
+    root, location = _workspace(tmp_path)
+    data = _settings()
+    del data["workflow_configuration"]
+    location.write_text(json.dumps(data), encoding="utf-8")
+    config = load_local_project_configuration(location)
+    assert run_local_operation(InspectRequest(config)).to_dict()["status"] == "inspected"
+    for request in (PlanRequest(config), GenerateRequest(config, Path("generated/project"))):
+        with pytest.raises(LocalOperationError, match="require workflow_configuration") as error:
+            run_local_operation(request)
+        assert error.value.code == "LO001"
+    assert not (root / "generated").exists()
 
 
 @pytest.mark.parametrize(

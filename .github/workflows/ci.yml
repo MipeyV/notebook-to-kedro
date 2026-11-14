@@ -63,7 +63,7 @@ jobs:
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: notebook-to-kedro-vscode
-          path: generated/notebook-to-kedro-0.1.0.vsix
+          path: generated/notebook-to-kedro-*.vsix
           if-no-files-found: error
 
   generated-bootstrap:

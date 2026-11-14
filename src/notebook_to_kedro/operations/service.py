@@ -70,7 +70,12 @@ def _prepare(
             plan, package_name=config.package_name, architecture_profile=profile
         )
     else:
-        assert config.workflow_configuration is not None
+        if config.workflow_configuration is None:
+            raise LocalOperationError(
+                "LO001",
+                "Planning and generation require workflow_configuration. "
+                "Inspect source first or add the workflow I/O configuration.",
+            )
         plan = plan_functional_workflow_path(
             config.source,
             load_functional_workflow_configuration(config.workflow_configuration),
