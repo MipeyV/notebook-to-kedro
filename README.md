@@ -106,6 +106,19 @@ remain inside their owning node; branching remains future work. Supply
 [pytest node/pipeline regressions](docs/reference/generated-workflow-tests.md) based on explicit
 expected values. Missing expectations are reported; generation never executes code to infer them.
 
+Use an explicit [local project configuration](docs/reference/local-operations.md) to select the
+existing notebook or functional engine and reuse settings across operations:
+
+```bash
+notebook-to-kedro project inspect examples/local_operations/functional.json
+notebook-to-kedro project plan examples/local_operations/functional.json
+notebook-to-kedro project generate examples/local_operations/functional.json generated/local_workflow
+```
+
+`plan` previews all new files without writing them; `generate` recomputes current inputs and
+publishes a new contained destination. Python callers use the same typed requests/results.
+These operations do not execute project code, install dependencies or contact a model.
+
 The root `README.md` remains the repository and package entry point. The
 [documentation index](docs/README.md) provides reading paths and a categorized document list.
 

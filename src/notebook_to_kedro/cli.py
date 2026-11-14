@@ -64,12 +64,20 @@ from notebook_to_kedro.exceptions import (
     BehavioralBenchmarkArtifactError,
     ConversionPlanValidationError,
     FunctionalSourceError,
+    LocalOperationError,
     NotebookLoadError,
     PlannerConfigurationError,
     PlanningBenchmarkError,
     ProjectGenerationError,
 )
 from notebook_to_kedro.generation.code import OllamaNodeBodyProvider, OllamaNodeCodeProvider
+from notebook_to_kedro.operations import (
+    GenerateRequest,
+    InspectRequest,
+    PlanRequest,
+    load_local_project_configuration,
+    run_local_operation,
+)
 from notebook_to_kedro.semantic import (
     DEFAULT_OLLAMA_BASE_URL,
     DEFAULT_OLLAMA_TIMEOUT_SECONDS,
@@ -95,16 +103,18 @@ def main(argv: list[str] | None = None) -> int:
     parser = _parser()
     args = parser.parse_args(argv)
     try:
-        if args.command in ("inspect-blocks", "plan-workflow", "generate-workflow"):
-            return _functional_workflow(args)
-        if args.command == "plan":
-            return _plan(args)
-        if args.command == "generate":
-            return _generate(args)
-        if args.command == "benchmark":
-            return _benchmark(args)
-        if args.command == "behavioral-benchmark":
-            return _behavioral_benchmark(args)
+        handlers = {
+            "project": _project_operation,
+            "inspect-blocks": _functional_workflow,
+            "plan-workflow": _functional_workflow,
+            "generate-workflow": _functional_workflow,
+            "plan": _plan,
+            "generate": _generate,
+            "benchmark": _benchmark,
+            "behavioral-benchmark": _behavioral_benchmark,
+        }
+        if args.command in handlers:
+            return handlers[args.command](args)
     except (
         BehavioralBenchmarkArtifactError,
         ConversionPlanValidationError,
@@ -113,6 +123,7 @@ def main(argv: list[str] | None = None) -> int:
         PlannerConfigurationError,
         PlanningBenchmarkError,
         ProjectGenerationError,
+        LocalOperationError,
     ) as error:
         sys.stderr.write(f"Error: {error}\n")
         return ERROR_EXIT_CODE
@@ -127,6 +138,7 @@ def _parser() -> argparse.ArgumentParser:
     subparsers = parser.add_subparsers(dest="command")
     _add_source_parsers(subparsers)
     _add_workflow_parsers(subparsers)
+    _add_project_parser(subparsers)
     benchmark_parser = subparsers.add_parser(
         "benchmark",
         help="compare planners over a reviewed planning corpus",
@@ -148,6 +160,31 @@ def _parser() -> argparse.ArgumentParser:
     _add_ollama_arguments(benchmark_parser)
     _add_behavioral_parsers(subparsers)
     return parser
+
+
+def _add_project_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
+    parser = subparsers.add_parser("project", help="use explicit local project configuration")
+    actions = parser.add_subparsers(dest="project_action", required=True)
+    for name in ("inspect", "plan", "generate"):
+        action = actions.add_parser(name)
+        action.add_argument("configuration", type=Path, help="local project JSON settings")
+        if name == "generate":
+            action.add_argument("destination", type=Path, help="new directory inside project_root")
+
+
+def _project_operation(args: argparse.Namespace) -> int:
+    configuration = load_local_project_configuration(args.configuration)
+    request: InspectRequest | PlanRequest | GenerateRequest
+    if args.project_action == "inspect":
+        request = InspectRequest(configuration)
+    elif args.project_action == "plan":
+        request = PlanRequest(configuration)
+    else:
+        request = GenerateRequest(configuration, args.destination)
+    result = run_local_operation(request)
+    payload = result.to_dict()
+    sys.stdout.write(json.dumps(payload, sort_keys=True, indent=2) + "\n")
+    return ERROR_EXIT_CODE if payload["status"] == "blocked" else 0
 
 
 def _add_source_parsers(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:

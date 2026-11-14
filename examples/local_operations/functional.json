@@ -1,0 +1,10 @@
+{
+  "schema_version": "1.0",
+  "project_root": "../..",
+  "source_kind": "functional",
+  "source": "examples/functional_workflow/workflow.py",
+  "package_name": "local_workflow",
+  "workflow_configuration": "examples/functional_workflow/workflow.json",
+  "architecture_profile": "examples/kedro_profiles/team_training.json",
+  "regression_contract": "examples/functional_workflow/regression.json"
+}

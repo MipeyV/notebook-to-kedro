@@ -6,6 +6,10 @@ The latter requires an explicit entrypoint and JSON configuration and supports J
 scalar parameters and a single-use linear chain only. The conversion support described below
 still applies to the original notebook path. Neither entrypoint supports arbitrary Python.
 
+The [local operation layer](local-operations.md) configures these same deterministic entrypoints
+through typed inspection, new-file preview and generation requests. It adds an explicit contained
+working root and local JSON settings, without broadening source/library support or executing code.
+
 [Documentation index](../README.md)
 
 ## Purpose

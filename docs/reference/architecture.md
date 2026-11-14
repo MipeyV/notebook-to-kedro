@@ -44,6 +44,16 @@ functional example. Source-free execution copies prove installed-package use; lo
 identities remain separate from static generation and its `not_run` snapshot. The check is not
 part of the runtime API and adds no core dependency or arbitrary-source execution service.
 
+The initial [local operation layer](local-operations.md) composes these deterministic paths
+under frozen inspect/plan/generate request/result contracts and explicit JSON settings. It
+resolves a declared working root, reuses current source-accounted planning and renderers,
+previews exact new files/copy hashes, and publishes through the existing writer. Read-only
+file validation is shared with the writer; functional rendering is separate from publication
+and revalidates captured wiring. The CLI presents JSON results without owning conversion rules.
+No UI, provider transport, execution service or universal project model is added.
+[ADR 0008](../decisions/0008-local-operation-contracts.md) records the working-root and preview
+boundaries; an approval-bound apply contract is separate future work.
+
 ## Design rules
 
 - Notebook code is never executed by the static analyzer.

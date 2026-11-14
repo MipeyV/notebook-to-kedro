@@ -29,6 +29,13 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Added explicit local JSON settings and immutable inspect/plan/generate operation contracts
+  for the existing deterministic notebook and functional workflow engines, exposed through
+  Python and `project` CLI actions. Actual rendered file/copy previews perform no writes;
+  publication recomputes current inputs and retains the staging writer's no-overwrite checks.
+  Root-relative configuration/catalog handling, path guards and explicit execution/install
+  gaps prepare a shared interface boundary without a UI, provider or code execution service.
+
 - Added an opt-in trusted functional-example bootstrap check: four script/notebook and
   default/custom variants, fresh wheel installation, source-free shipped pytest/Kedro CLI
   execution, actual runtime identities/hashes and retained logs/JUnit evidence. A separate

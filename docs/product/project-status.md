@@ -20,7 +20,7 @@ Historical measurements retain their original corpus, runtime and limitations.
 | MLOps / enterprise platform | Future integrations, governance and packaging require validated needs and separate contracts. |
 | Functional block inspection | Analysis-only API/CLI for explicit straight-line functions in `.py` and real notebook cells, with interfaces, function-reference graph, provenance and blockers. |
 | Functional workflow conversion | Explicit single-use linear entrypoints now generate Kedro from scripts or notebooks, using JSON file I/O/scalar parameters and checked paired fixture behavior. Helpers remain inside owning nodes and intermediate identity is preserved. General DAGs and arbitrary Python remain unsupported. |
-| Shared engine / local interface | Existing core includes structured-script inspection and a bounded generation adapter reusing the Kedro renderer, profiles and writer. A general project model, operation UI/local app or VS Code extension remain future work. |
+| Shared engine / local interface | Initial local operation contracts now compose both deterministic engines through typed inspect/plan/generate requests, explicit JSON settings and JSON result envelopes. Planning previews actual rendered files without writing. An app/VS Code interface, existing-project patches and a general project model remain future work. |
 
 Generation itself does not verify dependency installation, full DAG semantics or runtime behavior.
 The [explicit bootstrap check](../reference/generated-workflow-tests.md#fresh-environment-bootstrap)
@@ -37,6 +37,13 @@ behavioral proof or generation eligibility. The separate [workflow adapter](../r
 requires stricter entrypoint/I/O contracts and records per-statement module destinations.
 Existing notebook conversion remains separate. Paired tests are bounded evidence, not a
 general runtime guarantee. Fresh installation has a separate fixture-bound bootstrap check.
+
+See [local operations](../reference/local-operations.md) for the first E4 slice. Settings anchor
+the declared working root to the configuration file, constrain source/configuration/input/output
+paths to that root, and retain the separate workflow/profile/expectation schemas. Generation
+recomputes current inputs and uses the shared staging writer. A preview is neither runtime
+evidence nor an authenticated apply token; no installation, code execution, provider call or UI
+is introduced. Existing API/CLI entrypoints remain independently usable.
 
 See [source accounting](../reference/source-accounting.md) for the exact initial guard. It
 rejects omissions instead of automatically repairing them, preserves fully accounted plan bytes

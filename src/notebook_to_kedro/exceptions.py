@@ -15,6 +15,16 @@ class ProjectGenerationError(ValueError):
     """Raised when a generated project cannot be written safely."""
 
 
+class LocalOperationError(ValueError):
+    """Raised for invalid local configuration or an operation blocked before publication."""
+
+    def __init__(self, code: str, message: str) -> None:
+        """Keep a stable operation code and the underlying diagnostic for callers."""
+        super().__init__(f"{code}: {message}")
+        self.code = code
+        self.message = message
+
+
 class FunctionalSourceError(ValueError):
     """Raised when functional inspection cannot load a supported source document."""
 

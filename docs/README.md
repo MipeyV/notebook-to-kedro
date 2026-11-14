@@ -60,6 +60,7 @@ The compatibility policy is authoritative for supported runtimes and library-sup
 | [Functional block inspection](reference/functional-blocks.md) | Analysis-only explicit functions from Python/notebook inputs, source provenance, dependencies and supported-subset diagnostics. |
 | [Functional workflow to Kedro](reference/functional-workflows.md) | Explicit linear entrypoints, JSON I/O/scalar parameters, source accounting, generation and paired execution evidence. |
 | [Tests delivered with functional projects](reference/generated-workflow-tests.md) | Explicit expectations, standalone pytest tests, gaps/negative controls and opt-in fresh-environment wheel/Kedro bootstrap evidence. |
+| [Local project operations](reference/local-operations.md) | Explicit root-anchored settings, typed inspect/plan/generate requests/results, real file previews and static-only publication boundaries. |
 
 ## Evaluation
 
@@ -115,6 +116,8 @@ the dedicated experiment reports for their frozen settings, decisions and limita
   explicit wiring, preserved call order/object identity and reuse of the Kedro renderer/writer.
 - [ADR 0007: explicit generated regression tests](decisions/0007-explicit-generated-regression-tests.md):
   supplied oracles, standalone tests, explicit gaps and separate execution evidence.
+- [ADR 0008: local operation contracts](decisions/0008-local-operation-contracts.md): existing
+  deterministic engines, explicit local settings, shared rendering and preview/publication boundaries.
 
 ## Maintaining documentation
 
