@@ -20,6 +20,20 @@ from notebook_to_kedro.api import (
     render_conversion_report,
     validate_conversion_plan,
 )
+from notebook_to_kedro.operations import (
+    GenerateRequest,
+    GenerationResult,
+    InspectionResult,
+    InspectRequest,
+    LocalProjectConfiguration,
+    PlanningResult,
+    PlanRequest,
+    generate_project,
+    inspect_project,
+    load_local_project_configuration,
+    plan_project,
+    run_local_operation,
+)
 from notebook_to_kedro.semantic import PlannerMode
 
 __version__ = "0.1.0"
@@ -28,8 +42,15 @@ __all__ = [
     "DEFAULT_KEDRO_PROFILE",
     "ConversionSourceAudit",
     "FunctionalWorkflowConfiguration",
+    "GenerateRequest",
+    "GenerationResult",
+    "InspectRequest",
+    "InspectionResult",
     "KedroArchitectureProfile",
+    "LocalProjectConfiguration",
+    "PlanRequest",
     "PlannerMode",
+    "PlanningResult",
     "WorkflowRegressionContract",
     "__version__",
     "analyze_functional_blocks_path",
@@ -38,11 +59,16 @@ __all__ = [
     "create_semantic_planner",
     "generate_functional_kedro_project",
     "generate_kedro_project",
+    "generate_project",
+    "inspect_project",
     "load_functional_workflow_configuration",
     "load_kedro_profile",
+    "load_local_project_configuration",
     "load_workflow_regression_contract",
     "plan_functional_workflow_path",
     "plan_notebook_path",
+    "plan_project",
     "render_conversion_report",
+    "run_local_operation",
     "validate_conversion_plan",
 ]

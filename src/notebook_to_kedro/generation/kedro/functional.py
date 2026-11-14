@@ -98,6 +98,28 @@ def generate_functional_kedro_project(  # noqa: PLR0913
     """Recompute wiring and publish a new project; never execute source or a generated node."""
     root = Path.cwd() if project_root is None else Path(project_root).resolve()
     plan = plan_functional_workflow_path(path, configuration, project_root=root)
+    files, copies = render_functional_workflow(
+        plan,
+        root=root,
+        package_name=package_name,
+        architecture_profile=architecture_profile,
+        regression_contract=regression_contract,
+    )
+    return write_project(Path(output_path), files, copies)
+
+
+def render_functional_workflow(
+    plan: FunctionalWorkflowPlan,
+    *,
+    root: Path,
+    package_name: str,
+    architecture_profile: KedroArchitectureProfile | None = None,
+    regression_contract: WorkflowRegressionContract | None = None,
+) -> tuple[dict[Path, str], tuple[tuple[Path, Path], ...]]:
+    """Render an internally recomputed workflow plan without publication or execution."""
+    if plan_functional_workflow(plan.analysis, plan.configuration) != plan:
+        raise FunctionalWorkflowError("Functional plan differs from recomputed source wiring")
+    configuration = plan.configuration
     conversion = _conversion_plan(plan, root, package_name)
     # Always resolve generated wrapper names, including default-profile compatibility checks.
     profile = DEFAULT_KEDRO_PROFILE if architecture_profile is None else architecture_profile
@@ -151,4 +173,4 @@ def generate_functional_kedro_project(  # noqa: PLR0913
             '\n[project.optional-dependencies]\ntest = ["pytest>=9,<10"]\n'
             '\n[tool.pytest.ini_options]\npythonpath = ["src"]\ntestpaths = ["tests"]\n'
         )
-    return write_project(Path(output_path), files, copies)
+    return files, copies

@@ -78,6 +78,19 @@ def _validate_targets(paths: tuple[Path, ...]) -> None:
         seen.add(portable)
 
 
+def validate_project_files(
+    files: Mapping[Path, str],
+    copies: tuple[tuple[Path, Path], ...] = (),
+) -> None:
+    """Check portable, nonoverlapping targets and regular copy sources without writing."""
+    paths = (*files, *(target for _, target in copies))
+    _validate_targets(paths)
+    for source, _ in copies:
+        if not source.is_file():
+            message = f"Catalog source file does not exist or is not a file: {source}"
+            raise ProjectGenerationError(message)
+
+
 def write_project(
     root: Path,
     files: Mapping[Path, str],
@@ -90,13 +103,8 @@ def write_project(
     or a sandbox. Newly created parent directories may remain after an I/O failure.
     """
     _require_new_destination(root)
+    validate_project_files(files, copies)
     paths = (*files, *(target for _, target in copies))
-    _validate_targets(paths)
-    for source, _ in copies:
-        if not source.is_file():
-            message = f"Catalog source file does not exist or is not a file: {source}"
-            raise ProjectGenerationError(message)
-
     try:
         root.parent.mkdir(parents=True, exist_ok=True)
         with TemporaryDirectory(prefix=".notebook-to-kedro-", dir=root.parent) as directory:

@@ -1,0 +1,7 @@
+{
+  "schema_version": "1.0",
+  "project_root": "../..",
+  "source_kind": "notebook",
+  "source": "tests/fixtures/notebooks/simple_training.ipynb",
+  "package_name": "local_training"
+}

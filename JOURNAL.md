@@ -40,6 +40,50 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-11-14 - Explicit local operation contracts
+
+### Completed
+
+- Added immutable local project settings, typed inspect/plan/generate requests/results and
+  JSON envelopes composing both existing deterministic engines. Local JSON references the
+  existing workflow/profile/regression schemas; it does not replace them or select providers.
+- Added `project inspect|plan|generate` and root Python exports. Settings resolve their root
+  from the configuration file; other file settings, catalog inputs and destinations stay
+  contained. Direct API requests recheck paths when invoked. Unknown/duplicate fields,
+  invalid kinds/versions, oversized configuration and existing destinations remain visible.
+- Extracted functional rendering from publication with recomputed captured-source wiring
+  validation. Shared writer validation now supports read-only previews of the exact rendered
+  files and input identities. Generation accepts no cached plan and recomputes current inputs.
+- Tests compare file bytes with existing generators, inspect both source kinds, exercise CLI
+  root anchoring from another CWD, reject invalid source drift, tampered plans, external input
+  copies/resolved path drift, preserve existing files and prove static generation with an
+  unavailable application import. Subprocess tests execute the five shipped regressions for
+  both functional formats with a custom profile, keeping generation snapshots unchanged.
+- Added two working local configuration examples, indexed reference/ADR 0008, and updated
+  status, architecture, roadmap and release notes. Core runtime dependencies remain unchanged.
+- Final verification passed 2,289 offline tests on Python 3.12.14 in 444.25 seconds, with
+  100% line/branch coverage (8,717 statements, 2,536 branches, 94 modules). This includes
+  60 local-operation unit cases and two real shipped-suite subprocess cases. Ruff, strict
+  mypy (177 files), all 62 documentation checks and source/wheel builds passed. The built wheel
+  includes the four operation modules and still declares nbformat as its only runtime dependency.
+- Both source kinds also produced previews in locked core-only Python 3.11/3.13 environments,
+  explicitly checking that Kedro and pytest were not installed. These are static checks,
+  separate from the existing trusted-example installation/bootstrap evidence.
+
+### Decisions
+
+- This new operation boundary explicitly treats project_root as the working root for copied
+  procedural catalog paths; the old procedural API retains its prior relative-path behavior.
+- New-file previews are review snapshots, not approval tokens or proofs of execution.
+  Publication binds no prior review hash; concurrent filesystem races retain existing limits.
+- No UI, model call, source execution, dependency installer, general ProjectSpec or existing
+  project patching is introduced. The actual synthetic pilot's independent review is pending.
+
+### Next step
+
+- Select and prototype the first local app or VS Code surface using these operations, starting
+  with settings/source inspection and file previews, then an explicit UI publication contract.
+
 ## 2026-11-14 - Fresh-environment generated-project bootstrap
 
 ### Completed
