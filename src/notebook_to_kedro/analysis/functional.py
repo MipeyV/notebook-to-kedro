@@ -83,20 +83,23 @@ def _signature_supported(node: ast.FunctionDef) -> bool:
     )
 
 
-def _outputs(node: ast.FunctionDef) -> tuple[str, ...] | None:
+def _return_contract(node: ast.FunctionDef) -> tuple[tuple[str, ...], str] | None:
     returns = [item for item in ast.walk(node) if isinstance(item, ast.Return)]
     if len(returns) != 1 or node.body[-1] is not returns[0]:
         return None
     value = returns[0].value
+    if value is None:
+        return None
+    outputs: tuple[str, ...] = ()
     if isinstance(value, ast.Name):
-        return (value.id,)
-    if (
+        outputs = (value.id,)
+    elif (
         isinstance(value, ast.Tuple)
         and value.elts
         and all(isinstance(item, ast.Name) for item in value.elts)
     ):
-        return tuple(item.id for item in value.elts if isinstance(item, ast.Name))
-    return None
+        outputs = tuple(item.id for item in value.elts if isinstance(item, ast.Name))
+    return outputs, ast.unparse(value)
 
 
 def _body_checks(
@@ -213,12 +216,12 @@ def _function(
                 block_id,
             )
         )
-    outputs = _outputs(node)
-    if outputs is None:
+    return_contract = _return_contract(node)
+    if return_contract is None:
         diagnostics.append(
             _issue(
                 "BL003",
-                "Exactly one terminal return of named values is required.",
+                "Exactly one terminal return with an explicit value is required.",
                 unit,
                 node,
                 block_id,
@@ -267,13 +270,14 @@ def _function(
         block_id,
         node.name,
         parameters,
-        outputs or (),
+        return_contract[0] if return_contract is not None else (),
         source,
         _ast_sha256(node),
         _span(unit, node),
         globals_,
         calls,
         mutations,
+        return_contract[1] if return_contract is not None else None,
     )
     diagnostics.extend(_body_checks(unit, node, block_id, table))
     if calls:

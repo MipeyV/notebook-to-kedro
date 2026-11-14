@@ -56,10 +56,12 @@ def _run(project: Path, report: Path) -> tuple[subprocess.CompletedProcess[str],
 
 
 @pytest.mark.integration
+@pytest.mark.parametrize("source_name", ["workflow", "expression_returns"])
 @pytest.mark.parametrize("suffix", [".py", ".ipynb"])
 @pytest.mark.parametrize("custom_profile", [False, True])
 def test_shipped_tests_pass_for_both_inputs_and_profiles(
     tmp_path: Path,
+    source_name: str,
     suffix: str,
     *,
     custom_profile: bool,
@@ -73,7 +75,7 @@ def test_shipped_tests_pass_for_both_inputs_and_profiles(
         else None
     )
     generate_functional_kedro_project(
-        EXAMPLE / f"workflow{suffix}",
+        EXAMPLE / f"{source_name}{suffix}",
         config,
         destination,
         project_root=ROOT,

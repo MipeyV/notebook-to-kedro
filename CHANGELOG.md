@@ -29,6 +29,11 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Functional inspection schema 1.1 records terminal return expressions without inventing
+  output names. Called functions/helpers can retain direct calculations and calls in generated
+  Kedro projects under the existing body/dependency guards. Explicit named entrypoint wiring
+  remains required; schema 1.0 functional structure fingerprints must be recomputed.
+
 - Added the VS Code 0.2 setup assistant for source/project selection, optional profile and
   expectation files, Python-validated settings creation and immediate inspection. Functional
   inspection now accepts settings before workflow I/O is defined. Planning/generation require

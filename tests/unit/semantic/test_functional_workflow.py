@@ -50,10 +50,13 @@ def _analyze(body: str, *, extra: str = "", signature: str = "x, scale") -> Func
     )
 
 
-def test_pair_wiring_and_snapshot_have_real_positions() -> None:
+@pytest.mark.parametrize("source_name", ["workflow", "expression_returns"])
+def test_pair_wiring_and_snapshot_have_real_positions(source_name: str) -> None:
     config = load_functional_workflow_configuration(EXAMPLE / "workflow.json")
-    script = plan_functional_workflow_path(EXAMPLE / "workflow.py", config, project_root=ROOT)
-    notebook = plan_functional_workflow_path(EXAMPLE / "workflow.ipynb", config, project_root=ROOT)
+    script = plan_functional_workflow_path(EXAMPLE / f"{source_name}.py", config, project_root=ROOT)
+    notebook = plan_functional_workflow_path(
+        EXAMPLE / f"{source_name}.ipynb", config, project_root=ROOT
+    )
     assert script.analysis.structure_sha256 == notebook.analysis.structure_sha256
     assert [(step.function, step.inputs, step.output) for step in script.steps] == [
         ("prepare_values", (("values", "values"), ("scale", "scale")), "prepared"),
@@ -115,6 +118,23 @@ def test_empty_entrypoint_and_stale_analysis_are_rejected() -> None:
         )
     with pytest.raises(FunctionalWorkflowError, match="recomputed"):
         plan_functional_workflow(replace(analysis, statements=()), _configuration())
+
+
+def test_return_expression_metadata_is_recomputed_before_planning() -> None:
+    analysis = _analyze("    total = f(x)\n    return total")
+    changed = replace(analysis.blocks[0], return_expression="x + 1")
+    with pytest.raises(FunctionalWorkflowError, match="recomputed"):
+        plan_functional_workflow(
+            replace(analysis, blocks=(changed, *analysis.blocks[1:])), _configuration()
+        )
+
+
+@pytest.mark.parametrize("expression", ["f(x)", "x + scale", "(x, scale)", "None"])
+def test_expression_inspection_does_not_invent_entrypoint_wiring(expression: str) -> None:
+    analysis = _analyze(f"    return {expression}")
+    assert analysis.complete
+    with pytest.raises(FunctionalWorkflowError, match="single named return"):
+        plan_functional_workflow(analysis, _configuration())
 
 
 @pytest.mark.parametrize(
@@ -272,15 +292,18 @@ def test_cli_plan_generate_and_profile(tmp_path: Path, capsys: pytest.CaptureFix
     assert "Created functional" in capsys.readouterr().out
 
 
-def test_generation_keeps_source_ast_and_has_no_fake_python_cells(tmp_path: Path) -> None:
+@pytest.mark.parametrize("source_name", ["workflow", "expression_returns"])
+def test_generation_keeps_source_ast_and_has_no_fake_python_cells(
+    tmp_path: Path, source_name: str
+) -> None:
     configuration = load_functional_workflow_configuration(EXAMPLE / "workflow.json")
     destination = tmp_path / "project"
     generate_functional_kedro_project(
-        EXAMPLE / "workflow.py", configuration, destination, project_root=ROOT
+        EXAMPLE / f"{source_name}.py", configuration, destination, project_root=ROOT
     )
     generated = destination / "src/generated_workflow/workflow_source.py"
     assert ast.dump(ast.parse(generated.read_text(encoding="utf-8"))) == ast.dump(
-        ast.parse((EXAMPLE / "workflow.py").read_text(encoding="utf-8"))
+        ast.parse((EXAMPLE / f"{source_name}.py").read_text(encoding="utf-8"))
     )
     manifest = json.loads((destination / "functional-workflow.json").read_text())
     assert {row["statement_id"] for row in manifest["statement_destinations"]} == {
@@ -288,6 +311,22 @@ def test_generation_keeps_source_ast_and_has_no_fake_python_cells(tmp_path: Path
     }
     assert manifest["analysis"]["sources"][0]["cell_id"] is None
     assert analyze_functional_blocks_path(EXAMPLE / "workflow.py").complete
+
+
+def test_generating_return_calls_does_not_import_or_execute_dependencies(tmp_path: Path) -> None:
+    marker = tmp_path / "executed"
+    source = tmp_path / "workflow.py"
+    source.write_text(
+        "import absent_generation_dependency as dependency\n"
+        f"def f(x):\n    return dependency.check(open({str(marker)!r}, 'w'), x)\n"
+        "def workflow(x, scale):\n    total = f(x)\n    return total\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "input.json").write_text("1", encoding="utf-8")
+    destination = tmp_path / "project"
+    generate_functional_kedro_project(source, _configuration(), destination, project_root=tmp_path)
+    assert not marker.exists()
+    assert (destination / "src/generated_workflow/workflow_source.py").is_file()
 
 
 def test_incompatible_cell_compilation_context_blocks_publication(tmp_path: Path) -> None:

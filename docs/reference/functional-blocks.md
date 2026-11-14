@@ -4,7 +4,8 @@
 
 Status: first E2 analysis slice, implemented on 2026-11-06. A separate
 [linear workflow adapter](functional-workflows.md), implemented on 2026-11-12, now adds explicit
-entrypoints, JSON I/O and checked paired Kedro behavior without changing this inspection contract.
+entrypoints, JSON I/O and checked paired Kedro behavior. Inspection schema 1.1 adds explicit
+return-expression facts and support for terminal value expressions on 2026-11-14.
 
 ## Usage
 
@@ -55,12 +56,27 @@ references. This is a function-reference graph, not a Kedro dataset DAG. Functio
 are not inferred `parameters.yml` entries. Return names do not establish dataset ownership,
 runtime types or schemas. Calls do not establish actual object identity.
 
+Schema 1.1 adds `return_expression`: the AST-normalized expression of the sole final return,
+or `null` when that return contract is absent/invalid. `outputs` still records only a returned
+name or a nonempty tuple consisting entirely of names. For `return transform(x)` or
+`return x + 1`, `outputs` is empty and `return_expression` retains the expression; an empty
+`outputs` does not mean the function returns no value. No temporary variable, dataset name,
+return type or output arity is invented. `return None` has the explicit expression `None`;
+a bare `return` remains unsupported. Other body/dependency blockers can still invalidate a
+function with recorded return facts. Structure fingerprints include this metadata and schema
+version, so they differ from schema 1.0 fingerprints even for previously supported source.
+Local-operation envelopes and workflow configuration retain their separate schema 1.0.
+
 ## Initial supported subset
 
 The first slice covers library-style, single-file Python and equivalent function-based notebooks:
 absolute explicitly named imports, leading module/cell docstrings and synchronous top-level
 functions. Functions have ordinary positional parameters and straight-line assignments,
-assertions, expressions/calls and exactly one final return of a name or nonempty tuple of names.
+assertions, expressions/calls and exactly one final return with an explicit value. Return
+expressions use the same body/dependency checks as assignments: calls, arithmetic, attributes,
+subscripting, literals/containers, comparisons and conditional/Boolean expressions retain their
+original evaluation semantics. Comprehensions, generators, lambdas, assignment expressions,
+dynamic execution, unresolved globals and indirect/local callable targets remain blocked.
 Local reads must follow binding. An annotation without a value does not bind a local name.
 Non-call annotations are retained with a warning; types and definition-time behavior are unverified.
 
@@ -90,6 +106,11 @@ I/O. Function calls can still have external effects; their presence always warns
 `complete` means at least one block and no error diagnostics for this inspection subset. It
 does not approve execution, establish equivalence, validate business intent or permit generation.
 Unsupported code is retained and reported rather than repaired or omitted.
+
+The workflow adapter can now preserve these returns inside called functions and helpers.
+Its entrypoint still requires explicit named call assignments followed by the final result's
+name. Static acceptance of a standalone expression-returning function does not infer that
+orchestration, JSON I/O, external dependencies or an executable multi-module project.
 
 ## Paired example and fingerprint
 

@@ -47,19 +47,21 @@ def _track(module: Any, name: str, counts: Counter[str], observed: list[Any]) ->
 
 
 @pytest.mark.integration
+@pytest.mark.parametrize("source_name", ["workflow", "expression_returns"])
 @pytest.mark.parametrize("suffix", [".py", ".ipynb"])
 @pytest.mark.parametrize("custom_profile", [False, True])
 @pytest.mark.parametrize("scenario", [(-3.0, 2.0, 6.0), (0.0, 2.0, 0.0), (1.25, 4.0, 5.0)])
-def test_paired_workflows_match_hand_expectations_and_execute_each_call_once(
+def test_paired_workflows_match_hand_expectations_and_execute_each_call_once(  # noqa: PLR0913
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
+    source_name: str,
     suffix: str,
     *,
     custom_profile: bool,
     scenario: tuple[float, float, float],
 ) -> None:
     value, scale, expected = scenario
-    source = EXAMPLE / f"workflow{suffix}"
+    source = EXAMPLE / f"{source_name}{suffix}"
     scope = _reference(source)
     assert scope["workflow"](value, scale) == expected
     source_input = tmp_path / "input.json"
@@ -76,7 +78,7 @@ def test_paired_workflows_match_hand_expectations_and_execute_each_call_once(
         else None
     )
     scenario_id = str(value).replace("-", "n").replace(".", "_")
-    package = f"functional_{suffix[1:]}_{int(custom_profile)}_{scenario_id}"
+    package = f"functional_{source_name}_{suffix[1:]}_{int(custom_profile)}_{scenario_id}"
     destination = tmp_path / "project"
     generate_functional_kedro_project(
         source,
@@ -111,39 +113,46 @@ def test_paired_workflows_match_hand_expectations_and_execute_each_call_once(
 
 
 @pytest.mark.integration
+@pytest.mark.parametrize("expression_return", [False, True])
 def test_mutable_intermediate_identity_and_internal_helper_calls_are_preserved(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
+    *,
+    expression_return: bool,
 ) -> None:
     source = tmp_path / "workflow.py"
-    source.write_text(
+    content = (
         "def helper(x):\n    x.append(3)\n    return x\n"
         "def first(x):\n    y = helper(x)\n    return y\n"
         "def second(x):\n    x.append(4)\n    total = len(x)\n    return total\n"
-        "def workflow(x):\n    a = first(x)\n    total = second(a)\n    return total\n",
-        encoding="utf-8",
+        "def workflow(x):\n    a = first(x)\n    total = second(a)\n    return total\n"
     )
+    if expression_return:
+        content = content.replace("y = helper(x)\n    return y", "return helper(x)")
+        content = content.replace("total = len(x)\n    return total", "return len(x)")
+    source.write_text(content, encoding="utf-8")
     assert _reference(source)["workflow"]([1, 2]) == 4
     (tmp_path / "input.json").write_text("[1, 2]", encoding="utf-8")
     configuration = FunctionalWorkflowConfiguration(
         "workflow", (("x", "input.json"),), (), (("total", "data/08_reporting/total.json"),)
     )
     destination = tmp_path / "project"
+    package = f"functional_mutation_{int(expression_return)}"
     generate_functional_kedro_project(
         source,
         configuration,
         destination,
         project_root=tmp_path,
-        package_name="functional_mutation",
+        package_name=package,
     )
     monkeypatch.syspath_prepend(str(destination / "src"))
     monkeypatch.chdir(destination)
-    module = importlib.import_module("functional_mutation.workflow_source")
+    module = importlib.import_module(f"{package}.workflow_source")
     counts: Counter[str] = Counter()
     observed: list[Any] = []
     for name in ("helper", "first", "second"):
         monkeypatch.setattr(module, name, _track(module, name, counts, observed))
-    registry = importlib.import_module("functional_mutation.pipeline_registry")
+    registry = importlib.import_module(f"{package}.pipeline_registry")
     pipeline = registry.register_pipelines()["__default__"]
     loader = OmegaConfigLoader(conf_source=str(destination / "conf/base"))
     catalog = DataCatalog.from_config(loader["catalog"])

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import ast
 import hashlib
 import json
 import sys
@@ -54,8 +55,10 @@ def test_container_independent_structure_preserves_distinct_provenance() -> None
     )
 
 
-def test_changed_logic_changes_fingerprint_but_whitespace_does_not() -> None:
-    source = "def f(x):\n    y = x * 2\n    return y\n"
+@pytest.mark.parametrize(
+    "source", ["def f(x):\n    y = x * 2\n    return y\n", "def f(x):\n    return x * 2\n"]
+)
+def test_changed_logic_changes_fingerprint_but_whitespace_does_not(source: str) -> None:
     original = analyze_functional_blocks((_unit(source),))
     spaced = analyze_functional_blocks((_unit("\n" + source.replace(" * ", "*")),))
     changed = analyze_functional_blocks((_unit(source.replace("* 2", "* 3")),))
@@ -98,9 +101,7 @@ def test_named_tuple_returns_annotations_and_reference_edges() -> None:
         ("def f(x: annotate()):\n    return x", "BL003"),
         ("def f(x) -> annotate():\n    return x", "BL003"),
         ("def f(x):\n    pass", "BL003"),
-        ("def f(x):\n    return x + 1", "BL003"),
-        ("def f(x):\n    return ()", "BL003"),
-        ("def f(x):\n    return x, 1", "BL003"),
+        ("def f(x):\n    return", "BL003"),
         ("def f(x):\n    if x:\n        return x\n    return x", "BL003"),
         ("def f(x):\n    for y in x:\n        print(y)\n    return x", "BL004"),
         ("def f(x):\n    y = [v for v in x]\n    return y", "BL004"),
@@ -125,6 +126,86 @@ def test_unsupported_source_is_retained_and_never_marked_complete(source: str, c
     assert code in {issue.code for issue in result.diagnostics if issue.severity == "error"}
     assert result.sources[0].source == source
     assert json.loads(result.to_json())["structure_sha256"] is None
+
+
+@pytest.mark.parametrize(
+    ("expression", "names"),
+    [
+        ("x", ("x",)),
+        ("(x, x)", ("x", "x")),
+        ("abs(x)", ()),
+        ("x + 1", ()),
+        ("x[0]", ()),
+        ("x.real", ()),
+        ("-x", ()),
+        ("x and 1", ()),
+        ("x > 0", ()),
+        ("1 if x else 0", ()),
+        ("None", ()),
+        ("42", ()),
+        ("[]", ()),
+        ("{'value': x}", ()),
+        ("{x}", ()),
+        ("()", ()),
+        ("(x, 1)", ()),
+    ],
+)
+def test_explicit_return_expression_does_not_invent_output_names(
+    expression: str, names: tuple[str, ...]
+) -> None:
+    source = f"def f(x):\n    return {expression}\n"
+    result = analyze_functional_blocks((_unit(source),))
+    assert result.complete
+    block = result.blocks[0]
+    assert block.outputs == names
+    assert block.return_expression == ast.unparse(ast.parse(expression, mode="eval").body)
+    assert block.source == source.rstrip()
+    payload = json.loads(result.to_json())
+    assert payload["schema_version"] == "1.1"
+    assert payload["blocks"][0]["return_expression"] == block.return_expression
+
+
+@pytest.mark.parametrize(
+    ("source", "code"),
+    [
+        ("def f(x):\n    return [v for v in x]", "BL004"),
+        ("def f(x):\n    return (v for v in x)", "BL004"),
+        ("def f(x):\n    return lambda: x", "BL004"),
+        ("def f(x):\n    return (y := x)", "BL004"),
+        ("def f(x):\n    return (yield x)", "BL004"),
+        ("def f(x):\n    return eval(x)", "BL004"),
+        ("def f(x):\n    return unknown(x)", "BL005"),
+        ("def f(x):\n    y: int\n    return y + x", "BL006"),
+        ("def f(x):\n    return f(x)", "BL007"),
+        ("def f(callback, x):\n    return callback(x)", "BL008"),
+        ("def f(x):\n    return x[0]()", "BL008"),
+    ],
+)
+def test_expression_returns_keep_existing_body_and_dependency_guards(
+    source: str, code: str
+) -> None:
+    result = analyze_functional_blocks((_unit(source),))
+    assert not result.complete
+    assert code in {issue.code for issue in result.diagnostics}
+    assert result.sources[0].source == source
+
+
+def test_return_calls_are_analyzed_without_importing_or_executing(tmp_path: Path) -> None:
+    marker = tmp_path / "executed"
+    source = (
+        "import absent_return_dependency as dependency\n"
+        f"def f(x):\n    return dependency.fit(open({str(marker)!r}, 'w'), x)\n"
+        "def g(x):\n    return f(x)\n"
+    )
+    result = analyze_functional_blocks((_unit(source),))
+    assert result.complete
+    assert not marker.exists()
+    assert "absent_return_dependency" not in sys.modules
+    assert result.blocks[0].calls == ("dependency.fit", "open")
+    assert result.blocks[0].possible_mutation_targets == ("dependency",)
+    assert {"BL101", "BL102"} <= {issue.code for issue in result.diagnostics}
+    assert result.dependencies[0].kind == "call"
+    assert result.dependencies[0].callee_id == result.blocks[0].id
 
 
 def test_decoration_and_unicode_spans_keep_original_text() -> None:

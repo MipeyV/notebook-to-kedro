@@ -31,3 +31,11 @@ prove behavior or substitute for source-accounting checks. Procedural notebook s
 multi-file analysis, arbitrary Python and local UI remain later work.
 
 See the [inspection contract](../reference/functional-blocks.md) for exact boundaries.
+
+The 2026-11-14 expression-return increment extends inspection to explicit terminal value
+expressions under the same body/dependency guards. Schema 1.1 records `return_expression`
+separately from observed named outputs, without inventing local variables or runtime arity.
+Static structure fingerprints include the new schema/metadata and must be recomputed.
+Called helpers retain their original ASTs during relocation; the configured workflow entrypoint
+still requires the existing named linear wiring. A passing source inspection does not infer
+that wiring, external modules or runtime I/O types.

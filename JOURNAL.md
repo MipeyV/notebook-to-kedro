@@ -40,6 +40,52 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-11-14 - Preserve terminal expression returns in functional blocks
+
+### Completed
+
+- Extended deterministic functional inspection to one terminal return with an explicit value,
+  retaining the existing straight-line body, binding, call-target and dependency checks.
+  Schema 1.1 records an AST-normalized `return_expression` separately from observed named
+  outputs. Expression results receive no fabricated variable, dataset name, type or arity.
+- Kept generated called functions/helpers unchanged at the AST level through the existing
+  relocation/renderer/writer path. Added paired script/notebook examples for direct arithmetic
+  and library-call returns, reusing the explicit JSON I/O and regression expectations.
+- Checked real Kedro results for both source formats, default/custom profiles and three numeric
+  cases. Shipped pytest node/pipeline expectations passed for the new examples. Additional
+  controls preserve mutable receiver identity, internal helper calls and one-time call ordering.
+- Added negative checks for unsupported return expressions, unresolved globals, local binding,
+  recursion, indirect targets, tampered return facts and expression-returning entrypoints.
+  Static generation with an unavailable dependency and a return-side file call creates no
+  side-effect marker and does not import the dependency.
+- Re-inspected the same user-selected Python ML source without execution or modification.
+  Its three BL003 return blockers are gone: inspection is complete, with three call-effect
+  warnings and three annotation warnings. Source hash and Git state remain unchanged.
+- Validation passed: 2,344 offline Python tests with 100% line/branch coverage
+  (8,719 statements, 2,536 branches), Ruff lint/format and strict mypy on 177 files.
+  All 64 documentation checks and source/wheel builds passed.
+  All 24 Node protocol tests and real Windows VS Code 1.145.3 host checks passed, including
+  expression-return inspection/preview with a schema 1.1 analysis inside a schema 1.0 envelope.
+
+### Decisions
+
+- Version the functional inspection facts as 1.1 because return metadata and the meaning of
+  empty observed outputs have expanded. Recompute structure fingerprints; local-operation,
+  workflow configuration and original notebook conversion schemas stay unchanged.
+- Keep entrypoint naming and linear wiring explicit. Supporting expression-returning helpers
+  does not infer orchestration, multi-file source, domain-object serialization or dependencies.
+
+### Open questions
+
+- Complete conversion of the real project still needs reviewed workflow/I/O configuration,
+  multi-module support and typed dataset boundaries. A passing inspection is not runtime proof.
+- Actual pilot human review remains pending; no live provider or user-project execution occurred.
+
+### Next step
+
+- Specify one bounded real workflow and its I/O, then address its concrete module/type blockers
+  with synthetic regression fixtures before attempting real-project generation.
+
 ## 2026-11-14 - Guided local configuration and inspection before workflow setup
 
 ### Completed
