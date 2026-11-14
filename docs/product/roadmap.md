@@ -18,7 +18,7 @@ reusable core and is exercised through API/CLI first.
 | --- | --- | --- | --- |
 | 0 | Preserve the existing conversion foundation | Deterministic notebook analysis/generation, safe publication and default/custom Kedro naming profiles. | Implemented; scope and evidence remain bounded. |
 | E1 | Source completeness and graph fidelity | Every parsed statement has a supported destination or blocks conversion. Cross-check task AST/provenance, imports, selected parameter values, catalog relocation and source dependencies. Exercise the first rewrite of a catalog input. | Initial source-accounting/API guard and dataset-graph correction implemented in this increment; arbitrary semantics remain unsupported. |
-| E2 | Functional blocks and a structured Python input | Reuse immutable facts; demonstrate one workflow presented as notebook and structured script reaching the same checked Kedro behavior. Derive a small source-independent representation from these actual cases. | Initial bounded slice implemented: explicit-function analysis including terminal expressions, named linear entrypoint wiring, JSON catalog/scalar parameters, shared generation and paired fixture behavior with default/custom profiles. General DAGs, richer I/O and multi-file analysis remain unsupported; no universal ProjectSpec. |
+| E2 | Functional blocks and a structured Python input | Reuse immutable facts; demonstrate one workflow presented as notebook and structured script reaching the same checked Kedro behavior. Derive a small source-independent representation from these actual cases. | Initial bounded slices implemented: explicit-function analysis including terminal expressions, named linear wiring, JSON I/O, scalar/flat candidate parameters and paired generation/tests with profiles. Independent-loader joins, richer typed I/O and multi-file analysis remain unsupported; no universal ProjectSpec. |
 | E3 | Tests delivered with generated projects | Reviewed observable contracts/fixtures, pytest regression generation and fresh-environment bootstrap checks. Preserve missing expectations as explicit gaps; generated tests alone do not validate business intent. | Initial functional-workflow slices implemented: explicit JSON expectations, shipped node/pipeline pytest tests, gaps/negative controls, plus trusted-example wheel installation and CLI bootstrap in fresh environments with a separate CI matrix. Broader comparators, dependency inference/locking and procedural-notebook tests remain outstanding. |
 | E4 | Local operation contracts and first interface | Stable typed API/CLI requests/results for implemented tasks, local configuration, plan/diff inspection and explicit execution controls. Prototype a local app or VS Code extension with conversion/audit/profile operations first. | Initial contracts, VS Code prototype and settings assistant implemented. Functional inspection can precede workflow I/O. An initial real-project return-expression blocker is resolved; workflow/I/O setup and multi-module limitations remain. Broader workflow validation, automatic environment integration, existing-project diffs and approval-bound apply remain proposed. |
 | E5 | Existing Kedro project inspection and standardization | Read-only node/pipeline/catalog/config reconstruction, standards diagnostics, reviewable change plans and idempotence tests. Initially generate into a new destination; safe patch application requires its own conflict/ownership contract. | Proposed. |
@@ -38,10 +38,13 @@ generation and paired fixture behavior. E3 now has [explicit contracts and shipp
 tests](../reference/generated-workflow-tests.md), plus an opt-in fresh-environment wheel/bootstrap
 check and CI job. E4 now has [typed local operations](../reference/local-operations.md) and
 configuration for the implemented engines and an initial [VS Code interface](../guides/vscode-extension.md).
-Guided setup now supports inspection before data wiring, and called helpers can preserve direct
-return expressions. Next define a reviewable workflow/I/O setup for a real case, then extend
-multi-module and typed dataset support from its concrete blockers. A complete real-project
-conversion is not yet established. Optimization retains a separate acceptance contract.
+Guided setup supports inspection before data wiring, and called helpers preserve direct return
+expressions. A real workflow/I/O proposal now identifies independent loaders, frozen protocol,
+flat candidate configuration, typed domain objects and owned artifact writes. The flat candidate
+parameter slice is implemented and exercised on paired synthetic workflows. Next specify
+independent-loader/fan-in ordering and effects, then local package and typed dataset boundaries.
+A complete real-project conversion is not yet established. Optimization retains a separate
+acceptance contract.
 
 ## Whole-notebook evaluation next gate
 

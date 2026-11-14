@@ -28,6 +28,16 @@ export async function run(): Promise<void> {
   assert.equal(expressions?.analysis?.schema_version, "1.1");
   assert.equal(expressions?.status, "inspected");
   assert.equal((await command("preview"))?.status, "planned");
+  await command("selectConfiguration", vscode.Uri.file(path.join(root, "candidate.json")));
+  assert.equal((await command("inspect"))?.status, "inspected");
+  const candidatePreview = await command("preview");
+  assert.equal(candidatePreview?.schema_version, "1.0");
+  assert.equal(candidatePreview?.status, "planned");
+  const candidateParameters = (candidatePreview!.files as PreviewFile[]).find(
+    (item) => item.path === "conf/base/parameters.yml",
+  )!;
+  assert.equal(JSON.parse(candidateParameters.content).candidate.seed, 42);
+  assert.equal(JSON.parse(candidateParameters.content).candidate.phase, "validation");
   await command("selectConfiguration", vscode.Uri.file(path.join(root, "project.json")));
   await command("inspect");
   assert.ok(project.getChildren().some((item) => item.label === "Source"));

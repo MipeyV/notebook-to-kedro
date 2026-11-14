@@ -29,6 +29,12 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Opt-in functional workflow schema 1.1 supports flat scalar-valued candidate mappings with
+  immutable storage, fresh JSON exports and single-use node consumption. Regression overrides
+  follow the selected workflow schema; scalar-only schema 1.0 stays compatible. Added paired
+  synthetic generation/Kedro/pytest examples and a guide separating a real workflow proposal
+  from unresolved independent-loader, package, typed-I/O and artifact contracts.
+
 - Functional inspection schema 1.1 records terminal return expressions without inventing
   output names. Called functions/helpers can retain direct calculations and calls in generated
   Kedro projects under the existing body/dependency guards. Explicit named entrypoint wiring

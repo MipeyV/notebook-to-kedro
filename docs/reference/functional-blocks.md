@@ -65,7 +65,8 @@ return type or output arity is invented. `return None` has the explicit expressi
 a bare `return` remains unsupported. Other body/dependency blockers can still invalidate a
 function with recorded return facts. Structure fingerprints include this metadata and schema
 version, so they differ from schema 1.0 fingerprints even for previously supported source.
-Local-operation envelopes and workflow configuration retain their separate schema 1.0.
+Local-operation envelopes and project settings retain schema 1.0; the separate workflow
+configuration supports scalar schema 1.0 and flat candidate mappings in schema 1.1.
 
 ## Initial supported subset
 

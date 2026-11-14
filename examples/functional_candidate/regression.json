@@ -1,0 +1,23 @@
+{
+  "schema_version": "1.0",
+  "scenarios": [
+    {
+      "id": "positive",
+      "inputs": {"values": 3.0},
+      "parameters": {"candidate": {"name": "synthetic", "scale": 2.0, "offset": 1.0, "phase": "validation", "seed": 42, "enabled": true, "note": null}},
+      "expected": {"score": 7.0, "candidate": "synthetic", "phase": "validation", "seed": 42, "enabled": true, "note": null},
+      "nodes": {
+        "step_0000_evaluate": {
+          "inputs": {"values": 3.0, "candidate": {"name": "synthetic", "scale": 2.0, "offset": 1.0, "phase": "validation", "seed": 42, "enabled": true, "note": null}},
+          "expected": {"score": 7.0, "candidate": "synthetic", "phase": "validation", "seed": 42, "enabled": true, "note": null}
+        }
+      }
+    },
+    {
+      "id": "override",
+      "inputs": {"values": -2.0},
+      "parameters": {"candidate": {"name": "override", "scale": 3.0, "offset": 0.5, "phase": "validation", "seed": 0, "enabled": false, "note": "true"}},
+      "expected": {"score": -5.5, "candidate": "override", "phase": "validation", "seed": 0, "enabled": false, "note": "true"}
+    }
+  ]
+}

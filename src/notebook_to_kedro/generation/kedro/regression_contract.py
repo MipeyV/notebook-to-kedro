@@ -153,7 +153,7 @@ def load_workflow_regression_contract(path: str | Path) -> WorkflowRegressionCon
 def validate_regression_binding(
     contract: WorkflowRegressionContract, plan: FunctionalWorkflowPlan
 ) -> None:
-    """Require exact workflow/node input names and immutable scalar parameter overrides."""
+    """Require exact input names and parameter overrides under the workflow's own schema."""
     steps = {step.name: step for step in plan.steps}
     for scenario in contract.to_dict()["scenarios"]:
         if set(scenario["inputs"]) != set(dict(plan.configuration.inputs)) or set(
@@ -163,12 +163,9 @@ def validate_regression_binding(
                 "Regression inputs/parameters must match the workflow boundaries exactly"
             )
         # Reuse the real workflow parameter contract rather than accepting mutable overrides.
-        FunctionalWorkflowConfiguration(
-            plan.configuration.entrypoint,
-            plan.configuration.inputs,
-            tuple(scenario["parameters"].items()),
-            plan.configuration.outputs,
-        )
+        settings = plan.configuration.to_dict()
+        settings["parameters"] = scenario["parameters"]
+        FunctionalWorkflowConfiguration.from_dict(settings)
         for name, case in scenario.get("nodes", {}).items():
             if name not in steps or set(case["inputs"]) != {
                 value for _, value in steps[name].inputs

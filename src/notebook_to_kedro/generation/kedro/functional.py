@@ -74,7 +74,7 @@ def _conversion_plan(plan: FunctionalWorkflowPlan, root: Path, package_name: str
     functions = tuple(dict.fromkeys(step.function for step in plan.steps))
     return ConversionPlan(
         schema_version="1.0",
-        planner_version="functional-workflow-1.0",
+        planner_version=f"functional-workflow-{plan.configuration.schema_version}",
         notebook_path=plan.analysis.sources[0].path,
         task_candidates=tasks,
         imports=(f"from {package_name}.workflow_source import {', '.join(functions)}",),
@@ -150,7 +150,7 @@ def render_functional_workflow(
     )
     files[Path("conf/base/catalog.yml")] = json.dumps(catalog, sort_keys=True, indent=2) + "\n"
     files[Path("conf/base/parameters.yml")] = (
-        json.dumps(dict(configuration.parameters), sort_keys=True, indent=2) + "\n"
+        json.dumps(configuration.parameter_values(), sort_keys=True, indent=2) + "\n"
     )
     manifest = {
         **json.loads(plan.to_json()),

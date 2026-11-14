@@ -100,7 +100,9 @@ now generates Kedro projects from explicitly configured linear entrypoints in ei
 notebook-to-kedro generate-workflow examples/functional_workflow/workflow.py examples/functional_workflow/workflow.json generated/functional_project --project-root .
 ```
 
-This initial subset uses JSON file boundaries and scalar parameters. Internal helper calls
+This initial subset uses JSON file boundaries and explicit scalar or flat candidate parameters.
+The [real-workflow setup guide](docs/guides/real-workflow-setup.md) distinguishes the working
+candidate slice from remaining graph, package and typed-I/O gaps. Internal helper calls
 remain inside their owning node, including direct expression returns; the entrypoint keeps
 explicit named linear wiring. Branching remains future work. Supply
 `--regression-contract examples/functional_workflow/regression.json` to also deliver
