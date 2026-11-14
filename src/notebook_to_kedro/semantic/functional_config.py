@@ -8,12 +8,14 @@ import math
 import re
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, TypeAlias, cast
 
 from notebook_to_kedro.exceptions import FunctionalWorkflowError
 
 if TYPE_CHECKING:
     from notebook_to_kedro.ir.facts import JsonPrimitive
+
+FunctionalParameterValue: TypeAlias = "JsonPrimitive | tuple[tuple[str, JsonPrimitive], ...]"
 
 MAX_CONFIGURATION_BYTES = 65_536
 _PAIR_LENGTH = 2
@@ -29,21 +31,59 @@ def _public_name(value: object) -> bool:
     )
 
 
+def _finite_scalar(value: object) -> bool:
+    return type(value) in (str, bool, int, float, type(None)) and not (
+        isinstance(value, float) and not math.isfinite(value)
+    )
+
+
+def _validate_parameter(value: object, schema_version: str) -> None:
+    if _finite_scalar(value):
+        return
+    if schema_version != "1.1" or not isinstance(value, tuple):
+        raise FunctionalWorkflowError(
+            "Workflow parameters require finite JSON scalars; flat mappings require schema 1.1 "
+            "and immutable pairs"
+        )
+    if any(
+        not isinstance(item, tuple)
+        or len(item) != _PAIR_LENGTH
+        or not isinstance(item[0], str)
+        or not _finite_scalar(item[1])
+        for item in value
+    ):
+        raise FunctionalWorkflowError(
+            "Parameter mappings require string keys and finite JSON scalars"
+        )
+    if len({key for key, _ in value}) != len(value):
+        raise FunctionalWorkflowError("Parameter mappings cannot repeat keys")
+
+
+def _decode_parameter(value: object) -> FunctionalParameterValue:
+    if isinstance(value, dict):
+        return tuple(value.items())
+    if not _finite_scalar(value):
+        raise FunctionalWorkflowError(
+            "Workflow parameters must be finite JSON scalars or flat objects"
+        )
+    return cast("JsonPrimitive", value)
+
+
 @dataclass(frozen=True, slots=True)
 class FunctionalWorkflowConfiguration:
-    """One entrypoint, JSON input files, scalar parameters and one JSON output."""
+    """One entrypoint, JSON inputs, immutable explicit parameters and one JSON output."""
 
     entrypoint: str
     inputs: tuple[tuple[str, str], ...]
-    parameters: tuple[tuple[str, JsonPrimitive], ...]
+    parameters: tuple[tuple[str, FunctionalParameterValue], ...]
     outputs: tuple[tuple[str, str], ...]
     schema_version: str = "1.0"
 
     def __post_init__(self) -> None:
         """Validate both direct API values and decoded configuration."""
-        if self.schema_version != "1.0" or not _public_name(self.entrypoint):
+        if self.schema_version not in ("1.0", "1.1") or not _public_name(self.entrypoint):
             raise FunctionalWorkflowError(
-                "Workflow requires schema_version 1.0 and a public entrypoint"
+                "Workflow requires schema_version 1.0 or 1.1 and a public entrypoint"
             )
         for pairs in (self.inputs, self.parameters, self.outputs):
             if not isinstance(pairs, tuple) or any(
@@ -69,12 +109,15 @@ class FunctionalWorkflowConfiguration:
             raise FunctionalWorkflowError(
                 "Workflow requires one output under data/08_reporting/<name>.json"
             )
-        if any(
-            type(value) not in (str, bool, int, float, type(None))
-            or (isinstance(value, float) and not math.isfinite(value))
-            for _, value in self.parameters
-        ):
-            raise FunctionalWorkflowError("Workflow parameters must be finite JSON scalars")
+        for _, value in self.parameters:
+            _validate_parameter(value, self.schema_version)
+
+    def parameter_values(self) -> dict[str, JsonPrimitive | dict[str, JsonPrimitive]]:
+        """Return fresh JSON objects without exposing mutable configuration state."""
+        return {
+            key: dict(value) if isinstance(value, tuple) else value
+            for key, value in self.parameters
+        }
 
     def to_dict(self) -> dict[str, object]:
         """Export declarative values without importing source dependencies."""
@@ -82,7 +125,7 @@ class FunctionalWorkflowConfiguration:
             "schema_version": self.schema_version,
             "entrypoint": self.entrypoint,
             "inputs": dict(self.inputs),
-            "parameters": dict(self.parameters),
+            "parameters": self.parameter_values(),
             "outputs": dict(self.outputs),
         }
 
@@ -100,7 +143,7 @@ class FunctionalWorkflowConfiguration:
         return cls(
             data["entrypoint"],
             tuple(data["inputs"].items()),
-            tuple(data["parameters"].items()),
+            tuple((key, _decode_parameter(value)) for key, value in data["parameters"].items()),
             tuple(data["outputs"].items()),
             data["schema_version"],
         )

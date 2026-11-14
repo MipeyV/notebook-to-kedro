@@ -138,7 +138,9 @@ def plan_functional_workflow(
         raise FunctionalWorkflowError("Entrypoint must return the final call result")
     available = set(entry.parameters)
     consumed: set[str] = set()
-    parameters = set(dict(configuration.parameters))
+    reusable_parameters = {
+        name for name, value in configuration.parameters if not isinstance(value, tuple)
+    }
     previous: str | None = None
     for step in steps:
         values = [value for _, value in step.inputs]
@@ -146,10 +148,11 @@ def plan_functional_workflow(
             raise FunctionalWorkflowError(
                 "Workflow needs bound values and distinct single-assignment outputs"
             )
-        data_values = [value for value in values if value not in parameters]
+        data_values = [value for value in values if value not in reusable_parameters]
         if len(data_values) != len(set(data_values)) or set(data_values) & consumed:
             raise FunctionalWorkflowError(
-                "Data values must be consumed at most once; aliasing/fan-out is unsupported"
+                "Data and mapping parameters must be consumed at most once; "
+                "aliasing/fan-out is unsupported"
             )
         if previous is not None and previous not in data_values:
             raise FunctionalWorkflowError(

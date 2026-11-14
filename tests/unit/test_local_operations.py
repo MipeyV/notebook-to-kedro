@@ -262,6 +262,30 @@ def test_notebook_operation_preserves_existing_audited_generator(tmp_path: Path)
     )
 
 
+def test_local_operations_render_mapping_parameters_under_workflow_schema_1_1(
+    tmp_path: Path,
+) -> None:
+    root, location = _workspace(
+        tmp_path,
+        source="examples/functional_candidate/workflow.py",
+        workflow_configuration="examples/functional_candidate/workflow.json",
+        regression_contract="examples/functional_candidate/regression.json",
+    )
+    shutil.copytree(ROOT / "examples/functional_candidate", root / "examples/functional_candidate")
+    config = load_local_project_configuration(location)
+    before = set(root.rglob("*"))
+    result = plan_project(PlanRequest(config))
+    assert set(root.rglob("*")) == before
+    preview = result.to_dict()
+    assert preview["schema_version"] == "1.0"
+    assert preview["plan"]["configuration"]["schema_version"] == "1.1"  # type: ignore[index]
+    parameter_file = next(file for file in result.files if file.path == "conf/base/parameters.yml")
+    assert json.loads(parameter_file.content)["candidate"]["phase"] == "validation"
+    generated = generate_project(GenerateRequest(config, Path("generated")))
+    assert (generated.destination / parameter_file.path).read_text() == parameter_file.content
+    assert generated.to_dict()["execution_status"] == "not_run"
+
+
 def _write_notebook(path: Path, sources: tuple[str, ...]) -> None:
     data = {
         "nbformat": 4,

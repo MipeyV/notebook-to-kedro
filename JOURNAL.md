@@ -40,6 +40,59 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-11-14 - Flat candidate parameters and a concrete real-workflow proposal
+
+### Completed
+
+- Defined a local read-only proposal for one validation baseline using an existing market
+  loader, frozen protocol loader and benchmark node. Recorded source hashes, arguments,
+  domain types, provenance sidecar, candidate settings, artifact ownership and unresolved
+  expectations. Original source bytes and Git state stayed unchanged; no application import,
+  data loading, benchmark execution, tracking, download or final-test scoring occurred.
+- Confirmed that the original node module has no orchestration entrypoint. A proposed
+  entrypoint inspected in memory passes function analysis but still fails the linear planner
+  on its independent second loader. File presence does not verify protocol/data compatibility,
+  and a placeholder JSON output does not provide a serializer for a domain result object.
+- Added opt-in workflow configuration schema 1.1 for flat string-keyed mappings of finite
+  scalar values. Settings store immutable pairs and export fresh JSON objects. Scalar schema
+  1.0 and local-operation/project-settings schema 1.0 remain compatible. The shared parameter
+  renderer and writer are reused; no dependency or generic project framework was added.
+- Kept mapping parameters single-use across entrypoint calls, including duplicate arguments
+  in one call. Repeated parameter loads could alter mutation/identity behavior. A mapping can
+  flow as a returned value through existing assign-mode memory datasets; scalars remain reusable.
+- Added paired synthetic candidate examples, explicit pipeline/node expectations, negative
+  controls, real Kedro/profile checks, a mutable-mapping identity check and shipped pytest
+  checks that detect changed candidate values. Regression overrides use the selected workflow
+  schema; nested mappings and arrays remain unsupported. Local operations and actual Windows
+  VS Code inspection/preview checks accept the new workflow settings.
+- Added the indexed real-workflow setup guide and updated existing contracts, ADR 0006,
+  compatibility, architecture, status, roadmap and changelog. Private source/path details and
+  the actual proposal remain local ignored artifacts rather than public repository examples.
+- Validation passed: 2,393 offline Python tests, 100% line/branch coverage (8,741 statements,
+  2,548 branches), Ruff lint/format, strict mypy on 179 files and source/wheel builds. After
+  adding the guide, all 65 documentation checks passed. All 24 Node protocol tests and real
+  Windows VS Code 1.145.3 host checks passed. Visual layout review remains unverified.
+
+### Decisions
+
+- Address the real candidate dictionary through the existing functional configuration before
+  broadening graph, source-package or typed-I/O contracts. Flat mappings are sufficient for
+  this first observed boundary; do not add arbitrary recursive settings or infer scientific rules.
+- Preserve the independent-loader guard. Scientific protocol settings remain separate from
+  candidate choices, and project publication remains separate from runtime artifact writes.
+
+### Open questions
+
+- Independent-loader/fan-in order and effects, package imports/dependencies, typed data plus
+  sidecar loading, domain-result persistence and application-owned artifacts remain unresolved.
+- The actual snapshot/protocol binding and benchmark expectations are not runtime verified.
+  Complete real-project conversion and actual pilot human review remain pending.
+
+### Next step
+
+- Define an explicit ordering/effect contract for independent loaders and their join, using
+  synthetic controls before local package/typed boundary work or any real validation run.
+
 ## 2026-11-14 - Preserve terminal expression returns in functional blocks
 
 ### Completed

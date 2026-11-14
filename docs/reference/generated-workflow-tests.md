@@ -60,9 +60,10 @@ also supplies independent intermediate expectations for the two generated wrappe
 - IDs are unique lowercase identifiers with underscores/hyphens, at most 64 characters.
   Contracts are bounded to 64 KiB UTF-8 and 16 JSON nesting levels. Duplicate keys, non-finite
   values, non-JSON values and unknown/missing fields are rejected.
-- Scenario input/parameter names exactly match workflow boundaries. Parameters remain finite
-  scalars; input/expected values can be nested finite JSON. Application acceptance is tested
-  only when pytest runs.
+- Scenario input/parameter names exactly match workflow boundaries. Parameters follow the
+  selected workflow schema: finite scalars in 1.0, also flat scalar-valued objects in 1.1.
+  Input/expected values can be nested finite JSON. The regression contract itself remains
+  schema 1.0. Application acceptance is tested only when pytest runs.
 - `expected` describes the one final output. `nodes` maps unprefixed step names from
   `plan-workflow` to cases containing exactly `inputs` and `expected`. Node inputs name wrapper
   arguments (source value names), not necessarily the original callee's parameter names.

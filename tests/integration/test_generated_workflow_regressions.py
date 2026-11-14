@@ -159,3 +159,42 @@ def test_pipeline_only_contract_does_not_invent_passing_node_tests(tmp_path: Pat
     assert not report.findall(".//skipped")
     coverage = json.loads((project / "regression-coverage.json").read_text())
     assert len(coverage["missing_node_expectations"]) == 2
+
+
+@pytest.mark.integration
+@pytest.mark.parametrize("suffix", [".py", ".ipynb"])
+@pytest.mark.parametrize("custom_profile", [False, True])
+def test_shipped_candidate_tests_pass_and_detect_a_changed_mapping_setting(
+    tmp_path: Path, suffix: str, *, custom_profile: bool
+) -> None:
+    example = ROOT / "examples/functional_candidate"
+    config = load_functional_workflow_configuration(example / "workflow.json")
+    contract = load_workflow_regression_contract(example / "regression.json")
+    project = tmp_path / "project"
+    profile = (
+        KedroArchitectureProfile("test.candidate", "1.0.0", "validation", "candidate_")
+        if custom_profile
+        else None
+    )
+    generate_functional_kedro_project(
+        example / f"workflow{suffix}",
+        config,
+        project,
+        project_root=ROOT,
+        regression_contract=contract,
+        architecture_profile=profile,
+    )
+    original_parameters = (project / "conf/base/parameters.yml").read_bytes()
+    result, report = _run(project, tmp_path / "candidate.xml")
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert len(report.findall(".//testcase")) == 3
+    assert not report.findall(".//failure")
+    assert (project / "conf/base/parameters.yml").read_bytes() == original_parameters
+    cases_path = project / "tests/regression_cases.json"
+    cases = json.loads(cases_path.read_text())
+    cases["contract"]["scenarios"][1]["parameters"]["candidate"]["scale"] = 99.0
+    cases_path.write_text(json.dumps(cases), encoding="utf-8")
+    result, report = _run(project, tmp_path / "candidate-changed.xml")
+    assert result.returncode == 1, result.stdout + result.stderr
+    assert len(report.findall(".//failure")) == 1
+    assert not report.findall(".//error")

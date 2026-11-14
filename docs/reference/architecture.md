@@ -34,6 +34,11 @@ instruction ASTs live in a relocated module with a source manifest; Python tasks
 notebook cells. [ADR 0006](../decisions/0006-linear-functional-workflow-generation.md) records
 ordering, identity and bounded I/O decisions. The old notebook conversion contracts are unchanged.
 
+Workflow configuration schema 1.1 optionally carries flat scalar-valued candidate mappings
+as immutable pairs, rendered back to ordinary `parameters.yml` objects. The planner treats them
+as single-use values to preserve mutation/identity semantics. Regression binding validates
+overrides under that same workflow schema; local operation envelopes remain schema 1.0.
+
 Functional analysis schema 1.1 observes a terminal `return_expression` independently of
 named `outputs`. Called functions may return supported expressions directly; their ASTs stay
 in the source module. The entrypoint's explicit call assignments own dataset naming and linear

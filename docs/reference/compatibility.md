@@ -3,7 +3,7 @@
 Structured `.py` input is supported by [`inspect-blocks`](functional-blocks.md) and the separate
 [linear workflow conversion](functional-workflows.md), alongside function-based notebooks.
 The latter requires an explicit entrypoint and JSON configuration and supports JSON file I/O,
-scalar parameters and a single-use linear chain only. The conversion support described below
+scalar/flat-mapping parameters and a single-use linear chain only. The conversion support described below
 still applies to the original notebook path. Neither entrypoint supports arbitrary Python.
 
 Functional inspection schema 1.1 records explicit terminal return expressions separately from
@@ -11,7 +11,12 @@ observed return names. Supported called functions/helpers keep direct calculatio
 returns unchanged in generated projects. The workflow entrypoint still needs named linear
 call assignments and a final named result. Multi-file reconstruction, dependency inference and
 typed dataset boundaries remain unsupported. Existing schema 1.0 functional fingerprints change;
-local-operation/configuration schema versions remain 1.0.
+local-operation envelopes and project-settings schema versions remain 1.0.
+
+Workflow configuration schema 1.0 keeps scalar-only parameters. Opt-in schema 1.1 adds flat
+string-keyed mappings of finite JSON scalars, with immutable settings and single-use mapping
+consumption at the node boundary. Arrays, nested mapping contents, dependency inference and
+general DAGs remain unsupported. Generated tests reuse the selected workflow parameter schema.
 
 The [local operation layer](local-operations.md) configures these same deterministic entrypoints
 through typed inspection, new-file preview and generation requests. It adds an explicit contained

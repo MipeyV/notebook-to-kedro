@@ -249,3 +249,23 @@ def test_generation_does_not_import_source_or_infer_expected_results(tmp_path: P
     )
     metadata = json.loads((destination / "tests/regression_cases.json").read_text())
     assert metadata["contract"]["scenarios"][0]["expected"] == {"supplied": [None, True, "é", 999]}
+
+
+@pytest.mark.parametrize("value", [{"nested": {"seed": 42}}, {"values": []}])
+def test_mapping_regression_overrides_keep_the_flat_workflow_contract(
+    tmp_path: Path, value: dict[str, Any]
+) -> None:
+    example = ROOT / "examples/functional_candidate"
+    config = load_functional_workflow_configuration(example / "workflow.json")
+    data = load_workflow_regression_contract(example / "regression.json").to_dict()
+    data["scenarios"][0]["parameters"]["candidate"] = value
+    contract = WorkflowRegressionContract.from_dict(data)
+    with pytest.raises(FunctionalWorkflowError, match="finite JSON scalars"):
+        generate_functional_kedro_project(
+            example / "workflow.py",
+            config,
+            tmp_path / "project",
+            project_root=ROOT,
+            regression_contract=contract,
+        )
+    assert not (tmp_path / "project").exists()

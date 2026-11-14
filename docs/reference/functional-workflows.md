@@ -63,14 +63,48 @@ file is bounded to 64 KiB. The same immutable configuration validates direct Pyt
   are resolved relative to `project_root` (the current directory by default), not the config
   file. They must resolve to contained `.json` files. The writer checks existence before copying
   them to `data/01_raw/<argument>.json`. Input JSON contents/schema are not validated statically.
-- Parameters are finite JSON scalars; nested values and inferred parameters are unsupported.
-  They become `parameters.yml` entries and `params:<argument>` node inputs.
+- Schema 1.0 parameters are finite JSON scalars. Schema 1.1 additionally accepts flat JSON
+  objects with string keys and finite scalar values. Arrays, nested objects and inferred
+  parameters remain unsupported. Parameters become `parameters.yml` entries and
+  `params:<argument>` node inputs.
 - There is exactly one configured output, matching the entrypoint's named return. Its path is
   restricted to `data/08_reporting/<lowercase_name>.json`. This is an explicit JSON serialization
   boundary, not preservation of every possible Python return type.
 - Catalog and parameter configuration are rendered as quoted JSON, which is valid YAML.
   Dataset formats/options, credential injection and inferred dependencies are not configurable
   in this first schema. The generated dependency declarations reuse the existing Kedro scaffold.
+
+### Candidate mappings in schema 1.1
+
+Use schema 1.1 explicitly for a candidate/options dictionary. For example:
+
+```json
+{
+  "schema_version": "1.1",
+  "entrypoint": "workflow",
+  "inputs": {"values": "examples/functional_candidate/input.json"},
+  "parameters": {"candidate": {"name": "baseline", "seed": 42, "phase": "validation"}},
+  "outputs": {"total": "data/08_reporting/total.json"}
+}
+```
+
+This shows the boundary shape, not business logic for those keys. The complete synthetic
+[script](../../examples/functional_candidate/workflow.py),
+[notebook](../../examples/functional_candidate/workflow.ipynb) and
+[configuration](../../examples/functional_candidate/workflow.json) define their own explicit
+numeric behavior and [expectations](../../examples/functional_candidate/regression.json).
+
+`FunctionalWorkflowConfiguration.from_dict` copies each flat object into immutable pairs.
+Direct construction uses `(("candidate", (("name", "baseline"), ("seed", 42))),)` for the
+`parameters` field; `()` as a parameter value represents an empty object, not an array.
+`parameter_values()` and `to_dict()` return fresh ordinary JSON objects. Repeated mapping
+keys, mutable direct values, non-finite/non-JSON values and non-scalar contents are rejected.
+The existing 64 KiB loader limit and duplicate-field checks apply inside mappings as well.
+
+Schema 1.0 remains scalar-only. Analysis schema 1.1, workflow configuration schema 1.1 and
+local-operation/project-settings schema 1.0 are independent contracts. A candidate mapping
+does not establish that a string path is contained, a phase is scientifically authorized or an
+application dependency is available. Those remain application/boundary responsibilities.
 
 ## Workflow shape and ordering
 
@@ -98,6 +132,10 @@ final call result; a direct `return summarize(prepared)` there needs a separate 
 
 Every call after the first must consume its predecessor's result. Data values can be consumed
 at most once across the workflow, including within a call; scalar parameters can be reused.
+Mapping parameters are also single-use across entrypoint calls, including duplicate arguments
+within one call. Sharing a mutable mapping through repeated `params:` loads could change
+mutation/identity behavior, so the planner rejects it. A mapping returned from its consuming
+function can flow through the existing assign-mode intermediate datasets.
 These restrictions reject fan-out, aliases at the orchestration boundary and independent branches
 instead of silently reordering calls. Module-identity globals such as `__name__` are rejected.
 Unused function definitions and imports remain in the relocated module, rather than disappearing.

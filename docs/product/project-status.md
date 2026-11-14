@@ -19,7 +19,7 @@ Historical measurements retain their original corpus, runtime and limitations.
 | Tests delivered in functional projects | Optional explicit JSON expectations produce standalone pytest node/pipeline regressions with missing expectations reported. Positive/negative controls use development dependencies; a separate trusted-example check builds/installs wheels in new environments and runs shipped tests plus the Kedro CLI. CI configures Python 3.11/3.12/3.13 bootstrap jobs; configured coverage is not a passing-run claim. |
 | MLOps / enterprise platform | Future integrations, governance and packaging require validated needs and separate contracts. |
 | Functional block inspection | Analysis-only API/CLI for explicit straight-line functions in `.py` and real notebook cells, with interfaces, function-reference graph, provenance and blockers. Schema 1.1 records terminal return expressions separately from observed return names. |
-| Functional workflow conversion | Explicit single-use linear entrypoints now generate Kedro from scripts or notebooks, using JSON file I/O/scalar parameters and checked paired fixture behavior. Called functions/helpers preserve direct expression returns and intermediate identity. Entrypoints still require named linear wiring; general DAGs, multi-file reconstruction and arbitrary Python remain unsupported. |
+| Functional workflow conversion | Explicit single-use linear entrypoints generate Kedro from scripts or notebooks, using JSON file I/O and explicit parameters: scalars in schema 1.0, also flat scalar-valued mappings in schema 1.1. Candidate mappings are immutable in settings and single-use across calls. Helpers preserve direct expression returns and intermediate identity. Named linear wiring is required; independent-loader joins, multi-file reconstruction and arbitrary Python remain unsupported. |
 | Shared engine / local interface | Typed operations feed a desktop VS Code Explorer view with guided settings creation, inspection before workflow I/O, interpreter/profile selection, diagnostics, read-only previews and confirmed generation. Existing-project patches and automatic environment integration remain future work. |
 
 Generation itself does not verify dependency installation, full DAG semantics or runtime behavior.
@@ -37,6 +37,12 @@ behavioral proof or generation eligibility. The separate [workflow adapter](../r
 requires stricter entrypoint/I/O contracts and records per-statement module destinations.
 Existing notebook conversion remains separate. Paired tests are bounded evidence, not a
 general runtime guarantee. Fresh installation has a separate fixture-bound bootstrap check.
+
+The [real-workflow setup guide](../guides/real-workflow-setup.md) now documents a concrete
+candidate-parameter slice with paired synthetic examples, real Kedro checks and shipped tests.
+The inspected source case has independent loaders, a typed protocol/result and runner-owned
+artifact writes. Its proposed graph remains blocked; no complete real-project conversion,
+data/protocol runtime verification or benchmark execution is claimed.
 
 See [local operations](../reference/local-operations.md) for the first E4 slice. Settings anchor
 the declared working root to the configuration file, constrain source/configuration/input/output
