@@ -18,6 +18,11 @@ async function main() {
     path.join(workspace, "examples/functional_candidate"),
     { recursive: true },
   );
+  await fs.cp(
+    path.join(repository, "examples/functional_join"),
+    path.join(workspace, "examples/functional_join"),
+    { recursive: true },
+  );
   await fs.copyFile(
     path.join(repository, "examples/kedro_profiles/team_training.json"),
     path.join(workspace, "profile.json"),
@@ -56,6 +61,15 @@ async function main() {
   await fs.writeFile(
     path.join(workspace, "blocked.json"),
     JSON.stringify({ ...config, source: "blocked.py" }),
+  );
+  await fs.writeFile(
+    path.join(workspace, "ordered-join.json"),
+    JSON.stringify({
+      ...config,
+      source: "examples/functional_join/workflow.py",
+      workflow_configuration: "examples/functional_join/workflow.json",
+      regression_contract: "examples/functional_join/regression.json",
+    }),
   );
   await fs.writeFile(
     path.join(workspace, "notebook.json"),

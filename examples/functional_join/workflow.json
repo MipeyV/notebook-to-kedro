@@ -1,0 +1,10 @@
+{
+  "schema_version": "1.2",
+  "entrypoint": "workflow",
+  "inputs": {
+    "raw_values": "examples/functional_join/values.json",
+    "raw_specification": "examples/functional_join/specification.json"
+  },
+  "parameters": {"candidate": {"name": "synthetic", "phase": "validation"}},
+  "outputs": {"total": "data/08_reporting/total.json"}
+}

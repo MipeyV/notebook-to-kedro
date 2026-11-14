@@ -2,7 +2,7 @@
 
 [Documentation index](../README.md)
 
-Status: implemented flat candidate-parameter slice; broader real-project conversion remains
+Status: implemented flat candidate parameters and opt-in source-ordered joins; broader real-project conversion remains
 blocked. This guide distinguishes a declared workflow proposal from a source-derived plan.
 
 ## Keep the boundaries explicit
@@ -27,9 +27,10 @@ Keep the frozen protocol separate from candidate settings. File presence is not 
 snapshot matches the protocol's domain fingerprint. Keep training/validation/test rules and
 the original application runner; do not introduce a second scientific implementation.
 
-This independent-loader/fan-in graph is still outside the current linear conversion contract.
-Publication must remain blocked until ordering/effects, import context, typed I/O and artifact
-ownership are specified and exercised. A synthetic negative fixture enforces that boundary.
+Schemas 1.0/1.1 still reject this independent-loader/fan-in graph. Opt-in schema 1.2 can now
+preserve its source call order, with synthetic positive/negative controls. This resolves the
+ordering contract only. A real application still needs import context, typed I/O and artifact
+ownership before complete conversion/runtime claims.
 
 ## Working slice: a candidate dictionary
 
@@ -57,6 +58,28 @@ schema 1.1 workflow configuration. Existing inspection and file-preview commands
 engine contract. The interpreter must contain this engine revision; local project settings
 retain schema 1.0.
 
+## Working slice: ordered independent loaders
+
+The [paired join example](../../examples/functional_join/workflow.py) has two independent
+loaders followed by a function consuming both results. Its
+[configuration](../../examples/functional_join/workflow.json) selects schema 1.2; its
+[notebook](../../examples/functional_join/workflow.ipynb) and
+[supplied expectations](../../examples/functional_join/regression.json) exercise the same graph.
+
+```bash
+uv run notebook-to-kedro plan-workflow examples/functional_join/workflow.py examples/functional_join/workflow.json --project-root .
+uv run notebook-to-kedro generate-workflow examples/functional_join/workflow.py examples/functional_join/workflow.json generated/ordered_project --project-root . --regression-contract examples/functional_join/regression.json
+```
+
+The [source-order contract](../reference/functional-workflows.md#source-ordered-calls-in-schema-12)
+explains the private ordering input and how it stays outside business function arguments and
+node expectations. The first loader finishes before the second starts, and a failure stops later
+calls. The fixture uses plain JSON values, not application-specific dataset/result objects.
+
+The local real-workflow proposal now plans three calls with one explicit ordering edge in
+schema 1.2. This is still an in-memory proposal rather than an existing source entrypoint or a
+generated/executed real project. Placeholder JSON boundaries do not serialize domain objects.
+
 ## Review gaps before a real trial
 
 Keep a local, source-bound proposal with the selected functions, paths, source hashes,
@@ -66,7 +89,7 @@ Do not publish private project source or data as a reusable example.
 
 For a workflow like the graph above, the remaining concrete gates are:
 
-1. Define ordering/effect semantics for independent loaders and their join.
+1. Use the explicit source-order mode; do not assume loader effects commute or remove its edges.
 2. Preserve local application imports, dependency installation and versions.
 3. Specify typed data/protocol boundaries, sidecars and reference-copy behavior.
 4. Separate generated-project publication from application-owned artifact writes and require

@@ -540,3 +540,48 @@ def test_generator_ast_helper_fallbacks_cover_uncommon_shapes() -> None:
     assert generator._qualified_name(ast.Constant(value=1)) == "Constant"
     assert generator._offset("value = 1", None, 0) == 0
     assert generator._offset("value = 1", 1, None) == 0
+
+
+@pytest.mark.parametrize("ordering", [{"unknown": "one"}, {"one": "two"}, {"two": "two"}])
+def test_ordering_references_must_name_the_immediately_preceding_task(
+    ordering: dict[str, str],
+) -> None:
+    tasks = (
+        TaskCandidate("one", "first", (), (), (), ("x",), "x = 1"),
+        TaskCandidate("two", "second", (), (), (), ("y",), "y = 2"),
+    )
+    plan = ConversionPlan("1.0", "test", "example.py", tasks)
+    with pytest.raises(ProjectGenerationError, match="Ordering"):
+        generator.render_kedro_project(plan, order_after=ordering)
+
+
+@pytest.mark.parametrize("outputs", [(), ("x", "z")])
+def test_ordering_requires_one_materialized_previous_result(outputs: tuple[str, ...]) -> None:
+    tasks = (
+        TaskCandidate("one", "first", (), (), (), outputs, "x = 1\nz = 2"),
+        TaskCandidate("two", "second", (), (), (), ("y",), "y = 2"),
+    )
+    plan = ConversionPlan("1.0", "test", "example.py", tasks)
+    with pytest.raises(ProjectGenerationError, match="preceding single-output"):
+        generator.render_kedro_project(plan, order_after={"two": "one"})
+
+
+@pytest.mark.parametrize("parameter", [False, True])
+def test_ordering_adapter_cannot_capture_business_arguments(*, parameter: bool) -> None:
+    tasks = (
+        TaskCandidate("one", "first", (), (), (), ("x",), "x = 1"),
+        TaskCandidate(
+            "two",
+            "second",
+            (),
+            (),
+            () if parameter else ("_ntk_after",),
+            ("y",),
+            "y = 2",
+            parameters=("_ntk_after",) if parameter else (),
+        ),
+    )
+    parameters = (ParameterValue("_ntk_after", 1, "_ntk_after", ""),) if parameter else ()
+    plan = ConversionPlan("1.0", "test", "example.py", tasks, parameters=parameters)
+    with pytest.raises(ProjectGenerationError, match="conflicts with task arguments"):
+        generator.render_kedro_project(plan, order_after={"two": "one"})

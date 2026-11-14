@@ -1,4 +1,4 @@
-"""Source-accounted linear workflow wiring, separate from notebook conversion facts."""
+"""Source-accounted ordered workflow wiring, separate from notebook conversion facts."""
 
 from __future__ import annotations
 
@@ -31,11 +31,22 @@ class FunctionalWorkflowStep:
 
 @dataclass(frozen=True, slots=True)
 class FunctionalWorkflowPlan:
-    """Recomputed inspection and complete linear entrypoint wiring; no execution evidence."""
+    """Recomputed inspection and entrypoint wiring; no execution evidence."""
 
     analysis: FunctionalAnalysis
     configuration: FunctionalWorkflowConfiguration
     steps: tuple[FunctionalWorkflowStep, ...]
+
+    @property
+    def order_after(self) -> tuple[tuple[str, str], ...]:
+        """Declare missing adjacent-call dependencies in the explicit source-order mode."""
+        if self.configuration.schema_version != "1.2":
+            return ()
+        return tuple(
+            (current.id, previous.id)
+            for previous, current in zip(self.steps, self.steps[1:], strict=False)
+            if previous.output not in {value for _, value in current.inputs}
+        )
 
     def to_json(self) -> str:
         """Export source, I/O decisions and exact step locations for review."""
@@ -45,6 +56,15 @@ class FunctionalWorkflowPlan:
             "configuration": self.configuration.to_dict(),
             "steps": [asdict(step) for step in self.steps],
         }
+        if self.configuration.schema_version == "1.2":
+            payload["schema_version"] = "1.1"
+            payload["ordering"] = {
+                "policy": "source_order",
+                "after": [
+                    {"step_id": step, "after_step_id": previous}
+                    for step, previous in self.order_after
+                ],
+            }
         return json.dumps(payload, sort_keys=True, indent=2) + "\n"
 
 
@@ -108,7 +128,7 @@ def _step(
 def plan_functional_workflow(
     analysis: FunctionalAnalysis, configuration: FunctionalWorkflowConfiguration
 ) -> FunctionalWorkflowPlan:
-    """Recompute facts and require a single-use linear chain without executing source."""
+    """Recompute facts and require single-use data flow with explicit call-order semantics."""
     if analysis != analyze_functional_blocks(analysis.sources) or not analysis.complete:
         raise FunctionalWorkflowError("Workflow requires complete, recomputed functional analysis")
     functions = {block.name: block for block in analysis.blocks}
@@ -154,7 +174,11 @@ def plan_functional_workflow(
                 "Data and mapping parameters must be consumed at most once; "
                 "aliasing/fan-out is unsupported"
             )
-        if previous is not None and previous not in data_values:
+        if (
+            configuration.schema_version != "1.2"
+            and previous is not None
+            and previous not in data_values
+        ):
             raise FunctionalWorkflowError(
                 "Every subsequent call must consume the preceding result to preserve order"
             )

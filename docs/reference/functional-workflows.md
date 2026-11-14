@@ -2,9 +2,10 @@
 
 [Documentation index](../README.md)
 
-Status: bounded E2 generation slice implemented on 2026-11-12. It converts an explicit,
-single-use linear function workflow from a script or physical notebook cells. General DAGs,
-multi-file projects remain outside this slice. The first
+Status: bounded E2 generation slice implemented on 2026-11-12, extended with opt-in ordered
+joins on 2026-11-15. It converts explicit single-use workflows from scripts or notebook cells.
+Schemas 1.0/1.1 require a linear data chain; schema 1.2 preserves source order across independent
+calls and joins. General DAG inference, data fan-out and multi-file projects remain outside this slice. The first
 [generated-test increment](generated-workflow-tests.md) now optionally delivers pytest
 regressions from explicit expectations. A separate opt-in trusted-example bootstrap check
 now installs generated wheels and runs shipped tests plus the Kedro CLI in fresh environments.
@@ -63,7 +64,7 @@ file is bounded to 64 KiB. The same immutable configuration validates direct Pyt
   are resolved relative to `project_root` (the current directory by default), not the config
   file. They must resolve to contained `.json` files. The writer checks existence before copying
   them to `data/01_raw/<argument>.json`. Input JSON contents/schema are not validated statically.
-- Schema 1.0 parameters are finite JSON scalars. Schema 1.1 additionally accepts flat JSON
+- Schema 1.0 parameters are finite JSON scalars. Schemas 1.1/1.2 additionally accept flat JSON
   objects with string keys and finite scalar values. Arrays, nested objects and inferred
   parameters remain unsupported. Parameters become `parameters.yml` entries and
   `params:<argument>` node inputs.
@@ -101,7 +102,7 @@ Direct construction uses `(("candidate", (("name", "baseline"), ("seed", 42))),)
 keys, mutable direct values, non-finite/non-JSON values and non-scalar contents are rejected.
 The existing 64 KiB loader limit and duplicate-field checks apply inside mappings as well.
 
-Schema 1.0 remains scalar-only. Analysis schema 1.1, workflow configuration schema 1.1 and
+Schema 1.0 remains scalar-only. Analysis schema 1.1, workflow configuration schemas 1.0/1.1/1.2 and
 local-operation/project-settings schema 1.0 are independent contracts. A candidate mapping
 does not establish that a string path is contained, a phase is scientifically authorized or an
 application dependency is available. Those remain application/boundary responsibilities.
@@ -130,17 +131,62 @@ original Python function. The wrapper's dataset name comes from the explicit ent
 assignment, not from a fabricated return name. The entrypoint itself still requires a named
 final call result; a direct `return summarize(prepared)` there needs a separate wiring extension.
 
-Every call after the first must consume its predecessor's result. Data values can be consumed
+In schemas 1.0/1.1, every call after the first must consume its predecessor's result. Data values can be consumed
 at most once across the workflow, including within a call; scalar parameters can be reused.
 Mapping parameters are also single-use across entrypoint calls, including duplicate arguments
 within one call. Sharing a mutable mapping through repeated `params:` loads could change
 mutation/identity behavior, so the planner rejects it. A mapping returned from its consuming
 function can flow through the existing assign-mode intermediate datasets.
-These restrictions reject fan-out, aliases at the orchestration boundary and independent branches
-instead of silently reordering calls. Module-identity globals such as `__name__` are rejected.
+These restrictions reject data fan-out and aliases at the orchestration boundary. Independent
+calls require the explicit schema 1.2 mode below. Module-identity globals such as `__name__` are rejected.
 Unused function definitions and imports remain in the relocated module, rather than disappearing.
 Unknown dependency availability, library effects, ambient notebook state and runtime errors are
 not proven by static acceptance. Imports execute later when the generated project is run.
+
+### Source-ordered calls in schema 1.2
+
+Set `schema_version` to `1.2` explicitly to admit independent calls while retaining source
+sequencing. All other entrypoint, argument, single-assignment, parameter and I/O guards apply:
+
+```python
+def workflow(raw_values, raw_specification, candidate):
+    observations = load_values(raw_values)
+    specification = load_specification(raw_specification)
+    total = evaluate(observations, specification, candidate)
+    return total
+```
+
+The paired [script](../../examples/functional_join/workflow.py),
+[notebook](../../examples/functional_join/workflow.ipynb),
+[configuration](../../examples/functional_join/workflow.json) and
+[expectations](../../examples/functional_join/regression.json) exercise this synthetic join.
+Neither independence nor commutative effects are inferred. The first loader must finish before
+the second starts, and both finish before the join. If a call raises, later calls do not start;
+the engine adds no retries. An unused assigned result does not remove its call.
+
+`plan.order_after` records adjacent step-ID pairs that lack a natural data dependency. The
+renderer passes the preceding result through a private `_ntk_after` input to an importable
+`_AfterPrevious` callable in the generated pipeline module. It ignores that argument and calls
+the unchanged business wrapper with only its original inputs. Ordering uses the existing
+assign-mode memory dataset; it does not invent a dataset, copy/serialize the object or alter
+the business return. Old and naturally linear pipelines need no adapter. Original functions
+and business node signatures remain unchanged, including for generated standalone node tests.
+
+The complete registered pipeline is ordered even with a runner capable of concurrent execution.
+Trusted tests check SequentialRunner and ThreadRunner plus an adapter pickle round-trip;
+this is not a claim that every process runner/deployment is verified. Partial pipeline selection
+and hand-edited graphs have their own behavior. Source reuse/fan-out and dynamic control flow
+remain unsupported.
+
+Schema 1.2 plans export plan schema 1.1 with `ordering.policy: source_order` and explicit
+`ordering.after` edges. The generated manifest also records `ordering_inputs`, their existing
+dataset, private argument and `forwarded_to_function: false`. These edges are generation
+decisions, separate from observed `steps[].inputs` and function-reference facts. The renderer
+checks predecessor IDs, single-output dependencies and private-argument collisions before the
+shared writer publishes anything. Schemas 1.0/1.1 keep plan schema 1.0 and the linear guard.
+Local operation envelopes/project settings stay schema 1.0; analysis stays schema 1.1.
+
+See [ADR 0010](../decisions/0010-source-ordered-functional-joins.md) for the ordering decision.
 
 ## Rendering, identity and source accounting
 
@@ -180,7 +226,15 @@ inside its owning node, including a direct helper-call return. Negative tests bl
 return constructs, wiring, drift, source contexts and I/O
 configuration before publication. This is bounded fixture evidence, not arbitrary-code equivalence.
 
+The schema 1.2 join fixture also checks both source formats, default/custom profiles and two
+explicit numeric cases with SequentialRunner and ThreadRunner. Traces require each call once
+in source order and preserve loader-result identity at the join. First/second-loader failures
+stop later calls without retries. Removing the order dependency is a negative control that
+permits a forbidden concurrent loader start. The generated callable survives a pickle round-trip;
+this is separate from process-runner verification. Shipped pipeline/business-node tests pass
+and detect an arithmetic change, without requiring ordering inputs in node expectations.
+
 The first E3 increment now supplies explicit JSON contracts and tests delivered with generated
 projects, followed by a separate trusted-example fresh dependency bootstrap check. General
-branching, richer datasets, dependency inference and broader ML workflows need additional
+control-flow branching, data fan-out, richer datasets, dependency inference and broader ML workflows need additional
 contracts and behavioral cases. The existing whole-notebook pilot's human review remains pending.

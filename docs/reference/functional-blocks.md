@@ -67,6 +67,8 @@ function with recorded return facts. Structure fingerprints include this metadat
 version, so they differ from schema 1.0 fingerprints even for previously supported source.
 Local-operation envelopes and project settings retain schema 1.0; the separate workflow
 configuration supports scalar schema 1.0 and flat candidate mappings in schema 1.1.
+Workflow schema 1.2 additionally selects source-ordered independent calls/joins; these are
+planning/generation decisions and do not change the function-reference analysis schema.
 
 ## Initial supported subset
 
@@ -128,4 +130,4 @@ Existing `NotebookFacts`, `ConversionPlan`, `plan` and `generate` contracts rema
 The analyzers share small AST naming/constants utilities; functional inspection does not bypass
 notebook source accounting or automatically make a `.py` file eligible for generation. The
 separate workflow adapter requires additional configuration, recomputed facts and stricter
-linear wiring checks before rendering a project.
+wiring/order checks before rendering a project.

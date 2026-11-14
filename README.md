@@ -94,7 +94,7 @@ notebook-to-kedro inspect-blocks examples/functional_blocks/workflow.py
 The [functional inspection contract](docs/reference/functional-blocks.md) describes interfaces,
 function dependencies, retained source/provenance and blockers. This first E2 slice is analysis
 only. The separate [functional workflow conversion](docs/reference/functional-workflows.md)
-now generates Kedro projects from explicitly configured linear entrypoints in either format:
+now generates Kedro projects from explicitly configured entrypoints in either format:
 
 ```bash
 notebook-to-kedro generate-workflow examples/functional_workflow/workflow.py examples/functional_workflow/workflow.json generated/functional_project --project-root .
@@ -103,8 +103,9 @@ notebook-to-kedro generate-workflow examples/functional_workflow/workflow.py exa
 This initial subset uses JSON file boundaries and explicit scalar or flat candidate parameters.
 The [real-workflow setup guide](docs/guides/real-workflow-setup.md) distinguishes the working
 candidate slice from remaining graph, package and typed-I/O gaps. Internal helper calls
-remain inside their owning node, including direct expression returns; the entrypoint keeps
-explicit named linear wiring. Branching remains future work. Supply
+remain inside their owning node, including direct expression returns. Entrypoints keep explicit
+named calls: schemas 1.0/1.1 require a linear data chain, while opt-in schema 1.2 preserves source
+order across independent calls and joins. Data fan-out and control flow remain future work. Supply
 `--regression-contract examples/functional_workflow/regression.json` to also deliver
 [pytest node/pipeline regressions](docs/reference/generated-workflow-tests.md) based on explicit
 expected values. Missing expectations are reported; generation never executes code to infer them.

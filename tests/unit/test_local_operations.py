@@ -262,23 +262,28 @@ def test_notebook_operation_preserves_existing_audited_generator(tmp_path: Path)
     )
 
 
-def test_local_operations_render_mapping_parameters_under_workflow_schema_1_1(
+@pytest.mark.parametrize(
+    ("example_name", "schema"), [("functional_candidate", "1.1"), ("functional_join", "1.2")]
+)
+def test_local_operations_render_mapping_parameters_under_the_selected_workflow_schema(
     tmp_path: Path,
+    example_name: str,
+    schema: str,
 ) -> None:
     root, location = _workspace(
         tmp_path,
-        source="examples/functional_candidate/workflow.py",
-        workflow_configuration="examples/functional_candidate/workflow.json",
-        regression_contract="examples/functional_candidate/regression.json",
+        source=f"examples/{example_name}/workflow.py",
+        workflow_configuration=f"examples/{example_name}/workflow.json",
+        regression_contract=f"examples/{example_name}/regression.json",
     )
-    shutil.copytree(ROOT / "examples/functional_candidate", root / "examples/functional_candidate")
+    shutil.copytree(ROOT / f"examples/{example_name}", root / f"examples/{example_name}")
     config = load_local_project_configuration(location)
     before = set(root.rglob("*"))
     result = plan_project(PlanRequest(config))
     assert set(root.rglob("*")) == before
     preview = result.to_dict()
     assert preview["schema_version"] == "1.0"
-    assert preview["plan"]["configuration"]["schema_version"] == "1.1"  # type: ignore[index]
+    assert preview["plan"]["configuration"]["schema_version"] == schema  # type: ignore[index]
     parameter_file = next(file for file in result.files if file.path == "conf/base/parameters.yml")
     assert json.loads(parameter_file.content)["candidate"]["phase"] == "validation"
     generated = generate_project(GenerateRequest(config, Path("generated")))
