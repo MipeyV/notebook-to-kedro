@@ -1,14 +1,15 @@
 # Compatibility Policy
 
 Structured `.py` input is supported by [`inspect-blocks`](functional-blocks.md) and the separate
-[linear workflow conversion](functional-workflows.md), alongside function-based notebooks.
+[functional workflow conversion](functional-workflows.md), alongside function-based notebooks.
 The latter requires an explicit entrypoint and JSON configuration and supports JSON file I/O,
-scalar/flat-mapping parameters and a single-use linear chain only. The conversion support described below
+scalar/flat-mapping parameters and bounded single-use calls. Schemas 1.0/1.1 require a linear
+data chain; opt-in schema 1.2 also supports independent calls and joins in source order. The conversion support described below
 still applies to the original notebook path. Neither entrypoint supports arbitrary Python.
 
 Functional inspection schema 1.1 records explicit terminal return expressions separately from
 observed return names. Supported called functions/helpers keep direct calculation or call
-returns unchanged in generated projects. The workflow entrypoint still needs named linear
+returns unchanged in generated projects. The workflow entrypoint still needs named
 call assignments and a final named result. Multi-file reconstruction, dependency inference and
 typed dataset boundaries remain unsupported. Existing schema 1.0 functional fingerprints change;
 local-operation envelopes and project-settings schema versions remain 1.0.
@@ -17,6 +18,12 @@ Workflow configuration schema 1.0 keeps scalar-only parameters. Opt-in schema 1.
 string-keyed mappings of finite JSON scalars, with immutable settings and single-use mapping
 consumption at the node boundary. Arrays, nested mapping contents, dependency inference and
 general DAGs remain unsupported. Generated tests reuse the selected workflow parameter schema.
+
+Workflow schema 1.2 retains the flat mapping and single-use rules while enforcing source call
+order using explicit ordering-only dependencies. Business wrapper signatures remain unchanged.
+Its plan/manifest uses schema 1.1 ordering metadata; local operations stay schema 1.0. Tests
+exercise SequentialRunner, ThreadRunner and adapter pickling, without claiming every process
+runner or arbitrary deployment. Control flow, source data reuse/fan-out and typed I/O remain unsupported.
 
 The [local operation layer](local-operations.md) configures these same deterministic entrypoints
 through typed inspection, new-file preview and generation requests. It adds an explicit contained

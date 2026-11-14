@@ -34,6 +34,19 @@ if TYPE_CHECKING:
 
 DEFAULT_PACKAGE_NAME = "generated_notebook"
 PARAMETER_MAPPING_ITEM_LENGTH = 2
+ORDERING_INPUT_ARGUMENT = "_ntk_after"
+_ORDERING_HELPER = f'''
+
+class _AfterPrevious:
+    """Wait for a prior result without forwarding it to the business function."""
+
+    def __init__(self, function):
+        self._function = function
+        self.__name__ = function.__name__
+
+    def __call__(self, {ORDERING_INPUT_ARGUMENT}, **kwargs):
+        return self._function(**kwargs)
+'''
 SUPPORTED_PARAMETER_KEYWORDS = {
     "RandomForestClassifier": frozenset({"n_estimators", "random_state"}),
     "StandardScaler": frozenset({"with_mean", "with_std"}),
@@ -65,6 +78,7 @@ def render_kedro_project(
     package_name: str = DEFAULT_PACKAGE_NAME,
     architecture_profile: KedroArchitectureProfile | None = None,
     source_facts: NotebookFacts | None = None,
+    order_after: Mapping[str, str] | None = None,
 ) -> tuple[dict[Path, str], tuple[tuple[Path, Path], ...]]:
     """Validate and render shared Kedro scaffolding without publishing or executing it."""
     if source_facts is not None:
@@ -90,7 +104,7 @@ def render_kedro_project(
         package_root / "pipelines" / "__init__.py": _package_init(),
         pipeline_root / "__init__.py": _notebook_pipeline_init(package_name, profile.pipeline_name),
         pipeline_root / "pipeline.py": _pipeline(
-            plan, package_name, profile.pipeline_name, node_names
+            plan, package_name, profile.pipeline_name, node_names, order_after
         ),
     }
     try:
@@ -297,17 +311,25 @@ def _pipeline(
     package_name: str,
     pipeline_name: str = "notebook_pipeline",
     node_names: Mapping[str, str] | None = None,
+    order_after: Mapping[str, str] | None = None,
 ) -> str:
+    entries = _pipeline_entries(plan)
+    ordering_inputs = _ordering_inputs(entries, {} if order_after is None else order_after)
     node_entries = "\n".join(
-        _node_entry(entry, None if node_names is None else node_names[entry.task.id])
-        for entry in _pipeline_entries(plan)
+        _node_entry(
+            entry,
+            None if node_names is None else node_names[entry.task.id],
+            ordering_inputs.get(entry.task.id),
+        )
+        for entry in entries
     )
+    ordering_helper = _ORDERING_HELPER if ordering_inputs else ""
     return f'''"""Generated Kedro pipeline."""
 
 from kedro.pipeline import Pipeline, node
 
 from {package_name}.pipelines.{pipeline_name} import nodes
-
+{ordering_helper}
 
 def create_pipeline(**kwargs: object) -> Pipeline:
     """Create the generated notebook pipeline."""
@@ -319,12 +341,15 @@ def create_pipeline(**kwargs: object) -> Pipeline:
 '''
 
 
-def _node_entry(entry: _PipelineEntry, node_name: str | None = None) -> str:
-    inputs = _inputs_argument(entry)
+def _node_entry(
+    entry: _PipelineEntry, node_name: str | None = None, ordering_input: str | None = None
+) -> str:
+    inputs = _inputs_argument(entry, ordering_input)
     outputs = _outputs_argument(entry.outputs)
     name = entry.task.name if node_name is None else node_name
+    function = f"nodes.{name}" if ordering_input is None else f"_AfterPrevious(nodes.{name})"
     return f"""            node(
-                func=nodes.{name},
+                func={function},
                 inputs={inputs},
                 outputs={outputs},
                 name="{name}",
@@ -337,6 +362,27 @@ class _PipelineEntry:
     inputs: dict[str, str]
     outputs: tuple[str, ...]
     parameters: dict[str, str]
+
+
+def _ordering_inputs(
+    entries: tuple[_PipelineEntry, ...], order_after: Mapping[str, str]
+) -> dict[str, str]:
+    if set(order_after) - {entry.task.id for entry in entries}:
+        raise ProjectGenerationError("Ordering references unknown tasks")
+    result: dict[str, str] = {}
+    for index, entry in enumerate(entries):
+        if entry.task.id not in order_after:
+            continue
+        if (
+            index == 0
+            or order_after[entry.task.id] != entries[index - 1].task.id
+            or len(entries[index - 1].outputs) != 1
+        ):
+            raise ProjectGenerationError("Ordering requires the preceding single-output task")
+        if ORDERING_INPUT_ARGUMENT in entry.inputs or ORDERING_INPUT_ARGUMENT in entry.parameters:
+            raise ProjectGenerationError("Ordering argument conflicts with task arguments")
+        result[entry.task.id] = entries[index - 1].outputs[0]
+    return result
 
 
 def _pipeline_entries(plan: ConversionPlan) -> tuple[_PipelineEntry, ...]:
@@ -371,8 +417,11 @@ def _output_dataset(
     return symbol
 
 
-def _inputs_argument(entry: _PipelineEntry) -> str:
-    return _node_inputs_argument({**entry.inputs, **entry.parameters})
+def _inputs_argument(entry: _PipelineEntry, ordering_input: str | None = None) -> str:
+    inputs = {**entry.inputs, **entry.parameters}
+    if ordering_input is not None:
+        inputs = {ORDERING_INPUT_ARGUMENT: ordering_input, **inputs}
+    return _node_inputs_argument(inputs)
 
 
 def _node_inputs_argument(values: dict[str, str]) -> str:

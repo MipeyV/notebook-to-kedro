@@ -10,7 +10,10 @@ from typing import TYPE_CHECKING
 
 from notebook_to_kedro.analysis.functional_sources import analyze_functional_blocks_path
 from notebook_to_kedro.exceptions import FunctionalWorkflowError
-from notebook_to_kedro.generation.kedro.generator import render_kedro_project
+from notebook_to_kedro.generation.kedro.generator import (
+    ORDERING_INPUT_ARGUMENT,
+    render_kedro_project,
+)
 from notebook_to_kedro.generation.kedro.profiles import DEFAULT_KEDRO_PROFILE
 from notebook_to_kedro.generation.kedro.regression import render_workflow_regression_tests
 from notebook_to_kedro.generation.writer import write_project
@@ -124,7 +127,10 @@ def render_functional_workflow(
     # Always resolve generated wrapper names, including default-profile compatibility checks.
     profile = DEFAULT_KEDRO_PROFILE if architecture_profile is None else architecture_profile
     files, copies = render_kedro_project(
-        conversion, package_name=package_name, architecture_profile=profile
+        conversion,
+        package_name=package_name,
+        architecture_profile=profile,
+        order_after=dict(plan.order_after),
     )
     combined = "\n\n".join(unit.source for unit in plan.analysis.sources)
     try:
@@ -166,6 +172,18 @@ def render_functional_workflow(
         ],
         "profile_sha256": profile.sha256,
     }
+    if configuration.schema_version == "1.2":
+        steps = {step.id: step for step in plan.steps}
+        manifest["ordering_inputs"] = [
+            {
+                "step_id": step,
+                "after_step_id": previous,
+                "dataset": steps[previous].output,
+                "argument": ORDERING_INPUT_ARGUMENT,
+                "forwarded_to_function": False,
+            }
+            for step, previous in plan.order_after
+        ]
     files[Path("functional-workflow.json")] = json.dumps(manifest, sort_keys=True, indent=2) + "\n"
     files.update(render_workflow_regression_tests(plan, profile, package_name, regression_contract))
     if regression_contract is not None:

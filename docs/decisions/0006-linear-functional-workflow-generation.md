@@ -43,3 +43,7 @@ consumed only once across orchestration calls; repeated parameter loads could ot
 source mutation/identity behavior. Mapping results can flow through assign-mode memory datasets.
 This addresses one concrete real-workflow configuration gap, without approving independent
 loaders/fan-in, external package reconstruction, typed domain objects or artifact side effects.
+
+The later [ADR 0010](0010-source-ordered-functional-joins.md) adds opt-in schema 1.2 ordering
+dependencies for independent calls and joins. The linear rules above remain the contract for
+schemas 1.0/1.1; package, typed-I/O and artifact execution work remains separate.

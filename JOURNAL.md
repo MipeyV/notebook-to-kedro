@@ -40,6 +40,59 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-11-15 - Source-ordered independent functional calls and joins
+
+### Completed
+
+- Verified PR 90 merged with successful CI, synchronized main and implemented the next bounded
+  slice on a dedicated branch. Opt-in workflow schema 1.2 now accepts independent named calls
+  and joins while retaining source sequencing, single assignment, single-use data/mappings
+  and the final named-call result. Schemas 1.0/1.1 keep their linear guard.
+- Added recomputed adjacent-call ordering edges when data wiring alone does not establish
+  order. The shared renderer validates predecessor IDs, single-output dependencies and private
+  argument collisions before publication. A generated importable callable consumes the previous
+  assign-mode memory result as an ordering-only input and forwards only original business args.
+- Kept original source ASTs, business wrapper signatures, result names, profiles and node
+  expectations unchanged. Naturally linear pipelines emit no adapter. Plan schema 1.1 and
+  generated manifests distinguish source-order policy/edges from observed function arguments;
+  local operation/project settings remain schema 1.0 and analysis remains schema 1.1.
+- Added paired synthetic independent-loader/join examples, explicit expectations and checks
+  through real Kedro SequentialRunner and ThreadRunner. Traces preserve call order, one-time
+  calls, loader-result identity and failure boundaries. A negative control removes the order
+  edge and exposes concurrent starts; a separate check proves callable pickle round-trip.
+- Delivered pytest pipeline/business-node tests for the join without ordering arguments in
+  node cases. Arithmetic regressions produce the expected failures. Static generation with
+  an absent dependency and a return-side file call executes neither the source nor that effect.
+- Rechecked the private real-workflow proposal read-only: schema 1.2 plans three calls with
+  one explicit order edge. Source hashes and Git state stay unchanged. This is an in-memory
+  orchestration proposal, not an existing entrypoint or a generated/executed real project.
+  Package/import context, typed I/O, protocol/data binding, artifact ownership and expectations
+  remain unresolved. Private source/report details are not published in repository examples.
+- Added indexed ADR 0010 and updated the workflow/setup/compatibility references, architecture,
+  roadmap, current status and changelog. Visual UI layout review remains unverified.
+- Validation passed: 2,441 offline Python tests with 100% line/branch coverage
+  (8,774 statements, 2,566 branches), Ruff lint/format, strict mypy on 181 files and source/wheel
+  builds. All 66 documentation checks, 24 Node protocol tests and real Windows VS Code 1.145.3
+  host checks passed, including schema 1.2 inspection/preview and ordering audit metadata.
+
+### Decisions
+
+- Preserve source order instead of assuming loader effects commute. The extra ordering read
+  is explicit generated wiring, not an inferred application argument or new dataset contract.
+- Keep the data/mapping reuse guard and unchanged business-node interfaces. Do not add general
+  DAG inference, parallel optimization, a process-runner guarantee or execution consent.
+
+### Open questions
+
+- Local package/import preservation, declared dependencies, typed domain data/sidecars and
+  result/artifact persistence are the next real-project blockers.
+- Actual pilot human review, real data/protocol validation and benchmark execution remain pending.
+
+### Next step
+
+- Define a bounded package/import-context preservation slice against the real proposal, then
+  address its typed input/output and artifact boundaries before any explicit validation run.
+
 ## 2026-11-14 - Flat candidate parameters and a concrete real-workflow proposal
 
 ### Completed

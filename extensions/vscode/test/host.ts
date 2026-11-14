@@ -38,6 +38,22 @@ export async function run(): Promise<void> {
   )!;
   assert.equal(JSON.parse(candidateParameters.content).candidate.seed, 42);
   assert.equal(JSON.parse(candidateParameters.content).candidate.phase, "validation");
+  await command("selectConfiguration", vscode.Uri.file(path.join(root, "ordered-join.json")));
+  assert.equal((await command("inspect"))?.status, "inspected");
+  const orderedPreview = await command("preview");
+  assert.equal(orderedPreview?.schema_version, "1.0");
+  assert.equal(orderedPreview?.plan?.schema_version, "1.1");
+  assert.equal(orderedPreview?.status, "planned");
+  const orderedFiles = orderedPreview!.files as PreviewFile[];
+  const orderedPipeline = orderedFiles.find((item) => item.path.endsWith("/pipeline.py"))!;
+  assert.ok(orderedPipeline.content.includes("_AfterPrevious"));
+  const orderedManifest = JSON.parse(
+    orderedFiles.find((item) => item.path === "functional-workflow.json")!.content,
+  );
+  assert.equal(orderedManifest.configuration.schema_version, "1.2");
+  assert.equal(orderedManifest.ordering.policy, "source_order");
+  assert.equal(orderedManifest.ordering_inputs.length, 1);
+  assert.equal(orderedManifest.ordering_inputs[0].forwarded_to_function, false);
   await command("selectConfiguration", vscode.Uri.file(path.join(root, "project.json")));
   await command("inspect");
   assert.ok(project.getChildren().some((item) => item.label === "Source"));

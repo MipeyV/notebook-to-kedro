@@ -40,9 +40,9 @@ def _finite_scalar(value: object) -> bool:
 def _validate_parameter(value: object, schema_version: str) -> None:
     if _finite_scalar(value):
         return
-    if schema_version != "1.1" or not isinstance(value, tuple):
+    if schema_version not in ("1.1", "1.2") or not isinstance(value, tuple):
         raise FunctionalWorkflowError(
-            "Workflow parameters require finite JSON scalars; flat mappings require schema 1.1 "
+            "Workflow parameters require finite JSON scalars; flat mappings require schema 1.1/1.2 "
             "and immutable pairs"
         )
     if any(
@@ -81,9 +81,9 @@ class FunctionalWorkflowConfiguration:
 
     def __post_init__(self) -> None:
         """Validate both direct API values and decoded configuration."""
-        if self.schema_version not in ("1.0", "1.1") or not _public_name(self.entrypoint):
+        if self.schema_version not in ("1.0", "1.1", "1.2") or not _public_name(self.entrypoint):
             raise FunctionalWorkflowError(
-                "Workflow requires schema_version 1.0 or 1.1 and a public entrypoint"
+                "Workflow requires schema_version 1.0, 1.1 or 1.2 and a public entrypoint"
             )
         for pairs in (self.inputs, self.parameters, self.outputs):
             if not isinstance(pairs, tuple) or any(

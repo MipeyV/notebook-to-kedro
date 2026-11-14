@@ -29,6 +29,12 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Opt-in functional workflow schema 1.2 supports independent calls and joins while preserving
+  source call order through explicit ordering-only dependencies. Original functions, business
+  wrapper arguments and node regression cases remain unchanged. Plans/manifests record the
+  new ordering metadata; schemas 1.0/1.1 retain their linear guard. Added paired synthetic
+  examples, threaded/sequential execution and exception controls, and ADR 0010.
+
 - Opt-in functional workflow schema 1.1 supports flat scalar-valued candidate mappings with
   immutable storage, fresh JSON exports and single-use node consumption. Regression overrides
   follow the selected workflow schema; scalar-only schema 1.0 stays compatible. Added paired

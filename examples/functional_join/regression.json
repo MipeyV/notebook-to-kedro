@@ -1,0 +1,25 @@
+{
+  "schema_version": "1.0",
+  "scenarios": [
+    {
+      "id": "positive",
+      "inputs": {"raw_values": [3.0], "raw_specification": {"scale": 2.0, "offset": 1.0}},
+      "parameters": {"candidate": {"name": "synthetic", "phase": "validation"}},
+      "expected": {"score": 7.0, "candidate": "synthetic", "phase": "validation"},
+      "nodes": {
+        "step_0000_load_values": {"inputs": {"raw_values": [3.0]}, "expected": [3.0]},
+        "step_0001_load_specification": {"inputs": {"raw_specification": {"scale": 2.0, "offset": 1.0}}, "expected": {"scale": 2.0, "offset": 1.0}},
+        "step_0002_evaluate": {
+          "inputs": {"observations": [3.0], "specification": {"scale": 2.0, "offset": 1.0}, "candidate": {"name": "synthetic", "phase": "validation"}},
+          "expected": {"score": 7.0, "candidate": "synthetic", "phase": "validation"}
+        }
+      }
+    },
+    {
+      "id": "override",
+      "inputs": {"raw_values": [-2.0], "raw_specification": {"scale": 3.0, "offset": 0.5}},
+      "parameters": {"candidate": {"name": "override", "phase": "validation"}},
+      "expected": {"score": -5.5, "candidate": "override", "phase": "validation"}
+    }
+  ]
+}

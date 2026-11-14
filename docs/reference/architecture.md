@@ -2,7 +2,7 @@
 
 [Documentation index](../README.md)
 
-Status: implementation boundaries reviewed on 2026-11-14. The
+Status: implementation boundaries reviewed on 2026-11-15. The
 [proposed evolution](#proposed-evolution) is separate from current capabilities.
 
 ## Objective
@@ -29,7 +29,7 @@ execution or framework imports. Small AST primitives are shared with notebook an
 Inspection remains independent of generation, as recorded in
 [ADR 0005](../decisions/0005-explicit-functional-block-inspection.md). A separate
 [functional workflow adapter](functional-workflows.md) now recomputes facts, validates explicit
-linear wiring and adapts calls to the shared Kedro renderer, profiles and writer. Original
+bounded wiring and adapts calls to the shared Kedro renderer, profiles and writer. Original
 instruction ASTs live in a relocated module with a source manifest; Python tasks do not invent
 notebook cells. [ADR 0006](../decisions/0006-linear-functional-workflow-generation.md) records
 ordering, identity and bounded I/O decisions. The old notebook conversion contracts are unchanged.
@@ -38,6 +38,13 @@ Workflow configuration schema 1.1 optionally carries flat scalar-valued candidat
 as immutable pairs, rendered back to ordinary `parameters.yml` objects. The planner treats them
 as single-use values to preserve mutation/identity semantics. Regression binding validates
 overrides under that same workflow schema; local operation envelopes remain schema 1.0.
+
+Opt-in workflow schema 1.2 adds source-order sequencing across independent calls and joins.
+The plan records missing adjacent-call dependencies. The shared renderer validates predecessor
+IDs and argument collisions, then emits a callable adapter with an ordering-only input pointing
+to the preceding assign-mode memory result. Business node signatures and original ASTs stay
+unchanged. The manifest distinguishes these inputs from actual function arguments.
+[ADR 0010](../decisions/0010-source-ordered-functional-joins.md) records the effect/order boundary.
 
 Functional analysis schema 1.1 observes a terminal `return_expression` independently of
 named `outputs`. Called functions may return supported expressions directly; their ASTs stay

@@ -140,6 +140,48 @@ def test_generated_suites_detect_code_oracle_and_path_regressions(tmp_path: Path
 
 
 @pytest.mark.integration
+@pytest.mark.parametrize("suffix", [".py", ".ipynb"])
+@pytest.mark.parametrize("custom_profile", [False, True])
+def test_shipped_ordered_join_tests_keep_business_node_interfaces_and_detect_changed_logic(
+    tmp_path: Path, suffix: str, *, custom_profile: bool
+) -> None:
+    example = ROOT / "examples/functional_join"
+    config = load_functional_workflow_configuration(example / "workflow.json")
+    contract = load_workflow_regression_contract(example / "regression.json")
+    project = tmp_path / "project"
+    profile = (
+        KedroArchitectureProfile("test.ordered", "1.0.0", "validation", "ml_")
+        if custom_profile
+        else None
+    )
+    generate_functional_kedro_project(
+        example / f"workflow{suffix}",
+        config,
+        project,
+        project_root=ROOT,
+        regression_contract=contract,
+        architecture_profile=profile,
+    )
+    metadata = json.loads((project / "tests/regression_cases.json").read_text())
+    assert "_ntk_after" not in json.dumps(metadata["contract"])
+    result, report = _run(project, tmp_path / "ordered-join.xml")
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert len(report.findall(".//testcase")) == 5
+    assert not report.findall(".//failure")
+    source = project / "src/generated_workflow/workflow_source.py"
+    original = source.read_text()
+    changed = original.replace("+ specification['offset']", "- specification['offset']")
+    assert changed != original
+    source.write_text(
+        changed + "\n# deliberate synthetic arithmetic regression\n", encoding="utf-8"
+    )
+    result, report = _run(project, tmp_path / "ordered-join-changed.xml")
+    assert result.returncode == 1, result.stdout + result.stderr
+    assert len(report.findall(".//failure")) == 3
+    assert not report.findall(".//error")
+
+
+@pytest.mark.integration
 def test_pipeline_only_contract_does_not_invent_passing_node_tests(tmp_path: Path) -> None:
     config = load_functional_workflow_configuration(EXAMPLE / "workflow.json")
     data = load_workflow_regression_contract(EXAMPLE / "regression.json").to_dict()
