@@ -63,6 +63,15 @@ undefined; faithful conversion still requires an actual entrypoint and I/O contr
 [ADR 0012](../decisions/0012-explicit-orchestration-preparation.md) records this concrete API/CLI
 boundary. No existing-project patching or interface-specific transformation logic is added.
 
+Workflow schema 1.4 declares raw file references separately from JSON-value inputs. Bounded
+stream hashing records primary/sibling-sidecar identities without data readers. The plan binds
+those observations and rendering recaptures them before copying bundles through the shared
+writer. Assign-mode catalog data passes a staged path string to the unchanged application
+loader, which still owns domain validation and object construction. Plan/manifest schema 1.3
+separates byte evidence and destinations from unverified runtime/domain behavior. Existing
+JSON regressions reject undefined file fixtures; final-result/artifact policies remain separate.
+[ADR 0013](../decisions/0013-explicit-file-reference-inputs.md) records this input boundary.
+
 Functional analysis schema 1.1 observes a terminal `return_expression` independently of
 named `outputs`. Called functions may return supported expressions directly; their ASTs stay
 in the source module. The entrypoint's explicit call assignments own dataset naming and linear

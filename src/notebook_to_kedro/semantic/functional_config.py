@@ -11,6 +11,7 @@ from pathlib import Path, PurePosixPath
 from typing import TYPE_CHECKING, TypeAlias, cast
 
 from notebook_to_kedro.exceptions import FunctionalWorkflowError
+from notebook_to_kedro.semantic.file_inputs import FileReferenceInput
 
 if TYPE_CHECKING:
     from notebook_to_kedro.ir.facts import JsonPrimitive
@@ -40,7 +41,7 @@ def _finite_scalar(value: object) -> bool:
 def _validate_parameter(value: object, schema_version: str) -> None:
     if _finite_scalar(value):
         return
-    if schema_version not in ("1.1", "1.2", "1.3") or not isinstance(value, tuple):
+    if schema_version not in ("1.1", "1.2", "1.3", "1.4") or not isinstance(value, tuple):
         raise FunctionalWorkflowError(
             "Workflow parameters require finite JSON scalars; flat mappings require schema 1.1+ "
             "and immutable pairs"
@@ -79,16 +80,17 @@ class FunctionalWorkflowConfiguration:
     outputs: tuple[tuple[str, str], ...]
     schema_version: str = "1.0"
     source_package: str | None = None
+    file_inputs: tuple[tuple[str, FileReferenceInput], ...] = ()
 
     def __post_init__(self) -> None:
         """Validate both direct API values and decoded configuration."""
-        if self.schema_version not in ("1.0", "1.1", "1.2", "1.3") or not _public_name(
+        if self.schema_version not in ("1.0", "1.1", "1.2", "1.3", "1.4") or not _public_name(
             self.entrypoint
         ):
             raise FunctionalWorkflowError(
-                "Workflow requires schema_version 1.0 through 1.3 and a public entrypoint"
+                "Workflow requires schema_version 1.0 through 1.4 and a public entrypoint"
             )
-        if self.schema_version == "1.3":
+        if self.schema_version in ("1.3", "1.4"):
             if (
                 not isinstance(self.source_package, str)
                 or not self.source_package
@@ -99,11 +101,11 @@ class FunctionalWorkflowConfiguration:
                 or ":" in self.source_package
             ):
                 raise FunctionalWorkflowError(
-                    "Schema 1.3 requires a contained relative source_package path"
+                    "Schema 1.3+ requires a contained relative source_package path"
                 )
         elif self.source_package is not None:
-            raise FunctionalWorkflowError("source_package requires workflow schema 1.3")
-        for pairs in (self.inputs, self.parameters, self.outputs):
+            raise FunctionalWorkflowError("source_package requires workflow schema 1.3+")
+        for pairs in (self.inputs, self.parameters, self.outputs, self.file_inputs):
             if not isinstance(pairs, tuple) or any(
                 not isinstance(item, tuple)
                 or len(item) != _PAIR_LENGTH
@@ -117,6 +119,7 @@ class FunctionalWorkflowConfiguration:
                 raise FunctionalWorkflowError("Workflow mappings cannot repeat argument names")
         if set(dict(self.inputs)) & set(dict(self.parameters)):
             raise FunctionalWorkflowError("Workflow inputs and parameters must be disjoint")
+        self._validate_file_inputs()
         if any(not isinstance(value, str) or not value for _, value in self.inputs):
             raise FunctionalWorkflowError("Workflow input paths must be nonempty strings")
         if len(self.outputs) != 1 or any(
@@ -129,6 +132,16 @@ class FunctionalWorkflowConfiguration:
             )
         for _, value in self.parameters:
             _validate_parameter(value, self.schema_version)
+
+    def _validate_file_inputs(self) -> None:
+        if self.schema_version != "1.4" and self.file_inputs:
+            raise FunctionalWorkflowError("File references require workflow schema 1.4")
+        if any(not isinstance(value, FileReferenceInput) for _, value in self.file_inputs) or set(
+            dict(self.file_inputs)
+        ) & (set(dict(self.inputs)) | set(dict(self.parameters))):
+            raise FunctionalWorkflowError(
+                "File inputs require immutable references and disjoint boundary names"
+            )
 
     def parameter_values(self) -> dict[str, JsonPrimitive | dict[str, JsonPrimitive]]:
         """Return fresh JSON objects without exposing mutable configuration state."""
@@ -148,20 +161,27 @@ class FunctionalWorkflowConfiguration:
         }
         if self.source_package is not None:
             data["source_package"] = self.source_package
+        if self.schema_version == "1.4":
+            data["file_inputs"] = {name: value.to_dict() for name, value in self.file_inputs}
         return data
 
     @classmethod
     def from_dict(cls, data: object) -> FunctionalWorkflowConfiguration:
         """Reject unknown fields and non-mapping boundaries."""
+        fields = _FIELDS
+        if isinstance(data, dict) and data.get("schema_version") in ("1.3", "1.4"):
+            fields = fields | {"source_package"}
+            if data["schema_version"] == "1.4":
+                fields = fields | {"file_inputs"}
         if (
             not isinstance(data, dict)
-            or data.keys()
-            != (_FIELDS | {"source_package"} if data.get("schema_version") == "1.3" else _FIELDS)
+            or data.keys() != fields
             or any(not isinstance(data[key], dict) for key in ("inputs", "parameters", "outputs"))
+            or (data.get("schema_version") == "1.4" and not isinstance(data["file_inputs"], dict))
         ):
             raise FunctionalWorkflowError(
                 "Required workflow fields: schema_version, entrypoint, inputs, parameters, "
-                "outputs; schema 1.3 also requires source_package"
+                "outputs; schema 1.3+ requires source_package and 1.4 also file_inputs"
             )
         return cls(
             data["entrypoint"],
@@ -170,6 +190,10 @@ class FunctionalWorkflowConfiguration:
             tuple(data["outputs"].items()),
             data["schema_version"],
             data.get("source_package"),
+            tuple(
+                (name, FileReferenceInput.from_dict(value))
+                for name, value in data.get("file_inputs", {}).items()
+            ),
         )
 
 

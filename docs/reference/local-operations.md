@@ -72,7 +72,9 @@ existing publication and failure limits still apply.
 Planning uses the actual compile-only renderers and the writer's read-only file validation.
 Functional rendering revalidates wiring against captured source facts before rendering.
 Functional schema 1.3 also recaptures the declared source package. Copy previews include data,
-original package source and resources with target paths, hashes and exact contents. Publication
+original package source/resources and schema 1.4 input bundles with source/target paths and
+hashes. Rendered-text previews contain exact proposed text; copy entries do not embed file
+contents. Publication
 uses those same shared writer contracts. Source-only inspection remains context-free and does
 not load the workflow contract to infer relative-import context; package-aware planning requires
 the explicit schema 1.3 configuration. Supporting modules are not additional inspected node sources.

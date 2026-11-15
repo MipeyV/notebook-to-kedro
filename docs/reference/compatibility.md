@@ -41,6 +41,14 @@ wiring checks, conservatively treating all arguments as single-use. It is not au
 entrypoint discovery or typed-I/O support. Original conversion guards and local envelopes stay
 unchanged. Its synthesized facts and unreviewed status are distinct from original source facts.
 
+Workflow schema 1.4 retains the required regular package and adds explicit raw-file path inputs
+with declared sibling sidecars. It hashes/copies bytes under a 256 MiB total limit, supplies
+path strings through assign-mode memory datasets and preserves original application readers.
+No file format, Parquet execution, domain fingerprint or typed serializer is inferred. Plans use
+schema 1.3; analysis/local envelopes remain unchanged. Nested sidecars, remote/external files,
+generated file-fixture regression contracts and typed final-result/artifact policies remain
+unsupported. JSON-value input/regression behavior remains available independently.
+
 The [local operation layer](local-operations.md) configures these same deterministic entrypoints
 through typed inspection, new-file preview and generation requests. It adds an explicit contained
 working root and local JSON settings, without broadening source/library support or executing code.

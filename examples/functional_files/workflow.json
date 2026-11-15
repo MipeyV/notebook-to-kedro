@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.4",
+  "entrypoint": "workflow",
+  "source_package": "examples/functional_files/src/reference_ml",
+  "inputs": {},
+  "file_inputs": {
+    "snapshot_path": {
+      "path": "examples/functional_files/data/measurements.txt",
+      "sidecars": ["examples/functional_files/data/measurements.metadata.json"]
+    },
+    "protocol_path": {
+      "path": "examples/functional_files/protocols/study.json",
+      "sidecars": []
+    }
+  },
+  "parameters": {"candidate": {"bias": 0.5}},
+  "outputs": {"result": "data/08_reporting/result.json"}
+}

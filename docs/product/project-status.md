@@ -22,6 +22,7 @@ Historical measurements retain their original corpus, runtime and limitations.
 | Functional workflow conversion | Explicit single-use entrypoints generate Kedro from scripts or notebooks, with JSON file I/O and scalar/flat candidate parameters. Schemas 1.0/1.1 keep linear data wiring; schema 1.2 preserves source order across independent calls and joins. Schema 1.3 additionally copies one declared regular Python package/resources under its original import name, with inventory binding and compile-only checks. Business signatures, source, intermediate identity and single-use mapping rules are retained. Data fan-out, control flow, cross-module workflow discovery, dependency/metadata reconstruction and typed persistent I/O remain unsupported. |
 | Shared engine / local interface | Typed operations feed a desktop VS Code Explorer view with guided settings creation, inspection before workflow I/O, interpreter/profile selection, diagnostics, read-only previews and confirmed generation. Existing-project patches and automatic environment integration remain future work. |
 | Explicit orchestration preparation | Separate API/CLI previews declared calls against observed functions and can publish an unchanged package copy plus a synthesized forwarding adapter. Original facts and proposal facts remain distinct; persistent I/O/artifact policy stays undefined. This is an unreviewed integration proposal, not automatic entrypoint discovery or complete real-project conversion. |
+| Raw file-reference inputs | Opt-in workflow schema 1.4 hashes/copies declared primary files and up to 16 sibling sidecars, then supplies path strings to unchanged application loaders. A 256 MiB total budget and contained regular-file checks apply. Plans/manifests distinguish raw-byte evidence from unverified domain semantics. Final results remain JSON-compatible; generated file-fixture regressions and application artifacts remain future work. |
 
 Generation itself does not verify dependency installation, full DAG semantics or runtime behavior.
 The [explicit bootstrap check](../reference/generated-workflow-tests.md#fresh-environment-bootstrap)
@@ -55,6 +56,11 @@ source hashes. It publishes no real package copy and executes no application cod
 prepared adapters preserve object identity, call/exception order, and can pass subsequent
 Kedro/shipped tests when JSON I/O and expectations are supplied explicitly. Typed file references,
 result persistence and owned artifact policies remain proposed in the setup guide.
+
+The first file-reference input slice is now implemented and exercised on synthetic text/metadata
+and protocol files. A private real-input inventory captures two bundles/three files read-only;
+it establishes neither domain compatibility nor execution consent. Typed final results, artifacts
+and dependency/distribution metadata remain unresolved. No complete real project is generated.
 
 See [local operations](../reference/local-operations.md) for the first E4 slice. Settings anchor
 the declared working root to the configuration file, constrain source/configuration/input/output

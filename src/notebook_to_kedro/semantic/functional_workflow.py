@@ -12,6 +12,7 @@ from notebook_to_kedro.exceptions import FunctionalWorkflowError
 from notebook_to_kedro.ir.functional import BlockSpan
 
 if TYPE_CHECKING:
+    from notebook_to_kedro.ir.file_inputs import FileReferenceInventory
     from notebook_to_kedro.ir.functional import FunctionalAnalysis, FunctionalBlock
     from notebook_to_kedro.ir.source_package import SourcePackage
     from notebook_to_kedro.semantic.functional_config import FunctionalWorkflowConfiguration
@@ -38,11 +39,12 @@ class FunctionalWorkflowPlan:
     configuration: FunctionalWorkflowConfiguration
     steps: tuple[FunctionalWorkflowStep, ...]
     source_package: SourcePackage | None = None
+    file_inputs: tuple[FileReferenceInventory, ...] = ()
 
     @property
     def order_after(self) -> tuple[tuple[str, str], ...]:
         """Declare missing adjacent-call dependencies in the explicit source-order mode."""
-        if self.configuration.schema_version not in ("1.2", "1.3"):
+        if self.configuration.schema_version not in ("1.2", "1.3", "1.4"):
             return ()
         return tuple(
             (current.id, previous.id)
@@ -58,7 +60,7 @@ class FunctionalWorkflowPlan:
             "configuration": self.configuration.to_dict(),
             "steps": [asdict(step) for step in self.steps],
         }
-        if self.configuration.schema_version in ("1.2", "1.3"):
+        if self.configuration.schema_version in ("1.2", "1.3", "1.4"):
             payload["schema_version"] = "1.1"
             payload["ordering"] = {
                 "policy": "source_order",
@@ -71,6 +73,9 @@ class FunctionalWorkflowPlan:
             payload["schema_version"] = "1.2"
             payload["source_package"] = self.source_package.to_dict()
             payload["source_package_sha256"] = self.source_package.sha256
+        if self.configuration.schema_version == "1.4":
+            payload["schema_version"] = "1.3"
+            payload["file_inputs"] = [item.to_dict() for item in self.file_inputs]
         return json.dumps(payload, sort_keys=True, indent=2) + "\n"
 
 
@@ -162,9 +167,14 @@ def plan_functional_workflow(
     configuration: FunctionalWorkflowConfiguration,
     *,
     source_package: SourcePackage | None = None,
+    file_inputs: tuple[FileReferenceInventory, ...] = (),
 ) -> FunctionalWorkflowPlan:
     """Recompute facts and require single-use data flow with explicit call-order semantics."""
     _validate_package_context(analysis, configuration, source_package)
+    if tuple(
+        (item.argument, tuple(file.path for file in item.files)) for item in file_inputs
+    ) != tuple((name, (value.path, *value.sidecars)) for name, value in configuration.file_inputs):
+        raise FunctionalWorkflowError("Workflow requires matching captured file references")
     if (
         analysis
         != analyze_functional_blocks(analysis.sources, package_module=analysis.package_module)
@@ -176,8 +186,8 @@ def plan_functional_workflow(
         raise FunctionalWorkflowError("Configured entrypoint was not found")
     entry = functions[configuration.entrypoint]
     if set(entry.parameters) != set(dict(configuration.inputs)) | set(
-        dict(configuration.parameters)
-    ):
+        dict(configuration.file_inputs)
+    ) | set(dict(configuration.parameters)):
         raise FunctionalWorkflowError(
             "Configured inputs and parameters must cover the entrypoint arguments exactly"
         )
@@ -195,9 +205,9 @@ def plan_functional_workflow(
         reusable_parameters={
             name for name, value in configuration.parameters if not isinstance(value, tuple)
         },
-        source_order=configuration.schema_version in ("1.2", "1.3"),
+        source_order=configuration.schema_version in ("1.2", "1.3", "1.4"),
     )
-    return FunctionalWorkflowPlan(analysis, configuration, steps, source_package)
+    return FunctionalWorkflowPlan(analysis, configuration, steps, source_package, file_inputs)
 
 
 def plan_functional_steps(

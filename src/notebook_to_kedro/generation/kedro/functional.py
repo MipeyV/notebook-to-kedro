@@ -8,6 +8,7 @@ from dataclasses import asdict
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from notebook_to_kedro.analysis.file_inputs import capture_file_references
 from notebook_to_kedro.analysis.functional import analyze_functional_blocks
 from notebook_to_kedro.analysis.functional_sources import analyze_functional_blocks_path
 from notebook_to_kedro.analysis.source_packages import capture_source_package
@@ -45,7 +46,12 @@ def plan_functional_workflow_path(
     analysis = analyze_functional_blocks_path(path, project_root=root)
     if package is not None:
         analysis = analyze_functional_blocks(analysis.sources, package_module=package.module)
-    return plan_functional_workflow(analysis, configuration, source_package=package)
+    return plan_functional_workflow(
+        analysis,
+        configuration,
+        source_package=package,
+        file_inputs=capture_file_references(root, configuration.file_inputs),
+    )
 
 
 def _conversion_plan(plan: FunctionalWorkflowPlan, root: Path, package_name: str) -> ConversionPlan:
@@ -136,11 +142,16 @@ def render_functional_workflow(
     """Render an internally recomputed workflow plan without publication or execution."""
     if (
         plan_functional_workflow(
-            plan.analysis, plan.configuration, source_package=plan.source_package
+            plan.analysis,
+            plan.configuration,
+            source_package=plan.source_package,
+            file_inputs=plan.file_inputs,
         )
         != plan
     ):
         raise FunctionalWorkflowError("Functional plan differs from recomputed source wiring")
+    if capture_file_references(root, plan.configuration.file_inputs) != plan.file_inputs:
+        raise FunctionalWorkflowError("File references differ from the captured inventory")
     package = plan.source_package
     if package is not None:
         source = root / package.root / package.source_file
@@ -180,6 +191,40 @@ def render_functional_workflow(
         dataset.name: {"type": dataset.type, "filepath": dataset.filepath}
         for dataset in conversion.catalog_datasets
     }
+    reference_destinations = []
+    for inventory in plan.file_inputs:
+        targets = tuple(
+            Path("data/01_raw") / inventory.argument / Path(item.path).name
+            for item in inventory.files
+        )
+        catalog[inventory.argument] = {
+            "type": "MemoryDataset",
+            "copy_mode": "assign",
+            "data": targets[0].as_posix(),
+        }
+        copies = (
+            *copies,
+            *(
+                (root / item.path, target)
+                for item, target in zip(inventory.files, targets, strict=True)
+            ),
+        )
+        reference_destinations.append(
+            {
+                "argument": inventory.argument,
+                "load_policy": "path_string",
+                "runtime_hash_validation": "not_performed",
+                "files": [
+                    {
+                        "source": item.path,
+                        "destination": target.as_posix(),
+                        "sha256": item.sha256,
+                        "size_bytes": item.size_bytes,
+                    }
+                    for item, target in zip(inventory.files, targets, strict=True)
+                ],
+            }
+        )
     catalog.update(
         {
             name: {"type": "json.JSONDataset", "filepath": filepath}
@@ -207,7 +252,9 @@ def render_functional_workflow(
         ],
         "profile_sha256": profile.sha256,
     }
-    if configuration.schema_version in ("1.2", "1.3"):
+    if configuration.schema_version == "1.4":
+        manifest["file_reference_destinations"] = reference_destinations
+    if configuration.schema_version in ("1.2", "1.3", "1.4"):
         steps = {step.id: step for step in plan.steps}
         manifest["ordering_inputs"] = [
             {

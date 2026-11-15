@@ -32,6 +32,11 @@ async function main() {
     path.join(repository, "examples/kedro_profiles/team_training.json"),
     path.join(workspace, "profile.json"),
   );
+  await fs.cp(
+    path.join(repository, "examples/functional_files"),
+    path.join(workspace, "examples/functional_files"),
+    { recursive: true },
+  );
   await fs.copyFile(
     path.join(repository, "tests/fixtures/notebooks/simple_training.ipynb"),
     path.join(workspace, "source.ipynb"),
@@ -92,6 +97,15 @@ async function main() {
       source: "examples/functional_package/src/example_ml/workflow.py",
       workflow_configuration: "examples/functional_package/workflow.json",
       regression_contract: "examples/functional_package/regression.json",
+    }),
+  );
+  await fs.writeFile(
+    path.join(workspace, "files.json"),
+    JSON.stringify({
+      ...config,
+      source: "examples/functional_files/src/reference_ml/workflow.py",
+      workflow_configuration: "examples/functional_files/workflow.json",
+      regression_contract: undefined,
     }),
   );
   await runTests({

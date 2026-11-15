@@ -67,6 +67,12 @@ original import names and records the package inventory in the plan. This is not
 project/dependency discovery; select the existing package-aware workflow JSON through setup
 or settings. Source-only inspection remains independent of its package context.
 
+An engine from this revision also accepts schema 1.4 file-reference inputs with explicit sibling
+sidecars. The same Files to copy tree lists their actual staged destinations and the operation
+report retains raw-byte identities. Select the existing workflow JSON through setup/settings;
+the UI does not infer loaders or sidecars. These inputs do not yet support the JSON regression
+expectation contract. Local-operation schema and extension runtime behavior stay unchanged.
+
 **Generate project** refreshes the plan, asks for a destination inside the declared project
 root and displays an explicit destination confirmation. Canceling that confirmation leaves
 the destination absent. Confirming invokes the current Python generation operation, which

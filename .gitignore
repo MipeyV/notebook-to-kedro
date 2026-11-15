@@ -29,6 +29,10 @@ node_modules/
 # Generated projects and local data
 generated/
 data/
+!examples/functional_files/data/
+examples/functional_files/data/*
+!examples/functional_files/data/measurements.txt
+!examples/functional_files/data/measurements.metadata.json
 
 # Editors and operating systems
 .idea/

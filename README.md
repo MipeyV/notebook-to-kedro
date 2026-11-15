@@ -112,6 +112,11 @@ dependencies or reconstruct project metadata. Data fan-out and control flow rema
 [pytest node/pipeline regressions](docs/reference/generated-workflow-tests.md) based on explicit
 expected values. Missing expectations are reported; generation never executes code to infer them.
 
+Schema 1.4 adds [raw file references with declared sibling sidecars](docs/reference/functional-workflows.md#raw-file-path-inputs-in-schema-14).
+The engine copies and hashes their bytes, then passes a path to the original application loader.
+It does not infer data formats or serialize typed results. Shipped JSON regression contracts do
+not yet define file-reference fixtures; those gaps remain explicit.
+
 When a package exposes functions without an entrypoint, use the separate
 [orchestration preparation](docs/reference/functional-workflows.md#explicit-orchestration-preparation)
 operation: `prepare-workflow SOURCE DEFINITION` previews explicitly declared calls;
