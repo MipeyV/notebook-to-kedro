@@ -54,6 +54,21 @@ export async function run(): Promise<void> {
   assert.equal(orderedManifest.ordering.policy, "source_order");
   assert.equal(orderedManifest.ordering_inputs.length, 1);
   assert.equal(orderedManifest.ordering_inputs[0].forwarded_to_function, false);
+  await command("selectConfiguration", vscode.Uri.file(path.join(root, "package.json")));
+  assert.equal((await command("inspect"))?.status, "inspected");
+  const packagePreview = await command("preview");
+  assert.equal(packagePreview?.status, "planned");
+  assert.equal(packagePreview?.plan?.schema_version, "1.2");
+  const packageCopies = project.getChildren().find((item) => item.label === "Files to copy");
+  assert.ok(packageCopies?.children?.some((item) => item.label === "src/example_ml/workflow.py"));
+  const packageManifest = JSON.parse(
+    (packagePreview!.files as PreviewFile[]).find(
+      (item) => item.path === "functional-workflow.json",
+    )!.content,
+  );
+  assert.equal(packageManifest.source_package.module, "example_ml.workflow");
+  assert.equal(packageManifest.source_module, "src/example_ml/workflow.py");
+  assert.equal(packageManifest.source_package.distribution_metadata_status, "not_reconstructed");
   await command("selectConfiguration", vscode.Uri.file(path.join(root, "project.json")));
   await command("inspect");
   assert.ok(project.getChildren().some((item) => item.label === "Source"));

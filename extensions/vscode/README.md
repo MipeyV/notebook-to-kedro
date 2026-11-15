@@ -28,7 +28,7 @@ architecture profile and optional regression expectations with the normal JSON e
 
 - **Inspect source** displays static status and diagnostics. **Open operation report** shows
   the complete JSON facts.
-- **Preview files** displays proposed files and copied inputs. Clicking a file opens its exact
+- **Preview files** displays proposed files and **Files to copy**. Clicking a file opens its exact
   content in a read-only editor.
 - **Generate project** refreshes the plan, asks for a new folder inside the declared project
   root, and displays a final destination confirmation. The engine recomputes current saved
@@ -46,6 +46,11 @@ file workspaces. Calls use an explicit interpreter with isolated Python imports,
 process arguments and a 120-second timeout / 64 MiB response limit. Runtime dependencies of
 the generated ML project are installed separately when you intend to execute it.
 
+An engine from this revision supports explicit workflow schema 1.3 with one declared local
+Python package. Its source/resources appear among files to copy and retain original import
+names. Select that existing workflow JSON in setup/settings. Source-only inspection does not
+infer package context, and dependency/distribution metadata is not reconstructed.
+
 ## Development
 
 ```bash
@@ -55,7 +60,7 @@ npm test
 npm run package
 ```
 
-The package command creates `generated/notebook-to-kedro-0.2.0.vsix` at the repository root.
+The package command creates `generated/notebook-to-kedro-0.2.1.vsix` at the repository root.
 Set `NTK_TEST_PYTHON` to the engine interpreter and run `npm run test:host` for real VS Code
 extension-host checks. `VSCODE_EXECUTABLE_PATH` can select an installed Code executable.
 Otherwise the runner downloads the pinned test version. Tests use a private generated fixture

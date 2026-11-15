@@ -61,7 +61,7 @@ also supplies independent intermediate expectations for the two generated wrappe
   Contracts are bounded to 64 KiB UTF-8 and 16 JSON nesting levels. Duplicate keys, non-finite
   values, non-JSON values and unknown/missing fields are rejected.
 - Scenario input/parameter names exactly match workflow boundaries. Parameters follow the
-  selected workflow schema: finite scalars in 1.0, also flat scalar-valued objects in 1.1/1.2.
+  selected workflow schema: finite scalars in 1.0, also flat scalar-valued objects in 1.1/1.2/1.3.
   Input/expected values can be nested finite JSON. The regression contract itself remains
   schema 1.0. Application acceptance is tested only when pytest runs.
 - `expected` describes the one final output. `nodes` maps unprefixed step names from
@@ -147,6 +147,15 @@ The wheel contains application code; configuration, data and tests stay in the g
 project directory and must accompany it when running the project.
 
 ## Evidence and remaining E3 work
+
+The schema 1.3 [package fixture](../../examples/functional_package/regression.json) supplies two
+pipeline expectations and no fabricated JSON node cases for its internal dataclass. Missing
+node oracles remain in the gap snapshot. Both profiles pass the emitted tests; changing the
+copied resource makes both pipeline cases fail. Separate tests build a wheel offline with
+development-only Hatchling, run original functions and import the generated pipeline registry from its unpacked contents
+after removing generated sources from the import path. This proves package/resource inclusion
+and internal type identity, not fresh installation of application dependencies or original
+distribution metadata. Normal generation still performs no execution.
 
 Trusted tests execute the shipped suites in fresh Python processes for both source formats
 and default/custom profiles. The example produces five passing tests (three pipeline, two node);

@@ -50,9 +50,14 @@ def _python_source(path: Path, label: str) -> SourceUnit:
         raise FunctionalSourceError(f"Cannot read Python source: {path}") from error
     if len(content) > MAX_PYTHON_BYTES:
         raise FunctionalSourceError(f"Python source exceeds {MAX_PYTHON_BYTES} bytes")
+    source = decode_python_source(content, str(path))
+    return SourceUnit("module", label, "python", hashlib.sha256(content).hexdigest(), source)
+
+
+def decode_python_source(content: bytes, label: str) -> str:
+    """Decode retained Python bytes without rewriting encoding cookies or importing code."""
     try:
         encoding, _ = tokenize.detect_encoding(io.BytesIO(content).readline)
-        source = content.decode(encoding)
+        return content.decode(encoding)
     except (SyntaxError, UnicodeError, LookupError) as error:
-        raise FunctionalSourceError(f"Cannot decode Python source: {path}") from error
-    return SourceUnit("module", label, "python", hashlib.sha256(content).hexdigest(), source)
+        raise FunctionalSourceError(f"Cannot decode Python source: {label}") from error

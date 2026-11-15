@@ -5,6 +5,7 @@ from __future__ import annotations
 import ast
 import copy
 import hashlib
+import keyword
 import symtable
 from collections import Counter
 from graphlib import CycleError, TopologicalSorter
@@ -360,10 +361,24 @@ def _dependencies(
     return tuple(edges), tuple(diagnostics)
 
 
-def analyze_functional_blocks(sources: tuple[SourceUnit, ...]) -> FunctionalAnalysis:
+def analyze_functional_blocks(
+    sources: tuple[SourceUnit, ...], *, package_module: str | None = None
+) -> FunctionalAnalysis:
     """Inspect source units without execution, imports, provider calls or filesystem I/O."""
     if len({unit.id for unit in sources}) != len(sources):
         raise ValueError("Source unit IDs must be unique")
+    if package_module is not None and (
+        len(sources) != 1
+        or sources[0].kind != "python"
+        or not package_module
+        or any(
+            not part.isascii() or not part.isidentifier() or keyword.iskeyword(part)
+            for part in package_module.split(".")
+        )
+    ):
+        raise ValueError(
+            "Package module context requires one Python source and a dotted identifier"
+        )
     blocks: list[FunctionalBlock] = []
     statements: list[BlockStatement] = []
     diagnostics: list[BlockDiagnostic] = []
@@ -383,7 +398,8 @@ def analyze_functional_blocks(sources: tuple[SourceUnit, ...]) -> FunctionalAnal
             if isinstance(node, (ast.Import, ast.ImportFrom)):
                 kind = "import"
                 if isinstance(node, ast.ImportFrom) and (
-                    node.level or any(alias.name == "*" for alias in node.names)
+                    (node.level and package_module is None)
+                    or any(alias.name == "*" for alias in node.names)
                 ):
                     diagnostics.append(
                         _issue(
@@ -443,4 +459,12 @@ def analyze_functional_blocks(sources: tuple[SourceUnit, ...]) -> FunctionalAnal
         diagnostics.append(
             BlockDiagnostic("BL009", "error", "No explicit synchronous function blocks were found.")
         )
-    return FunctionalAnalysis(sources, tuple(statements), tuple(blocks), edges, tuple(diagnostics))
+    return FunctionalAnalysis(
+        sources,
+        tuple(statements),
+        tuple(blocks),
+        edges,
+        tuple(diagnostics),
+        schema_version="1.2" if package_module is not None else "1.1",
+        package_module=package_module,
+    )

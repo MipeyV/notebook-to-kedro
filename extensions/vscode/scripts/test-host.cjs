@@ -23,6 +23,11 @@ async function main() {
     path.join(workspace, "examples/functional_join"),
     { recursive: true },
   );
+  await fs.cp(
+    path.join(repository, "examples/functional_package"),
+    path.join(workspace, "examples/functional_package"),
+    { recursive: true },
+  );
   await fs.copyFile(
     path.join(repository, "examples/kedro_profiles/team_training.json"),
     path.join(workspace, "profile.json"),
@@ -78,6 +83,15 @@ async function main() {
       project_root: ".",
       source_kind: "notebook",
       source: "source.ipynb",
+    }),
+  );
+  await fs.writeFile(
+    path.join(workspace, "package.json"),
+    JSON.stringify({
+      ...config,
+      source: "examples/functional_package/src/example_ml/workflow.py",
+      workflow_configuration: "examples/functional_package/workflow.json",
+      regression_contract: "examples/functional_package/regression.json",
     }),
   );
   await runTests({

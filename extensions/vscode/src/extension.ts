@@ -380,7 +380,7 @@ export class ProjectController
       const copies = this.result.copies as PreviewCopy[];
       if (copies.length)
         entries.push({
-          label: "Copied inputs",
+          label: "Files to copy",
           children: copies.map((copy) => ({
             label: copy.destination,
             description: copy.source,

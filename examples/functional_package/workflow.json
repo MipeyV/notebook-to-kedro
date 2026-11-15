@@ -1,0 +1,8 @@
+{
+  "schema_version": "1.3",
+  "entrypoint": "workflow",
+  "source_package": "examples/functional_package/src/example_ml",
+  "inputs": {"values": "examples/functional_package/input.json"},
+  "parameters": {"scale": 2.0},
+  "outputs": {"total": "data/08_reporting/total.json"}
+}
