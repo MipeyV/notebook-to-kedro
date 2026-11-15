@@ -122,6 +122,12 @@ available; underlying engine/I/O exceptions propagate directly from those helper
 
 ## Evidence and next scope
 
+The separate `prepare-workflow` API/CLI operation previews declared orchestration before I/O
+configuration and optionally publishes a new review copy. It is not an additional schema 1.0
+local operation or VS Code command. Existing inspect/plan/generate behavior remains unchanged;
+once an adapter and supported I/O are supplied, ordinary workflow conversion can use its actual
+saved source. See the [preparation contract](functional-workflows.md#explicit-orchestration-preparation).
+
 Tests compare previews and published files byte-for-byte with both existing generators,
 including functional script/notebook inputs, copied CSV/JSON data and supplied regressions.
 They check root anchoring from another CWD, strict configuration, unchanged files during

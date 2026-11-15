@@ -21,6 +21,10 @@ from notebook_to_kedro.generation.kedro.regression_contract import (
     WorkflowRegressionContract,
     load_workflow_regression_contract,
 )
+from notebook_to_kedro.generation.workflow_preparation import (
+    prepare_functional_workflow,
+    render_workflow_preparation,
+)
 from notebook_to_kedro.notebook import load_notebook
 from notebook_to_kedro.reporting import render_conversion_report
 from notebook_to_kedro.semantic import (
@@ -40,6 +44,11 @@ from notebook_to_kedro.semantic.source_accounting import (
     ConversionSourceAudit,
     audit_conversion_source,
     enforce_source_accounting,
+)
+from notebook_to_kedro.semantic.workflow_preparation import (
+    WorkflowCall,
+    WorkflowPreparationDefinition,
+    load_workflow_preparation_definition,
 )
 
 if TYPE_CHECKING:
@@ -111,6 +120,8 @@ __all__ = [
     "ConversionSourceAudit",
     "FunctionalWorkflowConfiguration",
     "KedroArchitectureProfile",
+    "WorkflowCall",
+    "WorkflowPreparationDefinition",
     "WorkflowRegressionContract",
     "analyze_functional_blocks_path",
     "analyze_notebook_path",
@@ -120,9 +131,12 @@ __all__ = [
     "generate_kedro_project",
     "load_functional_workflow_configuration",
     "load_kedro_profile",
+    "load_workflow_preparation_definition",
     "load_workflow_regression_contract",
     "plan_functional_workflow_path",
     "plan_notebook_path",
+    "prepare_functional_workflow",
     "render_conversion_report",
+    "render_workflow_preparation",
     "validate_conversion_plan",
 ]

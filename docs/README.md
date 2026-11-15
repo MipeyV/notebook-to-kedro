@@ -126,6 +126,8 @@ the dedicated experiment reports for their frozen settings, decisions and limita
   opt-in ordered calls, explicit ordering-only inputs, unchanged business interfaces and bounded evidence.
 - [ADR 0011: explicit source package context](decisions/0011-explicit-source-package-context.md):
   bounded raw source/resource preservation, original imports, inventory binding and dependency limits.
+- [ADR 0012: explicit orchestration preparation](decisions/0012-explicit-orchestration-preparation.md):
+  declared calls, separate synthesized adapter facts and a new review copy before persistent I/O.
 
 ## Maintaining documentation
 

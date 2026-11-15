@@ -189,6 +189,25 @@ def plan_functional_workflow(
         raise FunctionalWorkflowError(
             "Module-identity globals cannot be relocated into a generated project"
         )
+    steps = plan_functional_steps(
+        entry,
+        functions,
+        reusable_parameters={
+            name for name, value in configuration.parameters if not isinstance(value, tuple)
+        },
+        source_order=configuration.schema_version in ("1.2", "1.3"),
+    )
+    return FunctionalWorkflowPlan(analysis, configuration, steps, source_package)
+
+
+def plan_functional_steps(
+    entry: FunctionalBlock,
+    functions: dict[str, FunctionalBlock],
+    *,
+    reusable_parameters: set[str],
+    source_order: bool,
+) -> tuple[FunctionalWorkflowStep, ...]:
+    """Validate explicit call wiring, independently of persistent I/O configuration."""
     node = cast("ast.FunctionDef", ast.parse(entry.source).body[0])
     body = node.body[1:] if ast.get_docstring(node) is not None else node.body
     steps = tuple(
@@ -198,9 +217,6 @@ def plan_functional_workflow(
         raise FunctionalWorkflowError("Entrypoint must return the final call result")
     available = set(entry.parameters)
     consumed: set[str] = set()
-    reusable_parameters = {
-        name for name, value in configuration.parameters if not isinstance(value, tuple)
-    }
     previous: str | None = None
     for step in steps:
         values = [value for _, value in step.inputs]
@@ -214,15 +230,11 @@ def plan_functional_workflow(
                 "Data and mapping parameters must be consumed at most once; "
                 "aliasing/fan-out is unsupported"
             )
-        if (
-            configuration.schema_version not in ("1.2", "1.3")
-            and previous is not None
-            and previous not in data_values
-        ):
+        if not source_order and previous is not None and previous not in data_values:
             raise FunctionalWorkflowError(
                 "Every subsequent call must consume the preceding result to preserve order"
             )
         consumed.update(data_values)
         available.add(step.output)
         previous = step.output
-    return FunctionalWorkflowPlan(analysis, configuration, steps, source_package)
+    return steps

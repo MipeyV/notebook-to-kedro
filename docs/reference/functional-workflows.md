@@ -190,6 +190,55 @@ Local operation envelopes/project settings stay schema 1.0; analysis stays schem
 
 See [ADR 0010](../decisions/0010-source-ordered-functional-joins.md) for the ordering decision.
 
+## Explicit orchestration preparation
+
+A missing source entrypoint still blocks faithful conversion. To declare new orchestration,
+use the separate preparation operation. It previews by default and writes a new review copy
+only with `--output-dir`:
+
+```bash
+uv run notebook-to-kedro prepare-workflow examples/functional_package/src/example_ml/transforms.py examples/functional_package/preparation.json --project-root .
+uv run notebook-to-kedro prepare-workflow examples/functional_package/src/example_ml/transforms.py examples/functional_package/preparation.json --project-root . --output-dir generated/prepared_package
+```
+
+The [definition](../../examples/functional_package/preparation.json) is a separate schema 1.0
+contract with exactly `schema_version`, `source_package`, `entrypoint`, `arguments`, `calls`
+and `output`. `arguments` is an ordered list of unique public lowercase ASCII names. Each call
+has exactly `function`, an `arguments` object binding source parameter names to declared/earlier
+values, and one `output`. The entrypoint/output/function/argument names follow the existing
+workflow identifier rules. There are at most 64 arguments, 1-64 calls and 64 bindings per call;
+the UTF-8 JSON loader is bounded to 64 KiB and rejects duplicate/unknown fields.
+
+Python callers use `WorkflowCall`, `WorkflowPreparationDefinition`,
+`load_workflow_preparation_definition`, `render_workflow_preparation` and
+`prepare_functional_workflow`. Definitions and nested calls use immutable tuples; exports are
+fresh JSON values. The renderer returns proposed text files and raw-file copy pairs without
+writing. Publication uses the shared writer, refusing existing targets, source-package overlap
+and a package file already occupying `workflow_adapter.py`.
+
+One declared regular package must contain the selected `.py` module, which must pass functional
+inspection in its captured module context. Declared functions must be observed definitions;
+entrypoint names cannot replace existing definitions. The engine emits new forwarding functions
+that delegate by keyword to those originals, then the explicitly ordered calls. Shared wiring
+validation checks exact signatures, bound names, distinct assignments, single-use values and
+the final call result. All arguments are conservatively single-use here; no scalar/mapping
+role or persistent boundary is inferred. Supporting modules remain opaque retained source.
+
+The copy contains unchanged package files under `src/<original_package>`, a synthesized
+`workflow_adapter.py`, `workflow-preparation.json` and `REVIEW.md`. The manifest separates
+original `source_facts`/inventory from the declaration and `proposal` analysis/steps. Synthesized
+instructions have their own path, hash and spans; `source_bindings` links forwarding functions
+to original module/function/block IDs and AST hashes. Inventory/selected-file drift blocks
+preparation. Existing filesystem concurrency limits still apply.
+
+Status stays `unreviewed_proposal`, execution `not_run`, persistent I/O/artifact policies
+`not_defined`. No catalog, workflow I/O settings, dependency declarations or test stubs are
+invented. The copy is not a generated Kedro project. Review/adopt the adapter, then supply actual
+input/output/dependency/artifact contracts and expectations for a later conversion. A static
+proposal does not verify business behavior or execution consent. The initial operation is
+API/CLI-only; local operation/project-settings schema 1.0 is unchanged.
+See [ADR 0012](../decisions/0012-explicit-orchestration-preparation.md).
+
 ## Rendering, identity and source accounting
 
 ### Explicit local package in schema 1.3

@@ -40,6 +40,56 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-11-15 - Explicit orchestration preparation before typed I/O
+
+### Completed
+
+- Verified PR 92 merged with successful CI and synchronized main, then implemented this bounded
+  slice on a dedicated branch. Added explicit immutable schema 1.0 declarations naming one
+  regular source package, workflow arguments, ordered calls and a final named result.
+- Added `prepare-workflow`: preview by default, optional new-directory publication through
+  the shared writer. The result is a raw package copy plus a new forwarding adapter and review
+  manifest, not a Kedro project. Existing source-only inspection and faithful conversion remain
+  available; a missing original entrypoint still blocks the original conversion path.
+- Kept original module/package facts separate from declarations and synthesized adapter facts.
+  New instructions own their path/hash/spans; bindings point to observed function IDs/AST hashes.
+  Reused exact-signature, bound-name, single-assignment, single-use and final-result checks.
+  Inventory drift, source/destination overlap, adapter collisions and overwrite attempts block.
+- Checked trusted synthetic loaders/join for call order, original type/reference identity and
+  stop-on-error boundaries. After separately supplying JSON I/O/expectations, prepared source
+  converts with both naming profiles and passes two shipped pipeline tests. A changed binding
+  causes both cases to fail. Preparation never infers tests, persistent serializers or artifacts.
+- Rendered the private real-source three-call proposal without publishing a package copy,
+  importing/executing application code or changing any of its 23 source files. It remains an
+  unreviewed integration proposal with undefined persistent-I/O/artifact policies.
+- Extended existing setup/reference/status/roadmap documents and indexed ADR 0012. Specified
+  proposed next acceptance requirements for raw file references/sidecars, separate protocols,
+  assign-mode domain values, explicit result persistence and application-owned artifact paths.
+- Validation passed: 2,577 offline Python tests with 100% line/branch coverage (9,130 statements,
+  2,694 branches), Ruff lint/format, strict mypy on 189 files and all 68 documentation checks.
+  Source/wheel builds passed; the wheel includes both preparation modules and still declares
+  nbformat as its only runtime dependency. No extension/protocol change or visual review is claimed.
+
+### Decisions
+
+- Make new orchestration a separate concrete proposal, never an injected original source fact.
+  Conservatively treat all preparation arguments as single-use until I/O/parameter roles exist.
+- Keep original application functions and their scientific validation intact. Do not invent
+  persistent data coercions, artifact destinations, dependency metadata or runtime approval.
+
+### Open questions
+
+- File-reference/sidecar inputs, explicit memory-only or serialized results, runtime artifact
+  ownership and dependency/distribution metadata still need bounded implementation contracts.
+- The real proposal's scientific expectations and actual snapshot/protocol match remain unreviewed.
+  Actual pilot human review and real benchmark execution remain pending.
+
+### Next step
+
+- Implement explicit file-reference inputs with declared sidecars, retaining application loaders,
+  followed by the chosen result/artifact boundary. Validate on synthetic fixtures before proposing
+  any explicitly scoped real runtime trial.
+
 ## 2026-11-15 - Explicit local source package preservation
 
 ### Completed

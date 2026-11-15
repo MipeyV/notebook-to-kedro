@@ -55,6 +55,14 @@ metadata are not reconstructed. Analysis/plan schema 1.2 and inventory schema 1.
 from unchanged local envelopes. [ADR 0011](../decisions/0011-explicit-source-package-context.md)
 records these boundaries; standalone module relocation remains available independently.
 
+A separate orchestration preparation operation accepts declared calls to observed functions.
+It previews by default or publishes an unchanged package copy with a new forwarding module.
+It shares straight-line wiring validation with the converter, while keeping observed source,
+operator decisions and synthesized facts separate. Persistent I/O/artifact policies remain
+undefined; faithful conversion still requires an actual entrypoint and I/O contract.
+[ADR 0012](../decisions/0012-explicit-orchestration-preparation.md) records this concrete API/CLI
+boundary. No existing-project patching or interface-specific transformation logic is added.
+
 Functional analysis schema 1.1 observes a terminal `return_expression` independently of
 named `outputs`. Called functions may return supported expressions directly; their ASTs stay
 in the source module. The entrypoint's explicit call assignments own dataset naming and linear

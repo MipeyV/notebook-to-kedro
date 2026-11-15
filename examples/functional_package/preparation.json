@@ -1,0 +1,11 @@
+{
+  "schema_version": "1.0",
+  "source_package": "examples/functional_package/src/example_ml",
+  "entrypoint": "prepared_workflow",
+  "arguments": ["values", "scale"],
+  "calls": [
+    {"function": "prepare_value", "arguments": {"values": "values", "scale": "scale"}, "output": "prepared"},
+    {"function": "finish_value", "arguments": {"prepared": "prepared"}, "output": "total"}
+  ],
+  "output": "total"
+}

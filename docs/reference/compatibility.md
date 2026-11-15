@@ -34,6 +34,13 @@ requirements and original distribution metadata remain unsupported. See the
 [package contract](functional-workflows.md#explicit-local-package-in-schema-13) for limits,
 path rules and the distinction between context-free inspection and package-aware planning.
 
+Separate `prepare-workflow` schema 1.0 previews an explicitly declared call sequence against
+observed functions in one regular package. Optional publication creates a new review copy and
+forwarding adapter. It shares exact-signature, single-assignment, single-use and final-result
+wiring checks, conservatively treating all arguments as single-use. It is not automatic
+entrypoint discovery or typed-I/O support. Original conversion guards and local envelopes stay
+unchanged. Its synthesized facts and unreviewed status are distinct from original source facts.
+
 The [local operation layer](local-operations.md) configures these same deterministic entrypoints
 through typed inspection, new-file preview and generation requests. It adds an explicit contained
 working root and local JSON settings, without broadening source/library support or executing code.
