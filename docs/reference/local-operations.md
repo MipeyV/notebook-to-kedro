@@ -78,6 +78,11 @@ contents. Publication
 uses those same shared writer contracts. Source-only inspection remains context-free and does
 not load the workflow contract to infer relative-import context; package-aware planning requires
 the explicit schema 1.3 configuration. Supporting modules are not additional inspected node sources.
+
+Schema 1.5 previews can declare a final memory-only result. The plan/manifest records its mode
+and nonpersistence, and catalog text shows assign-mode memory with no filepath. Local operations
+still never run a pipeline or transport a domain result in their JSON response. Generation
+publishes source/configuration only; source effects and owned runtime artifacts remain separate.
 Planning previews new files; it does not diff or patch an existing Kedro project. It is a
 review snapshot, not an authenticated approval or a reusable apply token. Generation never
 accepts a serialized preview and always recomputes current source/configuration. Valid later

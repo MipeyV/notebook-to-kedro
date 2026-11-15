@@ -48,7 +48,7 @@ The old `plan`/`generate` notebook operations retain their existing contract.
 ## Explicit boundaries
 
 The JSON configuration has exactly five fields in schemas 1.0/1.1/1.2, six in schema 1.3 and
-seven in schema 1.4 (adding `file_inputs`);
+seven in schemas 1.4/1.5 (adding `file_inputs`);
 unknown/duplicate fields are rejected. The
 file is bounded to 64 KiB. The same immutable configuration validates direct Python construction.
 
@@ -68,13 +68,14 @@ file is bounded to 64 KiB. The same immutable configuration validates direct Pyt
   are resolved relative to `project_root` (the current directory by default), not the config
   file. They must resolve to contained `.json` files. The writer checks existence before copying
   them to `data/01_raw/<argument>.json`. Input JSON contents/schema are not validated statically.
-- Schema 1.0 parameters are finite JSON scalars. Schemas 1.1/1.2/1.3/1.4 additionally accept flat JSON
+- Schema 1.0 parameters are finite JSON scalars. Schemas 1.1 through 1.5 additionally accept flat JSON
   objects with string keys and finite scalar values. Arrays, nested objects and inferred
   parameters remain unsupported. Parameters become `parameters.yml` entries and
   `params:<argument>` node inputs.
 - There is exactly one configured output, matching the entrypoint's named return. Its path is
   restricted to `data/08_reporting/<lowercase_name>.json`. This is an explicit JSON serialization
-  boundary, not preservation of every possible Python return type.
+  boundary, not preservation of every possible Python return type. Schema 1.5 can explicitly
+  select the nonpersistent memory result described below instead.
 - Catalog and parameter configuration are rendered as quoted JSON, which is valid YAML.
   Dataset formats/options, credential injection and inferred dependencies are not configurable
   in this first schema. The generated dependency declarations reuse the existing Kedro scaffold.
@@ -247,12 +248,62 @@ a JSON protocol, then return an explicitly JSON-compatible summary. Tests cover 
 profiles, SequentialRunner/ThreadRunner, source order, type/reference identity and domain
 sidecar errors. This is not a Parquet runtime compatibility claim.
 
-Final outputs still require JSON compatibility. Application-owned artifacts and typed final
-result persistence are separate work. Existing JSON regression contracts do not define file
+Schema 1.4 final outputs require JSON compatibility; schema 1.5 also permits an explicit memory
+result. Application-owned artifacts and typed final-result persistence are separate work.
+Existing JSON regression contracts do not define file
 fixtures and are rejected for workflows with file references; `regression-coverage.json`
 records `missing_file_fixtures` and no pytest stubs are invented. See
 [ADR 0013](../decisions/0013-explicit-file-reference-inputs.md) and the
 [test boundary](generated-workflow-tests.md).
+
+## Memory-only final results in schema 1.5
+
+Select schema 1.5 and the exact output target `memory` to retain the single named result as an
+opaque Python object during explicitly requested in-process Kedro execution:
+
+```json
+"outputs": {"result": "memory"}
+```
+
+Schema 1.5 inherits schema 1.4's seven required fields, including `source_package` and an explicit
+`file_inputs` object (possibly empty). JSON targets under `data/08_reporting/<name>.json` remain
+available. Legacy schemas still reject `memory`; unknown targets, serializers and output names
+remain blocked. The output name must match the source entrypoint's final named call result.
+
+The catalog declares `MemoryDataset` with `copy_mode: assign` and no filepath. It performs no
+JSON/pickle conversion, dataclass extraction, type inference or type validation. Original function
+bodies and return ASTs stay unchanged. After a caller explicitly runs a pipeline with its own
+catalog, `catalog.load("result")` returns the retained object in that process. Synthetic tests
+check the original type, exact result identity, internal dataset/protocol identities and mutable
+member identity with SequentialRunner and ThreadRunner. Other process runners are unverified.
+
+This result is not persisted. A new catalog or process cannot recover it; an ending `kedro run`
+process creates no durable result through this boundary. Releasing/discarding the catalog follows
+normal Kedro semantics. Memory mode does not suppress application side effects or approve artifact
+writes. A typed result's referenced files/directories still need their own ownership contract.
+
+Plan/manifest schema 1.4 records `result_boundary` with the dataset name, mode, persistence,
+`type_validation: not_performed` and `artifact_policy: not_defined`. Memory mode records
+`persistence: none`; JSON mode records `json_file`. Package-aware analysis stays schema 1.2 and
+local-operation/project-settings envelopes stay 1.0. Static operations never run the pipeline
+or put a business result into a JSON CLI/UI response.
+
+```bash
+uv run notebook-to-kedro plan-workflow examples/functional_files/src/reference_ml/memory_workflow.py examples/functional_files/memory_workflow.json --project-root .
+uv run notebook-to-kedro generate-workflow examples/functional_files/src/reference_ml/memory_workflow.py examples/functional_files/memory_workflow.json generated/memory_project --project-root .
+```
+
+The [synthetic source](../../examples/functional_files/src/reference_ml/memory_workflow.py)
+returns an application dataclass without a JSON serializer. Its
+[configuration](../../examples/functional_files/memory_workflow.json) keeps input paths/sidecars
+and the original domain readers. Selecting JSON for that same opaque result fails serialization
+at runtime; the engine never silently switches modes after a failure.
+
+Existing JSON regression contracts do not define typed memory-result comparisons and are
+rejected for this mode. Gap snapshots record `missing_memory_result_expectations`, without
+inventing tests or oracles. Schema 1.5 JSON mode with supported JSON inputs keeps existing
+regressions. Durable serializers, typed comparators and application artifacts remain separate
+work. See [ADR 0014](../decisions/0014-memory-only-functional-results.md).
 
 ## Explicit orchestration preparation
 

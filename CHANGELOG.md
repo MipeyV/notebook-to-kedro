@@ -29,6 +29,13 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Opt-in workflow schema 1.5 supports the explicit `memory` target for a named final result.
+  Assign-mode retention keeps the original Python object in the same-process Kedro catalog
+  without JSON/pickle coercion or a result filepath. Plan/manifest schema 1.4 records mode,
+  persistence and unverified type/artifact status. Added typed synthetic result identity,
+  nonpersistence, exception and JSON-failure controls plus local/VS Code previews and ADR 0014.
+  JSON targets remain available; typed generated comparators and durable artifacts stay separate.
+
 - Opt-in workflow schema 1.4 adds explicit file-reference inputs with declared sibling sidecars.
   Contained regular-file guards and bounded raw hashing feed the existing copy writer; staged
   path strings reach unchanged application loaders through assign-mode memory datasets.

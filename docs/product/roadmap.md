@@ -51,9 +51,11 @@ now previews explicitly declared calls and can publish a new review copy with a 
 adapter, keeping original facts separate. The real three-call preview is unreviewed and unexecuted.
 Bounded file-reference inputs with declared sibling sidecars are now implemented: raw hashing,
 staged path arguments and original domain loaders, with explicit missing file-fixture test gaps.
-The real input inventory remains a read-only observation. Next implement explicit memory-only or
-serialized final results and owned artifact boundaries alongside declared application dependencies;
-the setup guide records the remaining proposed acceptance contracts.
+The real input inventory remains a read-only observation. Explicit memory-only final results
+are now implemented in schema 1.5, preserving same-process object identity without persistence.
+Next implement owned runtime artifact boundaries alongside declared application dependencies;
+durable result serializers and typed generated expectations remain separate further work.
+The setup guide records the remaining proposed acceptance contracts.
 A complete real-project conversion is not yet established. Optimization retains a separate
 acceptance contract.
 

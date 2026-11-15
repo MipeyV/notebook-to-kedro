@@ -91,6 +91,23 @@ export async function run(): Promise<void> {
   );
   assert.equal(inputManifest.file_inputs[0].validation_status, "hashed_not_loaded");
   assert.equal(inputManifest.file_reference_destinations[0].load_policy, "path_string");
+  await command("selectConfiguration", vscode.Uri.file(path.join(root, "memory.json")));
+  assert.equal((await command("inspect"))?.status, "inspected");
+  const memoryPreview = await command("preview");
+  assert.equal(memoryPreview?.status, "planned");
+  assert.equal(memoryPreview?.plan?.schema_version, "1.4");
+  const memoryManifest = JSON.parse(
+    (memoryPreview!.files as PreviewFile[]).find(
+      (item) => item.path === "functional-workflow.json",
+    )!.content,
+  );
+  assert.equal(memoryManifest.result_boundary.mode, "memory");
+  assert.equal(memoryManifest.result_boundary.persistence, "none");
+  const memoryCatalog = JSON.parse(
+    (memoryPreview!.files as PreviewFile[]).find((item) => item.path === "conf/base/catalog.yml")!
+      .content,
+  );
+  assert.deepEqual(memoryCatalog.result, { type: "MemoryDataset", copy_mode: "assign" });
   await command("selectConfiguration", vscode.Uri.file(path.join(root, "project.json")));
   await command("inspect");
   assert.ok(project.getChildren().some((item) => item.label === "Source"));

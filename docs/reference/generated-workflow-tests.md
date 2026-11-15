@@ -148,6 +148,14 @@ project directory and must accompany it when running the project.
 
 ## Evidence and remaining E3 work
 
+Workflow schema 1.5 memory outputs do not yet have a typed result-comparison contract. The current
+JSON expectation contract is rejected before publication, even when inputs are ordinary JSON.
+Without expectations, the gap snapshot records `missing_memory_result_expectations`; no result
+coercion or pytest stub is generated. Trusted engine tests separately inspect synthetic domain
+result fields, exact reference/type identity, fresh-catalog nonpersistence, application failures
+and a JSON-mode serialization negative control. Schema 1.5 JSON mode retains shipped regressions
+for supported JSON inputs, checked under default/custom profiles.
+
 Workflow schema 1.4 file references do not yet have a shipped fixture/oracle contract. Supplying
 the current JSON regression contract to such a workflow fails before publication. Without one,
 the gap snapshot explicitly lists `missing_file_fixtures` and emits no tests. Do not substitute

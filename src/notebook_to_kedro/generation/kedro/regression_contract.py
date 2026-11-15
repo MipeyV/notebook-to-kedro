@@ -154,6 +154,10 @@ def validate_regression_binding(
     contract: WorkflowRegressionContract, plan: FunctionalWorkflowPlan
 ) -> None:
     """Require exact input names and parameter overrides under the workflow's own schema."""
+    if plan.configuration.memory_output:
+        raise WorkflowRegressionError(
+            "JSON regression contracts do not define typed memory-result expectations"
+        )
     if plan.configuration.file_inputs:
         raise WorkflowRegressionError(
             "JSON regression contracts do not define file-reference fixtures"

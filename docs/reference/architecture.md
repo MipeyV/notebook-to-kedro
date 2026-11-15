@@ -72,6 +72,14 @@ separates byte evidence and destinations from unverified runtime/domain behavior
 JSON regressions reject undefined file fixtures; final-result/artifact policies remain separate.
 [ADR 0013](../decisions/0013-explicit-file-reference-inputs.md) records this input boundary.
 
+Workflow schema 1.5 optionally selects the exact final target `memory`. The same renderer creates
+an assign-mode MemoryDataset without a filepath/serializer; original result values and source
+ASTs stay unchanged. Plan/manifest schema 1.4 records the result mode/persistence and unverified
+type/artifact policy. The execution catalog can retain the object in process, while static local
+operations still return only facts/files and `not_run` status. Typed JSON expectation coercion
+is rejected explicitly. [ADR 0014](../decisions/0014-memory-only-functional-results.md) records
+the lifetime boundary; durable results and application-owned artifact control remain separate.
+
 Functional analysis schema 1.1 observes a terminal `return_expression` independently of
 named `outputs`. Called functions may return supported expressions directly; their ASTs stay
 in the source module. The entrypoint's explicit call assignments own dataset naming and linear

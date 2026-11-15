@@ -49,3 +49,21 @@ def evaluate(dataset: Measurements, protocol: Protocol, candidate: dict[str, flo
         "total": sum(dataset.values) * protocol.factor + candidate["bias"],
         "unit": dataset.unit,
     }
+
+
+@dataclass(frozen=True)
+class EvaluationResult:
+    """Application result retains original domain objects without a JSON serializer."""
+
+    total: float
+    dataset: Measurements
+    protocol: Protocol
+    notes: list[str]
+
+
+def evaluate_result(
+    dataset: Measurements, protocol: Protocol, candidate: dict[str, float]
+) -> EvaluationResult:
+    """Return an opaque domain result using the same application validation."""
+    summary = evaluate(dataset, protocol, candidate)
+    return EvaluationResult(summary["total"], dataset, protocol, [])

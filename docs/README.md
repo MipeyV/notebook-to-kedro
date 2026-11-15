@@ -130,6 +130,8 @@ the dedicated experiment reports for their frozen settings, decisions and limita
   declared calls, separate synthesized adapter facts and a new review copy before persistent I/O.
 - [ADR 0013: explicit file-reference inputs](decisions/0013-explicit-file-reference-inputs.md):
   raw file/sidecar inventories, staged path arguments and preserved application domain readers.
+- [ADR 0014: memory-only functional results](decisions/0014-memory-only-functional-results.md):
+  explicit nonpersistent final objects, assign-mode identity and separate expectation/artifact gaps.
 
 ## Maintaining documentation
 

@@ -115,6 +115,8 @@ def render_workflow_regression_tests(
     }
     if plan.configuration.file_inputs:
         report["missing_file_fixtures"] = [name for name, _ in plan.configuration.file_inputs]
+    if plan.configuration.memory_output:
+        report["missing_memory_result_expectations"] = True
     files = {Path("regression-coverage.json"): json.dumps(report, sort_keys=True, indent=2) + "\n"}
     if contract is None:
         files[Path("TESTING.md")] = (
@@ -127,6 +129,11 @@ def render_workflow_regression_tests(
                 "\nFile-reference fixtures are not supported by the JSON regression contract. "
                 "Supply reviewed application-level fixture tests separately; "
                 "no tests were invented.\n"
+            )
+        if plan.configuration.memory_output:
+            files[Path("TESTING.md")] += (
+                "\nMemory-only results require explicit application-level expectations. "
+                "The JSON regression contract does not define typed result comparisons.\n"
             )
         return files
     metadata = {

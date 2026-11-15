@@ -40,6 +40,54 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-11-15 - Explicit memory-only final workflow results
+
+### Completed
+
+- Verified PR 94 merged with successful CI, synchronized main and implemented on a dedicated
+  branch. Workflow schema 1.5 inherits explicit package/file inputs and accepts the exact target
+  memory for its single named final call result. Existing JSON targets and legacy guards remain.
+- Rendered an assign-mode MemoryDataset without a result filepath, inferred serializer, dataclass
+  extraction or runtime type validation. Original function/return ASTs, result names, source
+  ordering and captured input/source inventories stay unchanged.
+- Added plan/manifest schema 1.4 result-boundary metadata distinguishing memory/json mode,
+  persistence, unverified type and undefined artifact policy. Static local operations/UI previews
+  expose configuration facts without executing a workflow or transporting its business object.
+- Added a synthetic opaque domain result retaining measurements/protocol references and mutable
+  notes. Real Kedro sequential/threaded runs under default/custom profiles preserve the exact
+  final object and internal identities. Fresh catalogs have no saved result. Domain exceptions
+  propagate; selecting JSON for that same result fails rather than silently falling back.
+- Kept JSON-mode shipped regressions working under schema 1.5. Memory mode rejects the existing
+  JSON comparator contract and records missing typed-result expectations without invented tests.
+- Rechecked the private real declaration read-only: file references and explicit memory output
+  validate, while the absent original orchestration still blocks source-bound planning. Original
+  source/input identities and Git state remain unchanged. No application import/execution or
+  real project generation occurred; artifact/dependency/scientific review gaps remain open.
+- Extended existing references, setup, status/roadmap and changelog, and indexed ADR 0014.
+  Actual VS Code host checks inspect/preview the new result policy without UI transformation rules.
+- Validation passed: 2,653 offline Python tests with 100% line/branch coverage (9,262 statements,
+  2,750 branches), Ruff lint/format, strict mypy on 196 files and all 70 documentation checks.
+  All 24 Node protocol tests and actual Windows VS Code 1.145.3 host checks passed. No extension
+  runtime/protocol change or visual layout review is claimed.
+
+### Decisions
+
+- Preserve an explicitly selected opaque object in the execution catalog, without claiming
+  persistence after a process ends or portability to other process runners.
+- Keep original source effects unchanged. Memory retention neither suppresses owned artifact
+  writes nor establishes a typed oracle, dependency availability or permission to execute.
+
+### Open questions
+
+- Application-owned runtime artifact destinations and dependency/distribution metadata remain
+  concrete blockers. Durable result serializers and generated typed comparators need later scopes.
+- Actual human pilot review and real scientific/runtime validation remain pending.
+
+### Next step
+
+- Specify and implement the bounded runtime artifact-destination contract, preserving the
+  application's refusal of an existing output directory and separating publication from execution.
+
 ## 2026-11-15 - Raw file-reference inputs with declared sibling sidecars
 
 ### Completed
