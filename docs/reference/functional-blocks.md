@@ -70,6 +70,14 @@ configuration supports scalar schema 1.0 and flat candidate mappings in schema 1
 Workflow schema 1.2 additionally selects source-ordered independent calls/joins; these are
 planning/generation decisions and do not change the function-reference analysis schema.
 
+Explicit package-aware workflow schema 1.3 uses analysis schema 1.2 with `package_module` in
+facts/fingerprints. The pure analyzer accepts this context only for one Python source unit
+and permits relative imports under the same binding/body guards. The filesystem workflow
+adapter derives and binds it to a captured regular package; supplying a string alone is not
+package completeness evidence. Supporting modules receive compile-only inventory checks.
+Source-only `inspect-blocks`/`project inspect` remain context-free, with schema 1.1 and their
+relative-import blocker. See the [package contract](functional-workflows.md#explicit-local-package-in-schema-13).
+
 ## Initial supported subset
 
 The first slice covers library-style, single-file Python and equivalent function-based notebooks:

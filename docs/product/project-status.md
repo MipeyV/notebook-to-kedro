@@ -19,7 +19,7 @@ Historical measurements retain their original corpus, runtime and limitations.
 | Tests delivered in functional projects | Optional explicit JSON expectations produce standalone pytest node/pipeline regressions with missing expectations reported. Positive/negative controls use development dependencies; a separate trusted-example check builds/installs wheels in new environments and runs shipped tests plus the Kedro CLI. CI configures Python 3.11/3.12/3.13 bootstrap jobs; configured coverage is not a passing-run claim. |
 | MLOps / enterprise platform | Future integrations, governance and packaging require validated needs and separate contracts. |
 | Functional block inspection | Analysis-only API/CLI for explicit straight-line functions in `.py` and real notebook cells, with interfaces, function-reference graph, provenance and blockers. Schema 1.1 records terminal return expressions separately from observed return names. |
-| Functional workflow conversion | Explicit single-use entrypoints generate Kedro from scripts or notebooks, with JSON file I/O and scalar/flat candidate parameters. Schemas 1.0/1.1 keep linear data wiring; opt-in schema 1.2 preserves source order across independent calls and joins using ordering-only inputs. Business signatures, source ASTs, intermediate identity and single-use mapping rules are retained. Data fan-out, control flow, multi-file reconstruction and typed I/O remain unsupported. |
+| Functional workflow conversion | Explicit single-use entrypoints generate Kedro from scripts or notebooks, with JSON file I/O and scalar/flat candidate parameters. Schemas 1.0/1.1 keep linear data wiring; schema 1.2 preserves source order across independent calls and joins. Schema 1.3 additionally copies one declared regular Python package/resources under its original import name, with inventory binding and compile-only checks. Business signatures, source, intermediate identity and single-use mapping rules are retained. Data fan-out, control flow, cross-module workflow discovery, dependency/metadata reconstruction and typed persistent I/O remain unsupported. |
 | Shared engine / local interface | Typed operations feed a desktop VS Code Explorer view with guided settings creation, inspection before workflow I/O, interpreter/profile selection, diagnostics, read-only previews and confirmed generation. Existing-project patches and automatic environment integration remain future work. |
 
 Generation itself does not verify dependency installation, full DAG semantics or runtime behavior.
@@ -42,7 +42,10 @@ The [real-workflow setup guide](../guides/real-workflow-setup.md) now documents 
 candidate-parameter slice with paired synthetic examples, real Kedro checks and shipped tests.
 The inspected source case has independent loaders, a typed protocol/result and runner-owned
 artifact writes. Its in-memory proposal now plans three calls with one ordering edge under schema
-1.2. Typed/package/artifact boundaries remain unresolved; no complete real-project conversion,
+1.2. Explicit schema 1.3 package capture now inventories the existing source read-only, but its
+selected module has no orchestration entrypoint and correctly blocks planning. No entrypoint
+is injected into captured source. Typed I/O, dependencies/distribution metadata and artifact
+boundaries remain unresolved; no complete real-project conversion,
 data/protocol runtime verification or benchmark execution is claimed. Paired synthetic joins
 exercise SequentialRunner, ThreadRunner, call/exception traces, identity and delivered tests.
 

@@ -17,7 +17,7 @@ npm ci
 npm run package
 ```
 
-Install `generated/notebook-to-kedro-0.2.0.vsix` using **Extensions: Install from VSIX**.
+Install `generated/notebook-to-kedro-0.2.1.vsix` using **Extensions: Install from VSIX**.
 The initial extension targets desktop VS Code 1.145+. Open Explorer's **Notebook to Kedro**
 view and choose the Python executable containing the engine. **Create Project Configuration**
 provides guided setup, and **Choose Project Configuration** opens an existing JSON file.
@@ -57,9 +57,15 @@ configured operations keep their schema 1.0 behavior. Settings stay editable in 
 **Inspect source** displays the engine's static status and diagnostics. **Open operation report**
 shows the complete JSON facts. A blocked inspection retains its diagnostic information.
 
-**Preview files** displays the actual generated file inventory and copied inputs. Selecting a
+**Preview files** displays the actual generated file inventory and **Files to copy**. Selecting a
 file opens a read-only virtual document containing its exact proposed bytes. Reports and
 previews remain in memory, and source files retain their saved contents.
+
+With an engine from this revision and an explicit schema 1.3 workflow configuration, copied
+files also include the declared local Python package and its resources. The engine preserves
+original import names and records the package inventory in the plan. This is not automatic
+project/dependency discovery; select the existing package-aware workflow JSON through setup
+or settings. Source-only inspection remains independent of its package context.
 
 **Generate project** refreshes the plan, asks for a destination inside the declared project
 root and displays an explicit destination confirmation. Canceling that confirmation leaves

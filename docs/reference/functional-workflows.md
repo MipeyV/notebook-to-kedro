@@ -3,9 +3,10 @@
 [Documentation index](../README.md)
 
 Status: bounded E2 generation slice implemented on 2026-11-12, extended with opt-in ordered
-joins on 2026-11-15. It converts explicit single-use workflows from scripts or notebook cells.
+joins and explicit local package preservation on 2026-11-15. It converts explicit single-use workflows from scripts or notebook cells.
 Schemas 1.0/1.1 require a linear data chain; schema 1.2 preserves source order across independent
-calls and joins. General DAG inference, data fan-out and multi-file projects remain outside this slice. The first
+calls and joins; schema 1.3 additionally preserves one declared Python package. General DAG inference,
+data fan-out and cross-module workflow discovery remain outside this slice. The first
 [generated-test increment](generated-workflow-tests.md) now optionally delivers pytest
 regressions from explicit expectations. A separate opt-in trusted-example bootstrap check
 now installs generated wheels and runs shipped tests plus the Kedro CLI in fresh environments.
@@ -45,7 +46,8 @@ The old `plan`/`generate` notebook operations retain their existing contract.
 
 ## Explicit boundaries
 
-The JSON configuration has exactly five fields; unknown/duplicate fields are rejected. The
+The JSON configuration has exactly five fields in schemas 1.0/1.1/1.2 and six in schema 1.3;
+unknown/duplicate fields are rejected. The
 file is bounded to 64 KiB. The same immutable configuration validates direct Python construction.
 
 ```json
@@ -64,7 +66,7 @@ file is bounded to 64 KiB. The same immutable configuration validates direct Pyt
   are resolved relative to `project_root` (the current directory by default), not the config
   file. They must resolve to contained `.json` files. The writer checks existence before copying
   them to `data/01_raw/<argument>.json`. Input JSON contents/schema are not validated statically.
-- Schema 1.0 parameters are finite JSON scalars. Schemas 1.1/1.2 additionally accept flat JSON
+- Schema 1.0 parameters are finite JSON scalars. Schemas 1.1/1.2/1.3 additionally accept flat JSON
   objects with string keys and finite scalar values. Arrays, nested objects and inferred
   parameters remain unsupported. Parameters become `parameters.yml` entries and
   `params:<argument>` node inputs.
@@ -190,6 +192,68 @@ See [ADR 0010](../decisions/0010-source-ordered-functional-joins.md) for the ord
 
 ## Rendering, identity and source accounting
 
+### Explicit local package in schema 1.3
+
+Schema 1.3 requires a sixth field, `source_package`, naming one regular package directory
+relative to `project_root`. It inherits schema 1.2 ordering and parameter rules. For example:
+
+```json
+{
+  "schema_version": "1.3",
+  "entrypoint": "workflow",
+  "inputs": {"values": "examples/functional_package/input.json"},
+  "parameters": {"scale": 2.0},
+  "outputs": {"total": "data/08_reporting/total.json"},
+  "source_package": "examples/functional_package/src/example_ml"
+}
+```
+
+Use the [selected module](../../examples/functional_package/src/example_ml/workflow.py) and
+[configuration](../../examples/functional_package/workflow.json) together:
+
+```bash
+uv run notebook-to-kedro plan-workflow examples/functional_package/src/example_ml/workflow.py examples/functional_package/workflow.json --project-root .
+uv run notebook-to-kedro generate-workflow examples/functional_package/src/example_ml/workflow.py examples/functional_package/workflow.json generated/package_project --project-root . --regression-contract examples/functional_package/regression.json
+```
+
+The selected source must be one `.py` file inside that package. Paths must be normalized,
+contained relative POSIX paths, without traversal, drives or backslashes. Root and Python
+subpackage directories need `__init__.py`; namespace packages are unsupported. Module/package
+names must be ASCII Python identifiers. The root name must be public and cannot shadow a
+standard-library/Kedro namespace or collide with the generated package name.
+
+Capture inventories every regular file, including resources, with raw-byte hashes/sizes and
+Python AST hashes. Limits are 256 files, 16 MiB total, 1 MiB per Python file and 4 MiB per
+resource. `__pycache__` directories are excluded explicitly and recorded. Links, reparse points,
+special files and compiled `.pyc/.pyo/.pyd/.so/.dll` files outside excluded caches are rejected.
+Every Python file is parsed and compiled without import or execution. Syntactic local import
+base-module references must name captured modules; relative references cannot escape the root.
+Imported symbols, dynamic imports and external dependency availability are not established.
+
+Only the selected workflow module receives functional supported-subset analysis. Supporting
+modules/resources are retained as opaque source, not recursively converted into nodes. The
+planner binds the selected document hash and module context to the inventory; rendering
+recaptures it and rejects changed/added files. There is no filesystem lock against concurrent
+changes. Source-only `inspect-blocks` and `project inspect` stay context-free: relative imports
+can block that inspection while explicit package-aware `plan-workflow` accepts their context.
+
+The writer copies all captured bytes to `src/<original_package>/...`, retaining encodings,
+comments and resources. Generated wrappers import the original selected module; no
+`workflow_source.py` is emitted. The wheel includes both the generated and original packages.
+Its environment must accommodate ownership of that original import namespace. Root-level
+distribution metadata, lockfiles and build configuration outside the package are not
+reconstructed. Calls relying on the original distribution version or external files can
+therefore still fail. External imports are module references, not inferred distribution names,
+requirements or versions; install required application dependencies separately.
+
+Package-aware analysis uses schema 1.2 with `package_module`; its plan/manifest uses schema 1.2
+with inventory schema 1.0, `source_package_sha256`, `compiled_not_executed`, `not_inferred` and
+`not_reconstructed` statuses. Each selected statement points to the original copied module.
+Legacy analysis/plan serialization remains unchanged without package context, as do local
+operation/project-settings schema 1.0. See [ADR 0011](../decisions/0011-explicit-source-package-context.md).
+
+### Relocation without package context
+
 Only entrypoint call statements become wrappers/nodes. Internal helper calls remain inside the
 original functions. The entrypoint definition is retained but is not also run as a node. All
 original top-level instruction ASTs are relocated into `src/<package>/workflow_source.py`, in
@@ -238,3 +302,9 @@ The first E3 increment now supplies explicit JSON contracts and tests delivered 
 projects, followed by a separate trusted-example fresh dependency bootstrap check. General
 control-flow branching, data fan-out, richer datasets, dependency inference and broader ML workflows need additional
 contracts and behavioral cases. The existing whole-notebook pilot's human review remains pending.
+
+The package fixture checks relative imports, an internal dataclass and file-relative JSON
+resources with default/custom profiles. Pipeline-only expectations pass and detect changed
+resource bytes; absent typed node oracles remain explicit gaps. An offline Hatchling build
+and isolated execution from an unpacked wheel prove source-free package/resource inclusion,
+separately from fresh dependency installation. No real user project is executed by this evidence.

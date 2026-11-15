@@ -72,13 +72,14 @@ def generate_kedro_project(
     return write_project(Path(output_path), files, copies)
 
 
-def render_kedro_project(
+def render_kedro_project(  # noqa: PLR0913
     plan: ConversionPlan,
     *,
     package_name: str = DEFAULT_PACKAGE_NAME,
     architecture_profile: KedroArchitectureProfile | None = None,
     source_facts: NotebookFacts | None = None,
     order_after: Mapping[str, str] | None = None,
+    source_package_name: str | None = None,
 ) -> tuple[dict[Path, str], tuple[tuple[Path, Path], ...]]:
     """Validate and render shared Kedro scaffolding without publishing or executing it."""
     if source_facts is not None:
@@ -88,13 +89,17 @@ def render_kedro_project(
     except ConversionPlanValidationError as error:
         raise ProjectGenerationError(str(error)) from error
     _require_valid_package_name(package_name)
+    if source_package_name is not None:
+        _require_valid_package_name(source_package_name)
+        if source_package_name.casefold() == package_name.casefold():
+            raise ProjectGenerationError("Source package name collides with the generated package")
     profile = DEFAULT_KEDRO_PROFILE if architecture_profile is None else architecture_profile
     node_names = None if architecture_profile is None else resolve_node_names(plan, profile)
 
     package_root = Path("src") / package_name
     pipeline_root = package_root / "pipelines" / profile.pipeline_name
     files = {
-        Path("pyproject.toml"): _pyproject(package_name),
+        Path("pyproject.toml"): _pyproject(package_name, source_package_name),
         Path("conf/local/.gitkeep"): "",
         package_root / "__init__.py": _package_init(),
         package_root / "settings.py": _settings(),
@@ -128,7 +133,10 @@ def render_kedro_project(
     return files, copies
 
 
-def _pyproject(package_name: str) -> str:
+def _pyproject(package_name: str, source_package_name: str | None = None) -> str:
+    package_paths = [f"src/{package_name}"]
+    if source_package_name is not None:
+        package_paths.append(f"src/{source_package_name}")
     return f"""[project]
 name = "{package_name.replace("_", "-")}"
 version = "0.1.0"
@@ -150,7 +158,7 @@ requires = ["hatchling>=1.27,<2"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/{package_name}"]
+packages = {json.dumps(package_paths)}
 """
 
 

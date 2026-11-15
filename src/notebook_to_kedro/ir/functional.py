@@ -95,6 +95,7 @@ class FunctionalAnalysis:
     dependencies: tuple[BlockDependency, ...]
     diagnostics: tuple[BlockDiagnostic, ...]
     schema_version: str = "1.1"
+    package_module: str | None = None
 
     @property
     def complete(self) -> bool:
@@ -119,6 +120,8 @@ class FunctionalAnalysis:
             ],
             "dependencies": [asdict(item) for item in self.dependencies],
         }
+        if self.package_module is not None:
+            payload["package_module"] = self.package_module
         serialized = json.dumps(payload, sort_keys=True, separators=(",", ":"))
         return hashlib.sha256(serialized.encode("utf-8")).hexdigest()
 
@@ -132,4 +135,6 @@ class FunctionalAnalysis:
             "complete": self.complete,
             "structure_sha256": self.structure_sha256,
         }
+        if self.package_module is None:
+            del payload["package_module"]
         return json.dumps(payload, sort_keys=True, indent=2) + "\n"

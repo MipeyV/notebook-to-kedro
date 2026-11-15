@@ -43,7 +43,11 @@ expressions. A real workflow/I/O proposal now identifies independent loaders, fr
 flat candidate configuration, typed domain objects and owned artifact writes. The flat candidate
 parameter slice and source-order join contract are implemented and exercised on paired synthetic
 workflows. The real proposal now plans three calls; no real project is generated or executed.
-Next preserve local package/import context, then specify typed dataset and artifact boundaries.
+One explicitly declared regular Python package can now retain original imports, raw source and
+resources through schema 1.3. Supporting modules remain opaque; dependency/distribution metadata
+is not reconstructed. The real source inventory is captured read-only, and its absent orchestration
+entrypoint blocks planning rather than being silently invented. Next define a reviewed entrypoint
+and typed dataset/result and artifact boundaries, alongside declared application dependencies.
 A complete real-project conversion is not yet established. Optimization retains a separate
 acceptance contract.
 

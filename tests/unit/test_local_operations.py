@@ -311,6 +311,33 @@ def _write_notebook(path: Path, sources: tuple[str, ...]) -> None:
     path.write_text(json.dumps(data), encoding="utf-8")
 
 
+def test_local_operations_preview_and_publish_original_package_files(tmp_path: Path) -> None:
+    root, location = _workspace(
+        tmp_path,
+        source="examples/functional_package/src/example_ml/workflow.py",
+        workflow_configuration="examples/functional_package/workflow.json",
+        regression_contract="examples/functional_package/regression.json",
+    )
+    shutil.copytree(ROOT / "examples/functional_package", root / "examples/functional_package")
+    config = load_local_project_configuration(location)
+    assert inspect_project(InspectRequest(config)).status == "inspected"
+    before = set(root.rglob("*"))
+    result = plan_project(PlanRequest(config))
+    assert set(root.rglob("*")) == before
+    payload: Any = result.to_dict()
+    assert payload["schema_version"] == "1.0"
+    assert payload["plan"]["configuration"]["schema_version"] == "1.3"
+    assert payload["plan"]["source_package"]["name"] == "example_ml"
+    assert any(item.destination == "src/example_ml/workflow.py" for item in result.copies)
+    assert any(item.destination == "src/example_ml/assets/offset.json" for item in result.copies)
+    generated = generate_project(GenerateRequest(config, Path("generated")))
+    for item in result.copies:
+        copied = generated.destination / item.destination
+        assert copied.read_bytes() == (root / item.source).read_bytes()
+        assert hashlib.sha256(copied.read_bytes()).hexdigest() == item.sha256
+    assert not (generated.destination / "src/generated_project/workflow_source.py").exists()
+
+
 def test_catalog_copies_are_previewed_with_exact_input_identity(tmp_path: Path) -> None:
     source = tmp_path / "source.ipynb"
     _write_notebook(

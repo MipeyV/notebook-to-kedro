@@ -102,10 +102,12 @@ notebook-to-kedro generate-workflow examples/functional_workflow/workflow.py exa
 
 This initial subset uses JSON file boundaries and explicit scalar or flat candidate parameters.
 The [real-workflow setup guide](docs/guides/real-workflow-setup.md) distinguishes the working
-candidate slice from remaining graph, package and typed-I/O gaps. Internal helper calls
+candidate, ordered-join and explicit package slices from remaining typed-I/O and artifact gaps. Internal helper calls
 remain inside their owning node, including direct expression returns. Entrypoints keep explicit
 named calls: schemas 1.0/1.1 require a linear data chain, while opt-in schema 1.2 preserves source
-order across independent calls and joins. Data fan-out and control flow remain future work. Supply
+order across independent calls and joins. Schema 1.3 additionally preserves one explicitly declared
+local Python package and its resources under its original import name; it does not infer external
+dependencies or reconstruct project metadata. Data fan-out and control flow remain future work. Supply
 `--regression-contract examples/functional_workflow/regression.json` to also deliver
 [pytest node/pipeline regressions](docs/reference/generated-workflow-tests.md) based on explicit
 expected values. Missing expectations are reported; generation never executes code to infer them.

@@ -240,3 +240,41 @@ def test_shipped_candidate_tests_pass_and_detect_a_changed_mapping_setting(
     assert result.returncode == 1, result.stdout + result.stderr
     assert len(report.findall(".//failure")) == 1
     assert not report.findall(".//error")
+
+
+@pytest.mark.integration
+@pytest.mark.parametrize("custom_profile", [False, True])
+def test_shipped_package_pipeline_tests_keep_resources_and_report_typed_node_gaps(
+    tmp_path: Path, *, custom_profile: bool
+) -> None:
+    example = ROOT / "examples/functional_package"
+    config = load_functional_workflow_configuration(example / "workflow.json")
+    contract = load_workflow_regression_contract(example / "regression.json")
+    project = tmp_path / "project"
+    profile = (
+        KedroArchitectureProfile("test.package", "1.0.0", "training", "ml_")
+        if custom_profile
+        else None
+    )
+    generate_functional_kedro_project(
+        example / "src/example_ml/workflow.py",
+        config,
+        project,
+        project_root=ROOT,
+        regression_contract=contract,
+        architecture_profile=profile,
+    )
+    original = (example / "src/example_ml/assets/offset.json").read_bytes()
+    result, report = _run(project, tmp_path / "package.xml")
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert len(report.findall(".//testcase")) == 2
+    assert not report.findall(".//failure")
+    gaps = json.loads((project / "regression-coverage.json").read_text())
+    assert gaps["missing_node_expectations"] == ["step_0000_prepare", "step_0001_summarize"]
+    asset = project / "src/example_ml/assets/offset.json"
+    asset.write_text('{"offset": 0.5}', encoding="utf-8")
+    result, report = _run(project, tmp_path / "package-changed-resource.xml")
+    assert result.returncode == 1, result.stdout + result.stderr
+    assert len(report.findall(".//failure")) == 2
+    assert not report.findall(".//error")
+    assert (example / "src/example_ml/assets/offset.json").read_bytes() == original

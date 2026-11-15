@@ -2,7 +2,7 @@
   "name": "notebook-to-kedro",
   "displayName": "Notebook to Kedro",
   "description": "Inspect, preview and generate local Kedro projects using the Notebook to Kedro Python engine.",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "publisher": "mipeyv",
   "license": "MIT",
   "repository": {

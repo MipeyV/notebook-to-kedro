@@ -25,6 +25,15 @@ Its plan/manifest uses schema 1.1 ordering metadata; local operations stay schem
 exercise SequentialRunner, ThreadRunner and adapter pickling, without claiming every process
 runner or arbitrary deployment. Control flow, source data reuse/fan-out and typed I/O remain unsupported.
 
+Opt-in workflow schema 1.3 preserves one explicitly declared regular Python package containing
+the selected `.py` module, including raw resources and original imports. It inherits source-order
+and flat-parameter rules. Analysis/plan schema 1.2 includes explicit context/inventory binding;
+local envelopes remain 1.0. Supporting modules receive compile-only checks, not functional
+reconstruction. Namespace packages, cross-module workflow discovery, inferred third-party
+requirements and original distribution metadata remain unsupported. See the
+[package contract](functional-workflows.md#explicit-local-package-in-schema-13) for limits,
+path rules and the distinction between context-free inspection and package-aware planning.
+
 The [local operation layer](local-operations.md) configures these same deterministic entrypoints
 through typed inspection, new-file preview and generation requests. It adds an explicit contained
 working root and local JSON settings, without broadening source/library support or executing code.

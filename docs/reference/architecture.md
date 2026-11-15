@@ -46,6 +46,15 @@ to the preceding assign-mode memory result. Business node signatures and origina
 unchanged. The manifest distinguishes these inputs from actual function arguments.
 [ADR 0010](../decisions/0010-source-ordered-functional-joins.md) records the effect/order boundary.
 
+Workflow schema 1.3 additionally declares one regular local source package. Static capture
+records raw file identities, AST hashes and syntactic imports without execution. Package-aware
+analysis binds the selected module context and source hash; rendering recaptures the inventory,
+then copies original source/resources through the shared writer and includes the original
+namespace in the wheel. Supporting modules remain opaque and external requirements/distribution
+metadata are not reconstructed. Analysis/plan schema 1.2 and inventory schema 1.0 are separate
+from unchanged local envelopes. [ADR 0011](../decisions/0011-explicit-source-package-context.md)
+records these boundaries; standalone module relocation remains available independently.
+
 Functional analysis schema 1.1 observes a terminal `return_expression` independently of
 named `outputs`. Called functions may return supported expressions directly; their ASTs stay
 in the source module. The entrypoint's explicit call assignments own dataset naming and linear

@@ -56,7 +56,7 @@ class FilePreview:
 
 @dataclass(frozen=True, slots=True)
 class CopyPreview:
-    """One input file to copy; its observed bytes are not an execution result."""
+    """One data/source/resource file to copy; observed bytes are not an execution result."""
 
     source: str
     destination: str

@@ -13,6 +13,7 @@ from notebook_to_kedro.ir.functional import BlockSpan
 
 if TYPE_CHECKING:
     from notebook_to_kedro.ir.functional import FunctionalAnalysis, FunctionalBlock
+    from notebook_to_kedro.ir.source_package import SourcePackage
     from notebook_to_kedro.semantic.functional_config import FunctionalWorkflowConfiguration
 
 
@@ -36,11 +37,12 @@ class FunctionalWorkflowPlan:
     analysis: FunctionalAnalysis
     configuration: FunctionalWorkflowConfiguration
     steps: tuple[FunctionalWorkflowStep, ...]
+    source_package: SourcePackage | None = None
 
     @property
     def order_after(self) -> tuple[tuple[str, str], ...]:
         """Declare missing adjacent-call dependencies in the explicit source-order mode."""
-        if self.configuration.schema_version != "1.2":
+        if self.configuration.schema_version not in ("1.2", "1.3"):
             return ()
         return tuple(
             (current.id, previous.id)
@@ -56,7 +58,7 @@ class FunctionalWorkflowPlan:
             "configuration": self.configuration.to_dict(),
             "steps": [asdict(step) for step in self.steps],
         }
-        if self.configuration.schema_version == "1.2":
+        if self.configuration.schema_version in ("1.2", "1.3"):
             payload["schema_version"] = "1.1"
             payload["ordering"] = {
                 "policy": "source_order",
@@ -65,6 +67,10 @@ class FunctionalWorkflowPlan:
                     for step, previous in self.order_after
                 ],
             }
+        if self.source_package is not None:
+            payload["schema_version"] = "1.2"
+            payload["source_package"] = self.source_package.to_dict()
+            payload["source_package_sha256"] = self.source_package.sha256
         return json.dumps(payload, sort_keys=True, indent=2) + "\n"
 
 
@@ -125,11 +131,45 @@ def _step(
     )
 
 
+def _validate_package_context(
+    analysis: FunctionalAnalysis,
+    configuration: FunctionalWorkflowConfiguration,
+    source_package: SourcePackage | None,
+) -> None:
+    if configuration.source_package is not None:
+        if (
+            source_package is None
+            or source_package.root != configuration.source_package
+            or analysis.package_module != source_package.module
+            or len(analysis.sources) != 1
+            or not any(
+                item.path == source_package.source_file
+                and item.sha256 == analysis.sources[0].document_sha256
+                for item in source_package.files
+            )
+        ):
+            raise FunctionalWorkflowError(
+                "Workflow requires matching captured source package context"
+            )
+    elif source_package is not None or analysis.package_module is not None:
+        raise FunctionalWorkflowError(
+            "Package context requires explicit source_package configuration"
+        )
+
+
 def plan_functional_workflow(
-    analysis: FunctionalAnalysis, configuration: FunctionalWorkflowConfiguration
+    analysis: FunctionalAnalysis,
+    configuration: FunctionalWorkflowConfiguration,
+    *,
+    source_package: SourcePackage | None = None,
 ) -> FunctionalWorkflowPlan:
     """Recompute facts and require single-use data flow with explicit call-order semantics."""
-    if analysis != analyze_functional_blocks(analysis.sources) or not analysis.complete:
+    _validate_package_context(analysis, configuration, source_package)
+    if (
+        analysis
+        != analyze_functional_blocks(analysis.sources, package_module=analysis.package_module)
+        or not analysis.complete
+    ):
         raise FunctionalWorkflowError("Workflow requires complete, recomputed functional analysis")
     functions = {block.name: block for block in analysis.blocks}
     if configuration.entrypoint not in functions:
@@ -175,7 +215,7 @@ def plan_functional_workflow(
                 "aliasing/fan-out is unsupported"
             )
         if (
-            configuration.schema_version != "1.2"
+            configuration.schema_version not in ("1.2", "1.3")
             and previous is not None
             and previous not in data_values
         ):
@@ -185,4 +225,4 @@ def plan_functional_workflow(
         consumed.update(data_values)
         available.add(step.output)
         previous = step.output
-    return FunctionalWorkflowPlan(analysis, configuration, steps)
+    return FunctionalWorkflowPlan(analysis, configuration, steps, source_package)

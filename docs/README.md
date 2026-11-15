@@ -124,6 +124,8 @@ the dedicated experiment reports for their frozen settings, decisions and limita
   Explorer/editor controls, the local Python bridge and explicit destination confirmation.
 - [ADR 0010: source-ordered functional joins](decisions/0010-source-ordered-functional-joins.md):
   opt-in ordered calls, explicit ordering-only inputs, unchanged business interfaces and bounded evidence.
+- [ADR 0011: explicit source package context](decisions/0011-explicit-source-package-context.md):
+  bounded raw source/resource preservation, original imports, inventory binding and dependency limits.
 
 ## Maintaining documentation
 

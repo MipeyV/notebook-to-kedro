@@ -40,6 +40,54 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-11-15 - Explicit local source package preservation
+
+### Completed
+
+- Verified PR 91 merged with successful CI, synchronized main and implemented on a dedicated
+  branch. Workflow schema 1.3 declares one regular local package containing the selected Python
+  module, inheriting ordered-call and flat-parameter rules. Legacy modes retain their serialization.
+- Added immutable bounded inventories with raw file identities, AST hashes, syntactic import
+  references, excluded caches and explicit compile-only/dependency/metadata statuses. Rejected
+  links/reparse points, compiled/special files, invalid module roots and escaping imports.
+- Bound selected facts to original module context and document bytes, recomputed functional
+  wiring and recaptured inventory before rendering. Copied original package/source/resources
+  through the shared writer and included both namespaces in generated wheels. Supporting
+  modules are retained opaquely; no runtime import or dependency inference occurs in generation.
+- Added a synthetic package with relative imports, internal dataclass and file-relative JSON.
+  Real Kedro checks cover two profiles and two results, internal type identity, original module
+  locations, pipeline-only shipped expectations and changed-resource negative controls.
+  An offline Hatchling wheel build and isolated execution from unpacked wheel contents establish
+  source-free inclusion, separately from fresh dependency installation. Typed node oracles remain gaps.
+- Rechecked the real package read-only: 23 captured files and an actual selected module without
+  an orchestration entrypoint. Planning correctly blocks instead of substituting the older
+  in-memory proposal. No real source modification/import/execution or project generation occurred.
+- Extended existing references/status/roadmap and indexed ADR 0011. VS Code 0.2.1 labels copied
+  data/source/resources as Files to copy and previews the package through existing engine contracts.
+  Visual layout review remains unverified.
+- Validation passed: 2,508 offline Python tests, 100% line/branch coverage (8,991 statements,
+  2,662 branches), Ruff lint/format and strict mypy on 185 files. All 24 Node protocol tests and
+  actual Windows VS Code 1.145.3 host checks passed; the 0.2.1 VSIX was packaged.
+  All 67 final documentation checks and source/wheel builds passed as well.
+
+### Decisions
+
+- Preserve the original import namespace and raw package bytes; keep supporting modules opaque
+  instead of inferring cross-module nodes. Source-only inspection stays context-free.
+- Keep dependency installation, original distribution metadata and external files explicit gaps.
+  Development-only Hatchling supports offline artifact tests; core runtime remains nbformat-only.
+
+### Open questions
+
+- A reviewed real entrypoint, declared dependencies/metadata, typed dataset/result boundaries
+  and artifact ownership remain necessary before complete real-project conversion.
+- Actual pilot human review and real data/protocol/benchmark execution remain pending.
+
+### Next step
+
+- Specify the narrow real entrypoint and typed persistent I/O/artifact contracts before another
+  bounded implementation. Do not treat static package capture as runtime approval.
+
 ## 2026-11-15 - Source-ordered independent functional calls and joins
 
 ### Completed

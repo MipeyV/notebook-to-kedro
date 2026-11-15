@@ -8,7 +8,9 @@ from dataclasses import asdict
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from notebook_to_kedro.analysis.functional import analyze_functional_blocks
 from notebook_to_kedro.analysis.functional_sources import analyze_functional_blocks_path
+from notebook_to_kedro.analysis.source_packages import capture_source_package
 from notebook_to_kedro.exceptions import FunctionalWorkflowError
 from notebook_to_kedro.generation.kedro.generator import (
     ORDERING_INPUT_ARGUMENT,
@@ -34,9 +36,16 @@ def plan_functional_workflow_path(
     project_root: str | Path | None = None,
 ) -> FunctionalWorkflowPlan:
     """Inspect a script/notebook and validate the configured entrypoint without execution."""
-    return plan_functional_workflow(
-        analyze_functional_blocks_path(path, project_root=project_root), configuration
+    root = Path.cwd() if project_root is None else Path(project_root).resolve()
+    package = (
+        None
+        if configuration.source_package is None
+        else capture_source_package(root, Path(path), configuration.source_package)
     )
+    analysis = analyze_functional_blocks_path(path, project_root=root)
+    if package is not None:
+        analysis = analyze_functional_blocks(analysis.sources, package_module=package.module)
+    return plan_functional_workflow(analysis, configuration, source_package=package)
 
 
 def _conversion_plan(plan: FunctionalWorkflowPlan, root: Path, package_name: str) -> ConversionPlan:
@@ -75,12 +84,17 @@ def _conversion_plan(plan: FunctionalWorkflowPlan, root: Path, package_name: str
             )
         )
     functions = tuple(dict.fromkeys(step.function for step in plan.steps))
+    source_module = (
+        f"{package_name}.workflow_source"
+        if plan.source_package is None
+        else plan.source_package.module
+    )
     return ConversionPlan(
         schema_version="1.0",
         planner_version=f"functional-workflow-{plan.configuration.schema_version}",
         notebook_path=plan.analysis.sources[0].path,
         task_candidates=tasks,
-        imports=(f"from {package_name}.workflow_source import {', '.join(functions)}",),
+        imports=(f"from {source_module} import {', '.join(functions)}",),
         catalog_datasets=tuple(catalog),
         parameters=tuple(
             ParameterValue(name, value, name, "") for name, value in plan.configuration.parameters
@@ -120,8 +134,18 @@ def render_functional_workflow(
     regression_contract: WorkflowRegressionContract | None = None,
 ) -> tuple[dict[Path, str], tuple[tuple[Path, Path], ...]]:
     """Render an internally recomputed workflow plan without publication or execution."""
-    if plan_functional_workflow(plan.analysis, plan.configuration) != plan:
+    if (
+        plan_functional_workflow(
+            plan.analysis, plan.configuration, source_package=plan.source_package
+        )
+        != plan
+    ):
         raise FunctionalWorkflowError("Functional plan differs from recomputed source wiring")
+    package = plan.source_package
+    if package is not None:
+        source = root / package.root / package.source_file
+        if capture_source_package(root, source, package.root) != package:
+            raise FunctionalWorkflowError("Source package differs from the captured inventory")
     configuration = plan.configuration
     conversion = _conversion_plan(plan, root, package_name)
     # Always resolve generated wrapper names, including default-profile compatibility checks.
@@ -131,16 +155,27 @@ def render_functional_workflow(
         package_name=package_name,
         architecture_profile=profile,
         order_after=dict(plan.order_after),
+        source_package_name=None if package is None else package.name,
     )
-    combined = "\n\n".join(unit.source for unit in plan.analysis.sources)
-    try:
-        # Normalize encoding cookies/comments while preserving every original instruction AST.
-        module_source = ast.unparse(ast.parse(combined)) + "\n"
-        compile(module_source, "workflow_source.py", "exec", dont_inherit=True)
-    except (SyntaxError, ValueError) as error:
-        raise FunctionalWorkflowError(f"Cannot relocate workflow module: {error}") from error
-    source_target = Path("src") / package_name / "workflow_source.py"
-    files[source_target] = module_source
+    if package is None:
+        combined = "\n\n".join(unit.source for unit in plan.analysis.sources)
+        try:
+            # Normalize encoding cookies/comments while preserving every original instruction AST.
+            module_source = ast.unparse(ast.parse(combined)) + "\n"
+            compile(module_source, "workflow_source.py", "exec", dont_inherit=True)
+        except (SyntaxError, ValueError) as error:
+            raise FunctionalWorkflowError(f"Cannot relocate workflow module: {error}") from error
+        source_target = Path("src") / package_name / "workflow_source.py"
+        files[source_target] = module_source
+    else:
+        source_target = Path("src") / package.name / package.source_file
+        copies = (
+            *copies,
+            *(
+                (root / package.root / item.path, Path("src") / package.name / item.path)
+                for item in package.files
+            ),
+        )
     catalog = {
         dataset.name: {"type": dataset.type, "filepath": dataset.filepath}
         for dataset in conversion.catalog_datasets
@@ -172,7 +207,7 @@ def render_functional_workflow(
         ],
         "profile_sha256": profile.sha256,
     }
-    if configuration.schema_version == "1.2":
+    if configuration.schema_version in ("1.2", "1.3"):
         steps = {step.id: step for step in plan.steps}
         manifest["ordering_inputs"] = [
             {

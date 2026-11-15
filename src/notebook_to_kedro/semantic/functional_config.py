@@ -7,7 +7,7 @@ import keyword
 import math
 import re
 from dataclasses import dataclass
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import TYPE_CHECKING, TypeAlias, cast
 
 from notebook_to_kedro.exceptions import FunctionalWorkflowError
@@ -40,9 +40,9 @@ def _finite_scalar(value: object) -> bool:
 def _validate_parameter(value: object, schema_version: str) -> None:
     if _finite_scalar(value):
         return
-    if schema_version not in ("1.1", "1.2") or not isinstance(value, tuple):
+    if schema_version not in ("1.1", "1.2", "1.3") or not isinstance(value, tuple):
         raise FunctionalWorkflowError(
-            "Workflow parameters require finite JSON scalars; flat mappings require schema 1.1/1.2 "
+            "Workflow parameters require finite JSON scalars; flat mappings require schema 1.1+ "
             "and immutable pairs"
         )
     if any(
@@ -78,13 +78,31 @@ class FunctionalWorkflowConfiguration:
     parameters: tuple[tuple[str, FunctionalParameterValue], ...]
     outputs: tuple[tuple[str, str], ...]
     schema_version: str = "1.0"
+    source_package: str | None = None
 
     def __post_init__(self) -> None:
         """Validate both direct API values and decoded configuration."""
-        if self.schema_version not in ("1.0", "1.1", "1.2") or not _public_name(self.entrypoint):
+        if self.schema_version not in ("1.0", "1.1", "1.2", "1.3") or not _public_name(
+            self.entrypoint
+        ):
             raise FunctionalWorkflowError(
-                "Workflow requires schema_version 1.0, 1.1 or 1.2 and a public entrypoint"
+                "Workflow requires schema_version 1.0 through 1.3 and a public entrypoint"
             )
+        if self.schema_version == "1.3":
+            if (
+                not isinstance(self.source_package, str)
+                or not self.source_package
+                or PurePosixPath(self.source_package).is_absolute()
+                or PurePosixPath(self.source_package).as_posix() != self.source_package
+                or ".." in PurePosixPath(self.source_package).parts
+                or "\\" in self.source_package
+                or ":" in self.source_package
+            ):
+                raise FunctionalWorkflowError(
+                    "Schema 1.3 requires a contained relative source_package path"
+                )
+        elif self.source_package is not None:
+            raise FunctionalWorkflowError("source_package requires workflow schema 1.3")
         for pairs in (self.inputs, self.parameters, self.outputs):
             if not isinstance(pairs, tuple) or any(
                 not isinstance(item, tuple)
@@ -121,24 +139,29 @@ class FunctionalWorkflowConfiguration:
 
     def to_dict(self) -> dict[str, object]:
         """Export declarative values without importing source dependencies."""
-        return {
+        data: dict[str, object] = {
             "schema_version": self.schema_version,
             "entrypoint": self.entrypoint,
             "inputs": dict(self.inputs),
             "parameters": self.parameter_values(),
             "outputs": dict(self.outputs),
         }
+        if self.source_package is not None:
+            data["source_package"] = self.source_package
+        return data
 
     @classmethod
     def from_dict(cls, data: object) -> FunctionalWorkflowConfiguration:
         """Reject unknown fields and non-mapping boundaries."""
         if (
             not isinstance(data, dict)
-            or data.keys() != _FIELDS
+            or data.keys()
+            != (_FIELDS | {"source_package"} if data.get("schema_version") == "1.3" else _FIELDS)
             or any(not isinstance(data[key], dict) for key in ("inputs", "parameters", "outputs"))
         ):
             raise FunctionalWorkflowError(
-                "Required workflow fields: schema_version, entrypoint, inputs, parameters, outputs"
+                "Required workflow fields: schema_version, entrypoint, inputs, parameters, "
+                "outputs; schema 1.3 also requires source_package"
             )
         return cls(
             data["entrypoint"],
@@ -146,6 +169,7 @@ class FunctionalWorkflowConfiguration:
             tuple((key, _decode_parameter(value)) for key, value in data["parameters"].items()),
             tuple(data["outputs"].items()),
             data["schema_version"],
+            data.get("source_package"),
         )
 
 

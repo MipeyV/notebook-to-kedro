@@ -1,0 +1,17 @@
+{
+  "schema_version": "1.0",
+  "scenarios": [
+    {
+      "id": "positive",
+      "inputs": {"values": 3.0},
+      "parameters": {"scale": 2.0},
+      "expected": {"value": 6.25, "type_module": "example_ml.domain", "helper_module": "example_ml.transforms"}
+    },
+    {
+      "id": "negative",
+      "inputs": {"values": -2.0},
+      "parameters": {"scale": 3.0},
+      "expected": {"value": -5.75, "type_module": "example_ml.domain", "helper_module": "example_ml.transforms"}
+    }
+  ]
+}
