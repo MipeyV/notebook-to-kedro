@@ -49,6 +49,14 @@ schema 1.3; analysis/local envelopes remain unchanged. Nested sidecars, remote/e
 generated file-fixture regression contracts and typed final-result/artifact policies remain
 unsupported. JSON-value input/regression behavior remains available independently.
 
+Workflow schema 1.5 additionally permits an explicit `memory` final-output target and retains
+existing JSON targets. Assign-mode retention preserves the runtime object/type without inferred
+serialization or type validation. SequentialRunner/ThreadRunner and default/custom profiles are
+verified on trusted synthetic examples; other process runners and durable recovery are not.
+Plans/manifests use schema 1.4, while analysis/local envelopes remain unchanged. JSON regression
+contracts do not define typed memory-result comparisons and are rejected for this mode. Durable
+result serializers, generated typed comparators and owned application artifacts remain future work.
+
 The [local operation layer](local-operations.md) configures these same deterministic entrypoints
 through typed inspection, new-file preview and generation requests. It adds an explicit contained
 working root and local JSON settings, without broadening source/library support or executing code.

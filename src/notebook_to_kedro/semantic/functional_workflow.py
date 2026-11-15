@@ -44,7 +44,7 @@ class FunctionalWorkflowPlan:
     @property
     def order_after(self) -> tuple[tuple[str, str], ...]:
         """Declare missing adjacent-call dependencies in the explicit source-order mode."""
-        if self.configuration.schema_version not in ("1.2", "1.3", "1.4"):
+        if self.configuration.schema_version not in ("1.2", "1.3", "1.4", "1.5"):
             return ()
         return tuple(
             (current.id, previous.id)
@@ -60,7 +60,7 @@ class FunctionalWorkflowPlan:
             "configuration": self.configuration.to_dict(),
             "steps": [asdict(step) for step in self.steps],
         }
-        if self.configuration.schema_version in ("1.2", "1.3", "1.4"):
+        if self.configuration.schema_version in ("1.2", "1.3", "1.4", "1.5"):
             payload["schema_version"] = "1.1"
             payload["ordering"] = {
                 "policy": "source_order",
@@ -73,9 +73,18 @@ class FunctionalWorkflowPlan:
             payload["schema_version"] = "1.2"
             payload["source_package"] = self.source_package.to_dict()
             payload["source_package_sha256"] = self.source_package.sha256
-        if self.configuration.schema_version == "1.4":
+        if self.configuration.schema_version in ("1.4", "1.5"):
             payload["schema_version"] = "1.3"
             payload["file_inputs"] = [item.to_dict() for item in self.file_inputs]
+        if self.configuration.schema_version == "1.5":
+            payload["schema_version"] = "1.4"
+            payload["result_boundary"] = {
+                "dataset": self.configuration.outputs[0][0],
+                "mode": "memory" if self.configuration.memory_output else "json",
+                "persistence": "none" if self.configuration.memory_output else "json_file",
+                "type_validation": "not_performed",
+                "artifact_policy": "not_defined",
+            }
         return json.dumps(payload, sort_keys=True, indent=2) + "\n"
 
 
@@ -205,7 +214,7 @@ def plan_functional_workflow(
         reusable_parameters={
             name for name, value in configuration.parameters if not isinstance(value, tuple)
         },
-        source_order=configuration.schema_version in ("1.2", "1.3", "1.4"),
+        source_order=configuration.schema_version in ("1.2", "1.3", "1.4", "1.5"),
     )
     return FunctionalWorkflowPlan(analysis, configuration, steps, source_package, file_inputs)
 

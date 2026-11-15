@@ -108,6 +108,15 @@ async function main() {
       regression_contract: undefined,
     }),
   );
+  await fs.writeFile(
+    path.join(workspace, "memory.json"),
+    JSON.stringify({
+      ...config,
+      source: "examples/functional_files/src/reference_ml/memory_workflow.py",
+      workflow_configuration: "examples/functional_files/memory_workflow.json",
+      regression_contract: undefined,
+    }),
+  );
   await runTests({
     version: "1.145.3",
     vscodeExecutablePath: process.env.VSCODE_EXECUTABLE_PATH,

@@ -117,6 +117,11 @@ The engine copies and hashes their bytes, then passes a path to the original app
 It does not infer data formats or serialize typed results. Shipped JSON regression contracts do
 not yet define file-reference fixtures; those gaps remain explicit.
 
+Schema 1.5 can explicitly retain a final Python object with `"outputs": {"result": "memory"}`.
+It preserves the original object in the execution catalog without JSON coercion or disk
+persistence. See the [memory-result boundary](docs/reference/functional-workflows.md#memory-only-final-results-in-schema-15)
+for lifetime limits and missing typed-result expectations.
+
 When a package exposes functions without an entrypoint, use the separate
 [orchestration preparation](docs/reference/functional-workflows.md#explicit-orchestration-preparation)
 operation: `prepare-workflow SOURCE DEFINITION` previews explicitly declared calls;

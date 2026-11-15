@@ -227,7 +227,11 @@ def render_functional_workflow(
         )
     catalog.update(
         {
-            name: {"type": "json.JSONDataset", "filepath": filepath}
+            name: (
+                {"type": "MemoryDataset", "copy_mode": "assign"}
+                if configuration.memory_output
+                else {"type": "json.JSONDataset", "filepath": filepath}
+            )
             for name, filepath in configuration.outputs
         }
     )
@@ -252,9 +256,9 @@ def render_functional_workflow(
         ],
         "profile_sha256": profile.sha256,
     }
-    if configuration.schema_version == "1.4":
+    if configuration.schema_version in ("1.4", "1.5"):
         manifest["file_reference_destinations"] = reference_destinations
-    if configuration.schema_version in ("1.2", "1.3", "1.4"):
+    if configuration.schema_version in ("1.2", "1.3", "1.4", "1.5"):
         steps = {step.id: step for step in plan.steps}
         manifest["ordering_inputs"] = [
             {

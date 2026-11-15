@@ -41,7 +41,7 @@ def _finite_scalar(value: object) -> bool:
 def _validate_parameter(value: object, schema_version: str) -> None:
     if _finite_scalar(value):
         return
-    if schema_version not in ("1.1", "1.2", "1.3", "1.4") or not isinstance(value, tuple):
+    if schema_version not in ("1.1", "1.2", "1.3", "1.4", "1.5") or not isinstance(value, tuple):
         raise FunctionalWorkflowError(
             "Workflow parameters require finite JSON scalars; flat mappings require schema 1.1+ "
             "and immutable pairs"
@@ -72,7 +72,7 @@ def _decode_parameter(value: object) -> FunctionalParameterValue:
 
 @dataclass(frozen=True, slots=True)
 class FunctionalWorkflowConfiguration:
-    """One entrypoint, JSON inputs, immutable explicit parameters and one JSON output."""
+    """One entrypoint, explicit boundaries/parameters and one JSON or memory-only output."""
 
     entrypoint: str
     inputs: tuple[tuple[str, str], ...]
@@ -84,13 +84,18 @@ class FunctionalWorkflowConfiguration:
 
     def __post_init__(self) -> None:
         """Validate both direct API values and decoded configuration."""
-        if self.schema_version not in ("1.0", "1.1", "1.2", "1.3", "1.4") or not _public_name(
-            self.entrypoint
-        ):
+        if self.schema_version not in (
+            "1.0",
+            "1.1",
+            "1.2",
+            "1.3",
+            "1.4",
+            "1.5",
+        ) or not _public_name(self.entrypoint):
             raise FunctionalWorkflowError(
-                "Workflow requires schema_version 1.0 through 1.4 and a public entrypoint"
+                "Workflow requires schema_version 1.0 through 1.5 and a public entrypoint"
             )
-        if self.schema_version in ("1.3", "1.4"):
+        if self.schema_version in ("1.3", "1.4", "1.5"):
             if (
                 not isinstance(self.source_package, str)
                 or not self.source_package
@@ -124,24 +129,33 @@ class FunctionalWorkflowConfiguration:
             raise FunctionalWorkflowError("Workflow input paths must be nonempty strings")
         if len(self.outputs) != 1 or any(
             not isinstance(value, str)
-            or re.fullmatch(r"data/08_reporting/[a-z][a-z0-9_]*\.json", value) is None
+            or (
+                not (self.schema_version == "1.5" and value == "memory")
+                and re.fullmatch(r"data/08_reporting/[a-z][a-z0-9_]*\.json", value) is None
+            )
             for _, value in self.outputs
         ):
             raise FunctionalWorkflowError(
-                "Workflow requires one output under data/08_reporting/<name>.json"
+                "Workflow requires one output under data/08_reporting/<name>.json; "
+                "schema 1.5 also accepts the explicit memory target"
             )
         for _, value in self.parameters:
             _validate_parameter(value, self.schema_version)
 
     def _validate_file_inputs(self) -> None:
-        if self.schema_version != "1.4" and self.file_inputs:
-            raise FunctionalWorkflowError("File references require workflow schema 1.4")
+        if self.schema_version not in ("1.4", "1.5") and self.file_inputs:
+            raise FunctionalWorkflowError("File references require workflow schema 1.4+")
         if any(not isinstance(value, FileReferenceInput) for _, value in self.file_inputs) or set(
             dict(self.file_inputs)
         ) & (set(dict(self.inputs)) | set(dict(self.parameters))):
             raise FunctionalWorkflowError(
                 "File inputs require immutable references and disjoint boundary names"
             )
+
+    @property
+    def memory_output(self) -> bool:
+        """Select nonpersistent object retention without importing or inferring its type."""
+        return self.outputs[0][1] == "memory"
 
     def parameter_values(self) -> dict[str, JsonPrimitive | dict[str, JsonPrimitive]]:
         """Return fresh JSON objects without exposing mutable configuration state."""
@@ -161,7 +175,7 @@ class FunctionalWorkflowConfiguration:
         }
         if self.source_package is not None:
             data["source_package"] = self.source_package
-        if self.schema_version == "1.4":
+        if self.schema_version in ("1.4", "1.5"):
             data["file_inputs"] = {name: value.to_dict() for name, value in self.file_inputs}
         return data
 
@@ -169,19 +183,22 @@ class FunctionalWorkflowConfiguration:
     def from_dict(cls, data: object) -> FunctionalWorkflowConfiguration:
         """Reject unknown fields and non-mapping boundaries."""
         fields = _FIELDS
-        if isinstance(data, dict) and data.get("schema_version") in ("1.3", "1.4"):
+        if isinstance(data, dict) and data.get("schema_version") in ("1.3", "1.4", "1.5"):
             fields = fields | {"source_package"}
-            if data["schema_version"] == "1.4":
+            if data["schema_version"] in ("1.4", "1.5"):
                 fields = fields | {"file_inputs"}
         if (
             not isinstance(data, dict)
             or data.keys() != fields
             or any(not isinstance(data[key], dict) for key in ("inputs", "parameters", "outputs"))
-            or (data.get("schema_version") == "1.4" and not isinstance(data["file_inputs"], dict))
+            or (
+                data.get("schema_version") in ("1.4", "1.5")
+                and not isinstance(data["file_inputs"], dict)
+            )
         ):
             raise FunctionalWorkflowError(
                 "Required workflow fields: schema_version, entrypoint, inputs, parameters, "
-                "outputs; schema 1.3+ requires source_package and 1.4 also file_inputs"
+                "outputs; schema 1.3+ requires source_package and 1.4+ also file_inputs"
             )
         return cls(
             data["entrypoint"],

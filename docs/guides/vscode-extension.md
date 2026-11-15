@@ -73,6 +73,10 @@ report retains raw-byte identities. Select the existing workflow JSON through se
 the UI does not infer loaders or sidecars. These inputs do not yet support the JSON regression
 expectation contract. Local-operation schema and extension runtime behavior stay unchanged.
 
+Schema 1.5 can explicitly choose a memory-only final result. Its preview/report shows
+`result_boundary` and the memory catalog entry without running a pipeline or serializing an
+application object into the interface. This does not persist results after a process ends.
+
 **Generate project** refreshes the plan, asks for a destination inside the declared project
 root and displays an explicit destination confirmation. Canceling that confirmation leaves
 the destination absent. Confirming invokes the current Python generation operation, which
