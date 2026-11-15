@@ -29,6 +29,13 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Separate explicit orchestration preparation API/CLI previews declared calls against observed
+  local functions, or publishes a new raw package copy plus a synthesized forwarding adapter.
+  Original/proposed facts remain separate and unreviewed; shared wiring checks retain signatures,
+  single-use values and source order. Added immutable bounded definitions, trusted identity/order/
+  exception and subsequent Kedro regression checks, ADR 0012 and proposed typed-I/O/artifact gates.
+  No source mutation, inferred persistent I/O, application execution or UI schema change.
+
 - Opt-in functional schema 1.3 preserves one explicitly declared regular Python package,
   including original source bytes, import context and resources. Bounded static inventories
   and drift checks feed the existing writer; generated wheels include the original package.

@@ -15,10 +15,13 @@ from notebook_to_kedro.api import (
     generate_kedro_project,
     load_functional_workflow_configuration,
     load_kedro_profile,
+    load_workflow_preparation_definition,
     load_workflow_regression_contract,
     plan_functional_workflow_path,
     plan_notebook_path,
+    prepare_functional_workflow,
     render_conversion_report,
+    render_workflow_preparation,
     validate_conversion_plan,
 )
 from notebook_to_kedro.evaluation import (
@@ -105,6 +108,7 @@ def main(argv: list[str] | None = None) -> int:
     try:
         handlers = {
             "project": _project_operation,
+            "prepare-workflow": _prepare_workflow,
             "inspect-blocks": _functional_workflow,
             "plan-workflow": _functional_workflow,
             "generate-workflow": _functional_workflow,
@@ -228,6 +232,19 @@ def _add_source_parsers(subparsers: argparse._SubParsersAction[argparse.Argument
 
 
 def _add_workflow_parsers(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
+    preparation = subparsers.add_parser(
+        "prepare-workflow", help="preview declared orchestration or publish a new review copy"
+    )
+    preparation.add_argument(
+        "source", type=Path, help="existing Python module inside a regular package"
+    )
+    preparation.add_argument(
+        "definition", type=Path, help="explicit orchestration declaration JSON"
+    )
+    preparation.add_argument("--project-root", type=Path, default=None)
+    preparation.add_argument(
+        "--output-dir", type=Path, help="publish a new review copy; otherwise preview only"
+    )
     for command in ("plan-workflow", "generate-workflow"):
         parser = subparsers.add_parser(
             command, help="plan or generate an explicit linear functional workflow"
@@ -244,6 +261,33 @@ def _add_workflow_parsers(subparsers: argparse._SubParsersAction[argparse.Argume
                 type=Path,
                 help="explicit JSON expectations; never inferred by executing source",
             )
+
+
+def _prepare_workflow(args: argparse.Namespace) -> int:
+    definition = load_workflow_preparation_definition(args.definition)
+    if args.output_dir is None:
+        files, copies = render_workflow_preparation(
+            args.source, definition, project_root=args.project_root
+        )
+        manifest = json.loads(files[Path("workflow-preparation.json")])
+        payload = {
+            "publication_status": "not_written",
+            "manifest": manifest,
+            "adapter_source": files[Path(manifest["proposal"]["adapter"])],
+            "copy_targets": [target.as_posix() for _, target in copies],
+        }
+    else:
+        paths = prepare_functional_workflow(
+            args.source, definition, args.output_dir, project_root=args.project_root
+        )
+        payload = {
+            "publication_status": "review_copy_written",
+            "status": "unreviewed_proposal",
+            "execution_status": "not_run",
+            "files": [str(path) for path in paths],
+        }
+    sys.stdout.write(json.dumps(payload, sort_keys=True, indent=2) + "\n")
+    return 0
 
 
 def _functional_workflow(args: argparse.Namespace) -> int:

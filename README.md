@@ -112,6 +112,13 @@ dependencies or reconstruct project metadata. Data fan-out and control flow rema
 [pytest node/pipeline regressions](docs/reference/generated-workflow-tests.md) based on explicit
 expected values. Missing expectations are reported; generation never executes code to infer them.
 
+When a package exposes functions without an entrypoint, use the separate
+[orchestration preparation](docs/reference/functional-workflows.md#explicit-orchestration-preparation)
+operation: `prepare-workflow SOURCE DEFINITION` previews explicitly declared calls;
+`--output-dir NEW_DIRECTORY` publishes a review copy with a new forwarding module. Original
+source facts stay separate from the synthesized proposal. Persistent I/O and artifact policies
+still need explicit contracts before complete conversion.
+
 Use an explicit [local project configuration](docs/reference/local-operations.md) to select the
 existing notebook or functional engine and reuse settings across operations:
 

@@ -148,6 +148,12 @@ project directory and must accompany it when running the project.
 
 ## Evidence and remaining E3 work
 
+Trusted preparation tests also convert the separate synthesized adapter after explicitly
+supplying JSON I/O and existing pipeline expectations. Both naming profiles pass two emitted
+tests; changing the adapter's value/scale binding causes both to fail. This checks a deliberate
+integration proposal, not equivalence to a previously absent original orchestration. Preparation
+itself emits no test stubs or expectations and retains its unreviewed/not-run snapshot.
+
 The schema 1.3 [package fixture](../../examples/functional_package/regression.json) supplies two
 pipeline expectations and no fabricated JSON node cases for its internal dataclass. Missing
 node oracles remain in the gap snapshot. Both profiles pass the emitted tests; changing the

@@ -46,8 +46,12 @@ workflows. The real proposal now plans three calls; no real project is generated
 One explicitly declared regular Python package can now retain original imports, raw source and
 resources through schema 1.3. Supporting modules remain opaque; dependency/distribution metadata
 is not reconstructed. The real source inventory is captured read-only, and its absent orchestration
-entrypoint blocks planning rather than being silently invented. Next define a reviewed entrypoint
-and typed dataset/result and artifact boundaries, alongside declared application dependencies.
+entrypoint blocks planning rather than being silently invented. A separate preparation operation
+now previews explicitly declared calls and can publish a new review copy with a synthesized
+adapter, keeping original facts separate. The real three-call preview is unreviewed and unexecuted.
+Next implement bounded file-reference inputs with declared sidecars, explicit memory-only or
+serialized results, and owned artifact boundaries alongside declared application dependencies;
+the setup guide records these proposed acceptance contracts.
 A complete real-project conversion is not yet established. Optimization retains a separate
 acceptance contract.
 
