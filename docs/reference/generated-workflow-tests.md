@@ -148,6 +148,13 @@ project directory and must accompany it when running the project.
 
 ## Evidence and remaining E3 work
 
+Workflow schema 1.4 file references do not yet have a shipped fixture/oracle contract. Supplying
+the current JSON regression contract to such a workflow fails before publication. Without one,
+the gap snapshot explicitly lists `missing_file_fixtures` and emits no tests. Do not substitute
+JSON-decoded values or path literals for real primary/sidecar fixture contents. Engine integration
+tests exercise trusted synthetic file loaders and domain errors separately; broader generated
+file-fixture tests remain future work. Schema 1.4 with only JSON inputs retains existing regressions.
+
 Trusted preparation tests also convert the separate synthesized adapter after explicitly
 supplying JSON I/O and existing pipeline expectations. Both naming profiles pass two emitted
 tests; changing the adapter's value/scale binding causes both to fail. This checks a deliberate

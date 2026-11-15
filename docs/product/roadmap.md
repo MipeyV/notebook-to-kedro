@@ -49,9 +49,11 @@ is not reconstructed. The real source inventory is captured read-only, and its a
 entrypoint blocks planning rather than being silently invented. A separate preparation operation
 now previews explicitly declared calls and can publish a new review copy with a synthesized
 adapter, keeping original facts separate. The real three-call preview is unreviewed and unexecuted.
-Next implement bounded file-reference inputs with declared sidecars, explicit memory-only or
-serialized results, and owned artifact boundaries alongside declared application dependencies;
-the setup guide records these proposed acceptance contracts.
+Bounded file-reference inputs with declared sibling sidecars are now implemented: raw hashing,
+staged path arguments and original domain loaders, with explicit missing file-fixture test gaps.
+The real input inventory remains a read-only observation. Next implement explicit memory-only or
+serialized final results and owned artifact boundaries alongside declared application dependencies;
+the setup guide records the remaining proposed acceptance contracts.
 A complete real-project conversion is not yet established. Optimization retains a separate
 acceptance contract.
 

@@ -19,6 +19,10 @@ export async function run(): Promise<void> {
   await command("selectConfiguration", vscode.Uri.file(path.join(root, "project.json")));
   await command("selectPython", vscode.Uri.file(python));
   await checkConfigurationWizard(root);
+  // Unexpected engine errors must fail the host test instead of waiting for a dialog dismissal.
+  mock.method(vscode.window, "showErrorMessage", async (message: string) => {
+    throw new Error(message);
+  });
   await command("selectConfiguration", vscode.Uri.file(path.join(root, "project.json")));
   const inspection = await command("inspect");
   assert.equal(inspection?.status, "inspected");
@@ -69,6 +73,24 @@ export async function run(): Promise<void> {
   assert.equal(packageManifest.source_package.module, "example_ml.workflow");
   assert.equal(packageManifest.source_module, "src/example_ml/workflow.py");
   assert.equal(packageManifest.source_package.distribution_metadata_status, "not_reconstructed");
+  await command("selectConfiguration", vscode.Uri.file(path.join(root, "files.json")));
+  assert.equal((await command("inspect"))?.status, "inspected");
+  const fileInputPreview = await command("preview");
+  assert.equal(fileInputPreview?.status, "planned");
+  assert.equal(fileInputPreview?.plan?.schema_version, "1.3");
+  const inputCopies = project.getChildren().find((item) => item.label === "Files to copy");
+  assert.ok(
+    inputCopies?.children?.some(
+      (item) => item.label === "data/01_raw/snapshot_path/measurements.metadata.json",
+    ),
+  );
+  const inputManifest = JSON.parse(
+    (fileInputPreview!.files as PreviewFile[]).find(
+      (item) => item.path === "functional-workflow.json",
+    )!.content,
+  );
+  assert.equal(inputManifest.file_inputs[0].validation_status, "hashed_not_loaded");
+  assert.equal(inputManifest.file_reference_destinations[0].load_policy, "path_string");
   await command("selectConfiguration", vscode.Uri.file(path.join(root, "project.json")));
   await command("inspect");
   assert.ok(project.getChildren().some((item) => item.label === "Source"));
@@ -126,4 +148,5 @@ export async function run(): Promise<void> {
     await fs.writeFile(path.join(root, "ui-ready.txt"), "ready", "utf8");
     await new Promise((resolve) => setTimeout(resolve, 60_000));
   }
+  mock.restoreAll();
 }

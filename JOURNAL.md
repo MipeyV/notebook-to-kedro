@@ -40,6 +40,59 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-11-15 - Raw file-reference inputs with declared sibling sidecars
+
+### Completed
+
+- Verified PR 93 merged with successful CI, synchronized main and implemented this bounded slice
+  on a dedicated branch. Workflow schema 1.4 inherits package preservation/source ordering and
+  requires an explicit file_inputs mapping alongside existing JSON inputs.
+- Added immutable primary/sibling-sidecar declarations with distinct boundary names, normalized
+  contained paths and up to 16 sidecars. Bounded chunk hashing enforces 256 MiB total across
+  references without importing readers or decoding data. Links/reparse points, special/missing
+  files, directories, source drift and inconsistent inventory bindings block publication.
+- Passed raw copies through the shared writer, preserving filenames under per-argument folders.
+  Assign-mode catalog data supplies a staged primary path string to the unchanged application
+  loader. Plan/manifest schema 1.3 separates raw-byte observations/destinations from unverified
+  domain semantics and explicitly records that runtime hash enforcement is not performed.
+- Kept old serializers, JSON inputs, package-aware analysis and local envelopes compatible.
+  JSON regression contracts reject undefined file-reference fixtures; gap snapshots name missing
+  fixtures and no tests/oracles are fabricated. Final outputs still require JSON compatibility.
+- Added a synthetic package using original text/metadata/protocol readers and typed intermediates.
+  SequentialRunner/ThreadRunner and default/custom naming checks preserve order, reference/type
+  identity and source bytes. Missing/incompatible sidecars retain original application errors.
+  Static generation copies invalid text bytes without decoding or executing an initializer.
+- Verified local operation preview/publication and actual VS Code copy-tree/manifest display.
+  Corrected the host fixture to omit its absent regression path and made unexpected host errors
+  fail immediately. No extension runtime/protocol or visual layout review is claimed.
+- Captured the private real snapshot/sidecar/protocol as two bundles and three files read-only.
+  Source/data hashes and Git state remain unchanged; no domain loading, compatibility check,
+  application execution or real project generation occurred. Typed result/artifact/dependency
+  boundaries and the unreviewed orchestration remain separate requirements.
+- Updated existing references, setup, roadmap, status and changelog; indexed ADR 0013.
+- Validation passed: 2,624 offline Python tests, 100% line/branch coverage (9,250 statements,
+  2,742 branches), Ruff lint/format, strict mypy on 194 files and all 69 documentation checks.
+  All 24 Node protocol tests and actual Windows VS Code 1.145.3 host checks passed. Source/wheel
+  builds passed; no core runtime dependency was added.
+
+### Decisions
+
+- Preserve raw paths and original domain readers rather than infer data serializers or replace
+  scientific validation. File hashes establish byte observations, not a domain fingerprint.
+- Keep generated file-fixture tests explicit future work and reject the incompatible JSON
+  expectation contract. This slice does not change typed final-result or owned artifact policy.
+
+### Open questions
+
+- Memory-only or serialized final results, application-owned artifact destinations and original
+  dependency/distribution metadata still need bounded implementation contracts.
+- Actual human pilot review, scientific expectations and real runtime/data validation remain pending.
+
+### Next step
+
+- Implement the chosen typed final-result boundary, then an explicit runtime artifact policy,
+  with synthetic checks before any separately scoped real execution proposal.
+
 ## 2026-11-15 - Explicit orchestration preparation before typed I/O
 
 ### Completed

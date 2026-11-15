@@ -29,6 +29,15 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Opt-in workflow schema 1.4 adds explicit file-reference inputs with declared sibling sidecars.
+  Contained regular-file guards and bounded raw hashing feed the existing copy writer; staged
+  path strings reach unchanged application loaders through assign-mode memory datasets.
+  Plan/manifest schema 1.3 records inventories/destinations and unverified domain/runtime status.
+  Added synthetic sequential/threaded identity and sidecar controls plus local/VS Code previews.
+  Existing JSON regression contracts reject undefined file fixtures and report explicit gaps.
+  Final result persistence and application artifacts remain separate work; core dependencies
+  and legacy workflow behavior stay unchanged. Added indexed ADR 0013.
+
 - Separate explicit orchestration preparation API/CLI previews declared calls against observed
   local functions, or publishes a new raw package copy plus a synthesized forwarding adapter.
   Original/proposed facts remain separate and unreviewed; shared wiring checks retain signatures,

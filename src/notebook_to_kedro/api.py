@@ -36,6 +36,7 @@ from notebook_to_kedro.semantic import (
     create_semantic_planner,
     validate_conversion_plan,
 )
+from notebook_to_kedro.semantic.file_inputs import FileReferenceInput
 from notebook_to_kedro.semantic.functional_config import (
     FunctionalWorkflowConfiguration,
     load_functional_workflow_configuration,
@@ -118,6 +119,7 @@ def _select_planner(
 __all__ = [
     "DEFAULT_KEDRO_PROFILE",
     "ConversionSourceAudit",
+    "FileReferenceInput",
     "FunctionalWorkflowConfiguration",
     "KedroArchitectureProfile",
     "WorkflowCall",

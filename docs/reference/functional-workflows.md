@@ -5,7 +5,8 @@
 Status: bounded E2 generation slice implemented on 2026-11-12, extended with opt-in ordered
 joins and explicit local package preservation on 2026-11-15. It converts explicit single-use workflows from scripts or notebook cells.
 Schemas 1.0/1.1 require a linear data chain; schema 1.2 preserves source order across independent
-calls and joins; schema 1.3 additionally preserves one declared Python package. General DAG inference,
+calls and joins; schema 1.3 additionally preserves one declared Python package and schema 1.4 adds
+explicit raw-file path inputs with sibling sidecars. General DAG inference,
 data fan-out and cross-module workflow discovery remain outside this slice. The first
 [generated-test increment](generated-workflow-tests.md) now optionally delivers pytest
 regressions from explicit expectations. A separate opt-in trusted-example bootstrap check
@@ -46,7 +47,8 @@ The old `plan`/`generate` notebook operations retain their existing contract.
 
 ## Explicit boundaries
 
-The JSON configuration has exactly five fields in schemas 1.0/1.1/1.2 and six in schema 1.3;
+The JSON configuration has exactly five fields in schemas 1.0/1.1/1.2, six in schema 1.3 and
+seven in schema 1.4 (adding `file_inputs`);
 unknown/duplicate fields are rejected. The
 file is bounded to 64 KiB. The same immutable configuration validates direct Python construction.
 
@@ -66,7 +68,7 @@ file is bounded to 64 KiB. The same immutable configuration validates direct Pyt
   are resolved relative to `project_root` (the current directory by default), not the config
   file. They must resolve to contained `.json` files. The writer checks existence before copying
   them to `data/01_raw/<argument>.json`. Input JSON contents/schema are not validated statically.
-- Schema 1.0 parameters are finite JSON scalars. Schemas 1.1/1.2/1.3 additionally accept flat JSON
+- Schema 1.0 parameters are finite JSON scalars. Schemas 1.1/1.2/1.3/1.4 additionally accept flat JSON
   objects with string keys and finite scalar values. Arrays, nested objects and inferred
   parameters remain unsupported. Parameters become `parameters.yml` entries and
   `params:<argument>` node inputs.
@@ -189,6 +191,68 @@ shared writer publishes anything. Schemas 1.0/1.1 keep plan schema 1.0 and the l
 Local operation envelopes/project settings stay schema 1.0; analysis stays schema 1.1.
 
 See [ADR 0010](../decisions/0010-source-ordered-functional-joins.md) for the ordering decision.
+
+## Raw-file path inputs in schema 1.4
+
+Use schema 1.4 explicitly when the original function expects a filename rather than loaded
+JSON. It inherits schema 1.3's required `source_package` and ordered-call rules. Keep `inputs`
+for JSON values; declare `file_inputs` separately, even when empty. JSON/file/parameter boundary
+names must be disjoint and together cover the entrypoint arguments.
+
+```json
+"file_inputs": {
+  "snapshot_path": {
+    "path": "data/snapshot.parquet",
+    "sidecars": ["data/snapshot.metadata.json"]
+  },
+  "protocol_path": {"path": "protocols/study.json", "sidecars": []}
+}
+```
+
+Each reference has exactly `path` and `sidecars`; unknown reader/options fields are rejected.
+Paths are normalized relative POSIX paths anchored to `project_root`, without traversal,
+drives or backslashes. Sidecars must be distinct siblings of the primary file, explicitly
+listed with at most 16 entries. Python callers use immutable `FileReferenceInput(path, sidecars)`
+pairs in `FunctionalWorkflowConfiguration.file_inputs`; exports return fresh JSON lists.
+
+Planning checks contained regular files, rejecting links/reparse points in every component,
+directories and special files. It hashes raw bytes in chunks, bounded to 256 MiB total across
+all declared references. It invokes no domain loader, decoder or data library. The immutable
+inventory is bound to the plan and recaptured before rendering; changed/missing files block.
+Existing writer concurrency limits still apply.
+
+The writer copies each bundle to `data/01_raw/<argument>/`, keeping the original filenames.
+An assign-mode `MemoryDataset` supplies the primary relative path string as catalog data. Run
+from the generated project directory, as with its other relative catalog paths. Original
+application code receives that string and owns loading/validation, including sidecar reads
+and domain-object construction. No generic Parquet/DataFrame/protocol coercion is introduced.
+Intermediate objects retain the existing assign-mode contract. Runtime hash enforcement is
+not performed; byte identities do not establish scientific dataset/protocol compatibility.
+
+Plan/manifest schema 1.3 adds `file_inputs` inventories with `hashed_not_loaded` and
+`not_verified` statuses. `file_reference_destinations` records each source/target/hash/size,
+`load_policy: path_string` and `runtime_hash_validation: not_performed`. Package-aware analysis
+stays schema 1.2; local operation/project-settings envelopes remain 1.0. Legacy modes retain
+their original serializers and JSON-input behavior.
+
+Try the [synthetic configuration](../../examples/functional_files/workflow.json):
+
+```bash
+uv run notebook-to-kedro plan-workflow examples/functional_files/src/reference_ml/workflow.py examples/functional_files/workflow.json --project-root .
+uv run notebook-to-kedro generate-workflow examples/functional_files/src/reference_ml/workflow.py examples/functional_files/workflow.json generated/file_project --project-root .
+```
+
+Its original readers build typed measurements/protocol objects from text, a JSON sidecar and
+a JSON protocol, then return an explicitly JSON-compatible summary. Tests cover default/custom
+profiles, SequentialRunner/ThreadRunner, source order, type/reference identity and domain
+sidecar errors. This is not a Parquet runtime compatibility claim.
+
+Final outputs still require JSON compatibility. Application-owned artifacts and typed final
+result persistence are separate work. Existing JSON regression contracts do not define file
+fixtures and are rejected for workflows with file references; `regression-coverage.json`
+records `missing_file_fixtures` and no pytest stubs are invented. See
+[ADR 0013](../decisions/0013-explicit-file-reference-inputs.md) and the
+[test boundary](generated-workflow-tests.md).
 
 ## Explicit orchestration preparation
 

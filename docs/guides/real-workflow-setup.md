@@ -128,24 +128,48 @@ It records three proposed calls and unchanged original package hashes, without p
 package copy or executing the application. A synthesized adapter is not an existing entrypoint.
 Original-source conversion still correctly rejects its missing entrypoint.
 
-## Next contract: domain file references and owned artifacts
+## Working slice: domain file references with sibling sidecars
 
-The following is a proposed next implementation boundary, not current dataset support or
-permission to execute a real run. Preserve application domain loaders rather than recreating
+Workflow schema 1.4 now accepts explicit path inputs, separately from JSON-value inputs:
+see the [file-reference contract](../reference/functional-workflows.md#raw-file-path-inputs-in-schema-14).
+It copies a primary file and declared sibling sidecars, then passes the staged primary path
+to the original application loader. The loader still constructs and validates domain objects.
+The separate protocol can also be a file reference, even when its on-disk format is JSON.
+
+```bash
+uv run notebook-to-kedro generate-workflow examples/functional_files/src/reference_ml/workflow.py examples/functional_files/workflow.json generated/file_project --project-root .
+```
+
+The synthetic fixture reads text values, a metadata sidecar and a protocol with original
+application code; it is not a Parquet execution claim. Its typed intermediates retain identity
+under SequentialRunner and ThreadRunner. Its final summary is explicitly JSON-compatible.
+JSON regression contracts cannot yet supply file fixtures, so these are explicit missing-test
+gaps rather than invented oracles. Dependencies and application execution remain separate.
+
+A private read-only check now hashes the real snapshot, metadata sidecar and protocol as two
+declared bundles. No application code or domain reader runs, and original source/data remain
+unchanged. Scientific compatibility is still unverified. The real orchestration remains a
+separate unreviewed proposal; its typed final result and artifact ownership are still blockers.
+
+## Next contracts: results and owned artifacts
+
+The following distinguishes the implemented input slice from proposed remaining boundaries;
+it is not permission to execute a real run. Preserve application domain loaders rather than recreating
 their scientific validation inside a generic dataset adapter.
 
 | Boundary | Proposed contract and acceptance requirement |
 | --- | --- |
-| Snapshot and provenance | Explicit raw file-reference input with declared sidecars. Preserve filenames/relative layout needed by the loader, contain and hash every declared regular file, and pass a path to the existing application loader. A copied byte hash does not establish the domain dataset fingerprint. |
-| Frozen protocol | Separate file-reference input passed to the existing protocol loader. Keep target/split/metric settings out of candidate parameters. A generic JSON dictionary is not the application's protocol object. |
+| Snapshot and provenance | Implemented for one primary file and explicitly declared sibling sidecars: contained raw-byte hashes, preserved filenames and a staged path passed to the application loader. Nested layouts and broader fixture contracts remain future work. A copied byte hash does not establish the domain dataset fingerprint. |
+| Frozen protocol | Implemented as a separate file-reference input passed to the existing protocol loader. Keep target/split/metric settings out of candidate parameters. A generic JSON dictionary is not the application's protocol object. |
 | Intermediate domain objects | Use assign-mode memory datasets between calls; preserve type/reference identity. Do not infer pickle, DataFrame or JSON coercions. |
 | Final domain result | Require an explicit memory-only result or a reviewed application serializer/descriptor. Do not assume a result dataclass is JSON-compatible. Memory-only retention would not establish persistence or runner portability. |
 | Artifact directory | Declare the application-owned runtime destination separately from generated-project publication. Preserve refusal of an existing destination; never precreate, overwrite, delete or retry the application's writes. Validate how a candidate output path is bound before a runtime trial. |
 | Dependencies and provenance | Declare application requirements/versions and any original distribution metadata or lockfile lookups. Copying importable source alone does not satisfy those lookups. |
 | Runtime evidence | Supply reviewed expectations and actual snapshot/protocol compatibility checks, then scope any validation-only execution explicitly. Keep final-test evaluation separate. |
 
-These requirements are now concrete inputs to the next bounded slice. Static preparation
-records persistent-I/O/artifact policies as undefined until those contracts exist.
+Result/artifact requirements are concrete inputs to the next bounded slice. Static source
+preparation alone still records persistent-I/O/artifact policies as undefined; selecting an
+actual workflow I/O configuration is a separate integration decision.
 
 ## Review gaps before a real trial
 

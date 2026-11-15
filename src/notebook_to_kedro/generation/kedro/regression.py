@@ -113,6 +113,8 @@ def render_workflow_regression_tests(
         "execution_status": "not_run",
         "review_status": "not_authenticated",
     }
+    if plan.configuration.file_inputs:
+        report["missing_file_fixtures"] = [name for name, _ in plan.configuration.file_inputs]
     files = {Path("regression-coverage.json"): json.dumps(report, sort_keys=True, indent=2) + "\n"}
     if contract is None:
         files[Path("TESTING.md")] = (
@@ -120,6 +122,12 @@ def render_workflow_regression_tests(
             "See regression-coverage.json for missing expectations. Supply an explicit regression "
             "contract when generating a new project.\n"
         )
+        if plan.configuration.file_inputs:
+            files[Path("TESTING.md")] += (
+                "\nFile-reference fixtures are not supported by the JSON regression contract. "
+                "Supply reviewed application-level fixture tests separately; "
+                "no tests were invented.\n"
+            )
         return files
     metadata = {
         "schema_version": "1.0",
