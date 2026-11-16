@@ -40,6 +40,43 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-11-16 - Prepare the paired real validation trial
+
+### Completed
+
+- Defined the next bounded trial in the existing real-workflow setup guide: direct original
+  application functions versus the registered generated pipeline, one frozen validation candidate,
+  identical input bytes and separate new application-owned artifact destinations.
+- Specified provenance/definition bindings, decoded table and metric comparisons, independent
+  metric recomputation, narrow metadata exclusions, artifact inventories and synthetic controls.
+- Prepared an ignored private worksheet with concrete paths, byte identities, candidate settings,
+  required artifacts and pending review/execution fields. Kept private source/data outside Git.
+- Preparation rechecked all 29 original-to-staged bindings, 50 published files and the selected
+  interpreter's 61 distribution metadata records. Source Git still matches the frozen report and
+  the generated artifact destination remains absent. No application function was executed.
+- All 74 documentation navigation checks and both repository-wide Ruff checks passed on
+  Windows/Python 3.12.14. Runtime source and tests are unchanged in this documentation increment.
+
+### Decisions
+
+- Use exact same-environment deterministic comparisons before introducing reviewed tolerances.
+  Record scientific acceptance separately from conversion equivalence.
+- Keep trial preparation as an operator workflow while its concrete runtime/comparator requirements
+  are still unvalidated. No new empty engine specification, execution API or core dependency.
+- Retain every attempt and partial output. Source Git, ambient execution Git, publication bytes,
+  installed metadata and actual behavior keep separate evidence scopes.
+
+### Open questions
+
+- Actual orchestration/scientific review and explicit benchmark execution consent remain pending.
+  The future bounded harness and its negative controls must be checked before running the pair.
+  Figure appearance/equivalence, broader scientific acceptance and the notebook pilot remain open.
+
+### Next step
+
+- Implement/check the concrete private validation harness, obtain review and execution consent,
+  then retain the observed artifacts/comparison outcomes linked to the frozen provenance report.
+
 ## 2026-11-16 - Explicit original-source and installed-workflow provenance
 
 ### Completed
