@@ -29,6 +29,13 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Added a standalone developer paired-trial harness for the narrow naive/one_step validation
+  artifact contract. It binds operator declarations to exact definition/provenance/script bytes,
+  verifies installed import origins, reserves exclusive attempts and compares decoded Parquet,
+  finite independently recomputed MAE/RMSE, metadata and artifact inventories. Added installed
+  synthetic mutation/failure/timeout controls and locked test-only PyArrow/editables dependencies.
+  A new private worksheet passes real runtime preflight; real review and execution remain pending.
+
 - Documented a provenance-bound paired validation trial with fixed candidate/phase, direct
   application versus registered-pipeline observations, explicit metric/table/artifact checks,
   comparator controls and retained failure evidence. Prepared a private real-source worksheet;

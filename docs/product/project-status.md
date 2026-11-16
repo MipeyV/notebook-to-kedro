@@ -2,7 +2,7 @@
 
 [Documentation index](../README.md)
 
-Status: current implementation summary reviewed on 2026-11-16; historical evidence follows.
+Status: current implementation summary reviewed on 2026-11-17; historical evidence follows.
 Historical measurements retain their original corpus, runtime and limitations.
 
 ## Project status
@@ -28,7 +28,7 @@ Historical measurements retain their original corpus, runtime and limitations.
 | Application distribution declarations | Schema 1.7 captures an explicitly selected pyproject, static requirements/extras/scripts and selected build/provenance files. Generation stages the original project under application/ for separate installation and links its exact distribution requirement. Plans/manifests use schema 1.6 with captured hashes and not_run build/resolution statuses. Trusted standard/editable-wheel installation, delivered regressions and Kedro CLI checks reuse locked development dependencies. Actual dependency resolution and real-project installation require environment-specific evidence. |
 | Application orchestration preparation | Separate preparation schema 1.1 captures original application metadata and selected project files, preserves its pyproject-relative package layout and adds the proposed adapter. Its manifest exposes original distribution facts and prepared paths with pending review. The copy can feed explicit workflow schema 1.7 conversion. Synthetic standard/editable-wheel installation tests exercise metadata, delivered tests and Kedro CLI after preparation. |
 | Workflow provenance capture | Application-aware generation publishes byte inventories. A separate API/CLI binds explicit original Git, source-copy identities, verified listed publication files and selected-interpreter distribution metadata in a new report. Prepared adapters are recomputed against original source. Review and benchmark status remain pending. Files added after generation and runtime import/result semantics require separate evidence. |
-| Real validation trial preparation | A documented paired-trial protocol and private frozen worksheet define direct-application versus registered-Kedro invocations, candidate/input/provenance bindings, typed table/metric/artifact expectations and retained failures. Human review, execution consent, the trial harness/comparators and actual real benchmark results remain pending; this adds no runtime API or generated typed tests. |
+| Real validation trial preparation | A developer-only script now preflights the private frozen worksheet and runs a consent-bound direct-application/registered-Kedro pair for the narrow naive/one_step validation artifact contract. Installed synthetic pairs and mutation/failure/timeout controls exercise exact decoded Parquet/metric/metadata checks and retained attempts. Real preflight verifies 25 module origins. Actual orchestration/scientific review, execution consent and real benchmark results remain pending. No runtime API or generated typed tests are added. |
 
 Generation itself does not verify dependency installation, full DAG semantics or runtime behavior.
 The [explicit bootstrap check](../reference/generated-workflow-tests.md#fresh-environment-bootstrap)

@@ -2,7 +2,7 @@
 
 [Documentation index](../README.md)
 
-Status: engine/operations/local-interface delivery priorities updated on 2026-11-16;
+Status: engine/operations/local-interface delivery priorities updated on 2026-11-17;
 historical V1/V2 checkboxes are preserved.
 The broader product direction is recorded in [Product vision](product-vision.md).
 
@@ -78,9 +78,11 @@ files to 50 published files and observes 61 distributions with distinct source/e
 A [paired validation trial protocol](../guides/real-workflow-setup.md#proposed-paired-validation-trial)
 now defines the reference/generated invocations, provenance binding, frozen candidate, explicit
 artifact/metric/table expectations, comparison controls and retained failure evidence. Its private
-real-source worksheet is prepared; orchestration/scientific review, execution consent, the bounded
-harness and actual benchmark results remain pending. Next implement/check the bounded harness
-against the concrete expectations, obtain review/execution consent and run the scoped pair.
+real-source worksheet now binds the developer harness. Installed synthetic pairs and independent
+artifact mutations exercise exact Parquet/metric/metadata comparisons, retained failures/timeouts
+and exclusive attempts. Real runtime preflight verifies 25 module origins. Orchestration/scientific
+review, explicit execution consent and actual benchmark results remain pending. Next obtain
+review/consent for the concrete checked pair and run it before promoting reusable engine contracts.
 A complete real-project conversion is not yet established. Optimization retains a separate
 acceptance contract.
 

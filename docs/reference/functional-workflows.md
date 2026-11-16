@@ -662,8 +662,9 @@ The decision is recorded in [ADR 0018](../decisions/0018-explicit-workflow-prove
 The [proposed paired validation protocol](../guides/real-workflow-setup.md#proposed-paired-validation-trial)
 defines how a private trial can bind exact provenance/definition bytes to direct application and
 registered-pipeline observations, with explicit metric/table/artifact checks and retained failures.
-Its worksheet is preparation evidence. The harness, runtime comparisons and real execution remain
-pending, and the existing generated JSON regression contract retains its supported boundaries.
+Its worksheet is preparation evidence. A separate developer script now checks installed synthetic
+pairs and the real runtime preflight; real review/execution remains pending. The existing generated
+JSON regression contract retains its supported boundaries and no runtime operation is added.
 
 ## Evidence and next work
 

@@ -43,12 +43,14 @@ lint = [
     "ruff>=0.14,<1",
 ]
 test = [
+    "editables>=0.5,<1",
     "hatchling>=1.27,<2",
     "ipykernel>=7.1,<8",
     "kedro>=1.5,<2",
     "kedro-datasets[pandas-csvdataset]>=8,<9",
     "nbclient>=0.10,<1",
     "pandas>=2.2,<4",
+    "pyarrow>=19,<24",
     "pytest>=9,<10",
     "pytest-cov>=7,<8",
     "scikit-learn>=1.7,<2",

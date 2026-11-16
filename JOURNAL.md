@@ -40,6 +40,51 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-11-17 - Check the bounded paired validation harness
+
+### Completed
+
+- Added tools/run_workflow_trial.py as a standalone opt-in developer bridge for the concrete
+  loader/benchmark result and artifact contract. Normal conversion, runtime APIs, generated
+  regression contracts and the interface remain separate.
+- Added original-file import checks, installed metadata/source/generated preflight, exact
+  operator-declaration bindings, exclusive attempt/worker claims and retained observations,
+  invocations, partial-file inventories and protected postflight checks.
+- Implemented exact decoded Parquet, independent finite MAE/RMSE, protocol/candidate metadata,
+  result descriptor and source/lock/version comparisons. Ambient Git values are checked against
+  actual worker observations; visual figure equivalence remains not_checked.
+- Added an independently specified three-observation synthetic application, editable installation,
+  full direct/registered execution and negative controls for artifacts, values, types, provenance,
+  consent, failures and timeouts. PyArrow and editable build support are locked test dependencies;
+  the engine still depends only on nbformat at runtime.
+- Preserved the earlier private proposal and prepared a new script-bound worksheet with a pending
+  consent template. Its authorized runtime preflight verified 25 application/generated module
+  origins, current metadata and frozen source/generated/input identities without invoking the
+  selected loaders or benchmark. Actual real-project benchmark execution remains not_run.
+- All 2,858 offline tests passed on Windows/Python 3.12.14, preserving the configured 100% engine
+  line/branch coverage (9,751 statements, 2,928 branches). The 21 new installed synthetic checks,
+  all 74 documentation checks, Ruff, strict mypy across 212 files and offline source/wheel builds
+  passed. The source archive includes the exact harness/fixtures and the wheel keeps nbformat
+  as its only runtime requirement. The interface was unchanged and was not retested locally.
+
+### Decisions
+
+- Keep this narrow bridge outside the engine until actual reviewed trial evidence establishes
+  reusable contracts. No universal executor, implicit serializers or scientific quality oracle.
+- Retain every reserved attempt and partial output. The immediate worker has a timeout and
+  retained logs are capped; full subprocess capture remains memory-buffered and descendant
+  processes are not an operating-system containment guarantee.
+
+### Open questions
+
+- Actual orchestration/scientific review and explicit real benchmark execution consent are pending.
+  Synthetic declarations do not approve the real pair or the independent notebook pilot.
+
+### Next step
+
+- Present the checked harness and frozen worksheet for actual review/consent, then execute the
+  scoped pair and retain its linked outcomes before designing reusable runtime comparators.
+
 ## 2026-11-16 - Prepare the paired real validation trial
 
 ### Completed

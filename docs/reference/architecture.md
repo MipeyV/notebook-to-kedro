@@ -114,6 +114,12 @@ ambient execution Git have separate report fields. Static capture, installed obs
 future benchmark execution retain distinct evidence scopes.
 [ADR 0018](../decisions/0018-explicit-workflow-provenance.md) records the snapshot boundary.
 
+A separate [developer paired-trial script](../guides/real-workflow-setup.md#developer-harness)
+now consumes a private frozen worksheet for one benchmark-shaped application. It runs through
+the selected installed runtime with explicit operator declarations and retained execution evidence.
+Its installed synthetic checks and real preflight are separate from actual real-project approval.
+It adds no engine execution API, generated typed regression schema or analysis dependency.
+
 Functional analysis schema 1.1 observes a terminal `return_expression` independently of
 named `outputs`. Called functions may return supported expressions directly; their ASTs stay
 in the source module. The entrypoint's explicit call assignments own dataset naming and linear

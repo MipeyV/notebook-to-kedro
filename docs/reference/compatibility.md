@@ -94,6 +94,12 @@ source, ambient Git, metadata observation and future runtime acceptance retain t
 The [provenance contract](functional-workflows.md#original-source-and-installed-workflow-provenance)
 defines limits and required regeneration for older published projects.
 
+An opt-in [developer paired-trial script](../guides/real-workflow-setup.md#developer-harness)
+checks the specific naive/one_step validation artifact contract outside normal engine operations.
+Its installed synthetic pairs reuse locked development libraries; PyArrow/editables are test-only
+dependencies. The private real runtime preflight passes, while real review/execution remains
+pending. This supplies no general executor or broader generated regression compatibility.
+
 The [local operation layer](local-operations.md) configures these same deterministic entrypoints
 through typed inspection, new-file preview and generation requests. It adds an explicit contained
 working root and local JSON settings, without broadening source/library support or executing code.
