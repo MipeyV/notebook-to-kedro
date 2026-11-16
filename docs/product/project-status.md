@@ -74,8 +74,13 @@ original source plus its proposed adapter, plans three calls with one ordering e
 through workflow schema 1.7. Both resulting local distributions install in a dedicated environment.
 Their editable metadata and all 61 installed dependencies pass validation. The original source
 remains the observation baseline, while the saved adapter belongs to the prepared proposal.
-Application/data execution and scientific/runtime acceptance require their specific scope.
-Ambient Git provenance is an identified integration review item.
+Separately authorized read-only checks now load the original dataset/protocol types, verify matching
+fingerprint/version/asset and inspect the three registered nodes. Installed versions and the copied
+lockfile hash resolve through application provenance. The initial NumPy 2.5.5 binary was refused by
+Windows application control. Compatible versions already used by the engine tests enable these
+checks with NumPy 2.5.2, SciPy 1.18.0 and scikit-learn 1.9.0. Application Git provenance reports the
+containing execution workspace's commit, requiring an explicit original-source provenance contract.
+Scientific expectations and benchmark execution remain pending.
 
 The first file-reference input slice is now implemented and exercised on synthetic text/metadata
 and protocol files. A private real-input inventory captures two bundles/three files read-only;

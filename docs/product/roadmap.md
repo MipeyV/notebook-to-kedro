@@ -64,8 +64,10 @@ its proposed adapter. Its review copy can feed workflow schema 1.7 with explicit
 and trusted installation tests exercise this composition through delivered regressions and CLI.
 The explicitly authorized private real application copy now plans and generates this path, and
 its two distributions install with compatible declared dependencies in a dedicated environment.
-Next review the prepared orchestration, ambient Git provenance and source-bound integration
-choices, then establish domain compatibility and scientific/runtime expectations for a scoped real
+Separately authorized loader checks now verify dataset fingerprint/version/asset against the
+protocol and inspect registered wiring and installed provenance. Git provenance reports the
+containing execution workspace's commit. Next define original-source Git provenance, review the
+prepared orchestration and establish scientific/runtime expectations for a scoped real
 trial. Durable result serializers, generated typed/
 artifact expectations and broader effects remain separate further work.
 The setup guide records the remaining proposed acceptance contracts.

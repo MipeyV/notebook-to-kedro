@@ -237,9 +237,13 @@ workflow schema 1.7 generation for the selected real source. It retains the orig
 files plus the proposed adapter. Its plan has three calls and one ordering edge. Both local
 distributions install in a dedicated environment, with metadata and all 61 installed packages
 validated. Resolution uses the declared constraints, and the copied original lockfile provides
-source provenance. Review the original application's ambient Git lookup when choosing the
-execution working directory. Domain compatibility and scientific/runtime expectations have
-separate review and execution scope.
+source provenance. After separate read-only authorization, original loaders verify dataset
+fingerprint/version/asset against the frozen protocol. Three registered nodes, installed metadata
+and the source-relative lockfile hash are also checked. Windows refused the initial NumPy 2.5.5
+binary. The successful runtime uses compatible NumPy 2.5.2, SciPy 1.18.0 and scikit-learn 1.9.0,
+matching versions already used by the engine tests. The application reports the containing
+execution workspace's Git commit. Define original-source provenance before relying on that field
+for an actual run. Scientific/runtime expectations and benchmark execution have separate scope.
 
 The following distinguishes the implemented input slice from proposed remaining boundaries;
 it is not permission to execute a real run. Preserve application domain loaders rather than recreating

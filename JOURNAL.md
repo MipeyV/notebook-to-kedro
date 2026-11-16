@@ -40,6 +40,30 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-11-16 - Authorized read-only checks of the installed real-project copy
+
+### Completed
+
+- Received explicit authorization to execute original loaders, inspect the registered pipeline
+  and read provenance from the private installed copy. Loaded 2,766 observations and the frozen
+  protocol through the original application functions. Dataset fingerprint, version and asset
+  match the protocol. The registered pipeline contains the three expected nodes.
+- Verified installed application/distribution versions and the copied lockfile hash through the
+  application's own provenance function. Retained private package/version and source identities.
+- Resolved a Windows application-control refusal for the initial NumPy 2.5.5 binary by selecting
+  compatible versions already used by the tested engine environment. NumPy 2.5.2, SciPy 1.18.0
+  and scikit-learn 1.9.0 satisfy declared requirements. uv validates all 61 installed packages.
+  Recorded the failed initial attempt and successful adjusted runtime in the private report.
+- Confirmed that application Git provenance reads the containing execution workspace's commit.
+  The original-source commit and observed execution-context commit are recorded separately.
+- Verified clean original and engine worktrees after the read-only checks. Benchmark execution
+  remains not_run and scientific expectations retain pending review.
+
+### Next step
+
+- Define the original-source Git provenance contract for generated execution, review the proposed
+  orchestration and scientific expectations, then scope a validation-only benchmark trial.
+
 ## 2026-11-16 - Application-aware orchestration preparation
 
 ### Completed
