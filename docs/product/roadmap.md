@@ -75,8 +75,12 @@ An explicit provenance capture now binds the original source Git context, origin
 byte identities and installed versions from a chosen interpreter. A publication inventory and
 recomputed preparation lineage support that report. The private real capture binds 29 source
 files to 50 published files and observes 61 distributions with distinct source/execution commits.
-Next review the proposed orchestration and scientific expectations, then define the separately
-scoped validation trial and its reference to the captured provenance.
+A [paired validation trial protocol](../guides/real-workflow-setup.md#proposed-paired-validation-trial)
+now defines the reference/generated invocations, provenance binding, frozen candidate, explicit
+artifact/metric/table expectations, comparison controls and retained failure evidence. Its private
+real-source worksheet is prepared; orchestration/scientific review, execution consent, the bounded
+harness and actual benchmark results remain pending. Next implement/check the bounded harness
+against the concrete expectations, obtain review/execution consent and run the scoped pair.
 A complete real-project conversion is not yet established. Optimization retains a separate
 acceptance contract.
 

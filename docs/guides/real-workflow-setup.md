@@ -292,3 +292,102 @@ For a workflow like the graph above, the remaining concrete gates are:
 
 Existing whole-notebook pilot review and provider/execution consent requirements remain pending
 and separate. Synthetic tooling tests do not approve that pilot or a user project's science.
+
+## Proposed paired validation trial
+
+Status: review protocol, prepared on 2026-11-16. Actual benchmark execution, the trial harness
+and reusable typed/artifact comparison support remain pending. This protocol does not add a
+CLI command or expand the generated JSON regression contract. Keep the concrete source paths,
+hashes and trial worksheet in the ignored local integration directory.
+
+The first trial should measure conversion fidelity for one frozen candidate. Compare direct calls
+to the original application functions in the installed private copy with the generated registered
+pipeline. Agreement establishes evidence for that candidate, snapshot and runtime; evaluating
+predictive usefulness requires separate scientific acceptance criteria.
+
+### Freeze before execution
+
+Record these choices in a private trial definition before seeing benchmark results:
+
+| Item | Required record |
+| --- | --- |
+| Evidence binding | Path, SHA-256 and byte size of the exact workflow-provenance.json report; generated inventory, adapter, manifest, catalog, parameters and artifact-policy identities. |
+| Application inputs | Original and staged primary/sidecar/protocol byte identities, plus the already observed domain dataset fingerprint, version and asset. Preserve the frozen protocol. |
+| Candidate | One estimator, strategy, validation phase and seed. Keep candidate parameters separate from target, split, feature and metric definitions. |
+| Runtime | Selected interpreter and captured distribution versions. Recheck actual import locations and current metadata before execution, including the original application functions and generated registry. |
+| Invocations | Direct loader -> protocol loader -> benchmark call, then the generated registered pipeline with the existing catalog and a sequential runner. Use fresh processes and exactly one invocation per path. |
+| Write scope | Two distinct absent artifact destinations under private roots, plus explicit logs/result-evidence files. Preserve the generated policy's exact relative path and parameter value. |
+| Controls | Comparison rules, exact metadata exclusions, timeout, attempt retention and explicit execution consent. Record missing review as pending. |
+
+The reference uses the original installed functions directly, bypassing the proposed adapter and
+generated node wrappers. Both paths consume the same staged input bytes and candidate values.
+An identical relative artifact path can resolve under different working roots: a new reference
+working directory and the unchanged generated project root. Do not override only the generated
+output parameter, because its artifact policy requires the declared value. Neither application
+destination is precreated; the application owns its creation and any partial output.
+
+The proposed first real-source candidate uses validation, the naive estimator, one-step strategy
+and seed 42. It reads the frozen snapshot and uses the application's training/validation rules.
+The protocol may describe test partitions and the loader may read the full snapshot; this does
+not authorize final-test scoring. Leave the protocol, fitting rules and candidate logic unchanged.
+Use the application's existing local no-op tracker, with no provider calls or external tracking.
+
+### Observable acceptance rules
+
+Freeze zero absolute/relative tolerance for the initial same-environment deterministic comparison.
+Any mismatch is retained for investigation. A later tolerance change defines a new reviewed trial;
+it cannot retroactively turn the first attempt into a pass. Require finite numeric observations.
+
+| Observable | Proposed acceptance |
+| --- | --- |
+| Completion and object | Each invocation completes once. The final memory result has the application's declared result type, directory, metrics and metadata; its metrics/metadata match its own saved artifacts. Capture these observations before its process ends. |
+| Protocol | Saved protocol objects equal each other and the original frozen protocol as parsed JSON; record serialized byte hashes separately. |
+| Metrics | Exact expected metric keys, finite values and numeric equality between paths. Independently recompute the declared metrics from each saved prediction table. The reference output is observed evidence, not a pre-existing scientific oracle. |
+| Predictions | Exact ordered columns, dtypes, row count, row order, coordinates, assets, horizons, target names and values after Parquet decoding. Keep timestamps in their declared types. Compare decoded values rather than treating Parquet byte equality as semantic equivalence. |
+| Scientific metadata | Equal benchmark/dataset/evaluation fingerprints, candidate identity, phase, seed, fitted-component declarations, features, horizons, targets and split summaries. Check frozen fields against the trial definition as well as against each other. |
+| Provenance metadata | Compare all run metadata by default. Enumerate allowed contextual differences before execution, retain both raw values, and bind them to the engine report and observed import locations. Ambient Git is separate from original source Git. |
+| Artifact inventory | Required protocol, metrics, run metadata and prediction files exist and parse. Require the declared figure files to exist and be nonempty. List and hash every observed file; unexpected or missing files require review. |
+
+The private worksheet must enumerate actual fields and filenames for the selected application.
+For the first inspected candidate, seven figures each have JSON and HTML outputs. Their existence
+is required; visual equivalence and exact serialized figure equality remain unverified unless
+separately implemented and checked. Record optional selector/importance artifacts explicitly as
+expected or absent for the chosen candidate. Do not silently ignore them.
+
+Metadata exclusions must be narrow. The two processes' ambient Git commit/dirty observations can
+depend on their working directories, so retain and attribute them separately. Package source
+hashes and installed versions should still agree when both paths import the same staged
+application. Never exclude the source map merely because it contains the proposed adapter.
+
+Before trusting a future comparator, check synthetic controls for a modified prediction, altered
+metric, reordered row/column, changed dtype, missing file and changed frozen fingerprint. Every
+control must fail the intended check. Such controls exercise the harness and do not approve the
+real scientific run or the independent notebook pilot.
+
+### Execution record and stop conditions
+
+Recheck frozen source/generated/input identities, import origins, metadata and destination absence
+immediately before execution. A prior provenance capture alone does not establish current runtime
+state. Changes require a fresh reviewed definition and provenance record. Record containing Git
+context at execution separately; preparing this worksheet can legitimately advance the engine
+repository's commit after the earlier capture.
+
+Reserve an attempt record before starting either process. Keep the definition/report digests,
+exact invocations, working directories, environment controls, exit codes, durations, bounded logs,
+artifact inventories and every comparison outcome. A proposed initial budget is 300 seconds per
+invocation, with no automatic retry. Confirm it in the private definition. Timeout or failure stops
+the pair and retains partial files. Do not delete or overwrite them to obtain a successful result;
+another attempt needs fresh destinations and its own evidence and consent.
+
+Recheck protected source/input/generated identities and installed metadata afterwards. Record
+`not_run`, setup/execution failure, comparison mismatch, or matched scoped expectations distinctly.
+An unimplemented comparison stays `not_checked`; it cannot contribute a passing result. A future
+harness must retain failures as carefully as successes and link its result to both the frozen
+trial definition and exact provenance report. Local observations are not authenticated attestation
+or an operating-system effect sandbox.
+
+The user's existing copy/generation/installation and read-only loader/provenance permissions
+cover preparing the private worksheet. Next implement/check the bounded harness and present it
+with the reviewed definition. Obtain explicit approval of the concrete pair and its writes as
+the final step before benchmark execution. Promote comparison primitives into the shared engine
+only when this evidence establishes their actual reusable contract.

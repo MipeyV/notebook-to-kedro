@@ -659,6 +659,12 @@ trial can reference this evidence when comparing application and Kedro outputs. 
 Git attribution then has an explicit reference even when application code reads ambient Git.
 The decision is recorded in [ADR 0018](../decisions/0018-explicit-workflow-provenance.md).
 
+The [proposed paired validation protocol](../guides/real-workflow-setup.md#proposed-paired-validation-trial)
+defines how a private trial can bind exact provenance/definition bytes to direct application and
+registered-pipeline observations, with explicit metric/table/artifact checks and retained failures.
+Its worksheet is preparation evidence. The harness, runtime comparisons and real execution remain
+pending, and the existing generated JSON regression contract retains its supported boundaries.
+
 ## Evidence and next work
 
 Trusted tests execute the paired committed fixtures and generated pipelines through real Kedro
