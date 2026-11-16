@@ -48,7 +48,8 @@ The old `plan`/`generate` notebook operations retain their existing contract.
 ## Explicit boundaries
 
 The JSON configuration has exactly five fields in schemas 1.0/1.1/1.2, six in schema 1.3 and
-seven in schemas 1.4/1.5 (adding `file_inputs`);
+seven in schemas 1.4/1.5 (adding `file_inputs`) and eight in schema 1.6 (adding
+`artifact_destinations`);
 unknown/duplicate fields are rejected. The
 file is bounded to 64 KiB. The same immutable configuration validates direct Python construction.
 
@@ -68,7 +69,7 @@ file is bounded to 64 KiB. The same immutable configuration validates direct Pyt
   are resolved relative to `project_root` (the current directory by default), not the config
   file. They must resolve to contained `.json` files. The writer checks existence before copying
   them to `data/01_raw/<argument>.json`. Input JSON contents/schema are not validated statically.
-- Schema 1.0 parameters are finite JSON scalars. Schemas 1.1 through 1.5 additionally accept flat JSON
+- Schema 1.0 parameters are finite JSON scalars. Schemas 1.1 through 1.6 additionally accept flat JSON
   objects with string keys and finite scalar values. Arrays, nested objects and inferred
   parameters remain unsupported. Parameters become `parameters.yml` entries and
   `params:<argument>` node inputs.
@@ -304,6 +305,69 @@ rejected for this mode. Gap snapshots record `missing_memory_result_expectations
 inventing tests or oracles. Schema 1.5 JSON mode with supported JSON inputs keeps existing
 regressions. Durable serializers, typed comparators and application artifacts remain separate
 work. See [ADR 0014](../decisions/0014-memory-only-functional-results.md).
+
+## Declared runtime artifact destinations in schema 1.6
+
+Schema 1.6 inherits package, file-input, memory/JSON result and ordering rules. Its eighth
+required field, `artifact_destinations`, is an explicit mapping, possibly empty:
+
+```json
+"parameters": {"candidate": {"output": "artifacts/example_run", "bias": 0.5}},
+"artifact_destinations": {
+  "run": {"parameter": "candidate", "key": "output", "path": "artifacts/example_run"}
+}
+```
+
+Each destination has exactly `parameter`, `key` and `path`. The named parameter must be a flat
+mapping whose selected string value already equals the declared path. No parameter rewrite or
+output-path inference occurs. Names follow the public lowercase identifier rules; paths are
+restricted to `artifacts/<run_name>` with a lowercase letter followed by up to 63 lowercase
+letters/digits/underscores/hyphens, excluding Windows device names. Up to eight destinations
+must have distinct paths. Nested/external paths and overwrite/retry options are unsupported.
+Python callers use immutable `ArtifactDestination` values in configuration pairs; exports are
+fresh JSON objects. Legacy schemas reject these declarations.
+
+Planning derives the owner from the actual single workflow call consuming the mapping. An
+unused parameter cannot claim ownership. This identifies the consuming call, not proof that
+the function writes only under that path. Original source functions, return ASTs and generated
+business wrappers remain unchanged. A generated `ArtifactChecked` callable wraps the owning
+registered pipeline node, composing with any existing source-order adapter.
+
+Immediately before that call, the adapter checks the runtime mapping value, project policy
+marker, parent directory kind and target absence. Run from the generated project directory:
+the current working directory must contain the exact generated `artifact-policy.json` bytes.
+A digest in the generated package binds that bounded 64 KiB runtime contract. Modified/missing
+markers, changed path parameters, pre-existing targets and links/reparse points are refused
+before the owner is invoked. Other earlier workflow calls still run in their original order.
+
+Generation only publishes policy/source/configuration files. It does not inspect the original
+project's runtime target or create the generated project's artifact directory. At runtime the
+adapter creates no parent/target, reserves nothing, and performs no retry or cleanup. Original
+application code owns its directory creation, existence check, writes and exceptions. Partial
+artifacts remain after an application failure. A repeated run refuses the existing directory.
+There is no lock against concurrent mutation between the check and application call.
+
+Plan/manifest schema 1.5 records declared destinations/derived owner IDs, checks `not_run`,
+`effect_completeness: not_verified` and `reservation: not_performed`. The manifest additionally
+records `artifact_policy_sha256`; an empty declaration emits no runtime policy/helper files.
+This is a local contract, not authenticated approval, complete effect analysis or a sandbox.
+Direct business-function calls bypass the registered-pipeline adapter. Static operations never
+execute application writes, and selecting this schema does not approve a benchmark run.
+
+```bash
+uv run notebook-to-kedro plan-workflow examples/functional_artifacts/src/artifact_ml/file_workflow.py examples/functional_artifacts/file_workflow.json --project-root .
+uv run notebook-to-kedro generate-workflow examples/functional_artifacts/src/artifact_ml/file_workflow.py examples/functional_artifacts/file_workflow.json generated/artifact_project --project-root .
+```
+
+The trusted example combines an application raw-file reader, independent artifact writer,
+source-ordered join and typed memory result. Its paired JSON-value-input
+[configuration](../../examples/functional_artifacts/workflow.json) uses
+[workflow.py](../../examples/functional_artifacts/src/artifact_ml/workflow.py). Tests cover both
+input modes, default/custom profiles and sequential/threaded runs, callable pickling, binding/
+marker drift, existing targets, links, partial writes and no cleanup/retry. Pickling alone is
+not process-runner verification. JSON regression contracts do not define artifact expectations
+and are rejected; gap snapshots name `missing_artifact_expectations` without invented stubs.
+See [ADR 0015](../decisions/0015-declared-runtime-artifact-destinations.md).
 
 ## Explicit orchestration preparation
 

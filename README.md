@@ -122,6 +122,11 @@ It preserves the original object in the execution catalog without JSON coercion 
 persistence. See the [memory-result boundary](docs/reference/functional-workflows.md#memory-only-final-results-in-schema-15)
 for lifetime limits and missing typed-result expectations.
 
+Schema 1.6 adds [declared runtime artifact destinations](docs/reference/functional-workflows.md#declared-runtime-artifact-destinations-in-schema-16),
+bound to exact flat-parameter fields such as `candidate.output`. The registered pipeline checks
+the new destination before its owning call; original application code owns creation, writes and
+partial failures. Generation creates no runtime artifact directory.
+
 When a package exposes functions without an entrypoint, use the separate
 [orchestration preparation](docs/reference/functional-workflows.md#explicit-orchestration-preparation)
 operation: `prepare-workflow SOURCE DEFINITION` previews explicitly declared calls;

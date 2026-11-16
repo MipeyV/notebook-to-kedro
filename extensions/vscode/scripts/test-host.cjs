@@ -117,6 +117,20 @@ async function main() {
       regression_contract: undefined,
     }),
   );
+  await fs.cp(
+    path.join(repository, "examples/functional_artifacts"),
+    path.join(workspace, "examples/functional_artifacts"),
+    { recursive: true },
+  );
+  await fs.writeFile(
+    path.join(workspace, "artifacts.json"),
+    JSON.stringify({
+      ...config,
+      source: "examples/functional_artifacts/src/artifact_ml/file_workflow.py",
+      workflow_configuration: "examples/functional_artifacts/file_workflow.json",
+      regression_contract: undefined,
+    }),
+  );
   await runTests({
     version: "1.145.3",
     vscodeExecutablePath: process.env.VSCODE_EXECUTABLE_PATH,

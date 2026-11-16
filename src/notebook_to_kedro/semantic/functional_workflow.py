@@ -44,7 +44,7 @@ class FunctionalWorkflowPlan:
     @property
     def order_after(self) -> tuple[tuple[str, str], ...]:
         """Declare missing adjacent-call dependencies in the explicit source-order mode."""
-        if self.configuration.schema_version not in ("1.2", "1.3", "1.4", "1.5"):
+        if self.configuration.schema_version not in ("1.2", "1.3", "1.4", "1.5", "1.6"):
             return ()
         return tuple(
             (current.id, previous.id)
@@ -60,7 +60,7 @@ class FunctionalWorkflowPlan:
             "configuration": self.configuration.to_dict(),
             "steps": [asdict(step) for step in self.steps],
         }
-        if self.configuration.schema_version in ("1.2", "1.3", "1.4", "1.5"):
+        if self.configuration.schema_version in ("1.2", "1.3", "1.4", "1.5", "1.6"):
             payload["schema_version"] = "1.1"
             payload["ordering"] = {
                 "policy": "source_order",
@@ -73,19 +73,41 @@ class FunctionalWorkflowPlan:
             payload["schema_version"] = "1.2"
             payload["source_package"] = self.source_package.to_dict()
             payload["source_package_sha256"] = self.source_package.sha256
-        if self.configuration.schema_version in ("1.4", "1.5"):
+        if self.configuration.schema_version in ("1.4", "1.5", "1.6"):
             payload["schema_version"] = "1.3"
             payload["file_inputs"] = [item.to_dict() for item in self.file_inputs]
-        if self.configuration.schema_version == "1.5":
+        if self.configuration.schema_version in ("1.5", "1.6"):
             payload["schema_version"] = "1.4"
             payload["result_boundary"] = {
                 "dataset": self.configuration.outputs[0][0],
                 "mode": "memory" if self.configuration.memory_output else "json",
                 "persistence": "none" if self.configuration.memory_output else "json_file",
                 "type_validation": "not_performed",
-                "artifact_policy": "not_defined",
+                "artifact_policy": "declared"
+                if self.configuration.artifact_destinations
+                else "not_defined",
+            }
+        if self.configuration.schema_version == "1.6":
+            payload["schema_version"] = "1.5"
+            payload["artifact_policy"] = {
+                "mode": "check_before_owner_call"
+                if self.configuration.artifact_destinations
+                else "not_declared",
+                "destinations": self.artifact_bindings(),
+                "runtime_validation": "not_run",
+                "effect_completeness": "not_verified",
+                "reservation": "not_performed",
             }
         return json.dumps(payload, sort_keys=True, indent=2) + "\n"
+
+    def artifact_bindings(self) -> list[dict[str, str]]:
+        """Derive declared ownership from actual single-use parameter consumption."""
+        return [
+            {"name": name, **destination.to_dict(), "owner_step": step.id}
+            for name, destination in self.configuration.artifact_destinations
+            for step in self.steps
+            if destination.parameter in {value for _, value in step.inputs}
+        ]
 
 
 def _call_arguments(call: ast.Call, function: FunctionalBlock) -> tuple[tuple[str, str], ...]:
@@ -214,8 +236,15 @@ def plan_functional_workflow(
         reusable_parameters={
             name for name, value in configuration.parameters if not isinstance(value, tuple)
         },
-        source_order=configuration.schema_version in ("1.2", "1.3", "1.4", "1.5"),
+        source_order=configuration.schema_version in ("1.2", "1.3", "1.4", "1.5", "1.6"),
     )
+    if any(
+        sum(destination.parameter in {value for _, value in step.inputs} for step in steps) != 1
+        for _, destination in configuration.artifact_destinations
+    ):
+        raise FunctionalWorkflowError(
+            "Each artifact mapping must be consumed by exactly one workflow call"
+        )
     return FunctionalWorkflowPlan(analysis, configuration, steps, source_package, file_inputs)
 
 

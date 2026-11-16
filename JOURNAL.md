@@ -40,6 +40,61 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-11-16 - Declared application-owned runtime artifact destinations
+
+### Completed
+
+- Verified PR 95 merged with successful CI, synchronized main and implemented on a dedicated
+  branch. Workflow schema 1.6 requires an explicit artifact_destinations mapping, with up to
+  eight exact flat-parameter/key/path declarations under portable artifacts/<run_name> paths.
+- Required matching configured values and derived declared owners from single consuming calls.
+  Kept original source functions, return ASTs, parameter objects and generated business wrappers
+  unchanged. Composed a generated callable around owning registered nodes and existing ordering
+  adapters, without relaxing source fidelity or mapping single-use guards.
+- Added a bounded generated policy marker/digest and runtime checks immediately before the owner:
+  matching project context, actual parameter value, regular parent and absent destination.
+  Existing files/directories, links/reparse points, marker drift and binding drift are refused.
+- Kept generation distinct from execution: it creates no runtime destination and does not inspect
+  the original project's artifact folder. Runtime guards reserve/create/delete nothing and add
+  no application retry or cleanup. Original application existence checks, writes, exceptions and
+  owned partial contents remain intact. Concurrent mutation/direct calls remain outside the guard.
+- Added source-ordered synthetic JSON/raw-file loaders, an independent writer/join and typed
+  memory result. Default/custom profiles and sequential/threaded runs preserve behavior; pickle
+  round-trip checks remain separate from process-runner claims. Negative controls cover path/
+  marker drift, existing targets, links, policy size, partial failure and unchanged owned bytes.
+- Exported plan/manifest schema 1.5 with declarations/derived owners, unrun runtime checks,
+  unverified effect completeness and no reservation. Existing JSON regression contracts reject
+  undefined artifact expectations and report missing expectations without fabricated stubs.
+- Checked a private real declaration statically, proposing a new path only in the separate
+  integration configuration. The original missing entrypoint still blocks planning; source/input
+  identities and Git state remain unchanged. Runtime paths were not checked/created; no application
+  import/execution or real project generation occurred. Dependencies and scientific review remain open.
+- Updated existing references, setup, compatibility, status/roadmap and changelog; indexed ADR 0015.
+  Local/VS Code previews expose policy files/owners without executing an application writer.
+- Validation passed: 2,704 offline Python tests with 100% line/branch coverage (9,367 statements,
+  2,792 branches), Ruff lint/format, strict mypy on 200 files and all 71 documentation checks.
+  All 24 Node protocol tests and actual Windows VS Code 1.145.3 host checks passed. No extension
+  runtime/protocol change, visual layout review, effect sandbox or runtime approval is claimed.
+  Source/wheel builds and generated-wheel policy member checks passed; core remains nbformat-only.
+
+### Decisions
+
+- Treat consumption as declared ownership, not proof of all effects. Validate the exact binding
+  before the owning call while preserving original call order and application behavior.
+- Keep project publication, application writes and runtime consent separate. Do not precreate
+  or reserve a directory that the application requires to be new; retain explicit race limits.
+
+### Open questions
+
+- Original dependency/distribution metadata, adopted orchestration and reviewed scientific/
+  artifact/result expectations still gate a real trial. Broader layouts/serializers/comparators
+  and complete effect accounting remain further work; actual human pilot review is pending.
+
+### Next step
+
+- Address declared application dependency/distribution metadata and prepare the integration
+  for review before any separately scoped real runtime experiment.
+
 ## 2026-11-15 - Explicit memory-only final workflow results
 
 ### Completed

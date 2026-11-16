@@ -77,6 +77,11 @@ Schema 1.5 can explicitly choose a memory-only final result. Its preview/report 
 `result_boundary` and the memory catalog entry without running a pipeline or serializing an
 application object into the interface. This does not persist results after a process ends.
 
+Schema 1.6 artifact declarations are visible through the same preview/report controls, including
+the runtime policy marker and owning-call bindings. Preview/generation creates no runtime
+artifact directory and invokes no application writer. Select an existing schema 1.6 workflow
+configuration with an engine from this revision; extension runtime/protocol behavior is unchanged.
+
 **Generate project** refreshes the plan, asks for a destination inside the declared project
 root and displays an explicit destination confirmation. Canceling that confirmation leaves
 the destination absent. Confirming invokes the current Python generation operation, which

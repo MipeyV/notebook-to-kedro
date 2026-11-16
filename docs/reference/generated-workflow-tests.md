@@ -148,6 +148,13 @@ project directory and must accompany it when running the project.
 
 ## Evidence and remaining E3 work
 
+Workflow schema 1.6 artifact declarations do not yet have a shipped artifact-fixture/comparator
+contract. The JSON regression contract is rejected before publication for declared artifacts;
+gap snapshots name `missing_artifact_expectations`. Trusted development tests separately check
+application-owned bytes, source order, marker/parameter drift, existing targets and partial
+failure without cleanup/retry. Those tests do not approve actual user effects or invent business
+oracles. A schema 1.6 workflow with no declarations retains the applicable JSON/memory rules.
+
 Workflow schema 1.5 memory outputs do not yet have a typed result-comparison contract. The current
 JSON expectation contract is rejected before publication, even when inputs are ordinary JSON.
 Without expectations, the gap snapshot records `missing_memory_result_expectations`; no result

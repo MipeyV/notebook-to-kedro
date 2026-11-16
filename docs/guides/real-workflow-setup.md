@@ -173,7 +173,36 @@ application result. It does not adopt the unreviewed orchestration, suppress the
 artifact writes, verify dependencies or authorize a benchmark execution. The real source stays
 unchanged and its original missing entrypoint continues to block conversion.
 
-## Next contracts: owned artifacts and durable results
+## Working slice: explicit application-owned artifact destinations
+
+Workflow schema 1.6 can bind a declared artifact path to an exact field such as
+`candidate.output`. The mapping's consuming call becomes the declared owner. The
+[artifact contract](../reference/functional-workflows.md#declared-runtime-artifact-destinations-in-schema-16)
+defines its narrow `artifacts/<run_name>` layout and generated policy marker.
+
+```bash
+uv run notebook-to-kedro generate-workflow examples/functional_artifacts/src/artifact_ml/file_workflow.py examples/functional_artifacts/file_workflow.json generated/artifact_project --project-root .
+```
+
+Generation publishes a project without creating its runtime artifact directory. During an
+explicit run, the registered pipeline checks the selected parameter, matching working-root
+policy and absence of the destination immediately before the owner. Original application code
+creates the directory and writes files. Existing targets are refused; application failures and
+partial files remain intact, without cleanup or retry. Direct function calls bypass this adapter;
+it is not a sandbox or a concurrency lock, and earlier workflow calls retain their order/effects.
+
+Synthetic tests combine raw-file inputs, original readers/writes and a typed memory result under
+default/custom profiles and sequential/threaded runners. They separately verify failed writes,
+unchanged owned contents and missing generated artifact expectations. This does not execute or
+approve a scientific user workflow.
+
+The private real configuration now proposes a new relative destination with the matching
+`candidate.output` declaration. It changes only that private integration proposal, without
+rewriting source or checking/creating an actual runtime directory. Original source-bound planning
+still rejects the absent entrypoint; dependency/distribution metadata and scientific/result/
+artifact review remain pending before a real trial.
+
+## Next contracts: dependencies, review and durable results
 
 The following distinguishes the implemented input slice from proposed remaining boundaries;
 it is not permission to execute a real run. Preserve application domain loaders rather than recreating
@@ -185,11 +214,11 @@ their scientific validation inside a generic dataset adapter.
 | Frozen protocol | Implemented as a separate file-reference input passed to the existing protocol loader. Keep target/split/metric settings out of candidate parameters. A generic JSON dictionary is not the application's protocol object. |
 | Intermediate domain objects | Use assign-mode memory datasets between calls; preserve type/reference identity. Do not infer pickle, DataFrame or JSON coercions. |
 | Final domain result | Implemented explicit memory-only retention in schema 1.5, without type conversion/validation. A durable application serializer/descriptor and typed generated comparators remain future work. Do not assume a result dataclass is JSON-compatible or portable across runners/processes. |
-| Artifact directory | Declare the application-owned runtime destination separately from generated-project publication. Preserve refusal of an existing destination; never precreate, overwrite, delete or retry the application's writes. Validate how a candidate output path is bound before a runtime trial. |
+| Artifact directory | Implemented schema 1.6 declarations for exact flat-parameter bindings under artifacts/<run_name>, checked before the consuming registered-pipeline call. No precreation, reservation, overwrite, cleanup or retry. Broader layouts, complete effects and concurrency locking remain unsupported. |
 | Dependencies and provenance | Declare application requirements/versions and any original distribution metadata or lockfile lookups. Copying importable source alone does not satisfy those lookups. |
 | Runtime evidence | Supply reviewed expectations and actual snapshot/protocol compatibility checks, then scope any validation-only execution explicitly. Keep final-test evaluation separate. |
 
-Artifact/durable-result requirements are concrete inputs to the next bounded slice. Static source
+Dependency/review/durable-result requirements remain concrete inputs to later slices. Static source
 preparation alone still records persistent-I/O/artifact policies as undefined; selecting an
 actual workflow I/O configuration is a separate integration decision.
 
