@@ -2,7 +2,7 @@
 
 [Documentation index](../README.md)
 
-Status: current implementation summary reviewed on 2026-11-16; historical evidence follows.
+Status: current implementation summary reviewed on 2026-11-17; historical evidence follows.
 Historical measurements retain their original corpus, runtime and limitations.
 
 ## Project status
@@ -28,7 +28,7 @@ Historical measurements retain their original corpus, runtime and limitations.
 | Application distribution declarations | Schema 1.7 captures an explicitly selected pyproject, static requirements/extras/scripts and selected build/provenance files. Generation stages the original project under application/ for separate installation and links its exact distribution requirement. Plans/manifests use schema 1.6 with captured hashes and not_run build/resolution statuses. Trusted standard/editable-wheel installation, delivered regressions and Kedro CLI checks reuse locked development dependencies. Actual dependency resolution and real-project installation require environment-specific evidence. |
 | Application orchestration preparation | Separate preparation schema 1.1 captures original application metadata and selected project files, preserves its pyproject-relative package layout and adds the proposed adapter. Its manifest exposes original distribution facts and prepared paths with pending review. The copy can feed explicit workflow schema 1.7 conversion. Synthetic standard/editable-wheel installation tests exercise metadata, delivered tests and Kedro CLI after preparation. |
 | Workflow provenance capture | Application-aware generation publishes byte inventories. A separate API/CLI binds explicit original Git, source-copy identities, verified listed publication files and selected-interpreter distribution metadata in a new report. Prepared adapters are recomputed against original source. Review and benchmark status remain pending. Files added after generation and runtime import/result semantics require separate evidence. |
-| Real validation trial preparation | A documented paired-trial protocol and private frozen worksheet define direct-application versus registered-Kedro invocations, candidate/input/provenance bindings, typed table/metric/artifact expectations and retained failures. Human review, execution consent, the trial harness/comparators and actual real benchmark results remain pending; this adds no runtime API or generated typed tests. |
+| Scoped real validation trial | The user validated the private frozen worksheet and explicitly authorized the naive/one_step validation pair. Both original-function and registered-Kedro invocations completed once and matched every implemented prediction/metric/metadata check, with 18 expected artifacts each and protected postflight identities intact. Detailed outputs remain private. This establishes one frozen-case comparison; visual figure equivalence, scientific quality thresholds, final-test scoring and broader runtime/generation contracts remain outside its evidence. No runtime API or generated typed tests are added. |
 
 Generation itself does not verify dependency installation, full DAG semantics or runtime behavior.
 The [explicit bootstrap check](../reference/generated-workflow-tests.md#fresh-environment-bootstrap)
@@ -48,6 +48,9 @@ general runtime guarantee. Fresh installation has a separate fixture-bound boots
 
 The [real-workflow setup guide](../guides/real-workflow-setup.md) now documents a concrete
 candidate-parameter slice with paired synthetic examples, real Kedro checks and shipped tests.
+The integration snapshots below retain the limits recorded at each delivery stage. The current
+scoped trial is summarized in the capability table above; earlier preparation-time pending/not_run
+reports were preserved rather than rewritten after subsequent installation or execution.
 The inspected source case has independent loaders, a typed protocol/result and runner-owned
 artifact writes. Its in-memory proposal now plans three calls with one ordering edge under schema
 1.2. Explicit schema 1.3 package capture now inventories the existing source read-only, but its
@@ -84,7 +87,8 @@ checks with NumPy 2.5.2, SciPy 1.18.0 and scikit-learn 1.9.0. Application Git pr
 containing execution workspace's commit. The new explicit workflow provenance report records the
 original source commit and ambient execution commit in separate fields, binding 29 original files
 to 50 published files and observing 61 installed distributions in the private real capture.
-Scientific expectations and benchmark execution remain pending.
+Scientific expectations and benchmark execution were pending at that capture. The later
+user-reviewed/authorized validation pair now supplies its separately linked scoped runtime evidence.
 
 The first file-reference input slice is now implemented and exercised on synthetic text/metadata
 and protocol files. A private real-input inventory captures two bundles/three files read-only;

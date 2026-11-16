@@ -196,11 +196,13 @@ default/custom profiles and sequential/threaded runners. They separately verify 
 unchanged owned contents and missing generated artifact expectations. This does not execute or
 approve a scientific user workflow.
 
-The private real configuration now proposes a new relative destination with the matching
+At the artifact-policy declaration stage, the private real configuration proposed a new relative
+destination with the matching
 `candidate.output` declaration. It changes only that private integration proposal, without
 rewriting source or checking/creating an actual runtime directory. Original source-bound planning
 still rejects the absent entrypoint. Schema 1.7 now captures the selected application's declared
-metadata. Actual installation and scientific/result/artifact review remain pending before a trial.
+metadata. Installation and scientific/result/artifact review were still pending in that snapshot;
+the later authorized trial below retains its own evidence.
 
 ## Working slice for application declarations
 
@@ -222,13 +224,13 @@ README to install both local projects, selecting optional extras explicitly. Edi
 retains source-relative project-file lookups. The details and synthetic example are documented in
 the [application distribution contract](../reference/functional-workflows.md#application-distribution-in-schema-17).
 
-The private real proposal now selects the original pyproject and lockfile. Read-only capture
+The initial private real proposal selected the original pyproject and lockfile. Read-only capture
 records six requirements, two extras groups, one script declaration and three project files.
 The 23-file source inventory and raw input hashes match the previous observation. Original
 source planning still reports its absent adopted entrypoint. The private report records pending
 review and `not_run` build/resolution/execution. The application keeps its original provenance
-implementation. Actual dependency installation, data/protocol compatibility and scientific
-expectations require later evidence.
+implementation. That declaration report alone supplies no installation, data/protocol compatibility
+or scientific/runtime evidence; the subsequent authorized records below supply their specific checks.
 
 ## Next contracts for review and durable results
 
@@ -237,8 +239,9 @@ new publication inventory, recomputes the prepared adapter against original sour
 the original Git context, ambient execution Git and installed versions from the chosen interpreter.
 The private real report now binds 29 original files to 50 published files and observes 61
 installed distributions. Its original source commit differs from the containing workspace's
-commit. The report retains pending review and benchmark execution status. A later trial can
-reference this report when associating application outputs with their source/environment evidence.
+commit. The report retains its preparation-time pending review and benchmark execution status.
+The subsequently authorized trial references these exact report bytes when associating application
+outputs with their source/environment evidence.
 See the [provenance contract](../reference/functional-workflows.md#original-source-and-installed-workflow-provenance).
 
 An explicitly authorized private review copy now exercises preparation schema 1.1 and subsequent
@@ -295,10 +298,10 @@ and separate. Synthetic tooling tests do not approve that pilot or a user projec
 
 ## Proposed paired validation trial
 
-Status: review protocol, prepared on 2026-11-16. Actual benchmark execution, the trial harness
-and reusable typed/artifact comparison support remain pending. This protocol does not add a
-CLI command or expand the generated JSON regression contract. Keep the concrete source paths,
-hashes and trial worksheet in the ignored local integration directory.
+Status: protocol prepared on 2026-11-16; developer harness implemented on 2026-11-17.
+The user reviewed and explicitly authorized the scoped pair, which completed on 2026-11-17.
+The harness is an opt-in repository script, outside the runtime API/CLI and generated JSON regression
+contract. Keep concrete source paths, hashes and the worksheet in the ignored local directory.
 
 The first trial should measure conversion fidelity for one frozen candidate. Compare direct calls
 to the original application functions in the installed private copy with the generated registered
@@ -359,7 +362,7 @@ depend on their working directories, so retain and attribute them separately. Pa
 hashes and installed versions should still agree when both paths import the same staged
 application. Never exclude the source map merely because it contains the proposed adapter.
 
-Before trusting a future comparator, check synthetic controls for a modified prediction, altered
+Before trusting the comparator, check synthetic controls for a modified prediction, altered
 metric, reordered row/column, changed dtype, missing file and changed frozen fingerprint. Every
 control must fail the intended check. Such controls exercise the harness and do not approve the
 real scientific run or the independent notebook pilot.
@@ -381,13 +384,111 @@ another attempt needs fresh destinations and its own evidence and consent.
 
 Recheck protected source/input/generated identities and installed metadata afterwards. Record
 `not_run`, setup/execution failure, comparison mismatch, or matched scoped expectations distinctly.
-An unimplemented comparison stays `not_checked`; it cannot contribute a passing result. A future
-harness must retain failures as carefully as successes and link its result to both the frozen
+An unimplemented comparison stays `not_checked`; it cannot contribute a passing result. The
+harness retains failures as carefully as successes and links its result to both the frozen
 trial definition and exact provenance report. Local observations are not authenticated attestation
 or an operating-system effect sandbox.
 
 The user's existing copy/generation/installation and read-only loader/provenance permissions
-cover preparing the private worksheet. Next implement/check the bounded harness and present it
-with the reviewed definition. Obtain explicit approval of the concrete pair and its writes as
-the final step before benchmark execution. Promote comparison primitives into the shared engine
-only when this evidence establishes their actual reusable contract.
+cover preparing the private worksheet and runtime preflight. Present the checked harness with
+the reviewed definition. Obtain explicit approval of the concrete pair and its writes as the
+final step before benchmark execution. Promote comparison primitives into the shared engine only
+when this evidence establishes their actual reusable contract.
+
+### Developer harness
+
+[tools/run_workflow_trial.py](../../tools/run_workflow_trial.py) is a standalone developer bridge
+for this concrete benchmark artifact shape. It accepts the private local_validation_trial_proposal
+worksheet and the exact copied workflow-provenance.json. It supports the naive/one_step validation
+candidate, one horizon and target, zero session gap, finite MAE/RMSE, exact comparisons, the
+loader/benchmark signatures above and a result with directory/metrics/metadata fields. Application
+names come from explicit declarations; this is not a universal project specification or executor.
+No generated regression schema, normal generation or local-interface operation changes.
+
+Invoke it through the explicitly selected installed application's interpreter, which needs Kedro,
+NumPy, pandas and a Parquet reader such as PyArrow. The engine does not need installation in that
+interpreter. The script imports optional runtime libraries only for the selected operation.
+The locked development test group now includes PyArrow for real Parquet controls and editables
+for reproducible editable-wheel construction; nbformat remains the engine's only runtime dependency.
+
+Preflight verifies protected byte identities, original source Git, installed metadata, the frozen
+protocol/parameters, input bindings and artifact policy. It imports selected application/registry
+modules and checks their actual file origins and bytes, without invoking the selected loaders
+or benchmark.
+Reference functions must originate in the original bound files, excluding the proposed adapter;
+the registry must match the generated pyproject declaration. Preflight is runtime inspection,
+not static source analysis or execution approval.
+
+```text
+<selected-python> -I tools/run_workflow_trial.py <private-trial-definition.json>
+```
+
+Execution additionally requires a separately supplied JSON operator declaration:
+
+```json
+{
+  "authorization": "execute_validation_pair",
+  "reviewed_by": "actual operator/review statement",
+  "definition_sha256": "exact definition digest",
+  "provenance_sha256": "exact frozen report digest",
+  "harness_sha256": "exact script digest"
+}
+```
+
+Prepare the declaration only after the actual reviewer/operator approves that exact pair. A
+pending template, different artifact digest or empty reviewer is rejected before reservation.
+The declaration binds local observations; it does not authenticate human identity. Synthetic
+test declarations never approve a real trial or the independent notebook pilot.
+
+```text
+<selected-python> -I tools/run_workflow_trial.py <private-trial-definition.json> \
+  --execute --consent <actual-execution-consent.json>
+```
+
+The script reserves a new attempt/ directory next to the definition before worker I/O. Each fresh
+isolated worker requires that reservation, its bound consent and an exclusive started claim.
+Application destinations remain absent until their owners write. Each worker captures the typed
+result's explicit fields before exiting. The generated path uses its unchanged catalog,
+parameters, registered pipeline and SequentialRunner. Workers use the same staged input bytes.
+
+The result distinguishes exact scoped matches, mismatches, execution failure, timeout and
+setup/postflight errors. It retains invocations, exit codes, elapsed times, stdout/stderr,
+typed-result observations, import origins, current Git observations and complete artifact-file
+inventories. Original package/lock identities and installed versions are checked against the
+frozen evidence. Ambient Git fields must agree with worker observations even though the two
+paths can have different Git contexts. Protected snapshot/runtime identities are rechecked after
+success or failure. Existing attempts are refused; partial outputs remain and are inventoried.
+
+The script retains at most 64 KiB per output stream after subprocess capture. Capture still
+buffers complete streams in memory; it is not a memory limit. Timeout stops the immediate worker;
+descendant-process containment and an operating-system effect sandbox are not supplied. This
+trusted local slice supplies no retry, cleanup, concurrency reservation for application writes,
+general fitted-model serialization, visual figure-equivalence check or scientific quality threshold.
+
+Synthetic environments install both editable wheels and reuse locked development libraries
+through an explicit site path. They do not establish fresh dependency resolution. The fixture
+exercises the complete direct/registered pair, exact decoded
+Parquet/dtype checks, independent MAE/RMSE recomputation and in-process result descriptors.
+Independent mutations cover changed predictions/metrics/fingerprints/source maps/versions,
+row/column order, dtype, missing/unexpected/empty/malformed artifacts, nonfinite metrics,
+memory/runtime disagreement, wrong ambient Git and both paths claiming test scoring. Failure and
+timeout controls retain attempts, bounded retained logs and partial artifacts without a second
+invocation. Stale definition/report/harness declarations and missing review are rejected.
+
+The new private real-source worksheet binds this concrete script and preserves the earlier
+proposal. Its runtime preflight verifies the original/staged files, installed metadata and
+25 application/generated module origins. After the user's explicit validation of that worksheet,
+an exclusive execution declaration bound the actual reply to the exact definition/report/script
+digests. The pending preparation template and original proposal remain unchanged historical records.
+
+The authorized pair completed once per path with zero exit codes and matched every implemented
+scoped expectation: exact decoded prediction tables/dtypes/order, finite metrics and independent
+recomputation, typed-result descriptors, protocol/candidate metadata, source/lock/version evidence
+and ambient Git observations. Both application directories contain the 18 expected artifacts.
+Protected source/input/generated identities and runtime metadata still match after execution.
+The detailed reports, predictions, metrics, consent and inventories remain private and ignored.
+
+This is evidence for one candidate, snapshot, protocol and installed runtime. Visual figure
+equivalence and scientific predictive-quality thresholds remain unverified; final-test scoring
+was not run. A new attempt needs its own fresh destinations, review and consent. The independent
+whole-notebook pilot review and broader runtime/generation contracts remain pending.

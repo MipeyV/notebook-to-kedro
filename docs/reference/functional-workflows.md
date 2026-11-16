@@ -431,7 +431,9 @@ Trusted synthetic tests build and install standard/editable application wheels p
 wheel, then check metadata lookup, script declarations, resources, pipeline behavior, delivered
 regressions and `kedro run`. Their temporary environments reuse locked development dependencies.
 An editable variant checks the source-relative auxiliary-file hash. The real-source declaration
-capture still reports its absent adopted entrypoint and pending runtime review.
+capture retains its absent adopted entrypoint and pending runtime-review snapshot. The subsequent
+authorized private prepared-copy trial is described in the
+[setup guide](../guides/real-workflow-setup.md#developer-harness) with its own scoped evidence.
 The architectural decision is recorded in [ADR 0016](../decisions/0016-explicit-application-distributions.md).
 
 ## Explicit orchestration preparation
@@ -662,8 +664,10 @@ The decision is recorded in [ADR 0018](../decisions/0018-explicit-workflow-prove
 The [proposed paired validation protocol](../guides/real-workflow-setup.md#proposed-paired-validation-trial)
 defines how a private trial can bind exact provenance/definition bytes to direct application and
 registered-pipeline observations, with explicit metric/table/artifact checks and retained failures.
-Its worksheet is preparation evidence. The harness, runtime comparisons and real execution remain
-pending, and the existing generated JSON regression contract retains its supported boundaries.
+Its worksheet is preparation evidence. A separate developer script now checks installed synthetic
+pairs and the real runtime preflight. One explicitly reviewed/authorized private real pair now
+matches its implemented scoped expectations, with detailed results kept locally. The existing
+generated JSON regression contract retains its supported boundaries and no runtime operation is added.
 
 ## Evidence and next work
 

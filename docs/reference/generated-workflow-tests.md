@@ -208,3 +208,12 @@ runtime. Linux CI results are recorded separately by the workflow, not inferred 
 The procedural notebook path and the whole-notebook
 pilot's pending human review retain their separate contracts. Richer comparators, dependency
 inference/locking and wider fixture coverage remain outstanding.
+
+The separate [developer paired-trial harness](../guides/real-workflow-setup.md#developer-harness)
+now compares explicitly declared benchmark-style application artifacts and in-process result
+descriptors against a registered generated pipeline. Installed synthetic applications exercise
+decoded Parquet/metric comparisons and failure controls. This repository script is not shipped
+pytest generation or a runtime operation; the JSON regression contract still rejects unsupported
+file-reference, memory-result and artifact expectations. One explicitly user-reviewed/authorized
+private real pair matched its scoped expectations; its detailed outputs stay local. That evidence
+does not extend the delivered-test contract or approve the independent notebook pilot.

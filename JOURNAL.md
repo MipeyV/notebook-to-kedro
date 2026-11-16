@@ -40,6 +40,82 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-11-17 - Execute the explicitly authorized private validation pair
+
+### Completed
+
+- The user explicitly validated the linked local worksheet and authorized its two real private
+  invocations. Recorded the actual reply in a new exclusive declaration bound to exact definition,
+  provenance and harness digests. Preserved the proposal and pending template as historical records.
+- Rechecked frozen identities and destinations, then ran the original installed functions and the
+  registered generated pipeline once each, using naive/one_step, seed 42 and validation only.
+  Both processes completed with exit code zero within their budgets; no retry was performed.
+- The retained report records matched_scoped_expectations: exact decoded prediction/dtype/order
+  agreement, finite independently recomputed metrics, typed-result descriptors, protocol/candidate
+  metadata, source/lock/version evidence and observed ambient Git context all passed.
+- Each path retained its 18 expected artifacts. Original/staged source, input and generated
+  protected bytes plus selected-runtime metadata still match after execution. Rechecked all
+  retained artifact byte identities and exact decoded table agreement without rerunning the app.
+- Kept detailed predictions, metric values, paths, hashes, user declaration and execution evidence
+  ignored locally. Updated capability/reference/roadmap claims only to this scoped real result.
+
+### Decisions
+
+- This establishes one frozen-case integration comparison, without predictive-quality thresholds,
+  visual figure equivalence or final-test scoring. The independent notebook pilot remains pending.
+- Actual operator consent is separate from synthetic declarations and from the original proposal's
+  preparation-time pending fields. Human identity is not authenticated by the local declaration.
+
+### Next step
+
+- Identify the smallest shared artifact/comparison contract justified by the real evidence, keeping
+  broader engines, candidate evaluation, existing-project edits and optimization separately scoped.
+
+## 2026-11-17 - Check the bounded paired validation harness
+
+### Completed
+
+- Added tools/run_workflow_trial.py as a standalone opt-in developer bridge for the concrete
+  loader/benchmark result and artifact contract. Normal conversion, runtime APIs, generated
+  regression contracts and the interface remain separate.
+- Added original-file import checks, installed metadata/source/generated preflight, exact
+  operator-declaration bindings, exclusive attempt/worker claims and retained observations,
+  invocations, partial-file inventories and protected postflight checks.
+- Implemented exact decoded Parquet, independent finite MAE/RMSE, protocol/candidate metadata,
+  result descriptor and source/lock/version comparisons. Ambient Git values are checked against
+  actual worker observations; visual figure equivalence remains not_checked.
+- Added an independently specified three-observation synthetic application, editable installation,
+  full direct/registered execution and negative controls for artifacts, values, types, provenance,
+  consent, failures and timeouts. PyArrow and editable build support are locked test dependencies;
+  the engine still depends only on nbformat at runtime.
+- Preserved the earlier private proposal and prepared a new script-bound worksheet with a pending
+  consent template. Its authorized runtime preflight verified 25 application/generated module
+  origins, current metadata and frozen source/generated/input identities without invoking the
+  selected loaders or benchmark. Actual real-project benchmark execution remains not_run.
+- All 2,858 offline tests passed on Windows/Python 3.12.14, preserving the configured 100% engine
+  line/branch coverage (9,751 statements, 2,928 branches). The 21 new installed synthetic checks,
+  all 74 documentation checks, Ruff, strict mypy across 212 files and offline source/wheel builds
+  passed. The source archive includes the exact harness/fixtures and the wheel keeps nbformat
+  as its only runtime requirement. The interface was unchanged and was not retested locally.
+
+### Decisions
+
+- Keep this narrow bridge outside the engine until actual reviewed trial evidence establishes
+  reusable contracts. No universal executor, implicit serializers or scientific quality oracle.
+- Retain every reserved attempt and partial output. The immediate worker has a timeout and
+  retained logs are capped; full subprocess capture remains memory-buffered and descendant
+  processes are not an operating-system containment guarantee.
+
+### Open questions
+
+- Actual orchestration/scientific review and explicit real benchmark execution consent are pending.
+  Synthetic declarations do not approve the real pair or the independent notebook pilot.
+
+### Next step
+
+- Present the checked harness and frozen worksheet for actual review/consent, then execute the
+  scoped pair and retain its linked outcomes before designing reusable runtime comparators.
+
 ## 2026-11-16 - Prepare the paired real validation trial
 
 ### Completed
