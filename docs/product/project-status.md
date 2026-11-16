@@ -26,6 +26,7 @@ Historical measurements retain their original corpus, runtime and limitations.
 | Memory-only final results | Workflow schema 1.5 explicitly retains a named final object in an assign-mode memory dataset, preserving its runtime type/reference identity in the same process. JSON outputs remain available. No durable storage, inferred type validation, typed generated comparators, cross-process guarantee or artifact policy is supplied. |
 | Declared runtime artifact destinations | Opt-in schema 1.6 binds up to eight new artifacts/<run_name> destinations to exact flat-parameter fields and their single consuming calls. The registered pipeline checks runtime values, project marker and absence before the owner. Application writes/exceptions/partial files remain owned; no reservation, cleanup, retry, effect sandbox or concurrency lock is supplied. |
 | Application distribution declarations | Schema 1.7 captures an explicitly selected pyproject, static requirements/extras/scripts and selected build/provenance files. Generation stages the original project under application/ for separate installation and links its exact distribution requirement. Plans/manifests use schema 1.6 with captured hashes and not_run build/resolution statuses. Trusted standard/editable-wheel installation, delivered regressions and Kedro CLI checks reuse locked development dependencies. Actual dependency resolution and real-project installation require environment-specific evidence. |
+| Application orchestration preparation | Separate preparation schema 1.1 captures original application metadata and selected project files, preserves its pyproject-relative package layout and adds the proposed adapter. Its manifest exposes original distribution facts and prepared paths with pending review. The copy can feed explicit workflow schema 1.7 conversion. Synthetic standard/editable-wheel installation tests exercise metadata, delivered tests and Kedro CLI after preparation. |
 
 Generation itself does not verify dependency installation, full DAG semantics or runtime behavior.
 The [explicit bootstrap check](../reference/generated-workflow-tests.md#fresh-environment-bootstrap)
@@ -67,6 +68,19 @@ two optional dependency groups, console-script declaration and three project fil
 reports `Configured entrypoint was not found`. Its private report records unreviewed status,
 `not_run` execution/build/resolution and pending scientific expectations. Human pilot review
 remains pending.
+
+With explicit user authorization, a private application review copy now retains the selected
+original source plus its proposed adapter, plans three calls with one ordering edge and generates
+through workflow schema 1.7. Both resulting local distributions install in a dedicated environment.
+Their editable metadata and all 61 installed dependencies pass validation. The original source
+remains the observation baseline, while the saved adapter belongs to the prepared proposal.
+Separately authorized read-only checks now load the original dataset/protocol types, verify matching
+fingerprint/version/asset and inspect the three registered nodes. Installed versions and the copied
+lockfile hash resolve through application provenance. The initial NumPy 2.5.5 binary was refused by
+Windows application control. Compatible versions already used by the engine tests enable these
+checks with NumPy 2.5.2, SciPy 1.18.0 and scikit-learn 1.9.0. Application Git provenance reports the
+containing execution workspace's commit, requiring an explicit original-source provenance contract.
+Scientific expectations and benchmark execution remain pending.
 
 The first file-reference input slice is now implemented and exercised on synthetic text/metadata
 and protocol files. A private real-input inventory captures two bundles/three files read-only;

@@ -59,8 +59,15 @@ Schema 1.7 now captures explicitly selected static application declarations and 
 stages the original installable distribution under `application/` and links its exact identity
 from the generated Kedro package. Trusted standard/editable-wheel tests reuse locked runtime
 dependencies. The real-source check captures declarations and source/input hashes read-only.
-Next review the explicit orchestration and source-bound integration choices, then establish
-actual environment installation and scientific/runtime expectations for a separately scoped real
+Preparation schema 1.1 now preserves the original application project and source layout alongside
+its proposed adapter. Its review copy can feed workflow schema 1.7 with explicit I/O settings,
+and trusted installation tests exercise this composition through delivered regressions and CLI.
+The explicitly authorized private real application copy now plans and generates this path, and
+its two distributions install with compatible declared dependencies in a dedicated environment.
+Separately authorized loader checks now verify dataset fingerprint/version/asset against the
+protocol and inspect registered wiring and installed provenance. Git provenance reports the
+containing execution workspace's commit. Next define original-source Git provenance, review the
+prepared orchestration and establish scientific/runtime expectations for a scoped real
 trial. Durable result serializers, generated typed/
 artifact expectations and broader effects remain separate further work.
 The setup guide records the remaining proposed acceptance contracts.

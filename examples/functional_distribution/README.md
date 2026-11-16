@@ -10,3 +10,8 @@ project root. Follow the generated README to install the two local projects.
 
 The wheel probe covers installed metadata and packaged resources. Editable
 installation also exposes the project-relative auxiliary file to the application.
+
+`preparation.json` selects the original project and explicitly declares a forwarding adapter.
+Its review copy preserves the original source layout and includes the selected input file for
+subsequent workflow schema 1.7 conversion. Select the prepared adapter and supply its explicit
+I/O configuration before generating a Kedro project.

@@ -40,6 +40,61 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-11-16 - Authorized read-only checks of the installed real-project copy
+
+### Completed
+
+- Received explicit authorization to execute original loaders, inspect the registered pipeline
+  and read provenance from the private installed copy. Loaded 2,766 observations and the frozen
+  protocol through the original application functions. Dataset fingerprint, version and asset
+  match the protocol. The registered pipeline contains the three expected nodes.
+- Verified installed application/distribution versions and the copied lockfile hash through the
+  application's own provenance function. Retained private package/version and source identities.
+- Resolved a Windows application-control refusal for the initial NumPy 2.5.5 binary by selecting
+  compatible versions already used by the tested engine environment. NumPy 2.5.2, SciPy 1.18.0
+  and scikit-learn 1.9.0 satisfy declared requirements. uv validates all 61 installed packages.
+  Recorded the failed initial attempt and successful adjusted runtime in the private report.
+- Confirmed that application Git provenance reads the containing execution workspace's commit.
+  The original-source commit and observed execution-context commit are recorded separately.
+- Verified clean original and engine worktrees after the read-only checks. Benchmark execution
+  remains not_run and scientific expectations retain pending review.
+
+### Next step
+
+- Define the original-source Git provenance contract for generated execution, review the proposed
+  orchestration and scientific expectations, then scope a validation-only benchmark trial.
+
+## 2026-11-16 - Application-aware orchestration preparation
+
+### Completed
+
+- Verified PR 97 merged with successful CI and started a dedicated branch from updated main.
+- Added opt-in preparation schema 1.1 with explicit original application selection. Preserved
+  pyproject-relative package layout, raw metadata/resources and selected auxiliary files alongside
+  the synthesized adapter, using shared static capture and publication checks.
+- Added manifest schema 1.1 distribution evidence and prepared project paths, with pending review
+  and original/proposed source provenance. Recaptured project files, deduplicated package files
+  and rejected collisions with adapter/review/manifest outputs.
+- Extended trusted installation tests through preparation, workflow schema 1.7 generation,
+  standard/editable application wheels, real metadata lookup, delivered regressions and Kedro CLI.
+  These fixtures reuse locked runtime dependencies.
+- Documented the concrete composition in ADR 0017 and updated the roadmap and support references.
+- Verified 2,774 offline tests on Windows/Python 3.12.14 with 100% coverage across 9,564
+  statements and 2,866 branches. Passed Ruff, strict mypy across 207 files, 73 documentation
+  checks, source/wheel builds and the VS Code 1.145.3 host.
+- After explicit user authorization, generated a private application copy and Kedro review project
+  from the selected real source. The prepared package retains the 23 original files plus its
+  proposed adapter, and its workflow plans three calls with one source-order edge.
+- Installed both local projects in a dedicated environment using their declared constraints.
+  Distribution metadata identifies the expected editable projects and uv validates all 61
+  installed packages. The original lockfile is retained as provenance. Scientific expectations
+  and application/data execution have their own pending scope.
+
+### Next step
+
+- Review the prepared orchestration, ambient Git provenance and integration settings, then
+  establish domain compatibility and scientific/runtime expectations for an explicitly scoped trial.
+
 ## 2026-11-16 - Explicit original application distribution capture
 
 ### Completed

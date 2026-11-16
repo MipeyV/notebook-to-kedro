@@ -76,6 +76,15 @@ resources, shipped regressions and CLI execution. Actual backend installability 
 dependency resolution require environment-specific evidence. The contract is documented under
 [application distribution](functional-workflows.md#application-distribution-in-schema-17).
 
+Separate preparation schema 1.1 preserves an explicitly selected application project, its
+pyproject-relative source layout and selected build/provenance/input files alongside the new
+adapter. Preparation manifest schema 1.1 records original and proposed facts with captured
+distribution evidence and pending review. Subsequent conversion uses an explicitly configured
+workflow schema 1.7. Synthetic src/lib-layout, byte-preservation, collision/drift and installed
+standard/editable-wheel checks cover the composition. The
+[application preparation contract](functional-workflows.md#application-projects-in-preparation-schema-11)
+defines review and installation scope.
+
 The [local operation layer](local-operations.md) configures these same deterministic entrypoints
 through typed inspection, new-file preview and generation requests. It adds an explicit contained
 working root and local JSON settings, without broadening source/library support or executing code.

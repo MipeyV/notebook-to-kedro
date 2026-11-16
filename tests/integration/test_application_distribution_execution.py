@@ -10,15 +10,19 @@ import subprocess
 import sys
 import sysconfig
 import zipfile
+from dataclasses import replace
 from email.parser import BytesParser
 from pathlib import Path
 
 import pytest
 
 from notebook_to_kedro import (
+    ApplicationProject,
     generate_functional_kedro_project,
     load_functional_workflow_configuration,
+    load_workflow_preparation_definition,
     load_workflow_regression_contract,
+    prepare_functional_workflow,
 )
 
 ROOT = Path(__file__).parents[2]
@@ -78,10 +82,12 @@ def _run(command: list[str], cwd: Path) -> subprocess.CompletedProcess[str]:
 
 @pytest.mark.integration
 @pytest.mark.parametrize("editable", [False, True])
+@pytest.mark.parametrize("prepared", [False, True])
 def test_built_application_and_generated_wheels_install_and_run_with_real_metadata(
     tmp_path: Path,
     *,
     editable: bool,
+    prepared: bool,
 ) -> None:
     project = tmp_path / "project"
     lock_sha256 = hashlib.sha256((EXAMPLE / "application.lock").read_bytes()).hexdigest()
@@ -114,11 +120,28 @@ def test_built_application_and_generated_wheels_install_and_run_with_real_metada
         ),
         encoding="utf-8",
     )
+    source = EXAMPLE / "src/distribution_ml/workflow.py"
+    root = ROOT
+    config = load_functional_workflow_configuration(EXAMPLE / "workflow.json")
+    if prepared:
+        root = tmp_path / "prepared"
+        definition = load_workflow_preparation_definition(EXAMPLE / "preparation.json")
+        prepare_functional_workflow(source, definition, root, project_root=ROOT)
+        source = root / "src/distribution_ml/workflow_adapter.py"
+        config = replace(
+            config,
+            entrypoint=definition.entrypoint,
+            source_package="src/distribution_ml",
+            inputs=(("raw", "input.json"),),
+            application_project=ApplicationProject(
+                "pyproject.toml", ("application.lock", "workflow-preparation.json", "REVIEW.md")
+            ),
+        )
     generate_functional_kedro_project(
-        EXAMPLE / "src/distribution_ml/workflow.py",
-        load_functional_workflow_configuration(EXAMPLE / "workflow.json"),
+        source,
+        config,
         project,
-        project_root=ROOT,
+        project_root=root,
         package_name="distribution_case",
         regression_contract=load_workflow_regression_contract(expectations),
     )

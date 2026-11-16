@@ -204,6 +204,15 @@ metadata. Actual installation and scientific/result/artifact review remain pendi
 
 ## Working slice for application declarations
 
+Preparation schema 1.1 can now retain the original application project while adding the proposed
+adapter in its source layout. Select its pyproject and additional build/provenance/input files
+explicitly. After reviewing the resulting copy, configure workflow schema 1.7 against the saved
+adapter. The preparation manifest provides the relative pyproject, package and adapter paths.
+Select that manifest and review file as additional application files to carry their provenance
+into subsequent generation. The
+[application preparation contract](../reference/functional-workflows.md#application-projects-in-preparation-schema-11)
+and synthetic definition demonstrate this path.
+
 Workflow schema 1.7 selects the original application pyproject and required additional files,
 such as its lockfile. Static capture records the declared name/version, Python requirements,
 dependencies, extras, scripts and raw project-file identities. Generation stages a separately
@@ -222,6 +231,19 @@ implementation. Actual dependency installation, data/protocol compatibility and 
 expectations require later evidence.
 
 ## Next contracts for review and durable results
+
+An explicitly authorized private review copy now exercises preparation schema 1.1 and subsequent
+workflow schema 1.7 generation for the selected real source. It retains the original 23 package
+files plus the proposed adapter. Its plan has three calls and one ordering edge. Both local
+distributions install in a dedicated environment, with metadata and all 61 installed packages
+validated. Resolution uses the declared constraints, and the copied original lockfile provides
+source provenance. After separate read-only authorization, original loaders verify dataset
+fingerprint/version/asset against the frozen protocol. Three registered nodes, installed metadata
+and the source-relative lockfile hash are also checked. Windows refused the initial NumPy 2.5.5
+binary. The successful runtime uses compatible NumPy 2.5.2, SciPy 1.18.0 and scikit-learn 1.9.0,
+matching versions already used by the engine tests. The application reports the containing
+execution workspace's Git commit. Define original-source provenance before relying on that field
+for an actual run. Scientific/runtime expectations and benchmark execution have separate scope.
 
 The following distinguishes the implemented input slice from proposed remaining boundaries;
 it is not permission to execute a real run. Preserve application domain loaders rather than recreating

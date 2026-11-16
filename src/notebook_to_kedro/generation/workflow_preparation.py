@@ -8,6 +8,7 @@ from dataclasses import asdict
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from notebook_to_kedro.analysis.application_project import capture_application_project
 from notebook_to_kedro.analysis.functional import analyze_functional_blocks
 from notebook_to_kedro.analysis.functional_sources import analyze_functional_blocks_path
 from notebook_to_kedro.analysis.source_packages import capture_source_package
@@ -17,7 +18,9 @@ from notebook_to_kedro.ir.functional import SourceUnit
 from notebook_to_kedro.semantic.functional_workflow import plan_functional_steps
 
 if TYPE_CHECKING:
+    from notebook_to_kedro.ir.application_project import ApplicationDistribution
     from notebook_to_kedro.ir.functional import FunctionalAnalysis
+    from notebook_to_kedro.ir.source_package import SourcePackage
     from notebook_to_kedro.semantic.workflow_preparation import WorkflowPreparationDefinition
 
 ADAPTER_FILENAME = "workflow_adapter.py"
@@ -37,6 +40,44 @@ generation. No workflow I/O configuration, catalog, dependencies or pytest stubs
 All declared arguments are conservatively single-use at this stage. Source-only inspection
 and faithful conversion remain independently available.
 """
+_APPLICATION_REVIEW = """# Prepared application orchestration
+
+This directory contains the selected original application project and a proposed
+workflow_adapter.py in its original package layout. workflow-preparation.json records
+observed source facts, declared calls, original project-file identities and proposed facts.
+
+Review the call order, argument bindings and application build inputs before adopting
+this copy. The manifest provides paths for a subsequent explicit workflow schema 1.7
+configuration. Select its inputs, parameters, result and artifact policy for that conversion.
+Selected auxiliary files retain their original relative paths and byte identities.
+
+Install the application using its original pyproject after review. Build and dependency
+resolution initially have not_run status. Runtime expectations and execution scope require
+their own review. This preparation records an unreviewed proposal.
+"""
+
+
+def _prepared_copies(
+    root: Path, package: SourcePackage, distribution: ApplicationDistribution | None
+) -> tuple[tuple[Path, Path], ...]:
+    package_target = (
+        Path("src") / package.name if distribution is None else Path(distribution.package_root)
+    )
+    copies = tuple(
+        (root / package.root / item.path, package_target / item.path) for item in package.files
+    )
+    if distribution is None:
+        return copies
+    directory = (root / distribution.pyproject).parent
+    targets = {target for _, target in copies}
+    return (
+        *copies,
+        *(
+            (directory / item.path, Path(item.path))
+            for item in distribution.files
+            if Path(item.path) not in targets
+        ),
+    )
 
 
 def _adapter_source(
@@ -79,6 +120,11 @@ def render_workflow_preparation(
     """Preview new source and a manifest; never write, import or execute application code."""
     root = Path.cwd() if project_root is None else Path(project_root).resolve()
     package = capture_source_package(root, Path(source), definition.source_package)
+    distribution = (
+        None
+        if definition.application_project is None
+        else capture_application_project(root, definition.application_project, package.root)
+    )
     observed = analyze_functional_blocks_path(source, project_root=root)
     observed = analyze_functional_blocks(observed.sources, package_module=package.module)
     if not observed.complete:
@@ -87,7 +133,10 @@ def render_workflow_preparation(
         item.sha256 for item in package.files if item.path == package.source_file
     ):
         raise FunctionalWorkflowError("Preparation source differs from the captured package")
-    target = Path("src") / package.name / ADAPTER_FILENAME
+    package_target = (
+        Path("src") / package.name if distribution is None else Path(distribution.package_root)
+    )
+    target = package_target / ADAPTER_FILENAME
     code = _adapter_source(definition, observed, package.module)
     digest = hashlib.sha256(code.encode("utf-8")).hexdigest()
     proposed = analyze_functional_blocks(
@@ -133,12 +182,33 @@ def render_workflow_preparation(
     files = {
         target: code,
         Path("workflow-preparation.json"): json.dumps(manifest, sort_keys=True, indent=2) + "\n",
-        Path("REVIEW.md"): _REVIEW,
+        Path("REVIEW.md"): _REVIEW if distribution is None else _APPLICATION_REVIEW,
     }
-    copies = tuple(
-        (root / package.root / item.path, Path("src") / package.name / item.path)
-        for item in package.files
-    )
+    copies = _prepared_copies(root, package, distribution)
+    if definition.application_project is not None:
+        assert distribution is not None
+        manifest.update(
+            {
+                "schema_version": "1.1",
+                "application_distribution": distribution.to_dict(),
+                "application_distribution_sha256": distribution.sha256,
+                "prepared_application": {
+                    "pyproject": "pyproject.toml",
+                    "source_package": distribution.package_root,
+                    "adapter": target.as_posix(),
+                },
+            }
+        )
+        files[Path("workflow-preparation.json")] = (
+            json.dumps(manifest, sort_keys=True, indent=2) + "\n"
+        )
+        if (
+            capture_application_project(root, definition.application_project, package.root)
+            != distribution
+        ):
+            raise FunctionalWorkflowError(
+                "Preparation application differs from the captured inventory"
+            )
     if capture_source_package(root, Path(source), definition.source_package) != package:
         raise FunctionalWorkflowError("Preparation package differs from the captured inventory")
     validate_project_files(files, copies)
