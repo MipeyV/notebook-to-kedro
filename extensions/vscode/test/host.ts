@@ -124,6 +124,31 @@ export async function run(): Promise<void> {
     (artifactPreview!.files as PreviewFile[]).some((item) => item.path === "artifact-policy.json"),
   );
   await assert.rejects(fs.stat(path.join(root, "artifacts")));
+  await command("selectConfiguration", vscode.Uri.file(path.join(root, "distribution.json")));
+  assert.equal((await command("inspect"))?.status, "inspected");
+  const distributionPreview = await command("preview");
+  assert.equal(distributionPreview?.status, "planned");
+  assert.equal(distributionPreview?.plan?.schema_version, "1.6");
+  const distributionManifest = JSON.parse(
+    (distributionPreview!.files as PreviewFile[]).find(
+      (item) => item.path === "functional-workflow.json",
+    )!.content,
+  );
+  assert.equal(distributionManifest.configuration.schema_version, "1.7");
+  assert.equal(
+    distributionManifest.application_distribution.name,
+    "synthetic-distribution-example",
+  );
+  assert.equal(distributionManifest.application_distribution.build_status, "not_run");
+  assert.equal(distributionManifest.source_module, "application/src/distribution_ml/workflow.py");
+  const applicationCopies = project.getChildren().find((item) => item.label === "Files to copy");
+  assert.ok(
+    applicationCopies?.children?.some((item) => item.label === "application/pyproject.toml"),
+  );
+  assert.ok(
+    applicationCopies?.children?.some((item) => item.label === "application/application.lock"),
+  );
+  await assert.rejects(fs.stat(path.join(root, "application")));
   await command("selectConfiguration", vscode.Uri.file(path.join(root, "project.json")));
   await command("inspect");
   assert.ok(project.getChildren().some((item) => item.label === "Source"));

@@ -89,6 +89,15 @@ executes the application; original code owns writes, errors and partial contents
 schema 1.5 distinguishes declared ownership from unverified effects and no reservation.
 [ADR 0015](../decisions/0015-declared-runtime-artifact-destinations.md) records scope and race limits.
 
+Workflow schema 1.7 selects an original pyproject and additional project files. Standard-library
+TOML capture records static distribution/dependency declarations and file hashes. Rendering
+recaptures this evidence, stages raw metadata and the original source layout under `application/`
+through the shared writer and makes the generated distribution depend on the original name/version.
+The original backend supplies installed metadata when the operator installs the staged application.
+Plan/manifest schema 1.6 records build/resolution as `not_run`. Trusted wheel/editable-wheel
+installation tests reuse locked runtime dependencies. The decisions and installation-layout
+boundary are recorded in [ADR 0016](../decisions/0016-explicit-application-distributions.md).
+
 Functional analysis schema 1.1 observes a terminal `return_expression` independently of
 named `outputs`. Called functions may return supported expressions directly; their ASTs stay
 in the source module. The entrypoint's explicit call assignments own dataset naming and linear

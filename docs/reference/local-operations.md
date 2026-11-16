@@ -158,3 +158,9 @@ contact a model. The separate [bootstrap check](generated-workflow-tests.md#fres
 retains its explicit trusted-example execution contract. E4 now has an initial VS Code interface.
 Setup simplification and any approval-bound apply contract remain further work.
 The independent whole-notebook pilot review remains pending.
+
+Functional workflow schema 1.7 flows through the same local plan/generate operations. Copy
+previews include the staged application pyproject, selected project files and original source
+layout, with exact byte hashes. The manifest exposes captured static distribution declarations
+and `not_run` build/resolution statuses. Generated setup instructions describe installing both
+local projects. The actual VS Code host test exercises inspection and preview for this schema.

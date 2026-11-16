@@ -36,6 +36,7 @@ from notebook_to_kedro.semantic import (
     create_semantic_planner,
     validate_conversion_plan,
 )
+from notebook_to_kedro.semantic.application_project import ApplicationProject
 from notebook_to_kedro.semantic.artifacts import ArtifactDestination
 from notebook_to_kedro.semantic.file_inputs import FileReferenceInput
 from notebook_to_kedro.semantic.functional_config import (
@@ -119,6 +120,7 @@ def _select_planner(
 
 __all__ = [
     "DEFAULT_KEDRO_PROFILE",
+    "ApplicationProject",
     "ArtifactDestination",
     "ConversionSourceAudit",
     "FileReferenceInput",

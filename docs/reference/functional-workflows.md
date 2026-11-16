@@ -6,7 +6,9 @@ Status: bounded E2 generation slice implemented on 2026-11-12, extended with opt
 joins and explicit local package preservation on 2026-11-15. It converts explicit single-use workflows from scripts or notebook cells.
 Schemas 1.0/1.1 require a linear data chain; schema 1.2 preserves source order across independent
 calls and joins; schema 1.3 additionally preserves one declared Python package and schema 1.4 adds
-explicit raw-file path inputs with sibling sidecars. General DAG inference,
+explicit raw-file path inputs with sibling sidecars. Schemas 1.5/1.6 add explicit memory results
+and owned artifact destinations. Schema 1.7 adds application distribution capture on 2026-11-16.
+General DAG inference,
 data fan-out and cross-module workflow discovery remain outside this slice. The first
 [generated-test increment](generated-workflow-tests.md) now optionally delivers pytest
 regressions from explicit expectations. A separate opt-in trusted-example bootstrap check
@@ -48,8 +50,8 @@ The old `plan`/`generate` notebook operations retain their existing contract.
 ## Explicit boundaries
 
 The JSON configuration has exactly five fields in schemas 1.0/1.1/1.2, six in schema 1.3 and
-seven in schemas 1.4/1.5 (adding `file_inputs`) and eight in schema 1.6 (adding
-`artifact_destinations`);
+seven in schemas 1.4/1.5 (adding `file_inputs`), eight in schema 1.6 (adding
+`artifact_destinations`) and nine in schema 1.7 (adding `application_project`).
 unknown/duplicate fields are rejected. The
 file is bounded to 64 KiB. The same immutable configuration validates direct Python construction.
 
@@ -69,7 +71,7 @@ file is bounded to 64 KiB. The same immutable configuration validates direct Pyt
   are resolved relative to `project_root` (the current directory by default), not the config
   file. They must resolve to contained `.json` files. The writer checks existence before copying
   them to `data/01_raw/<argument>.json`. Input JSON contents/schema are not validated statically.
-- Schema 1.0 parameters are finite JSON scalars. Schemas 1.1 through 1.6 additionally accept flat JSON
+- Schema 1.0 parameters are finite JSON scalars. Schemas 1.1 through 1.7 additionally accept flat JSON
   objects with string keys and finite scalar values. Arrays, nested objects and inferred
   parameters remain unsupported. Parameters become `parameters.yml` entries and
   `params:<argument>` node inputs.
@@ -368,6 +370,69 @@ marker drift, existing targets, links, partial writes and no cleanup/retry. Pick
 not process-runner verification. JSON regression contracts do not define artifact expectations
 and are rejected; gap snapshots name `missing_artifact_expectations` without invented stubs.
 See [ADR 0015](../decisions/0015-declared-runtime-artifact-destinations.md).
+
+## Application distribution in schema 1.7
+
+Schema 1.7 inherits source ordering, flat parameters, package capture, file references,
+JSON/memory results and artifact declarations. Its additional required field explicitly selects
+an original application project. The full configuration is available in the
+[synthetic distribution example](../../examples/functional_distribution/workflow.json).
+
+```json
+{
+  "application_project": {
+    "pyproject": "examples/functional_distribution/pyproject.toml",
+    "files": ["application.lock"]
+  }
+}
+```
+
+`pyproject` is a normalized relative POSIX path from `project_root` to a `pyproject.toml`.
+The selected source package must be inside its directory. `files` is an explicit list, possibly
+empty, of distinct relative files from that directory. Python construction uses the immutable
+`ApplicationProject(pyproject, files_tuple)` exported by the public API.
+
+The engine reads static PEP 621 name, version, requires-python, dependencies, optional dependencies
+and scripts with `tomllib`. A static name/version and static dependency declarations are required.
+Requirement/version grammar and backend-specific metadata validation occur during build or
+installation. The complete raw pyproject retains its other metadata, backend and tool settings.
+Referenced readme and license-file resources are selected automatically. Other build/provenance
+inputs require explicit selection. A 64 KiB metadata limit, a 256 MiB selected-project-file budget
+and existing regular-file/link/path guards apply. Rendering recaptures all selected identities.
+
+Generation stages `application/pyproject.toml`, selected project files and the original relative
+source layout under `application/`. It records actual statement destinations in that layout.
+The generated Kedro wheel includes its generated package and declares the original distribution's
+exact name/version requirement. Distribution names are compared using normalized punctuation and
+case, alongside the existing import-name collision checks. Local copy previews expose the
+metadata/resource files and their hashes.
+
+The generated README supplies installation commands for both projects. From the generated root,
+after reviewing source metadata, build inputs and compatible environment constraints, use
+
+```sh
+python -m pip install -e ./application -e .
+kedro run
+```
+
+Select application extras explicitly, such as `-e './application[tracking]'` when declared.
+Editable installation keeps source-relative project-file lookups anchored in the staged project.
+A regular application wheel exposes its installed metadata and packaged resources, while its
+source-relative filesystem lookups depend on the installed layout. Copied lockfiles retain their
+original scope and paths. Review local workspace/path sources and additional backend inputs for
+the selected installation. Backend execution and dependency resolution occur during installation.
+
+Plan/manifest schema 1.6 includes `application_distribution`, its captured file identities and
+`application_distribution_sha256`. Metadata status is `static_declarations_captured`, with build
+and dependency resolution initially `not_run`. Source-package inventory keeps its own original
+capture statuses. Source facts, declarations and later runtime evidence have separate provenance.
+
+Trusted synthetic tests build and install standard/editable application wheels plus the generated
+wheel, then check metadata lookup, script declarations, resources, pipeline behavior, delivered
+regressions and `kedro run`. Their temporary environments reuse locked development dependencies.
+An editable variant checks the source-relative auxiliary-file hash. The real-source declaration
+capture still reports its absent adopted entrypoint and pending runtime review.
+The architectural decision is recorded in [ADR 0016](../decisions/0016-explicit-application-distributions.md).
 
 ## Explicit orchestration preparation
 

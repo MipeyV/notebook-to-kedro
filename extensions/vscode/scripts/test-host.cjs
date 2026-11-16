@@ -131,6 +131,20 @@ async function main() {
       regression_contract: undefined,
     }),
   );
+  await fs.cp(
+    path.join(repository, "examples/functional_distribution"),
+    path.join(workspace, "examples/functional_distribution"),
+    { recursive: true },
+  );
+  await fs.writeFile(
+    path.join(workspace, "distribution.json"),
+    JSON.stringify({
+      ...config,
+      source: "examples/functional_distribution/src/distribution_ml/workflow.py",
+      workflow_configuration: "examples/functional_distribution/workflow.json",
+      regression_contract: undefined,
+    }),
+  );
   await runTests({
     version: "1.145.3",
     vscodeExecutablePath: process.env.VSCODE_EXECUTABLE_PATH,

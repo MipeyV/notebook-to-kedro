@@ -19,12 +19,13 @@ Historical measurements retain their original corpus, runtime and limitations.
 | Tests delivered in functional projects | Optional explicit JSON expectations produce standalone pytest node/pipeline regressions with missing expectations reported. Positive/negative controls use development dependencies; a separate trusted-example check builds/installs wheels in new environments and runs shipped tests plus the Kedro CLI. CI configures Python 3.11/3.12/3.13 bootstrap jobs; configured coverage is not a passing-run claim. |
 | MLOps / enterprise platform | Future integrations, governance and packaging require validated needs and separate contracts. |
 | Functional block inspection | Analysis-only API/CLI for explicit straight-line functions in `.py` and real notebook cells, with interfaces, function-reference graph, provenance and blockers. Schema 1.1 records terminal return expressions separately from observed return names. |
-| Functional workflow conversion | Explicit single-use entrypoints generate Kedro from scripts or notebooks, with JSON file I/O and scalar/flat candidate parameters. Schemas 1.0/1.1 keep linear data wiring; schema 1.2 preserves source order across independent calls and joins. Schema 1.3 additionally copies one declared regular Python package/resources under its original import name, with inventory binding and compile-only checks. Business signatures, source, intermediate identity and single-use mapping rules are retained. Data fan-out, control flow, cross-module workflow discovery, dependency/metadata reconstruction and typed persistent I/O remain unsupported. |
+| Functional workflow conversion | Explicit single-use entrypoints generate Kedro from scripts or notebooks, with JSON file I/O and scalar/flat candidate parameters. Schemas 1.0/1.1 keep linear data wiring; schema 1.2 preserves source order across independent calls and joins. Schema 1.3 additionally copies one declared regular Python package/resources under its original import name, with inventory binding and compile-only checks. Schema 1.7 adds explicitly selected application distribution declarations and original layout. Business signatures, source, intermediate identity and single-use mapping rules are retained. Data fan-out, control flow, cross-module workflow discovery, dependency inference and typed persistent I/O remain future work. |
 | Shared engine / local interface | Typed operations feed a desktop VS Code Explorer view with guided settings creation, inspection before workflow I/O, interpreter/profile selection, diagnostics, read-only previews and confirmed generation. Existing-project patches and automatic environment integration remain future work. |
 | Explicit orchestration preparation | Separate API/CLI previews declared calls against observed functions and can publish an unchanged package copy plus a synthesized forwarding adapter. Original facts and proposal facts remain distinct; persistent I/O/artifact policy stays undefined. This is an unreviewed integration proposal, not automatic entrypoint discovery or complete real-project conversion. |
 | Raw file-reference inputs | Opt-in workflow schema 1.4+ hashes/copies declared primary files and up to 16 sibling sidecars, then supplies path strings to unchanged application loaders. A 256 MiB total budget and contained regular-file checks apply. Plans/manifests distinguish raw-byte evidence from unverified domain semantics. Generated file-fixture regressions and application artifacts remain future work. |
 | Memory-only final results | Workflow schema 1.5 explicitly retains a named final object in an assign-mode memory dataset, preserving its runtime type/reference identity in the same process. JSON outputs remain available. No durable storage, inferred type validation, typed generated comparators, cross-process guarantee or artifact policy is supplied. |
 | Declared runtime artifact destinations | Opt-in schema 1.6 binds up to eight new artifacts/<run_name> destinations to exact flat-parameter fields and their single consuming calls. The registered pipeline checks runtime values, project marker and absence before the owner. Application writes/exceptions/partial files remain owned; no reservation, cleanup, retry, effect sandbox or concurrency lock is supplied. |
+| Application distribution declarations | Schema 1.7 captures an explicitly selected pyproject, static requirements/extras/scripts and selected build/provenance files. Generation stages the original project under application/ for separate installation and links its exact distribution requirement. Plans/manifests use schema 1.6 with captured hashes and not_run build/resolution statuses. Trusted standard/editable-wheel installation, delivered regressions and Kedro CLI checks reuse locked development dependencies. Actual dependency resolution and real-project installation require environment-specific evidence. |
 
 Generation itself does not verify dependency installation, full DAG semantics or runtime behavior.
 The [explicit bootstrap check](../reference/generated-workflow-tests.md#fresh-environment-bootstrap)
@@ -48,33 +49,41 @@ The inspected source case has independent loaders, a typed protocol/result and r
 artifact writes. Its in-memory proposal now plans three calls with one ordering edge under schema
 1.2. Explicit schema 1.3 package capture now inventories the existing source read-only, but its
 selected module has no orchestration entrypoint and correctly blocks planning. No entrypoint
-is injected into captured source. Typed I/O, dependencies/distribution metadata and artifact
-boundaries remain unresolved; no complete real-project conversion,
-data/protocol runtime verification or benchmark execution is claimed. Paired synthetic joins
+is injected into captured source. Application declarations are now captured read-only through
+schema 1.7. Actual installation, scientific/runtime expectations and review of the proposed
+orchestration and artifact choices remain outstanding. Data/protocol runtime verification and
+benchmark execution require separately scoped evidence. Paired synthetic joins
 exercise SequentialRunner, ThreadRunner, call/exception traces, identity and delivered tests.
 
 Separate explicit preparation now previews those three declared real calls with unchanged
 source hashes. It publishes no real package copy and executes no application code. Synthetic
 prepared adapters preserve object identity, call/exception order, and can pass subsequent
-Kedro/shipped tests when JSON I/O and expectations are supplied explicitly. Typed file references,
-result persistence and owned artifact policies remain proposed in the setup guide.
+Kedro/shipped tests when JSON I/O and expectations are supplied explicitly. Prepared adapters
+require explicit file/result/artifact settings and application selection for subsequent conversion.
+
+The current real-source declaration check captures its static name/version, six requirements,
+two optional dependency groups, console-script declaration and three project files. The existing
+23-file source inventory and raw input hashes match the earlier capture. Original planning still
+reports `Configured entrypoint was not found`. Its private report records unreviewed status,
+`not_run` execution/build/resolution and pending scientific expectations. Human pilot review
+remains pending.
 
 The first file-reference input slice is now implemented and exercised on synthetic text/metadata
 and protocol files. A private real-input inventory captures two bundles/three files read-only;
-it establishes neither domain compatibility nor execution consent. Durable typed results, artifacts
-and dependency/distribution metadata remain unresolved. No complete real project is generated.
+it establishes neither domain compatibility nor execution consent. Durable typed results, broader
+artifact contracts, actual dependency installation and scientific review remain outstanding.
 
 The memory-only result slice now removes the forced JSON boundary for explicitly selected final
 objects. Synthetic default/custom profiles and sequential/threaded runs retain exact result and
 internal domain identities, while fresh catalogs have no stored result. A private real declaration
 validates this mode without adopting its proposed orchestration or executing the application.
-Durable results, broader runtime effects, dependencies and reviewed scientific expectations remain open.
+Durable results, broader runtime effects, dependency installation and scientific expectations remain open.
 
 The initial runtime-artifact slice now preserves application-owned directory creation/writes
 under an explicit generated policy. Synthetic JSON/raw-file input pipelines exercise default/
 custom profiles, sequential/threaded order and typed results, including drift, existing targets
 and partial failure without retry/cleanup. A private real declaration remains unreviewed and
-unexecuted; the missing original entrypoint, dependencies and scientific review still block a
+unexecuted; the missing original entrypoint, dependency installation and scientific review still block a
 complete real-project claim. Broader artifact layouts and durable serializers remain future work.
 
 See [local operations](../reference/local-operations.md) for the first E4 slice. Settings anchor

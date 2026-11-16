@@ -132,6 +132,8 @@ the dedicated experiment reports for their frozen settings, decisions and limita
   raw file/sidecar inventories, staged path arguments and preserved application domain readers.
 - [ADR 0014: memory-only functional results](decisions/0014-memory-only-functional-results.md):
   explicit nonpersistent final objects, assign-mode identity and separate expectation/artifact gaps.
+- [ADR 0016 - Explicit application distributions](decisions/0016-explicit-application-distributions.md)
+  records static metadata capture, separate installation, original layout and runtime evidence.
 - [ADR 0015: declared runtime artifact destinations](decisions/0015-declared-runtime-artifact-destinations.md):
   exact parameter bindings, consuming-call checks and preserved application-owned writes.
 

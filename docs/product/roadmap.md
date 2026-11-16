@@ -55,8 +55,13 @@ The real input inventory remains a read-only observation. Explicit memory-only f
 are now implemented in schema 1.5, preserving same-process object identity without persistence.
 Declared runtime artifact boundaries are now implemented in schema 1.6, with exact mapping
 bindings, owner-call checks and original application writes without precreation/retry/cleanup.
-Next address declared application dependencies/distribution metadata and review the explicit
-orchestration before a separately scoped real trial. Durable result serializers, generated typed/
+Schema 1.7 now captures explicitly selected static application declarations and project files,
+stages the original installable distribution under `application/` and links its exact identity
+from the generated Kedro package. Trusted standard/editable-wheel tests reuse locked runtime
+dependencies. The real-source check captures declarations and source/input hashes read-only.
+Next review the explicit orchestration and source-bound integration choices, then establish
+actual environment installation and scientific/runtime expectations for a separately scoped real
+trial. Durable result serializers, generated typed/
 artifact expectations and broader effects remain separate further work.
 The setup guide records the remaining proposed acceptance contracts.
 A complete real-project conversion is not yet established. Optimization retains a separate

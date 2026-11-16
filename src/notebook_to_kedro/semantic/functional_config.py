@@ -11,6 +11,7 @@ from pathlib import Path, PurePosixPath
 from typing import TYPE_CHECKING, TypeAlias, cast
 
 from notebook_to_kedro.exceptions import FunctionalWorkflowError
+from notebook_to_kedro.semantic.application_project import ApplicationProject
 from notebook_to_kedro.semantic.artifacts import MAX_ARTIFACT_DESTINATIONS, ArtifactDestination
 from notebook_to_kedro.semantic.file_inputs import FileReferenceInput
 
@@ -42,7 +43,7 @@ def _finite_scalar(value: object) -> bool:
 def _validate_parameter(value: object, schema_version: str) -> None:
     if _finite_scalar(value):
         return
-    if schema_version not in ("1.1", "1.2", "1.3", "1.4", "1.5", "1.6") or not isinstance(
+    if schema_version not in ("1.1", "1.2", "1.3", "1.4", "1.5", "1.6", "1.7") or not isinstance(
         value, tuple
     ):
         raise FunctionalWorkflowError(
@@ -85,6 +86,7 @@ class FunctionalWorkflowConfiguration:
     source_package: str | None = None
     file_inputs: tuple[tuple[str, FileReferenceInput], ...] = ()
     artifact_destinations: tuple[tuple[str, ArtifactDestination], ...] = ()
+    application_project: ApplicationProject | None = None
 
     def __post_init__(self) -> None:
         """Validate both direct API values and decoded configuration."""
@@ -96,11 +98,12 @@ class FunctionalWorkflowConfiguration:
             "1.4",
             "1.5",
             "1.6",
+            "1.7",
         ) or not _public_name(self.entrypoint):
             raise FunctionalWorkflowError(
-                "Workflow requires schema_version 1.0 through 1.6 and a public entrypoint"
+                "Workflow requires schema_version 1.0 through 1.7 and a public entrypoint"
             )
-        if self.schema_version in ("1.3", "1.4", "1.5", "1.6"):
+        if self.schema_version in ("1.3", "1.4", "1.5", "1.6", "1.7"):
             if (
                 not isinstance(self.source_package, str)
                 or not self.source_package
@@ -141,7 +144,7 @@ class FunctionalWorkflowConfiguration:
         if len(self.outputs) != 1 or any(
             not isinstance(value, str)
             or (
-                not (self.schema_version in ("1.5", "1.6") and value == "memory")
+                not (self.schema_version in ("1.5", "1.6", "1.7") and value == "memory")
                 and re.fullmatch(r"data/08_reporting/[a-z][a-z0-9_]*\.json", value) is None
             )
             for _, value in self.outputs
@@ -153,9 +156,19 @@ class FunctionalWorkflowConfiguration:
         for _, value in self.parameters:
             _validate_parameter(value, self.schema_version)
         self._validate_artifacts()
+        self._validate_application()
+
+    def _validate_application(self) -> None:
+        if self.schema_version == "1.7":
+            if not isinstance(self.application_project, ApplicationProject):
+                raise FunctionalWorkflowError(
+                    "Schema 1.7 requires an immutable application_project"
+                )
+        elif self.application_project is not None:
+            raise FunctionalWorkflowError("Application projects require workflow schema 1.7")
 
     def _validate_artifacts(self) -> None:
-        if self.schema_version != "1.6" and self.artifact_destinations:
+        if self.schema_version not in ("1.6", "1.7") and self.artifact_destinations:
             raise FunctionalWorkflowError("Artifact destinations require workflow schema 1.6")
         if len(self.artifact_destinations) > MAX_ARTIFACT_DESTINATIONS or any(
             not isinstance(value, ArtifactDestination) for _, value in self.artifact_destinations
@@ -177,7 +190,7 @@ class FunctionalWorkflowConfiguration:
             paths.add(destination.path)
 
     def _validate_file_inputs(self) -> None:
-        if self.schema_version not in ("1.4", "1.5", "1.6") and self.file_inputs:
+        if self.schema_version not in ("1.4", "1.5", "1.6", "1.7") and self.file_inputs:
             raise FunctionalWorkflowError("File references require workflow schema 1.4+")
         if any(not isinstance(value, FileReferenceInput) for _, value in self.file_inputs) or set(
             dict(self.file_inputs)
@@ -209,41 +222,51 @@ class FunctionalWorkflowConfiguration:
         }
         if self.source_package is not None:
             data["source_package"] = self.source_package
-        if self.schema_version in ("1.4", "1.5", "1.6"):
+        if self.schema_version in ("1.4", "1.5", "1.6", "1.7"):
             data["file_inputs"] = {name: value.to_dict() for name, value in self.file_inputs}
-        if self.schema_version == "1.6":
+        if self.schema_version in ("1.6", "1.7"):
             data["artifact_destinations"] = {
                 name: value.to_dict() for name, value in self.artifact_destinations
             }
+        if self.application_project is not None:
+            data["application_project"] = self.application_project.to_dict()
         return data
 
     @classmethod
     def from_dict(cls, data: object) -> FunctionalWorkflowConfiguration:
         """Reject unknown fields and non-mapping boundaries."""
         fields = _FIELDS
-        if isinstance(data, dict) and data.get("schema_version") in ("1.3", "1.4", "1.5", "1.6"):
+        if isinstance(data, dict) and data.get("schema_version") in (
+            "1.3",
+            "1.4",
+            "1.5",
+            "1.6",
+            "1.7",
+        ):
             fields = fields | {"source_package"}
-            if data["schema_version"] in ("1.4", "1.5", "1.6"):
+            if data["schema_version"] in ("1.4", "1.5", "1.6", "1.7"):
                 fields = fields | {"file_inputs"}
-            if data["schema_version"] == "1.6":
+            if data["schema_version"] in ("1.6", "1.7"):
                 fields = fields | {"artifact_destinations"}
+            if data["schema_version"] == "1.7":
+                fields = fields | {"application_project"}
         if (
             not isinstance(data, dict)
             or data.keys() != fields
             or any(not isinstance(data[key], dict) for key in ("inputs", "parameters", "outputs"))
             or (
-                data.get("schema_version") in ("1.4", "1.5", "1.6")
+                data.get("schema_version") in ("1.4", "1.5", "1.6", "1.7")
                 and not isinstance(data["file_inputs"], dict)
             )
             or (
-                data.get("schema_version") == "1.6"
+                data.get("schema_version") in ("1.6", "1.7")
                 and not isinstance(data["artifact_destinations"], dict)
             )
         ):
             raise FunctionalWorkflowError(
                 "Required workflow fields: schema_version, entrypoint, inputs, parameters, "
                 "outputs; schema 1.3+ requires source_package, 1.4+ file_inputs "
-                "and 1.6 artifact_destinations"
+                "and 1.6+ artifact_destinations, 1.7 application_project"
             )
         return cls(
             data["entrypoint"],
@@ -260,6 +283,9 @@ class FunctionalWorkflowConfiguration:
                 (name, ArtifactDestination.from_dict(value))
                 for name, value in data.get("artifact_destinations", {}).items()
             ),
+            ApplicationProject.from_dict(data["application_project"])
+            if "application_project" in data
+            else None,
         )
 
 

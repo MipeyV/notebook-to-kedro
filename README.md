@@ -127,6 +127,11 @@ bound to exact flat-parameter fields such as `candidate.output`. The registered 
 the new destination before its owning call; original application code owns creation, writes and
 partial failures. Generation creates no runtime artifact directory.
 
+Schema 1.7 captures explicitly selected application metadata, dependencies, extras and project
+files. It stages the original installable project under `application/` and links its distribution
+identity from the generated Kedro project. The generated README describes installation of both
+local projects. See the [distribution contract](docs/reference/functional-workflows.md#application-distribution-in-schema-17).
+
 When a package exposes functions without an entrypoint, use the separate
 [orchestration preparation](docs/reference/functional-workflows.md#explicit-orchestration-preparation)
 operation: `prepare-workflow SOURCE DEFINITION` previews explicitly declared calls;
