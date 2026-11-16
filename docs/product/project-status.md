@@ -2,7 +2,7 @@
 
 [Documentation index](../README.md)
 
-Status: current implementation summary reviewed on 2026-11-15; historical evidence follows.
+Status: current implementation summary reviewed on 2026-11-16; historical evidence follows.
 Historical measurements retain their original corpus, runtime and limitations.
 
 ## Project status
@@ -24,6 +24,7 @@ Historical measurements retain their original corpus, runtime and limitations.
 | Explicit orchestration preparation | Separate API/CLI previews declared calls against observed functions and can publish an unchanged package copy plus a synthesized forwarding adapter. Original facts and proposal facts remain distinct; persistent I/O/artifact policy stays undefined. This is an unreviewed integration proposal, not automatic entrypoint discovery or complete real-project conversion. |
 | Raw file-reference inputs | Opt-in workflow schema 1.4+ hashes/copies declared primary files and up to 16 sibling sidecars, then supplies path strings to unchanged application loaders. A 256 MiB total budget and contained regular-file checks apply. Plans/manifests distinguish raw-byte evidence from unverified domain semantics. Generated file-fixture regressions and application artifacts remain future work. |
 | Memory-only final results | Workflow schema 1.5 explicitly retains a named final object in an assign-mode memory dataset, preserving its runtime type/reference identity in the same process. JSON outputs remain available. No durable storage, inferred type validation, typed generated comparators, cross-process guarantee or artifact policy is supplied. |
+| Declared runtime artifact destinations | Opt-in schema 1.6 binds up to eight new artifacts/<run_name> destinations to exact flat-parameter fields and their single consuming calls. The registered pipeline checks runtime values, project marker and absence before the owner. Application writes/exceptions/partial files remain owned; no reservation, cleanup, retry, effect sandbox or concurrency lock is supplied. |
 
 Generation itself does not verify dependency installation, full DAG semantics or runtime behavior.
 The [explicit bootstrap check](../reference/generated-workflow-tests.md#fresh-environment-bootstrap)
@@ -67,7 +68,14 @@ The memory-only result slice now removes the forced JSON boundary for explicitly
 objects. Synthetic default/custom profiles and sequential/threaded runs retain exact result and
 internal domain identities, while fresh catalogs have no stored result. A private real declaration
 validates this mode without adopting its proposed orchestration or executing the application.
-Durable results, runtime artifacts, dependencies and reviewed scientific expectations remain open.
+Durable results, broader runtime effects, dependencies and reviewed scientific expectations remain open.
+
+The initial runtime-artifact slice now preserves application-owned directory creation/writes
+under an explicit generated policy. Synthetic JSON/raw-file input pipelines exercise default/
+custom profiles, sequential/threaded order and typed results, including drift, existing targets
+and partial failure without retry/cleanup. A private real declaration remains unreviewed and
+unexecuted; the missing original entrypoint, dependencies and scientific review still block a
+complete real-project claim. Broader artifact layouts and durable serializers remain future work.
 
 See [local operations](../reference/local-operations.md) for the first E4 slice. Settings anchor
 the declared working root to the configuration file, constrain source/configuration/input/output

@@ -2,7 +2,7 @@
 
 [Documentation index](../README.md)
 
-Status: engine/operations/local-interface delivery priorities updated on 2026-11-15;
+Status: engine/operations/local-interface delivery priorities updated on 2026-11-16;
 historical V1/V2 checkboxes are preserved.
 The broader product direction is recorded in [Product vision](product-vision.md).
 
@@ -53,8 +53,11 @@ Bounded file-reference inputs with declared sibling sidecars are now implemented
 staged path arguments and original domain loaders, with explicit missing file-fixture test gaps.
 The real input inventory remains a read-only observation. Explicit memory-only final results
 are now implemented in schema 1.5, preserving same-process object identity without persistence.
-Next implement owned runtime artifact boundaries alongside declared application dependencies;
-durable result serializers and typed generated expectations remain separate further work.
+Declared runtime artifact boundaries are now implemented in schema 1.6, with exact mapping
+bindings, owner-call checks and original application writes without precreation/retry/cleanup.
+Next address declared application dependencies/distribution metadata and review the explicit
+orchestration before a separately scoped real trial. Durable result serializers, generated typed/
+artifact expectations and broader effects remain separate further work.
 The setup guide records the remaining proposed acceptance contracts.
 A complete real-project conversion is not yet established. Optimization retains a separate
 acceptance contract.

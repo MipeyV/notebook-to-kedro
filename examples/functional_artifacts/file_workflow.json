@@ -1,0 +1,12 @@
+{
+  "schema_version": "1.6",
+  "entrypoint": "workflow",
+  "source_package": "examples/functional_artifacts/src/artifact_ml",
+  "inputs": {},
+  "file_inputs": {"values_path": {"path": "examples/functional_artifacts/input.json", "sidecars": []}},
+  "parameters": {"candidate": {"output": "artifacts/example_run", "bias": 0.5}},
+  "outputs": {"result": "memory"},
+  "artifact_destinations": {
+    "run": {"parameter": "candidate", "key": "output", "path": "artifacts/example_run"}
+  }
+}

@@ -28,7 +28,7 @@ The compatibility policy is authoritative for supported runtimes and library-sup
 | Document | Status | Purpose |
 | --- | --- | --- |
 | [Project overview](product/overview.md) | Original design | Context, intended interfaces, scope and principles extracted from the old README. |
-| [Detailed project status](product/project-status.md) | Reviewed: 2026-11-15 | Current capability matrix, implemented APIs and historical measurement context. |
+| [Detailed project status](product/project-status.md) | Reviewed: 2026-11-16 | Current capability matrix, implemented APIs and historical measurement context. |
 | [Conversion roadmap](product/roadmap.md) | V1 completed; V2 ongoing | Existing milestones and checkboxes, without changing completion claims. |
 | [Product vision](product/product-vision.md) | Direction; future features proposed | Existing-project and greenfield entrypoints, reusable enterprise standards, evidence and commercial hypotheses. |
 
@@ -132,6 +132,8 @@ the dedicated experiment reports for their frozen settings, decisions and limita
   raw file/sidecar inventories, staged path arguments and preserved application domain readers.
 - [ADR 0014: memory-only functional results](decisions/0014-memory-only-functional-results.md):
   explicit nonpersistent final objects, assign-mode identity and separate expectation/artifact gaps.
+- [ADR 0015: declared runtime artifact destinations](decisions/0015-declared-runtime-artifact-destinations.md):
+  exact parameter bindings, consuming-call checks and preserved application-owned writes.
 
 ## Maintaining documentation
 

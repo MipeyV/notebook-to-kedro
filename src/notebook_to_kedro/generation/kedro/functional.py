@@ -13,6 +13,7 @@ from notebook_to_kedro.analysis.functional import analyze_functional_blocks
 from notebook_to_kedro.analysis.functional_sources import analyze_functional_blocks_path
 from notebook_to_kedro.analysis.source_packages import capture_source_package
 from notebook_to_kedro.exceptions import FunctionalWorkflowError
+from notebook_to_kedro.generation.kedro.artifacts import render_artifact_policy
 from notebook_to_kedro.generation.kedro.generator import (
     ORDERING_INPUT_ARGUMENT,
     render_kedro_project,
@@ -242,6 +243,7 @@ def render_functional_workflow(
     files[Path("conf/base/parameters.yml")] = (
         json.dumps(configuration.parameter_values(), sort_keys=True, indent=2) + "\n"
     )
+    policy_digest = render_artifact_policy(plan, profile, package_name, files)
     manifest = {
         **json.loads(plan.to_json()),
         "source_module": source_target.as_posix(),
@@ -256,9 +258,11 @@ def render_functional_workflow(
         ],
         "profile_sha256": profile.sha256,
     }
-    if configuration.schema_version in ("1.4", "1.5"):
+    if configuration.schema_version == "1.6":
+        manifest["artifact_policy_sha256"] = policy_digest
+    if configuration.schema_version in ("1.4", "1.5", "1.6"):
         manifest["file_reference_destinations"] = reference_destinations
-    if configuration.schema_version in ("1.2", "1.3", "1.4", "1.5"):
+    if configuration.schema_version in ("1.2", "1.3", "1.4", "1.5", "1.6"):
         steps = {step.id: step for step in plan.steps}
         manifest["ordering_inputs"] = [
             {

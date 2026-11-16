@@ -108,6 +108,22 @@ export async function run(): Promise<void> {
       .content,
   );
   assert.deepEqual(memoryCatalog.result, { type: "MemoryDataset", copy_mode: "assign" });
+  await command("selectConfiguration", vscode.Uri.file(path.join(root, "artifacts.json")));
+  assert.equal((await command("inspect"))?.status, "inspected");
+  const artifactPreview = await command("preview");
+  assert.equal(artifactPreview?.status, "planned");
+  assert.equal(artifactPreview?.plan?.schema_version, "1.5");
+  const artifactManifest = JSON.parse(
+    (artifactPreview!.files as PreviewFile[]).find(
+      (item) => item.path === "functional-workflow.json",
+    )!.content,
+  );
+  assert.equal(artifactManifest.artifact_policy.mode, "check_before_owner_call");
+  assert.equal(artifactManifest.artifact_policy.runtime_validation, "not_run");
+  assert.ok(
+    (artifactPreview!.files as PreviewFile[]).some((item) => item.path === "artifact-policy.json"),
+  );
+  await assert.rejects(fs.stat(path.join(root, "artifacts")));
   await command("selectConfiguration", vscode.Uri.file(path.join(root, "project.json")));
   await command("inspect");
   assert.ok(project.getChildren().some((item) => item.label === "Source"));

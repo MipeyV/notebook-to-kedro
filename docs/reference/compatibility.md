@@ -57,6 +57,15 @@ Plans/manifests use schema 1.4, while analysis/local envelopes remain unchanged.
 contracts do not define typed memory-result comparisons and are rejected for this mode. Durable
 result serializers, generated typed comparators and owned application artifacts remain future work.
 
+Workflow schema 1.6 adds explicit artifact destinations tied to flat parameter fields, with up
+to eight portable artifacts/<run_name> paths and a bounded generated policy marker. Checks run
+at the consuming registered pipeline node; direct function calls bypass them. Source functions
+remain unchanged. SequentialRunner/ThreadRunner and callable pickling have trusted fixture
+evidence, without a process-runner, sandbox or concurrency-lock guarantee. Legacy modes remain
+independent. Plan/manifest schema 1.5 records ownership/check gaps; analysis/local envelopes stay
+unchanged. Broad artifact layouts, typed/artifact generated comparators and dependency metadata
+are separate work; no real application execution follows from configuration.
+
 The [local operation layer](local-operations.md) configures these same deterministic entrypoints
 through typed inspection, new-file preview and generation requests. It adds an explicit contained
 working root and local JSON settings, without broadening source/library support or executing code.

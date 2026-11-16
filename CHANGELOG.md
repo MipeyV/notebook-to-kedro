@@ -29,6 +29,14 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Opt-in workflow schema 1.6 binds declared runtime artifact destinations to exact flat-parameter
+  fields and their consuming calls. Generated registered-pipeline adapters check project policy,
+  actual values and new targets without rewriting business code, precreating/reserving directories
+  or retrying/cleaning application writes. Plan/manifest schema 1.5 records ownership and runtime/
+  effect gaps. Added bounded policy markers, source-ordered synthetic JSON/raw-file input cases,
+  typed results, partial-failure controls, local/VS Code previews and indexed ADR 0015. Legacy
+  behavior, core dependencies, actual execution consent and pending human review remain unchanged.
+
 - Opt-in workflow schema 1.5 supports the explicit `memory` target for a named final result.
   Assign-mode retention keeps the original Python object in the same-process Kedro catalog
   without JSON/pickle coercion or a result filepath. Plan/manifest schema 1.4 records mode,

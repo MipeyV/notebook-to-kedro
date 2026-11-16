@@ -2,7 +2,7 @@
 
 [Documentation index](../README.md)
 
-Status: implementation boundaries reviewed on 2026-11-15. The
+Status: implementation boundaries reviewed on 2026-11-16. The
 [proposed evolution](#proposed-evolution) is separate from current capabilities.
 
 ## Objective
@@ -79,6 +79,15 @@ type/artifact policy. The execution catalog can retain the object in process, wh
 operations still return only facts/files and `not_run` status. Typed JSON expectation coercion
 is rejected explicitly. [ADR 0014](../decisions/0014-memory-only-functional-results.md) records
 the lifetime boundary; durable results and application-owned artifact control remain separate.
+
+Workflow schema 1.6 adds exact flat-parameter artifact declarations and derives owners from
+single-use call wiring. The functional renderer composes a generated callable around each
+owning registered node, preserving business wrappers/source ASTs and source-order adapters.
+A bounded runtime policy marker and generated digest check working-root context and parameter
+drift before destination absence checks. Generation never creates the runtime directory or
+executes the application; original code owns writes, errors and partial contents. Plan/manifest
+schema 1.5 distinguishes declared ownership from unverified effects and no reservation.
+[ADR 0015](../decisions/0015-declared-runtime-artifact-destinations.md) records scope and race limits.
 
 Functional analysis schema 1.1 observes a terminal `return_expression` independently of
 named `outputs`. Called functions may return supported expressions directly; their ASTs stay

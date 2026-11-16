@@ -117,6 +117,10 @@ def render_workflow_regression_tests(
         report["missing_file_fixtures"] = [name for name, _ in plan.configuration.file_inputs]
     if plan.configuration.memory_output:
         report["missing_memory_result_expectations"] = True
+    if plan.configuration.artifact_destinations:
+        report["missing_artifact_expectations"] = [
+            name for name, _ in plan.configuration.artifact_destinations
+        ]
     files = {Path("regression-coverage.json"): json.dumps(report, sort_keys=True, indent=2) + "\n"}
     if contract is None:
         files[Path("TESTING.md")] = (
@@ -134,6 +138,11 @@ def render_workflow_regression_tests(
             files[Path("TESTING.md")] += (
                 "\nMemory-only results require explicit application-level expectations. "
                 "The JSON regression contract does not define typed result comparisons.\n"
+            )
+        if plan.configuration.artifact_destinations:
+            files[Path("TESTING.md")] += (
+                "\nRuntime artifacts require reviewed application-level expectations; "
+                "the JSON regression contract does not define artifact fixtures.\n"
             )
         return files
     metadata = {

@@ -154,6 +154,10 @@ def validate_regression_binding(
     contract: WorkflowRegressionContract, plan: FunctionalWorkflowPlan
 ) -> None:
     """Require exact input names and parameter overrides under the workflow's own schema."""
+    if plan.configuration.artifact_destinations:
+        raise WorkflowRegressionError(
+            "JSON regression contracts do not define runtime artifact expectations"
+        )
     if plan.configuration.memory_output:
         raise WorkflowRegressionError(
             "JSON regression contracts do not define typed memory-result expectations"
