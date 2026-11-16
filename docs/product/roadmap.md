@@ -42,7 +42,7 @@ Guided setup supports inspection before data wiring, and called helpers preserve
 expressions. A real workflow/I/O proposal now identifies independent loaders, frozen protocol,
 flat candidate configuration, typed domain objects and owned artifact writes. The flat candidate
 parameter slice and source-order join contract are implemented and exercised on paired synthetic
-workflows. The real proposal now plans three calls; no real project is generated or executed.
+workflows. That slice planned three calls from an in-memory real-project proposal.
 One explicitly declared regular Python package can now retain original imports, raw source and
 resources through schema 1.3. Supporting modules remain opaque; dependency/distribution metadata
 is not reconstructed. The real source inventory is captured read-only, and its absent orchestration
@@ -66,11 +66,17 @@ The explicitly authorized private real application copy now plans and generates 
 its two distributions install with compatible declared dependencies in a dedicated environment.
 Separately authorized loader checks now verify dataset fingerprint/version/asset against the
 protocol and inspect registered wiring and installed provenance. Git provenance reports the
-containing execution workspace's commit. Next define original-source Git provenance, review the
-prepared orchestration and establish scientific/runtime expectations for a scoped real
-trial. Durable result serializers, generated typed/
+containing execution workspace's commit. Explicit engine provenance now records the source
+context separately. Review the prepared orchestration and establish scientific/runtime expectations
+for a scoped real trial. Durable result serializers, generated typed/
 artifact expectations and broader effects remain separate further work.
 The setup guide records the remaining proposed acceptance contracts.
+An explicit provenance capture now binds the original source Git context, original/generated
+byte identities and installed versions from a chosen interpreter. A publication inventory and
+recomputed preparation lineage support that report. The private real capture binds 29 source
+files to 50 published files and observes 61 distributions with distinct source/execution commits.
+Next review the proposed orchestration and scientific expectations, then define the separately
+scoped validation trial and its reference to the captured provenance.
 A complete real-project conversion is not yet established. Optimization retains a separate
 acceptance contract.
 

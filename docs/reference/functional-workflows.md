@@ -604,6 +604,61 @@ both local projects. Adopting the proposed orchestration and approving runtime e
 separate review decisions. The decision is recorded in
 [ADR 0017](../decisions/0017-application-aware-workflow-preparation.md).
 
+## Original-source and installed-workflow provenance
+
+Application-aware generation now includes `generation-inventory.json` schema 1.0. It records
+every published text/copied file's SHA-256, byte size and origin, excluding the inventory itself.
+The existing workflow schemas retain their versions. Regenerate older application projects to
+obtain this publication witness before capturing provenance.
+
+Capture provenance explicitly from the original source root and the chosen installed environment.
+Use a workflow configuration that selects the original package, pyproject and input files.
+Its entrypoint can still be absent in that original module when a separately prepared adapter
+supplies orchestration. The operation recomputes the saved preparation and verifies the adapter
+against its original declaration and source facts.
+
+```sh
+notebook-to-kedro generate-workflow examples/functional_distribution/src/distribution_ml/workflow.py examples/functional_distribution/workflow.json generated/distribution_project --project-root .
+```
+
+After installing both local projects as described in the generated README, choose that
+environment's interpreter and create a new evidence directory.
+
+```sh
+notebook-to-kedro capture-workflow-provenance examples/functional_distribution/src/distribution_ml/workflow.py examples/functional_distribution/workflow.json generated/distribution_project generated/distribution_provenance --project-root . --python /path/to/installed/environment/python
+```
+
+The same entrypoint is available through `python -m notebook_to_kedro.cli`. Python callers use
+`capture_workflow_provenance(source, configuration, generated_project, output_path, *,
+project_root, python_executable)`, exported by the public API.
+
+The new `workflow-provenance.json` schema 1.0 records the original Git commit and clean/dirty
+status, selected package/application identities, verified original-to-generated copy bindings
+and the complete listed publication inventory. It also records the chosen interpreter and all
+observed distribution names/versions. Exactly one installed distribution must identify each
+original/generated name. Declared and observed versions are retained together, including any
+normalization difference. Package versions come from metadata observed in that interpreter.
+Runtime import/file selection has a separate validation scope.
+
+The report's `source.git` describes the explicit original root. `execution_directory_git` describes
+the generated working directory or records its unavailable status. Git status includes normal
+untracked entries and ignores submodule inspection. Original file hashes retain their own
+identity alongside that Git observation. Inherited Git environment overrides are cleared and
+fsmonitor hooks and optional locks are disabled for these read operations.
+
+Source/package/project/input drift, changed publication bytes and inconsistent prepared bindings
+block report publication. All selected identities are recaptured after interpreter observation.
+The shared writer requires a new contained report destination outside the protected package and
+generated project. Git probes use 15-second timeouts and the metadata probe 30 seconds. Reads of
+on-disk JSON evidence are bounded to 16 MiB per file. Capture verifies listed files, with
+post-generation additions and concurrent filesystem mutation beyond the final recapture remaining
+outside that snapshot.
+
+The report records pending review and `benchmark_execution` as `not_run`. A separately scoped
+trial can reference this evidence when comparing application and Kedro outputs. Original-source
+Git attribution then has an explicit reference even when application code reads ambient Git.
+The decision is recorded in [ADR 0018](../decisions/0018-explicit-workflow-provenance.md).
+
 ## Evidence and next work
 
 Trusted tests execute the paired committed fixtures and generated pipelines through real Kedro

@@ -27,6 +27,7 @@ Historical measurements retain their original corpus, runtime and limitations.
 | Declared runtime artifact destinations | Opt-in schema 1.6 binds up to eight new artifacts/<run_name> destinations to exact flat-parameter fields and their single consuming calls. The registered pipeline checks runtime values, project marker and absence before the owner. Application writes/exceptions/partial files remain owned; no reservation, cleanup, retry, effect sandbox or concurrency lock is supplied. |
 | Application distribution declarations | Schema 1.7 captures an explicitly selected pyproject, static requirements/extras/scripts and selected build/provenance files. Generation stages the original project under application/ for separate installation and links its exact distribution requirement. Plans/manifests use schema 1.6 with captured hashes and not_run build/resolution statuses. Trusted standard/editable-wheel installation, delivered regressions and Kedro CLI checks reuse locked development dependencies. Actual dependency resolution and real-project installation require environment-specific evidence. |
 | Application orchestration preparation | Separate preparation schema 1.1 captures original application metadata and selected project files, preserves its pyproject-relative package layout and adds the proposed adapter. Its manifest exposes original distribution facts and prepared paths with pending review. The copy can feed explicit workflow schema 1.7 conversion. Synthetic standard/editable-wheel installation tests exercise metadata, delivered tests and Kedro CLI after preparation. |
+| Workflow provenance capture | Application-aware generation publishes byte inventories. A separate API/CLI binds explicit original Git, source-copy identities, verified listed publication files and selected-interpreter distribution metadata in a new report. Prepared adapters are recomputed against original source. Review and benchmark status remain pending. Files added after generation and runtime import/result semantics require separate evidence. |
 
 Generation itself does not verify dependency installation, full DAG semantics or runtime behavior.
 The [explicit bootstrap check](../reference/generated-workflow-tests.md#fresh-environment-bootstrap)
@@ -79,7 +80,9 @@ fingerprint/version/asset and inspect the three registered nodes. Installed vers
 lockfile hash resolve through application provenance. The initial NumPy 2.5.5 binary was refused by
 Windows application control. Compatible versions already used by the engine tests enable these
 checks with NumPy 2.5.2, SciPy 1.18.0 and scikit-learn 1.9.0. Application Git provenance reports the
-containing execution workspace's commit, requiring an explicit original-source provenance contract.
+containing execution workspace's commit. The new explicit workflow provenance report records the
+original source commit and ambient execution commit in separate fields, binding 29 original files
+to 50 published files and observing 61 installed distributions in the private real capture.
 Scientific expectations and benchmark execution remain pending.
 
 The first file-reference input slice is now implemented and exercised on synthetic text/metadata

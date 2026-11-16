@@ -53,6 +53,7 @@ from notebook_to_kedro.semantic.workflow_preparation import (
     WorkflowPreparationDefinition,
     load_workflow_preparation_definition,
 )
+from notebook_to_kedro.workflow_provenance import capture_workflow_provenance
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -132,6 +133,7 @@ __all__ = [
     "analyze_functional_blocks_path",
     "analyze_notebook_path",
     "audit_conversion_source",
+    "capture_workflow_provenance",
     "create_semantic_planner",
     "generate_functional_kedro_project",
     "generate_kedro_project",

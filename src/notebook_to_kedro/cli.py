@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING
 
 from notebook_to_kedro.api import (
     analyze_functional_blocks_path,
+    capture_workflow_provenance,
     create_semantic_planner,
     generate_functional_kedro_project,
     generate_kedro_project,
@@ -109,6 +110,7 @@ def main(argv: list[str] | None = None) -> int:
         handlers = {
             "project": _project_operation,
             "prepare-workflow": _prepare_workflow,
+            "capture-workflow-provenance": _capture_workflow_provenance,
             "inspect-blocks": _functional_workflow,
             "plan-workflow": _functional_workflow,
             "generate-workflow": _functional_workflow,
@@ -245,6 +247,24 @@ def _add_workflow_parsers(subparsers: argparse._SubParsersAction[argparse.Argume
     preparation.add_argument(
         "--output-dir", type=Path, help="publish a new review copy; otherwise preview only"
     )
+    provenance = subparsers.add_parser(
+        "capture-workflow-provenance",
+        help="bind explicit source Git, generated files and installed versions",
+    )
+    provenance.add_argument(
+        "source", type=Path, help="original Python module in the selected package"
+    )
+    provenance.add_argument(
+        "configuration",
+        type=Path,
+        help="workflow JSON selecting the original application and inputs",
+    )
+    provenance.add_argument(
+        "generated_project", type=Path, help="published application-aware Kedro project"
+    )
+    provenance.add_argument("output_dir", type=Path, help="new directory for the provenance report")
+    provenance.add_argument("--project-root", type=Path, required=True)
+    provenance.add_argument("--python", type=Path, required=True, dest="python_executable")
     for command in ("plan-workflow", "generate-workflow"):
         parser = subparsers.add_parser(
             command, help="plan or generate an explicit linear functional workflow"
@@ -261,6 +281,21 @@ def _add_workflow_parsers(subparsers: argparse._SubParsersAction[argparse.Argume
                 type=Path,
                 help="explicit JSON expectations; never inferred by executing source",
             )
+
+
+def _capture_workflow_provenance(args: argparse.Namespace) -> int:
+    paths = capture_workflow_provenance(
+        args.source,
+        load_functional_workflow_configuration(args.configuration),
+        args.generated_project,
+        args.output_dir,
+        project_root=args.project_root,
+        python_executable=args.python_executable,
+    )
+    sys.stdout.write(
+        json.dumps({"status": "captured", "files": [str(path) for path in paths]}, indent=2) + "\n"
+    )
+    return 0
 
 
 def _prepare_workflow(args: argparse.Namespace) -> int:

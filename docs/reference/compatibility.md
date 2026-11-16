@@ -85,6 +85,15 @@ standard/editable-wheel checks cover the composition. The
 [application preparation contract](functional-workflows.md#application-projects-in-preparation-schema-11)
 defines review and installation scope.
 
+Application-aware workflow generation now emits a schema 1.0 published-file inventory. The
+separate capture-workflow-provenance API/CLI requires Git at the original source root and a
+selected interpreter with the declared original/generated distributions installed. It verifies
+listed bytes and source-copy bindings, recomputes prepared lineage and captures installed
+metadata in report schema 1.0. Standard/editable synthetic installations are exercised. Original
+source, ambient Git, metadata observation and future runtime acceptance retain their own scopes.
+The [provenance contract](functional-workflows.md#original-source-and-installed-workflow-provenance)
+defines limits and required regeneration for older published projects.
+
 The [local operation layer](local-operations.md) configures these same deterministic entrypoints
 through typed inspection, new-file preview and generation requests. It adds an explicit contained
 working root and local JSON settings, without broadening source/library support or executing code.

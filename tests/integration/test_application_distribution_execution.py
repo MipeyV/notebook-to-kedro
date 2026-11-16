@@ -18,6 +18,7 @@ import pytest
 
 from notebook_to_kedro import (
     ApplicationProject,
+    capture_workflow_provenance,
     generate_functional_kedro_project,
     load_functional_workflow_configuration,
     load_workflow_preparation_definition,
@@ -171,7 +172,7 @@ def test_built_application_and_generated_wheels_install_and_run_with_real_metada
             "-I",
             "-m",
             "venv",
-            "--copies",
+            "--copies" if os.name == "nt" else "--symlinks",
             "--without-pip",
             str(environment),
         ],
@@ -205,6 +206,21 @@ def test_built_application_and_generated_wheels_install_and_run_with_real_metada
         [str(python), "-I", "-c", _PROBE, str(project), lock_sha256, str(editable)], project
     )
     assert '"metadata_version": "1.2.3"' in probe.stdout
+    evidence = capture_workflow_provenance(
+        EXAMPLE / "src/distribution_ml/workflow.py",
+        load_functional_workflow_configuration(EXAMPLE / "workflow.json"),
+        project,
+        tmp_path / "provenance",
+        project_root=ROOT,
+        python_executable=python,
+    )
+    captured = json.loads(evidence[0].read_text())
+    assert captured["source"]["lineage"] == (
+        "recomputed_preparation_proposal" if prepared else "original_package"
+    )
+    installed = {item["name"]: item["version"] for item in captured["environment"]["distributions"]}
+    assert installed["synthetic-distribution-example"] == "1.2.3"
+    assert installed["distribution-case"] == "0.1.0"
     shipped = _run(
         [
             str(python),
