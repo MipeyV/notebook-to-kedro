@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.1",
+  "source_package": "examples/functional_distribution/src/distribution_ml",
+  "entrypoint": "prepared_workflow",
+  "arguments": ["raw", "factor"],
+  "calls": [
+    {"function": "report", "arguments": {"raw": "raw", "factor": "factor"}, "output": "result"}
+  ],
+  "output": "result",
+  "application_project": {
+    "pyproject": "examples/functional_distribution/pyproject.toml",
+    "files": ["application.lock", "input.json"]
+  }
+}

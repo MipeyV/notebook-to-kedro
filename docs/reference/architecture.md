@@ -98,6 +98,14 @@ Plan/manifest schema 1.6 records build/resolution as `not_run`. Trusted wheel/ed
 installation tests reuse locked runtime dependencies. The decisions and installation-layout
 boundary are recorded in [ADR 0016](../decisions/0016-explicit-application-distributions.md).
 
+Preparation schema 1.1 composes original application capture with explicit orchestration.
+It preserves the pyproject-relative package layout and selected original project files in a new
+review copy, with an added forwarding adapter. Its manifest binds original distribution evidence
+and prepared paths alongside original/proposed source facts. Subsequent workflow schema 1.7
+conversion uses the actual saved adapter and explicit I/O choices. Static recapture and the shared
+writer guard publication. [ADR 0017](../decisions/0017-application-aware-workflow-preparation.md)
+records the composition and review boundary.
+
 Functional analysis schema 1.1 observes a terminal `return_expression` independently of
 named `outputs`. Called functions may return supported expressions directly; their ASTs stay
 in the source module. The entrypoint's explicit call assignments own dataset naming and linear

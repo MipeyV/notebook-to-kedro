@@ -139,6 +139,11 @@ operation: `prepare-workflow SOURCE DEFINITION` previews explicitly declared cal
 source facts stay separate from the synthesized proposal. Persistent I/O and artifact policies
 still need explicit contracts before complete conversion.
 
+Preparation schema 1.1 also preserves a selected original application pyproject and project files,
+with the adapter in the original package layout. This review copy can feed the schema 1.7
+converter with explicit I/O settings. See the
+[application preparation contract](docs/reference/functional-workflows.md#application-projects-in-preparation-schema-11).
+
 Use an explicit [local project configuration](docs/reference/local-operations.md) to select the
 existing notebook or functional engine and reuse settings across operations:
 

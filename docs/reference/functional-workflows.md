@@ -569,6 +569,41 @@ Output catalog entries are added after graph rendering, so a persistent final ou
 mistaken for a pre-existing catalog input and renamed as a rewrite. The shared renderer and
 writer retain validation, compile preflight, profile compatibility and no-overwrite publication.
 
+## Application projects in preparation schema 1.1
+
+Preparation schema 1.1 adds a required `application_project` field using the same
+`ApplicationProject` selection as workflow schema 1.7. Its pyproject is relative to `project_root`
+and its explicit `files` list is relative to the pyproject directory. The
+[synthetic preparation definition](../../examples/functional_distribution/preparation.json)
+selects original metadata, a provenance fixture and the input needed for subsequent conversion.
+
+```sh
+notebook-to-kedro prepare-workflow examples/functional_distribution/src/distribution_ml/workflow.py examples/functional_distribution/preparation.json --project-root .
+notebook-to-kedro prepare-workflow examples/functional_distribution/src/distribution_ml/workflow.py examples/functional_distribution/preparation.json --project-root . --output-dir generated/prepared_distribution
+```
+
+The new review copy is the selected application project. It contains the original pyproject,
+readme/license resources, selected additional files and source package in its original relative
+layout. For example, `lib/package` retains that path. The new adapter sits inside the package.
+Selected project files already captured in the source package are copied once. Target collisions
+with `workflow_adapter.py`, `REVIEW.md` or `workflow-preparation.json` block publication.
+
+Preparation manifest schema 1.1 includes original `application_distribution` declarations and
+their digest, alongside source facts, call declarations and synthesized adapter facts. Its
+`prepared_application` object gives pyproject/source-package/adapter paths relative to the review
+copy. Project-file and source inventories are recaptured before publication. Review status starts
+as `unreviewed_proposal`, with execution/build/resolution `not_run`. Persistent I/O and artifact
+policy await an explicit conversion configuration.
+
+To convert the prepared application, use the new adapter as the actual source and configure
+workflow schema 1.7 relative to that copy. Select `pyproject.toml`, the prepared package path and
+explicit inputs, parameters, outputs and artifact settings. Select the preparation manifest and
+`REVIEW.md` as additional application files to carry the original/proposed provenance into the
+generated project's `application/` directory. Follow generated installation instructions for
+both local projects. Adopting the proposed orchestration and approving runtime expectations are
+separate review decisions. The decision is recorded in
+[ADR 0017](../decisions/0017-application-aware-workflow-preparation.md).
+
 ## Evidence and next work
 
 Trusted tests execute the paired committed fixtures and generated pipelines through real Kedro

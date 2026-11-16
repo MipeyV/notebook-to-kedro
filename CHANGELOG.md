@@ -29,6 +29,14 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Preparation schema 1.1 selects an original application project and preserves its metadata,
+  additional files and pyproject-relative source layout alongside the proposed adapter. Manifest
+  schema 1.1 binds original distribution facts and prepared paths. Added static recapture,
+  collision/deduplication checks, application review instructions and a synthetic preparation
+  example that converts through workflow schema 1.7. Standard/editable-wheel installation tests
+  exercise metadata, delivered regressions and Kedro CLI behavior after preparation. ADR 0017
+  records the composition and review boundary.
+
 - Opt-in workflow schema 1.7 captures an explicitly selected application pyproject, static
   dependency/extras/script declarations and selected project files. Generation stages the original
   application layout under application/ for separate installation and declares its exact

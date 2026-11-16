@@ -8,6 +8,7 @@ from pathlib import Path, PurePosixPath
 from typing import cast
 
 from notebook_to_kedro.exceptions import FunctionalWorkflowError
+from notebook_to_kedro.semantic.application_project import ApplicationProject
 from notebook_to_kedro.semantic.functional_config import (
     MAX_CONFIGURATION_BYTES,
     _public_name,
@@ -58,10 +59,11 @@ class WorkflowPreparationDefinition:
     calls: tuple[WorkflowCall, ...]
     output: str
     schema_version: str = "1.0"
+    application_project: ApplicationProject | None = None
 
     def __post_init__(self) -> None:
         if (
-            self.schema_version != "1.0"
+            self.schema_version not in ("1.0", "1.1")
             or not isinstance(self.source_package, str)
             or not self.source_package
             or PurePosixPath(self.source_package).is_absolute()
@@ -73,8 +75,13 @@ class WorkflowPreparationDefinition:
             or not _public_name(self.output)
         ):
             raise FunctionalWorkflowError(
-                "Preparation requires schema 1.0, a relative package and public names"
+                "Preparation requires schema 1.0 or 1.1, a relative package and public names"
             )
+        if self.schema_version == "1.1":
+            if not isinstance(self.application_project, ApplicationProject):
+                raise FunctionalWorkflowError("Preparation schema 1.1 requires application_project")
+        elif self.application_project is not None:
+            raise FunctionalWorkflowError("Application preparation requires schema 1.1")
         if (
             not isinstance(self.arguments, tuple)
             or len(self.arguments) > MAX_PREPARATION_ITEMS
@@ -91,6 +98,10 @@ class WorkflowPreparationDefinition:
     def to_dict(self) -> dict[str, object]:
         """Return fresh JSON values for review, without importing source."""
         data = asdict(self)
+        if self.application_project is None:
+            data.pop("application_project")
+        else:
+            data["application_project"] = self.application_project.to_dict()
         data["arguments"] = list(self.arguments)
         data["calls"] = [
             {"function": call.function, "arguments": dict(call.arguments), "output": call.output}
@@ -101,9 +112,12 @@ class WorkflowPreparationDefinition:
     @classmethod
     def from_dict(cls, data: object) -> WorkflowPreparationDefinition:
         """Reject unknown fields and freeze explicitly declared calls."""
+        fields = _FIELDS
+        if isinstance(data, dict) and data.get("schema_version") == "1.1":
+            fields = fields | {"application_project"}
         if (
             not isinstance(data, dict)
-            or data.keys() != _FIELDS
+            or data.keys() != fields
             or not isinstance(data["arguments"], list)
             or not isinstance(data["calls"], list)
             or any(
@@ -124,6 +138,9 @@ class WorkflowPreparationDefinition:
             ),
             data["output"],
             data["schema_version"],
+            ApplicationProject.from_dict(data["application_project"])
+            if "application_project" in data
+            else None,
         )
 
 
