@@ -144,6 +144,11 @@ with the adapter in the original package layout. This review copy can feed the s
 converter with explicit I/O settings. See the
 [application preparation contract](docs/reference/functional-workflows.md#application-projects-in-preparation-schema-11).
 
+Use `capture-workflow-provenance` after application-aware generation and installation to bind
+the original source Git commit, published file hashes and selected interpreter's installed
+versions in a new report. The source and execution-directory Git contexts have explicit fields.
+See the [workflow provenance contract](docs/reference/functional-workflows.md#original-source-and-installed-workflow-provenance).
+
 Use an explicit [local project configuration](docs/reference/local-operations.md) to select the
 existing notebook or functional engine and reuse settings across operations:
 

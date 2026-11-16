@@ -20,6 +20,10 @@ from notebook_to_kedro.generation.kedro.generator import (
     ORDERING_INPUT_ARGUMENT,
     render_kedro_project,
 )
+from notebook_to_kedro.generation.kedro.inventory import (
+    GENERATION_INVENTORY,
+    render_generation_inventory,
+)
 from notebook_to_kedro.generation.kedro.profiles import DEFAULT_KEDRO_PROFILE
 from notebook_to_kedro.generation.kedro.regression import render_workflow_regression_tests
 from notebook_to_kedro.generation.writer import write_project
@@ -312,4 +316,6 @@ def render_functional_workflow(
             '\n[project.optional-dependencies]\ntest = ["pytest>=9,<10"]\n'
             '\n[tool.pytest.ini_options]\npythonpath = ["src"]\ntestpaths = ["tests"]\n'
         )
+    if plan.application_distribution is not None:
+        files[GENERATION_INVENTORY] = render_generation_inventory(files, copies)
     return files, copies

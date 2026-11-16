@@ -40,6 +40,40 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-11-16 - Explicit original-source and installed-workflow provenance
+
+### Completed
+
+- Verified PR 98 merged with successful CI and started a dedicated branch from updated main.
+- Added application-aware publication inventories with raw hashes, byte sizes and generated/
+  copied origins. Added a separate capture-workflow-provenance API/CLI requiring explicit
+  original source/configuration, generated project, interpreter and a new evidence destination.
+- Captured original Git HEAD/status with explicit root and cleared Git environment overrides.
+  Disabled fsmonitor and optional locks for these reads. Recorded ambient execution Git separately.
+- Verified listed published bytes and original package/project/input bindings. Recomputed prepared
+  adapters against their original source and declarations, preserving keyword order from ordered
+  step bindings in existing serialized preparations. Recaptured identities before publication.
+- Observed installed distribution versions through an isolated standard-library metadata probe
+  and retained declared/observed versions for the selected original/generated distributions.
+  Preserved pending review and benchmark status in the new report and documented its limits in
+  ADR 0018.
+- Exercised original/prepared synthetic standard/editable installations, distinct Git repositories,
+  dirty contexts, byte/binding drift, interpreter metadata, destination boundaries and new-file CLI.
+- Verified 2,837 offline tests on Windows/Python 3.12.14 with 100% coverage of 9,751 statements
+  and 2,928 branches. Passed Ruff, strict mypy across 210 files, 74 documentation checks,
+  source/wheel builds and the VS Code 1.145.3 host. Built provenance/CLI modules match source
+  bytes and nbformat remains the sole engine runtime requirement. Regression checks cover a
+  missing JSON input and retaining the selected interpreter's virtual-environment path.
+- Reused the user's existing private-copy, installation and read-only authorization for a fresh
+  private real-project copy. Its report binds 29 original files to 50 published files and observes
+  61 installed distributions. Verified editable installation locations and compatible dependencies.
+  The original source Git commit and containing workspace commit are distinct report fields.
+
+### Next step
+
+- Review the proposed orchestration and scientific expectations, then scope a validation-only
+  benchmark trial that references the captured source/generation/environment evidence.
+
 ## 2026-11-16 - Authorized read-only checks of the installed real-project copy
 
 ### Completed

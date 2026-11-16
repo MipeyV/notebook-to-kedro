@@ -106,6 +106,14 @@ conversion uses the actual saved adapter and explicit I/O choices. Static recapt
 writer guard publication. [ADR 0017](../decisions/0017-application-aware-workflow-preparation.md)
 records the composition and review boundary.
 
+Application-aware rendering also publishes a file identity inventory. The separate explicit
+workflow-provenance operation binds it to current original package/project/input bytes, the
+original Git context and installed metadata from a selected isolated interpreter. Prepared
+adapter lineage is recomputed against source through the existing renderer. Source Git and
+ambient execution Git have separate report fields. Static capture, installed observations and
+future benchmark execution retain distinct evidence scopes.
+[ADR 0018](../decisions/0018-explicit-workflow-provenance.md) records the snapshot boundary.
+
 Functional analysis schema 1.1 observes a terminal `return_expression` independently of
 named `outputs`. Called functions may return supported expressions directly; their ASTs stay
 in the source module. The entrypoint's explicit call assignments own dataset naming and linear

@@ -33,6 +33,10 @@ class FunctionalWorkflowError(ProjectGenerationError):
     """Raised when explicit workflow wiring cannot be converted faithfully."""
 
 
+class WorkflowProvenanceError(ProjectGenerationError):
+    """Raised when source, generated files or runtime metadata cannot be bound safely."""
+
+
 class WorkflowRegressionError(FunctionalWorkflowError):
     """Raised for invalid or incompatible explicitly supplied test expectations."""
 

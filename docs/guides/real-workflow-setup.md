@@ -232,6 +232,15 @@ expectations require later evidence.
 
 ## Next contracts for review and durable results
 
+Use the separate explicit provenance capture before choosing a benchmark trial. It verifies the
+new publication inventory, recomputes the prepared adapter against original source and records
+the original Git context, ambient execution Git and installed versions from the chosen interpreter.
+The private real report now binds 29 original files to 50 published files and observes 61
+installed distributions. Its original source commit differs from the containing workspace's
+commit. The report retains pending review and benchmark execution status. A later trial can
+reference this report when associating application outputs with their source/environment evidence.
+See the [provenance contract](../reference/functional-workflows.md#original-source-and-installed-workflow-provenance).
+
 An explicitly authorized private review copy now exercises preparation schema 1.1 and subsequent
 workflow schema 1.7 generation for the selected real source. It retains the original 23 package
 files plus the proposed adapter. Its plan has three calls and one ordering edge. Both local
@@ -242,8 +251,8 @@ fingerprint/version/asset against the frozen protocol. Three registered nodes, i
 and the source-relative lockfile hash are also checked. Windows refused the initial NumPy 2.5.5
 binary. The successful runtime uses compatible NumPy 2.5.2, SciPy 1.18.0 and scikit-learn 1.9.0,
 matching versions already used by the engine tests. The application reports the containing
-execution workspace's Git commit. Define original-source provenance before relying on that field
-for an actual run. Scientific/runtime expectations and benchmark execution have separate scope.
+execution workspace's Git commit. Use the engine report's explicit source.git field for original
+source attribution. Scientific/runtime expectations and benchmark execution have separate scope.
 
 The following distinguishes the implemented input slice from proposed remaining boundaries;
 it is not permission to execute a real run. Preserve application domain loaders rather than recreating
