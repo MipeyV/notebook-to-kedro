@@ -2,6 +2,7 @@
 
 from notebook_to_kedro.api import (
     DEFAULT_KEDRO_PROFILE,
+    ApplicationProject,
     ArtifactDestination,
     ConversionSourceAudit,
     FileReferenceInput,
@@ -47,6 +48,7 @@ __version__ = "0.1.0"
 
 __all__ = [
     "DEFAULT_KEDRO_PROFILE",
+    "ApplicationProject",
     "ArtifactDestination",
     "ConversionSourceAudit",
     "FileReferenceInput",

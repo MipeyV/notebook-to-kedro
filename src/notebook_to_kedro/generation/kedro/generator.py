@@ -80,6 +80,7 @@ def render_kedro_project(  # noqa: PLR0913
     source_facts: NotebookFacts | None = None,
     order_after: Mapping[str, str] | None = None,
     source_package_name: str | None = None,
+    application_requirement: str | None = None,
 ) -> tuple[dict[Path, str], tuple[tuple[Path, Path], ...]]:
     """Validate and render shared Kedro scaffolding without publishing or executing it."""
     if source_facts is not None:
@@ -99,7 +100,11 @@ def render_kedro_project(  # noqa: PLR0913
     package_root = Path("src") / package_name
     pipeline_root = package_root / "pipelines" / profile.pipeline_name
     files = {
-        Path("pyproject.toml"): _pyproject(package_name, source_package_name),
+        Path("pyproject.toml"): _pyproject(
+            package_name,
+            source_package_name if application_requirement is None else None,
+            application_requirement,
+        ),
         Path("conf/local/.gitkeep"): "",
         package_root / "__init__.py": _package_init(),
         package_root / "settings.py": _settings(),
@@ -133,16 +138,23 @@ def render_kedro_project(  # noqa: PLR0913
     return files, copies
 
 
-def _pyproject(package_name: str, source_package_name: str | None = None) -> str:
+def _pyproject(
+    package_name: str,
+    source_package_name: str | None = None,
+    application_requirement: str | None = None,
+) -> str:
     package_paths = [f"src/{package_name}"]
     if source_package_name is not None:
         package_paths.append(f"src/{source_package_name}")
+    application_dependency = (
+        "" if application_requirement is None else f"    {json.dumps(application_requirement)},\n"
+    )
     return f"""[project]
 name = "{package_name.replace("_", "-")}"
 version = "0.1.0"
 requires-python = ">=3.11,<3.14"
 dependencies = [
-    "kedro>=1.5,<2",
+{application_dependency}    "kedro>=1.5,<2",
     "kedro-datasets[pandas-csvdataset]>=8,<9",
     "pandas>=2.2,<4",
     "scikit-learn>=1.7,<2",

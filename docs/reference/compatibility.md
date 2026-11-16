@@ -66,6 +66,16 @@ independent. Plan/manifest schema 1.5 records ownership/check gaps; analysis/loc
 unchanged. Broad artifact layouts, typed/artifact generated comparators and dependency metadata
 are separate work; no real application execution follows from configuration.
 
+Workflow schema 1.7 captures static PEP 621 application declarations from an explicitly selected
+pyproject, including requirements, extras, scripts and selected build/provenance resources. It
+stages the original project and source layout under `application/` for separate installation,
+with an exact application dependency in the generated Kedro distribution. Metadata/file drift and
+normalized distribution-name collisions block rendering. Plans/manifests use schema 1.6. The
+synthetic wheel/editable-wheel checks reuse locked runtime dependencies and exercise metadata,
+resources, shipped regressions and CLI execution. Actual backend installability and fresh
+dependency resolution require environment-specific evidence. The contract is documented under
+[application distribution](functional-workflows.md#application-distribution-in-schema-17).
+
 The [local operation layer](local-operations.md) configures these same deterministic entrypoints
 through typed inspection, new-file preview and generation requests. It adds an explicit contained
 working root and local JSON settings, without broadening source/library support or executing code.

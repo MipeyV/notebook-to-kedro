@@ -8,11 +8,13 @@ from dataclasses import asdict
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from notebook_to_kedro.analysis.application_project import capture_application_project
 from notebook_to_kedro.analysis.file_inputs import capture_file_references
 from notebook_to_kedro.analysis.functional import analyze_functional_blocks
 from notebook_to_kedro.analysis.functional_sources import analyze_functional_blocks_path
 from notebook_to_kedro.analysis.source_packages import capture_source_package
 from notebook_to_kedro.exceptions import FunctionalWorkflowError
+from notebook_to_kedro.generation.kedro.application_project import render_application_project
 from notebook_to_kedro.generation.kedro.artifacts import render_artifact_policy
 from notebook_to_kedro.generation.kedro.generator import (
     ORDERING_INPUT_ARGUMENT,
@@ -52,6 +54,11 @@ def plan_functional_workflow_path(
         configuration,
         source_package=package,
         file_inputs=capture_file_references(root, configuration.file_inputs),
+        application_distribution=None
+        if configuration.application_project is None
+        else capture_application_project(
+            root, configuration.application_project, str(configuration.source_package)
+        ),
     )
 
 
@@ -132,21 +139,14 @@ def generate_functional_kedro_project(  # noqa: PLR0913
     return write_project(Path(output_path), files, copies)
 
 
-def render_functional_workflow(
-    plan: FunctionalWorkflowPlan,
-    *,
-    root: Path,
-    package_name: str,
-    architecture_profile: KedroArchitectureProfile | None = None,
-    regression_contract: WorkflowRegressionContract | None = None,
-) -> tuple[dict[Path, str], tuple[tuple[Path, Path], ...]]:
-    """Render an internally recomputed workflow plan without publication or execution."""
+def _validate_captured_plan(plan: FunctionalWorkflowPlan, root: Path) -> None:
     if (
         plan_functional_workflow(
             plan.analysis,
             plan.configuration,
             source_package=plan.source_package,
             file_inputs=plan.file_inputs,
+            application_distribution=plan.application_distribution,
         )
         != plan
     ):
@@ -159,6 +159,28 @@ def render_functional_workflow(
         if capture_source_package(root, source, package.root) != package:
             raise FunctionalWorkflowError("Source package differs from the captured inventory")
     configuration = plan.configuration
+    if (
+        configuration.application_project is not None
+        and capture_application_project(
+            root, configuration.application_project, str(configuration.source_package)
+        )
+        != plan.application_distribution
+    ):
+        raise FunctionalWorkflowError("Application project differs from the captured inventory")
+
+
+def render_functional_workflow(
+    plan: FunctionalWorkflowPlan,
+    *,
+    root: Path,
+    package_name: str,
+    architecture_profile: KedroArchitectureProfile | None = None,
+    regression_contract: WorkflowRegressionContract | None = None,
+) -> tuple[dict[Path, str], tuple[tuple[Path, Path], ...]]:
+    """Render an internally recomputed workflow plan without publication or execution."""
+    _validate_captured_plan(plan, root)
+    package = plan.source_package
+    configuration = plan.configuration
     conversion = _conversion_plan(plan, root, package_name)
     # Always resolve generated wrapper names, including default-profile compatibility checks.
     profile = DEFAULT_KEDRO_PROFILE if architecture_profile is None else architecture_profile
@@ -168,6 +190,9 @@ def render_functional_workflow(
         architecture_profile=profile,
         order_after=dict(plan.order_after),
         source_package_name=None if package is None else package.name,
+        application_requirement=None
+        if plan.application_distribution is None
+        else f"{plan.application_distribution.name}=={plan.application_distribution.version}",
     )
     if package is None:
         combined = "\n\n".join(unit.source for unit in plan.analysis.sources)
@@ -180,14 +205,20 @@ def render_functional_workflow(
         source_target = Path("src") / package_name / "workflow_source.py"
         files[source_target] = module_source
     else:
-        source_target = Path("src") / package.name / package.source_file
+        package_target = (
+            Path("src") / package.name
+            if plan.application_distribution is None
+            else Path("application") / plan.application_distribution.package_root
+        )
+        source_target = package_target / package.source_file
         copies = (
             *copies,
             *(
-                (root / package.root / item.path, Path("src") / package.name / item.path)
+                (root / package.root / item.path, package_target / item.path)
                 for item in package.files
             ),
         )
+    copies = render_application_project(plan, root, package_name, files, copies)
     catalog = {
         dataset.name: {"type": dataset.type, "filepath": dataset.filepath}
         for dataset in conversion.catalog_datasets
@@ -258,11 +289,11 @@ def render_functional_workflow(
         ],
         "profile_sha256": profile.sha256,
     }
-    if configuration.schema_version == "1.6":
+    if configuration.schema_version in ("1.6", "1.7"):
         manifest["artifact_policy_sha256"] = policy_digest
-    if configuration.schema_version in ("1.4", "1.5", "1.6"):
+    if configuration.schema_version in ("1.4", "1.5", "1.6", "1.7"):
         manifest["file_reference_destinations"] = reference_destinations
-    if configuration.schema_version in ("1.2", "1.3", "1.4", "1.5", "1.6"):
+    if configuration.schema_version in ("1.2", "1.3", "1.4", "1.5", "1.6", "1.7"):
         steps = {step.id: step for step in plan.steps}
         manifest["ordering_inputs"] = [
             {

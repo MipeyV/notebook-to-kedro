@@ -5,6 +5,7 @@ from __future__ import annotations
 import ast
 import json
 from dataclasses import asdict, dataclass
+from pathlib import PurePosixPath
 from typing import TYPE_CHECKING, cast
 
 from notebook_to_kedro.analysis.functional import analyze_functional_blocks
@@ -12,6 +13,7 @@ from notebook_to_kedro.exceptions import FunctionalWorkflowError
 from notebook_to_kedro.ir.functional import BlockSpan
 
 if TYPE_CHECKING:
+    from notebook_to_kedro.ir.application_project import ApplicationDistribution
     from notebook_to_kedro.ir.file_inputs import FileReferenceInventory
     from notebook_to_kedro.ir.functional import FunctionalAnalysis, FunctionalBlock
     from notebook_to_kedro.ir.source_package import SourcePackage
@@ -40,11 +42,12 @@ class FunctionalWorkflowPlan:
     steps: tuple[FunctionalWorkflowStep, ...]
     source_package: SourcePackage | None = None
     file_inputs: tuple[FileReferenceInventory, ...] = ()
+    application_distribution: ApplicationDistribution | None = None
 
     @property
     def order_after(self) -> tuple[tuple[str, str], ...]:
         """Declare missing adjacent-call dependencies in the explicit source-order mode."""
-        if self.configuration.schema_version not in ("1.2", "1.3", "1.4", "1.5", "1.6"):
+        if self.configuration.schema_version not in ("1.2", "1.3", "1.4", "1.5", "1.6", "1.7"):
             return ()
         return tuple(
             (current.id, previous.id)
@@ -60,7 +63,7 @@ class FunctionalWorkflowPlan:
             "configuration": self.configuration.to_dict(),
             "steps": [asdict(step) for step in self.steps],
         }
-        if self.configuration.schema_version in ("1.2", "1.3", "1.4", "1.5", "1.6"):
+        if self.configuration.schema_version in ("1.2", "1.3", "1.4", "1.5", "1.6", "1.7"):
             payload["schema_version"] = "1.1"
             payload["ordering"] = {
                 "policy": "source_order",
@@ -73,10 +76,10 @@ class FunctionalWorkflowPlan:
             payload["schema_version"] = "1.2"
             payload["source_package"] = self.source_package.to_dict()
             payload["source_package_sha256"] = self.source_package.sha256
-        if self.configuration.schema_version in ("1.4", "1.5", "1.6"):
+        if self.configuration.schema_version in ("1.4", "1.5", "1.6", "1.7"):
             payload["schema_version"] = "1.3"
             payload["file_inputs"] = [item.to_dict() for item in self.file_inputs]
-        if self.configuration.schema_version in ("1.5", "1.6"):
+        if self.configuration.schema_version in ("1.5", "1.6", "1.7"):
             payload["schema_version"] = "1.4"
             payload["result_boundary"] = {
                 "dataset": self.configuration.outputs[0][0],
@@ -87,7 +90,7 @@ class FunctionalWorkflowPlan:
                 if self.configuration.artifact_destinations
                 else "not_defined",
             }
-        if self.configuration.schema_version == "1.6":
+        if self.configuration.schema_version in ("1.6", "1.7"):
             payload["schema_version"] = "1.5"
             payload["artifact_policy"] = {
                 "mode": "check_before_owner_call"
@@ -98,6 +101,10 @@ class FunctionalWorkflowPlan:
                 "effect_completeness": "not_verified",
                 "reservation": "not_performed",
             }
+        if self.application_distribution is not None:
+            payload["schema_version"] = "1.6"
+            payload["application_distribution"] = self.application_distribution.to_dict()
+            payload["application_distribution_sha256"] = self.application_distribution.sha256
         return json.dumps(payload, sort_keys=True, indent=2) + "\n"
 
     def artifact_bindings(self) -> list[dict[str, str]]:
@@ -199,9 +206,25 @@ def plan_functional_workflow(
     *,
     source_package: SourcePackage | None = None,
     file_inputs: tuple[FileReferenceInventory, ...] = (),
+    application_distribution: ApplicationDistribution | None = None,
 ) -> FunctionalWorkflowPlan:
     """Recompute facts and require single-use data flow with explicit call-order semantics."""
     _validate_package_context(analysis, configuration, source_package)
+    if configuration.application_project is not None:
+        if (
+            application_distribution is None
+            or application_distribution.pyproject != configuration.application_project.pyproject
+            or (
+                PurePosixPath(application_distribution.pyproject).parent
+                / application_distribution.package_root
+            ).as_posix()
+            != configuration.source_package
+        ):
+            raise FunctionalWorkflowError("Workflow requires matching application project context")
+    elif application_distribution is not None:
+        raise FunctionalWorkflowError(
+            "Application metadata requires application_project configuration"
+        )
     if tuple(
         (item.argument, tuple(file.path for file in item.files)) for item in file_inputs
     ) != tuple((name, (value.path, *value.sidecars)) for name, value in configuration.file_inputs):
@@ -236,7 +259,7 @@ def plan_functional_workflow(
         reusable_parameters={
             name for name, value in configuration.parameters if not isinstance(value, tuple)
         },
-        source_order=configuration.schema_version in ("1.2", "1.3", "1.4", "1.5", "1.6"),
+        source_order=configuration.schema_version in ("1.2", "1.3", "1.4", "1.5", "1.6", "1.7"),
     )
     if any(
         sum(destination.parameter in {value for _, value in step.inputs} for step in steps) != 1
@@ -245,7 +268,9 @@ def plan_functional_workflow(
         raise FunctionalWorkflowError(
             "Each artifact mapping must be consumed by exactly one workflow call"
         )
-    return FunctionalWorkflowPlan(analysis, configuration, steps, source_package, file_inputs)
+    return FunctionalWorkflowPlan(
+        analysis, configuration, steps, source_package, file_inputs, application_distribution
+    )
 
 
 def plan_functional_steps(

@@ -40,6 +40,41 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-11-16 - Explicit original application distribution capture
+
+### Completed
+
+- Verified PR 96 merged with successful CI, synchronized main and started a dedicated branch.
+- Added workflow schema 1.7 application-project selection, immutable static distribution facts
+  and source/file identity binding. Preserved raw pyproject metadata, original source layout,
+  declared readme/license resources and explicitly selected build/provenance files.
+- Staged the original project under application/ through the shared writer and linked its exact
+  name/version requirement from the generated Kedro distribution. Added normalized distribution
+  collision checks, metadata recapture and generated installation instructions.
+- Exercised trusted standard/editable application wheels and generated wheels through offline
+  installation, real metadata/resource lookup, delivered node/pipeline regressions and Kedro CLI
+  execution. Temporary environments reuse locked development dependencies through a site path.
+- Extended local-operation and actual VS Code host previews for application files and manifest
+  declarations. Recorded the architecture and installation boundary in ADR 0016.
+- Verified 2,760 offline tests on Windows/Python 3.12.14 with 100% coverage of 9,533 statements
+  and 2,850 branches. Passed Ruff, strict mypy across 206 files, 72 documentation checks,
+  24 Node tests, the VS Code 1.145.3 host and source/wheel builds. Inspected the built engine's
+  four application-project modules and its sole nbformat runtime requirement.
+- Captured the real application's declarations read-only into a private report. Its 23 source
+  files and raw input hashes match previous observations. Original source planning reports the
+  absent adopted entrypoint. Build, dependency resolution, execution and human review stay pending.
+
+### Decisions
+
+- Let each application's original backend supply installed distribution metadata from its raw
+  project configuration. Preserve source-relative layout through editable installation.
+- Record static declarations, build/resolution status and runtime evidence independently.
+
+### Next step
+
+- Review the explicit orchestration and source-bound integration choices, then establish actual
+  installation and scientific/runtime expectations for a separately scoped real trial.
+
 ## 2026-11-16 - Declared application-owned runtime artifact destinations
 
 ### Completed

@@ -29,6 +29,15 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Opt-in workflow schema 1.7 captures an explicitly selected application pyproject, static
+  dependency/extras/script declarations and selected project files. Generation stages the original
+  application layout under application/ for separate installation and declares its exact
+  distribution requirement in the generated Kedro package. Plan/manifest schema 1.6 binds metadata
+  and file hashes, with pending build/resolution statuses. Added drift/collision guards, generated
+  setup instructions, trusted standard/editable-wheel installation and regression/CLI checks,
+  local/VS Code previews and indexed ADR 0016. Read-only real-source capture records declarations
+  and the outstanding adopted-entrypoint/runtime review requirements.
+
 - Opt-in workflow schema 1.6 binds declared runtime artifact destinations to exact flat-parameter
   fields and their consuming calls. Generated registered-pipeline adapters check project policy,
   actual values and new targets without rewriting business code, precreating/reserving directories

@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.7",
+  "entrypoint": "workflow",
+  "source_package": "examples/functional_distribution/src/distribution_ml",
+  "inputs": {"raw": "examples/functional_distribution/input.json"},
+  "file_inputs": {},
+  "parameters": {"factor": 2.0},
+  "outputs": {"result": "data/08_reporting/result.json"},
+  "artifact_destinations": {},
+  "application_project": {
+    "pyproject": "examples/functional_distribution/pyproject.toml",
+    "files": ["application.lock"]
+  }
+}

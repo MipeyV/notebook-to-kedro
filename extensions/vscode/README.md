@@ -51,6 +51,11 @@ Python package. Its source/resources appear among files to copy and retain origi
 names. Select that existing workflow JSON in setup/settings. Source-only inspection does not
 infer package context, and dependency/distribution metadata is not reconstructed.
 
+Workflow schema 1.7 selects an application pyproject and additional project files. The preview
+shows copies under `application/`, captured declarations and generated installation instructions.
+The operator installs both local projects after reviewing the preview and build requirements.
+The host test exercises this schema through the existing inspect/preview commands.
+
 ## Development
 
 ```bash

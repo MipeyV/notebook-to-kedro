@@ -9,6 +9,14 @@ Richer comparators and procedural-notebook test generation remain future.
 
 ## Generate and run
 
+Workflow schema 1.7 supports the same explicit JSON regression contract after installation of
+both the generated project and its staged application. Trusted distribution tests build and
+install standard/editable application wheels and generated wheels offline, run supplied node/
+pipeline expectations and invoke `python -m kedro run`. They reuse the locked development
+runtime's dependencies through an explicit site path. The editable variant verifies a
+source-relative project-file hash. Fresh dependency resolution has its own bootstrap scope.
+Installation details are in the [distribution contract](functional-workflows.md#application-distribution-in-schema-17).
+
 ```bash
 uv run notebook-to-kedro generate-workflow examples/functional_workflow/workflow.py examples/functional_workflow/workflow.json generated/tested_workflow --project-root . --regression-contract examples/functional_workflow/regression.json
 ```
