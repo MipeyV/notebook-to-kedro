@@ -214,4 +214,6 @@ now compares explicitly declared benchmark-style application artifacts and in-pr
 descriptors against a registered generated pipeline. Installed synthetic applications exercise
 decoded Parquet/metric comparisons and failure controls. This repository script is not shipped
 pytest generation or a runtime operation; the JSON regression contract still rejects unsupported
-file-reference, memory-result and artifact expectations. Real review/execution remains pending.
+file-reference, memory-result and artifact expectations. One explicitly user-reviewed/authorized
+private real pair matched its scoped expectations; its detailed outputs stay local. That evidence
+does not extend the delivered-test contract or approve the independent notebook pilot.

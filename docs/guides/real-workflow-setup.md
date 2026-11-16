@@ -196,11 +196,13 @@ default/custom profiles and sequential/threaded runners. They separately verify 
 unchanged owned contents and missing generated artifact expectations. This does not execute or
 approve a scientific user workflow.
 
-The private real configuration now proposes a new relative destination with the matching
+At the artifact-policy declaration stage, the private real configuration proposed a new relative
+destination with the matching
 `candidate.output` declaration. It changes only that private integration proposal, without
 rewriting source or checking/creating an actual runtime directory. Original source-bound planning
 still rejects the absent entrypoint. Schema 1.7 now captures the selected application's declared
-metadata. Actual installation and scientific/result/artifact review remain pending before a trial.
+metadata. Installation and scientific/result/artifact review were still pending in that snapshot;
+the later authorized trial below retains its own evidence.
 
 ## Working slice for application declarations
 
@@ -222,13 +224,13 @@ README to install both local projects, selecting optional extras explicitly. Edi
 retains source-relative project-file lookups. The details and synthetic example are documented in
 the [application distribution contract](../reference/functional-workflows.md#application-distribution-in-schema-17).
 
-The private real proposal now selects the original pyproject and lockfile. Read-only capture
+The initial private real proposal selected the original pyproject and lockfile. Read-only capture
 records six requirements, two extras groups, one script declaration and three project files.
 The 23-file source inventory and raw input hashes match the previous observation. Original
 source planning still reports its absent adopted entrypoint. The private report records pending
 review and `not_run` build/resolution/execution. The application keeps its original provenance
-implementation. Actual dependency installation, data/protocol compatibility and scientific
-expectations require later evidence.
+implementation. That declaration report alone supplies no installation, data/protocol compatibility
+or scientific/runtime evidence; the subsequent authorized records below supply their specific checks.
 
 ## Next contracts for review and durable results
 
@@ -237,8 +239,9 @@ new publication inventory, recomputes the prepared adapter against original sour
 the original Git context, ambient execution Git and installed versions from the chosen interpreter.
 The private real report now binds 29 original files to 50 published files and observes 61
 installed distributions. Its original source commit differs from the containing workspace's
-commit. The report retains pending review and benchmark execution status. A later trial can
-reference this report when associating application outputs with their source/environment evidence.
+commit. The report retains its preparation-time pending review and benchmark execution status.
+The subsequently authorized trial references these exact report bytes when associating application
+outputs with their source/environment evidence.
 See the [provenance contract](../reference/functional-workflows.md#original-source-and-installed-workflow-provenance).
 
 An explicitly authorized private review copy now exercises preparation schema 1.1 and subsequent
@@ -296,8 +299,8 @@ and separate. Synthetic tooling tests do not approve that pilot or a user projec
 ## Proposed paired validation trial
 
 Status: protocol prepared on 2026-11-16; developer harness implemented on 2026-11-17.
-Actual benchmark execution and real orchestration/scientific review remain pending. The harness
-is an opt-in repository script, outside the runtime API/CLI and generated JSON regression
+The user reviewed and explicitly authorized the scoped pair, which completed on 2026-11-17.
+The harness is an opt-in repository script, outside the runtime API/CLI and generated JSON regression
 contract. Keep concrete source paths, hashes and the worksheet in the ignored local directory.
 
 The first trial should measure conversion fidelity for one frozen candidate. Compare direct calls
@@ -474,5 +477,18 @@ invocation. Stale definition/report/harness declarations and missing review are 
 
 The new private real-source worksheet binds this concrete script and preserves the earlier
 proposal. Its runtime preflight verifies the original/staged files, installed metadata and
-25 application/generated module origins. Benchmark execution and real review remain pending;
-the pending consent template does not authorize either real invocation.
+25 application/generated module origins. After the user's explicit validation of that worksheet,
+an exclusive execution declaration bound the actual reply to the exact definition/report/script
+digests. The pending preparation template and original proposal remain unchanged historical records.
+
+The authorized pair completed once per path with zero exit codes and matched every implemented
+scoped expectation: exact decoded prediction tables/dtypes/order, finite metrics and independent
+recomputation, typed-result descriptors, protocol/candidate metadata, source/lock/version evidence
+and ambient Git observations. Both application directories contain the 18 expected artifacts.
+Protected source/input/generated identities and runtime metadata still match after execution.
+The detailed reports, predictions, metrics, consent and inventories remain private and ignored.
+
+This is evidence for one candidate, snapshot, protocol and installed runtime. Visual figure
+equivalence and scientific predictive-quality thresholds remain unverified; final-test scoring
+was not run. A new attempt needs its own fresh destinations, review and consent. The independent
+whole-notebook pilot review and broader runtime/generation contracts remain pending.

@@ -40,6 +40,37 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-11-17 - Execute the explicitly authorized private validation pair
+
+### Completed
+
+- The user explicitly validated the linked local worksheet and authorized its two real private
+  invocations. Recorded the actual reply in a new exclusive declaration bound to exact definition,
+  provenance and harness digests. Preserved the proposal and pending template as historical records.
+- Rechecked frozen identities and destinations, then ran the original installed functions and the
+  registered generated pipeline once each, using naive/one_step, seed 42 and validation only.
+  Both processes completed with exit code zero within their budgets; no retry was performed.
+- The retained report records matched_scoped_expectations: exact decoded prediction/dtype/order
+  agreement, finite independently recomputed metrics, typed-result descriptors, protocol/candidate
+  metadata, source/lock/version evidence and observed ambient Git context all passed.
+- Each path retained its 18 expected artifacts. Original/staged source, input and generated
+  protected bytes plus selected-runtime metadata still match after execution. Rechecked all
+  retained artifact byte identities and exact decoded table agreement without rerunning the app.
+- Kept detailed predictions, metric values, paths, hashes, user declaration and execution evidence
+  ignored locally. Updated capability/reference/roadmap claims only to this scoped real result.
+
+### Decisions
+
+- This establishes one frozen-case integration comparison, without predictive-quality thresholds,
+  visual figure equivalence or final-test scoring. The independent notebook pilot remains pending.
+- Actual operator consent is separate from synthetic declarations and from the original proposal's
+  preparation-time pending fields. Human identity is not authenticated by the local declaration.
+
+### Next step
+
+- Identify the smallest shared artifact/comparison contract justified by the real evidence, keeping
+  broader engines, candidate evaluation, existing-project edits and optimization separately scoped.
+
 ## 2026-11-17 - Check the bounded paired validation harness
 
 ### Completed

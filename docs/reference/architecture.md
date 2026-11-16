@@ -117,8 +117,10 @@ future benchmark execution retain distinct evidence scopes.
 A separate [developer paired-trial script](../guides/real-workflow-setup.md#developer-harness)
 now consumes a private frozen worksheet for one benchmark-shaped application. It runs through
 the selected installed runtime with explicit operator declarations and retained execution evidence.
-Its installed synthetic checks and real preflight are separate from actual real-project approval.
-It adds no engine execution API, generated typed regression schema or analysis dependency.
+Its installed synthetic checks and real preflight remain distinct from actual approval. The user
+explicitly reviewed and authorized one private real pair, which matched its scoped comparisons
+with protected postflight identities intact. This adds no engine execution API, generated typed
+regression schema or analysis dependency.
 
 Functional analysis schema 1.1 observes a terminal `return_expression` independently of
 named `outputs`. Called functions may return supported expressions directly; their ASTs stay
