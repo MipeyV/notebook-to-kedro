@@ -39,9 +39,12 @@ from notebook_to_kedro.operations import (
     PlanRequest,
     generate_project,
     inspect_project,
+    load_effort_declaration,
     load_local_project_configuration,
+    measure_local_operation,
     plan_project,
     run_local_operation,
+    summarize_conversion_measurements,
 )
 from notebook_to_kedro.semantic import PlannerMode
 
@@ -76,11 +79,13 @@ __all__ = [
     "generate_kedro_project",
     "generate_project",
     "inspect_project",
+    "load_effort_declaration",
     "load_functional_workflow_configuration",
     "load_kedro_profile",
     "load_local_project_configuration",
     "load_workflow_preparation_definition",
     "load_workflow_regression_contract",
+    "measure_local_operation",
     "plan_functional_workflow_path",
     "plan_notebook_path",
     "plan_project",
@@ -88,5 +93,6 @@ __all__ = [
     "render_conversion_report",
     "render_workflow_preparation",
     "run_local_operation",
+    "summarize_conversion_measurements",
     "validate_conversion_plan",
 ]

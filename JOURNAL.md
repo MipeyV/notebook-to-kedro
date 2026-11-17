@@ -40,6 +40,51 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-11-17 - Measure conversion work separately from pipeline execution
+
+### Completed
+
+- Added an opt-in wrapper for existing inspect/plan/generate requests with unchanged results,
+  diagnostics, source accounting and publication guards. Default calls collect nothing.
+- Reserved exclusive measurement directories through the shared writer, protected source/package/
+  settings/generation targets and retained operation duration/status, source identities, diagnostics
+  and unfinished attempts. Added a read-only all-attempt summary and CLI flags/summary command.
+- Bound optional human effort declarations to the current inventory. Comparisons require matching
+  primary source, acceptance criteria, setup mode and declared acceptance, with explicit
+  measured/estimated labels. Human and elapsed differences stay separate; negative savings remain.
+- Exercised the actual measurement API on the committed static functional example. All three
+  operations completed, with no application execution and no human/baseline declarations. The
+  summary correctly reports no established saving. Demo records stay ignored locally.
+- Added ADR 0019 and updated product/reference documentation. There is no extra dependency,
+  operation envelope/configuration change or interface implementation.
+- The final frozen offline suite passed all 2,915 tests on Windows/Python 3.12.14 with 100%
+  coverage of 9,939 statements and 2,964 branches. The targeted 119 checks cover the new module
+  completely. All 75 documentation checks, Ruff and strict mypy across 214 files passed.
+  Offline source/wheel builds include the exact modules/tests and retain nbformat alone at runtime.
+- All 24 VS Code protocol checks and the actual VS Code 1.145.3 command host passed. Native
+  output capture confirms exit zero; the first PowerShell redirection treated npm stderr progress
+  as an error despite successful host assertions. No interface source changes were needed.
+- An earlier full pass encountered the new ADR before its index edit completed; the finished
+  document index and subsequent complete suite pass. No source/fixture changes occurred during
+  the successful final suite.
+
+### Decisions
+
+- Time existing operations only; preparation, installation, runtime validation, collection overhead,
+  process startup and human/journey time need separate observations. Source hashing can warm caches.
+- Operator declarations do not authenticate review, prove task equivalence, authorize execution
+  or approve the notebook pilot. Primary-source binding is partial project/input evidence.
+
+### Open questions
+
+- Actual human baselines and matched accepted tasks are not collected yet. The earlier real
+  pipeline comparison is behavioral evidence and receives no retrospective productivity estimate.
+
+### Next step
+
+- Collect first-use/reuse conversion effort on matched tasks with normal manual work, a general
+  coding assistant and this tool, counting configuration, corrections, review and failures.
+
 ## 2026-11-17 - Execute the explicitly authorized private validation pair
 
 ### Completed

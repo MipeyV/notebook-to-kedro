@@ -162,6 +162,11 @@ notebook-to-kedro project generate examples/local_operations/functional.json gen
 publishes a new contained destination. Python callers use the same typed requests/results.
 These operations do not execute project code, install dependencies or contact a model.
 
+Opt into [conversion effort measurements](docs/reference/local-operations.md#opt-in-conversion-measurements)
+with `--case-id` and a new `--measurement-dir`. `project measurement-summary` reports operation
+times and retained attempts. Human effort and manual baselines are explicit declarations;
+pipeline execution time alone does not establish conversion time saved.
+
 The initial [VS Code extension](docs/guides/vscode-extension.md) exposes these operations from
 Explorer with guided configuration creation, interpreter selection, diagnostics, read-only previews and confirmed
 generation. Build its installable VSIX with `npm ci` and `npm run package` in `extensions/vscode`.

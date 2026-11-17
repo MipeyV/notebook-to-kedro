@@ -132,6 +132,116 @@ engine/I/O failures in `run_local_operation`, retaining their cause and original
 The specific `inspect_project`, `plan_project` and `generate_project` helpers also remain
 available; underlying engine/I/O exceptions propagate directly from those helpers.
 
+## Conversion effort measurements
+
+### Opt-in conversion measurements
+
+`measure_local_operation(request, directory, case_id=...)` runs an existing typed operation
+and returns its unchanged result. The CLI exposes two optional flags, used together:
+
+```bash
+notebook-to-kedro project inspect examples/local_operations/functional.json \
+  --case-id functional-example --measurement-dir generated/effort/attempts/01-inspect
+notebook-to-kedro project plan examples/local_operations/functional.json \
+  --case-id functional-example --measurement-dir generated/effort/attempts/02-plan
+notebook-to-kedro project generate examples/local_operations/functional.json generated/effort/project \
+  --case-id functional-example --measurement-dir generated/effort/attempts/03-generate
+notebook-to-kedro project measurement-summary generated/effort/attempts
+```
+
+Default calls collect nothing. Result envelopes and configuration schemas keep their versions.
+This adds no VS Code controls, application execution, installation or pipeline validation.
+The API is exported from the package root and operations module.
+
+Each attempt directory must be new. The shared writer publishes reservation.json before the
+operation; measurement.json is written exclusively afterwards, including errors/interruption.
+Reject overlap with source/settings files, enclosing regular packages and the generated target.
+Retries need new directories. Missing observations are unfinished with unknown duration;
+malformed/unbound evidence is rejected. There is no filesystem lock or automated cleanup.
+Relative measurement paths use the caller's CWD, independently of configuration path anchoring.
+Explicit sibling paths outside project_root are allowed; the protected-overlap checks still apply.
+
+Schema 1.0 reservations capture case/operation, settings, primary source SHA-256/size,
+Python/platform and UTC creation time. Outcomes bind the canonical reservation digest and
+record status, monotonic duration_ns, source identity afterwards, finish time and bounded
+diagnostics. Exceptions keep their type/diagnostics; blocked inspection keeps its result.
+LM002 reports outcome-publication failure after success. During an operation error, the original
+exception is retained with a note/warning. Do not blindly repeat generation after publication.
+
+**Timing scope:** only run_local_operation after request construction/configuration loading.
+Analysis/rendering/validation/writing inside it are included. Inspect/plan/generate are distinct
+requests and may repeat analysis; totals represent recorded operations, not disjoint compiler
+phases. Process startup, collection overhead, preparation, installation, runtime validation,
+waiting and human work are not automatically timed. Source hashing can warm caches. These
+observations do not establish cold-start latency or whole-journey elapsed time.
+
+`summarize_conversion_measurements(directory, effort=None, baseline=None)` reads all direct
+attempt directories. Keep declarations/summary files outside that ledger. Empty/mixed-case
+ledgers, linked entries, malformed JSON and invalid durations fail with LM001. Known seconds,
+statuses and unfinished counts stay separate. A canonical attempts_sha256 binds declarations
+to the current observed inventory; new/changed attempts invalidate prior human declarations.
+It does not prove the operator included attempts made elsewhere.
+
+### Declared human effort and baselines
+
+Without declarations, human_effort/baseline and savings are null, with comparison.status
+not_established. Human active time and elapsed time are not inferred from machine latency or
+timestamp gaps. Effort JSON has this shape; fill placeholders and actual observations:
+
+```json
+{
+  "schema_version": "1.0",
+  "case_id": "functional-example",
+  "source_sha256": "COPY source_sha256 FROM THE SUMMARY",
+  "attempts_sha256": "COPY attempts_sha256 FROM THE SUMMARY",
+  "acceptance_criteria": "Same reviewed outputs, expected Kedro layout and passing project checks",
+  "setup_mode": "first_use",
+  "method": "tool",
+  "basis": "estimated",
+  "outcome": "in_progress",
+  "operator": "actual operator",
+  "segments": []
+}
+```
+
+Segments have exactly activity and seconds. Activities are configuration, adaptation, correction,
+review or other. Seconds are finite/nonnegative; booleans fail. At most 1,000 segments and
+1 MiB JSON per file are accepted; duplicate/nonfinite values fail. load_effort_declaration loads
+strict JSON; summarizing validates semantics. Optional elapsed_seconds records journey time
+independently. Basis is measured/estimated; outcome is accepted/in_progress/blocked/abandoned.
+Set accepted only after reviewing criteria, independently of generation success. Setup mode
+first_use/reuse is explicitly declared rather than inferred from installed dependencies.
+
+A baseline uses the same schema/case/source/criteria/setup values, method manual or
+general_assistant and its own operator/basis/outcome/segments/optional elapsed_seconds.
+It does not need attempts_sha256. Both declarations live outside the attempts directory:
+
+```bash
+notebook-to-kedro project measurement-summary generated/effort/attempts \
+  --effort generated/effort/human.json --baseline generated/effort/baseline.json
+```
+
+Comparison requires matching declarations, stable common primary source, effort bound to the
+inventory, no unfinished attempts and accepted outcomes for both methods. Failed/interrupted/
+blocked attempts remain in the inventory/totals. Different task/source/criteria/setup declarations
+are rejected; changed/unavailable source leaves savings unestablished. Source binding covers the
+primary file, not all datasets, resources, dependencies or business intent. Input equivalence and
+acceptance remain operator declarations.
+
+Eligible human savings equal baseline active seconds minus assisted active seconds. Elapsed
+savings are separate, computed only when both supply them. Never add human/machine durations
+to invent elapsed time. Negative savings remain; zero baseline gives no percentage. Status is
+operator_declared_measurement when both bases are measured, otherwise operator_declared_estimate.
+Neither authenticates a reviewer, proves causality, grants execution consent or accepts the
+notebook pilot. Local reports can contain paths, identities and names; there is no automatic upload.
+
+Product evaluation compares the same accepted task across normal manual work, a general coding
+assistant and this tool. Include configuration/corrections/review and failures, separating first
+use from reuse. Engine development investment and pipeline execution differ from per-project
+conversion effort. The earlier private paired trial establishes scoped behavior; engineering
+time was not measured and no gain is retroactively assigned.
+[ADR 0019](../decisions/0019-opt-in-conversion-measurements.md) records these boundaries.
+
 ## Evidence and next scope
 
 The separate `prepare-workflow` API/CLI operation previews declared orchestration before I/O

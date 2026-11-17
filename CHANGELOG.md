@@ -29,6 +29,12 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Added opt-in local-operation timing and conversion effort summaries through API/CLI. Exclusive
+  reservations retain failures/interruption and expose unfinished attempts. Human effort binds to
+  the current inventory; matched operator-declared baselines can report separate human/elapsed
+  differences, including negative savings and labelled estimates. Original operation envelopes
+  and dependency surface stay unchanged. Missing baselines never produce an inferred saving.
+
 - Added a standalone developer paired-trial harness for the narrow naive/one_step validation
   artifact contract. It binds operator declarations to exact definition/provenance/script bytes,
   verifies installed import origins, reserves exclusive attempts and compares decoded Parquet,

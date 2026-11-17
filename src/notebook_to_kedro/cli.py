@@ -79,8 +79,11 @@ from notebook_to_kedro.operations import (
     GenerateRequest,
     InspectRequest,
     PlanRequest,
+    load_effort_declaration,
     load_local_project_configuration,
+    measure_local_operation,
     run_local_operation,
+    summarize_conversion_measurements,
 )
 from notebook_to_kedro.semantic import (
     DEFAULT_OLLAMA_BASE_URL,
@@ -174,11 +177,35 @@ def _add_project_parser(subparsers: argparse._SubParsersAction[argparse.Argument
     for name in ("inspect", "plan", "generate"):
         action = actions.add_parser(name)
         action.add_argument("configuration", type=Path, help="local project JSON settings")
+        action.add_argument(
+            "--measurement-dir", type=Path, help="new exclusive measurement attempt directory"
+        )
+        action.add_argument("--case-id", help="case identifier shared by measured attempts")
         if name == "generate":
             action.add_argument("destination", type=Path, help="new directory inside project_root")
+    summary = actions.add_parser(
+        "measurement-summary", help="summarize local timing attempts and declared effort"
+    )
+    summary.add_argument("directory", type=Path, help="ledger containing only attempt directories")
+    summary.add_argument("--effort", type=Path, help="tool-assisted human effort declaration JSON")
+    summary.add_argument(
+        "--baseline", type=Path, help="manual/general-assistant baseline declaration JSON"
+    )
 
 
 def _project_operation(args: argparse.Namespace) -> int:
+    if args.project_action == "measurement-summary":
+        summary = summarize_conversion_measurements(
+            args.directory,
+            effort=None if args.effort is None else load_effort_declaration(args.effort),
+            baseline=None if args.baseline is None else load_effort_declaration(args.baseline),
+        )
+        sys.stdout.write(json.dumps(summary, sort_keys=True, indent=2, allow_nan=False) + "\n")
+        return 0
+    if (args.measurement_dir is None) != (args.case_id is None):
+        raise LocalOperationError(
+            "LM001", "--measurement-dir and --case-id must be supplied together"
+        )
     configuration = load_local_project_configuration(args.configuration)
     request: InspectRequest | PlanRequest | GenerateRequest
     if args.project_action == "inspect":
@@ -187,7 +214,11 @@ def _project_operation(args: argparse.Namespace) -> int:
         request = PlanRequest(configuration)
     else:
         request = GenerateRequest(configuration, args.destination)
-    result = run_local_operation(request)
+    result = (
+        run_local_operation(request)
+        if args.measurement_dir is None
+        else measure_local_operation(request, args.measurement_dir, case_id=args.case_id)
+    )
     payload = result.to_dict()
     sys.stdout.write(json.dumps(payload, sort_keys=True, indent=2) + "\n")
     return ERROR_EXIT_CODE if payload["status"] == "blocked" else 0

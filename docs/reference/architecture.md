@@ -122,6 +122,12 @@ explicitly reviewed and authorized one private real pair, which matched its scop
 with protected postflight identities intact. This adds no engine execution API, generated typed
 regression schema or analysis dependency.
 
+Opt-in [operation measurements](local-operations.md#opt-in-conversion-measurements) wrap existing
+requests and retain separate timing/attempt evidence. Source facts and normal result envelopes
+stay deterministic. Human active time, acceptance and comparable baselines are explicit
+operator declarations, separate from latency and pipeline execution.
+[ADR 0019](../decisions/0019-opt-in-conversion-measurements.md) records that separation.
+
 Functional analysis schema 1.1 observes a terminal `return_expression` independently of
 named `outputs`. Called functions may return supported expressions directly; their ASTs stay
 in the source module. The entrypoint's explicit call assignments own dataset naming and linear
