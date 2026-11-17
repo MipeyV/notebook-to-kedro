@@ -244,6 +244,87 @@ time was not measured and no gain is retroactively assigned.
 
 ## Evidence and next scope
 
+### Preparing a prospective comparison
+
+Once a case has complete operation records, a stable common primary source and at least one
+successful generation, prepare consistently bound draft forms:
+
+```bash
+notebook-to-kedro project prepare-effort-comparison generated/effort/attempts \
+  generated/effort/comparison \
+  --acceptance-criteria "Same supplied inputs, target conventions and reviewed conversion checks" \
+  --setup-mode reuse --operator "pending human operator"
+```
+
+The API is `prepare_effort_comparison(directory, output, acceptance_criteria=..., setup_mode=...,
+operator=...)`, exported from the root/operations modules. Output must be a new direct sibling
+of the ledger. This keeps forms outside the attempt inventory and limits publication placement;
+the shared writer refuses existing targets and prepares all files privately before publication.
+
+The five outputs are tool-effort.json, manual-baseline.json, assistant-baseline.json,
+measurement-summary.json and README.md. The summary freezes current machine observations.
+All forms share case/source/criteria/setup fields. Only the tool form binds attempts_sha256;
+the others select manual/general_assistant methods. Every form starts estimated/in_progress
+with empty segments. These are collection drafts, not observed zero human time, accepted
+projects or execution approval. Field validation and an inventory recheck precede publication.
+
+Keep configuration, adaptation, correction and review effort in scope for each method. Record
+human intervals and elapsed time prospectively rather than reconstructing them from machine
+durations. If a tool solution has already been seen, use an independent operator or fresh,
+counterbalanced matched tasks to reduce learning bias. Source bytes and labels are partial
+evidence; verify data, dependencies, requirements and actual task equivalence separately.
+This function neither copies/freezes a workspace nor validates business behavior.
+
+New/changed attempts invalidate the tool form. Prepare a new sibling output, preserve earlier
+records and explicitly carry actual human observations forward. Review the same acceptance
+criteria for each method before declaring accepted. Estimated or incomplete baselines keep
+their labels; drafting the forms does not establish productivity gains or approve the notebook
+pilot. Application execution retains its separate consent contract.
+
+A local collection pilot now has two committed controlled cases and one real private application
+starting from an already prepared workflow. Static inspect/plan/generate completed for each;
+all three kits are pending human collection. The real case excludes its earlier adapter creation,
+installation and runtime validation. This is preparation of differing scoped tasks, not a
+representative corpus or a measured productivity comparison. Detailed records remain ignored
+locally; protected files from the earlier private runtime trial were rechecked unchanged.
+
+### One-prompt agent check
+
+On 2026-11-17, a user-requested external coding-agent experiment used fresh context, one fixed
+detailed prompt and the same prepared synthetic functional script/configuration/profile/oracles
+as the converter. The agent received no corrective coordinator follow-up or converter solution.
+It could use only the generic shared writer to publish its authored files, never transformation
+or test-rendering APIs. This is separate from engine providers; no transport was implemented.
+
+Both projects passed independent checks against actual catalogs/registered pipelines: two connected
+prefixed nodes, preserved helper ASTs, JSON input/output, assign-mode memory intermediate, explicit
+parameters, three pipeline and six node expectations, standard Kedro CLI execution and delivered
+tests. Their tests rejected two arithmetic source mutations in separate copies. Canonical candidate
+inventories and all six shared input files were rechecked unchanged.
+
+| Observation | Coding agent | Deterministic converter |
+| --- | --- | --- |
+| Delivered tests passing independently | 11 (nine supplied expectations plus two AST checks) | 9 |
+| Production phase observation | Approximately 319 s dispatch-to-completion clock window | 0.356 s in-process setup/imports and inspect/plan/generate |
+| Successful common independent acceptance | 8.710 s | 8.488 s |
+| Retained unsuccessful verification | Metadata probe, Windows temp-directory errors, obsolete DataCatalog.add test-harness call corrected internally | First coordinator check hit Windows temp-directory access errors (4.556 s); common harness corrected |
+
+The agent window includes reading, authoring, internal corrections, its tests, CLI checks and a
+voluntary offline wheel build, plus coordinator/tool scheduling at one-second clock resolution.
+Converter timing begins with already supplied configuration and excludes prior source/specification
+preparation, process startup, human review and the separately reported acceptance. The agent's wheel
+build is additional evidence; common acceptance did not build/install either project. No speedup
+ratio is inferred from these different boundaries. Exact agent model identifier, tokens and cost
+were not exposed; human preparation/correction/review intervals remain uncollected.
+
+The initial coordinator failure is preserved. Both candidates then used the same corrected checker
+with new contained pytest temporary directories; neither canonical candidate was repaired by the
+coordinator. The agent also retained its own failed attempts. Detailed prompt, inventories, candidate
+projects and logs remain ignored locally. The original manual-first input case remains unchanged.
+This one tiny functional script and ready environment establish a scoped successful example,
+not notebook accuracy, fresh-environment installation, independent human acceptance or productivity.
+No real financial workflow/data was exercised and broader pilot review retains its own scope.
+
 The separate `prepare-workflow` API/CLI operation previews declared orchestration before I/O
 configuration and optionally publishes a new review copy. It is not an additional schema 1.0
 local operation or VS Code command. Existing inspect/plan/generate behavior remains unchanged;

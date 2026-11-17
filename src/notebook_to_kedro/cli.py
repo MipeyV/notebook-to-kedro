@@ -82,6 +82,7 @@ from notebook_to_kedro.operations import (
     load_effort_declaration,
     load_local_project_configuration,
     measure_local_operation,
+    prepare_effort_comparison,
     run_local_operation,
     summarize_conversion_measurements,
 )
@@ -191,9 +192,38 @@ def _add_project_parser(subparsers: argparse._SubParsersAction[argparse.Argument
     summary.add_argument(
         "--baseline", type=Path, help="manual/general-assistant baseline declaration JSON"
     )
+    comparison = actions.add_parser(
+        "prepare-effort-comparison", help="prepare pending human comparison declarations"
+    )
+    comparison.add_argument("directory", type=Path, help="complete operation measurement ledger")
+    comparison.add_argument("output", type=Path, help="new sibling directory for comparison drafts")
+    comparison.add_argument(
+        "--acceptance-criteria", required=True, help="shared task acceptance text"
+    )
+    comparison.add_argument("--setup-mode", required=True, choices=("first_use", "reuse"))
+    comparison.add_argument(
+        "--operator", required=True, help="prospective operator or pending label"
+    )
 
 
 def _project_operation(args: argparse.Namespace) -> int:
+    if args.project_action == "prepare-effort-comparison":
+        paths = prepare_effort_comparison(
+            args.directory,
+            args.output,
+            acceptance_criteria=args.acceptance_criteria,
+            setup_mode=args.setup_mode,
+            operator=args.operator,
+        )
+        sys.stdout.write(
+            json.dumps(
+                {"status": "collection_pending", "files": [str(path) for path in paths]},
+                sort_keys=True,
+                indent=2,
+            )
+            + "\n"
+        )
+        return 0
     if args.project_action == "measurement-summary":
         summary = summarize_conversion_measurements(
             args.directory,

@@ -31,6 +31,13 @@ review effort, failures/unfinished attempts, latency and cost. Actual human revi
 whole-notebook model campaign; it does not block deterministic core development. Customer discovery
 and broader source/library contracts accompany the relevant slices.
 
+An initial [one-prompt agent check](../reference/local-operations.md#one-prompt-agent-check)
+now records successful independent acceptance for both a fresh coding agent and the converter
+on one prepared synthetic functional script. It does not cover notebook conversion, human effort,
+cost or a representative corpus. Extend the comparison to larger matched tasks and prospectively
+observed preparation/correction/review before estimating productivity; do not divide clocks with
+different boundaries into a claimed speedup.
+
 Source accounting and supported graph checks are implemented. E2 now has
 [functional inspection](../reference/functional-blocks.md) and a bounded
 [linear workflow conversion](../reference/functional-workflows.md), with source-accounted
@@ -96,6 +103,13 @@ declared journey elapsed time. An actual static-example run exercises all three 
 its absent human/baseline evidence correctly leaves savings unestablished. Next collect matched
 accepted tasks with real human effort across manual/general-assistant/tool methods, separating
 initial setup from reuse. Preparation/install/runtime timing and interface controls need later slices.
+
+Pending comparison-kit preparation now exports consistent tool/manual/general-assistant forms,
+criteria and observed inventory snapshots. A local pilot has two controlled cases and one
+already-prepared private real workflow, with all nine static operations completed. Human
+collection and comparable accepted baselines remain pending. Next perform prospective timed
+tasks with actual operators, accounting for learning/order effects and the chosen task boundary.
+The real prepared-workflow case excludes prior adapter work and establishes no end-to-end gain.
 
 ## Whole-notebook evaluation next gate
 

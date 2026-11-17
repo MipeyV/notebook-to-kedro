@@ -40,6 +40,79 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-11-17 - Run one frozen-prompt coding-agent comparison
+
+### Completed
+
+- At the user's request, gave one fixed prompt and fresh context to a coding agent for a new
+  isolated copy of the controlled scalar functional task. No corrective coordinator follow-up,
+  converter solution or transformation API was supplied; only the shared file writer was allowed.
+- Both agent and converter projects passed independent structural/AST/catalog/parameter checks,
+  three pipeline/six node oracles, the Kedro CLI and delivered tests. Both suites rejected two
+  arithmetic mutations in private copies. Agent tests passed 11/11; converter tests passed 9/9.
+- Observed an approximate 319 s agent dispatch/completion window and 0.356 s converter in-process
+  setup/static operations. Successful common acceptance took 8.710 s and 8.488 s respectively.
+  Preserve different clock boundaries; no human effort or saving is inferred.
+- Retained the agent's metadata/temp-directory/API test-harness failures and internal correction.
+  The coordinator's first tool check hit a Windows pytest temporary-directory error (4.556 s);
+  corrected the shared checker for both projects without repairing either canonical candidate.
+- Rechecked all six shared/original input files and candidate inventories unchanged. The agent
+  additionally built its wheel offline; no installation or real financial runtime was performed.
+  Detailed prompts, candidates, inventories and failed/successful logs stay ignored locally.
+- All 75 documentation checks, Ruff and format checks passed for this documentation-only
+  evidence update. Core/interface code is unchanged; the full engine suite was not rerun.
+
+### Decisions
+
+- This is an external coding-agent experiment, not a new product provider transport. Exact model
+  identifier, tokens/cost and prospectively observed human intervals were unavailable.
+- One tiny prepared functional script in a reused environment is not a notebook or representative
+  productivity study. Agent timing includes authorship/corrections/tests/extra build; converter
+  timing excludes prior source/config preparation and separately reported runtime acceptance.
+
+### Next step
+
+- Use larger matched notebook tasks and prospectively record preparation, corrections and review,
+  retaining failures and comparable accepted outcomes before estimating human or commercial gain.
+
+## 2026-11-17 - Prepare prospective effort comparison kits
+
+### Completed
+
+- Added prepare_effort_comparison through the operation API/CLI. Complete stable generation
+  observations can publish consistently bound tool/manual/general-assistant draft declarations,
+  a machine summary and collection instructions into a new sibling directory.
+- Kept every form estimated/in_progress with empty segments. Validate fields, retain failed
+  attempts and recheck inventory before publication. Existing forms are never overwritten.
+- Prepared local kits for a committed functional example, a controlled notebook and one real
+  private already-prepared workflow. All nine static operations completed; no application function,
+  model training, package installation or provider call was performed. Human work remains pending.
+- Rechecked the 50 protected generation files from the earlier real runtime trial unchanged.
+  Detailed private source/configuration/observation/identity records remain ignored locally.
+- The user volunteered for a controlled manual baseline. Prepared a fresh source-only case and
+  its two-node/three-pipeline/six-node-test acceptance contract, validated statically. No tool
+  solution was published and no human clock or observation was inferred from that reply.
+- The frozen offline suite passed all 2,931 tests on Windows/Python 3.12.14 with 100% coverage
+  of 9,967 statements and 2,966 branches. The 135 targeted checks, all 75 documentation checks,
+  Ruff, strict mypy across 214 files and offline source/wheel builds passed. Built API/CLI bytes
+  match source; nbformat remains the only runtime dependency. The unchanged interface was not
+  retested locally in this increment.
+
+### Decisions
+
+- These kits aid prospective collection rather than reconstructing human effort. Existing tool
+  outputs can bias baselines; use independent operators or fresh counterbalanced matched cases.
+- The real task begins at a supplied adapter and explicit configuration. Its prior preparation,
+  installation and runtime checks remain outside this particular static-conversion comparison.
+  Neither the mixed three-case pilot nor the pending forms establish a productivity gain.
+- Extend ADR 0019's observation/declaration contract without a universal project specification,
+  new runtime dependency, automatic acceptance or additional execution authorization.
+
+### Next step
+
+- Record actual human intervals and same-criteria acceptance on the scoped matched tasks, keeping
+  failures and learning/setup effects visible before estimating product value.
+
 ## 2026-11-17 - Measure conversion work separately from pipeline execution
 
 ### Completed

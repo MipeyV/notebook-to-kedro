@@ -15,6 +15,7 @@ from notebook_to_kedro.operations.contracts import (
 from notebook_to_kedro.operations.measurements import (
     load_effort_declaration,
     measure_local_operation,
+    prepare_effort_comparison,
     summarize_conversion_measurements,
 )
 from notebook_to_kedro.operations.service import (
@@ -38,6 +39,7 @@ __all__ = [
     "load_local_project_configuration",
     "measure_local_operation",
     "plan_project",
+    "prepare_effort_comparison",
     "run_local_operation",
     "summarize_conversion_measurements",
 ]

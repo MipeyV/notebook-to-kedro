@@ -438,3 +438,94 @@ def summarize_conversion_measurements(
     }
     json.dumps(result, allow_nan=False)
     return result
+
+
+def prepare_effort_comparison(
+    directory: str | Path,
+    output: Path,
+    *,
+    acceptance_criteria: str,
+    setup_mode: str,
+    operator: str,
+) -> tuple[Path, ...]:
+    """Publish pending, consistently bound declarations for a prospective human comparison."""
+    ledger = Path(directory).absolute()
+    destination = output.absolute()
+    _require(
+        destination.resolve().parent == ledger.resolve().parent
+        and not _overlaps(destination.resolve(), ledger.resolve()),
+        "Comparison output must be a new sibling of the attempt ledger",
+    )
+    summary = summarize_conversion_measurements(ledger)
+    _require(
+        summary["machine_timing_complete"] and summary["source_sha256"] is not None,
+        "Comparison preparation requires complete timings and a stable primary source",
+    )
+    _require(
+        any(
+            item["reservation"]["operation"] == "generate"
+            and item["observation"]["status"] == "generated"
+            for item in summary["attempts"]
+        ),
+        "Comparison preparation requires an observed successful generation",
+    )
+    common = {
+        "schema_version": "1.0",
+        "case_id": summary["case_id"],
+        "source_sha256": summary["source_sha256"],
+        "acceptance_criteria": acceptance_criteria,
+        "setup_mode": setup_mode,
+        "basis": "estimated",
+        "outcome": "in_progress",
+        "operator": operator,
+        "segments": [],
+    }
+    tool = {**common, "method": "tool", "attempts_sha256": summary["attempts_sha256"]}
+    manual = {**common, "method": "manual"}
+    assistant = {**common, "method": "general_assistant"}
+    _effort(tool, assisted=True)
+    _effort(manual, assisted=False)
+    _effort(assistant, assisted=False)
+    instructions = """# Prospective conversion effort comparison
+
+Status: collection pending. Templates contain no observed human time or accepted outcome.
+measurement-summary.json is the frozen tool-operation snapshot used to prepare this kit.
+Its settings and primary-source identity identify the observed task, not every project input.
+
+1. Read the shared case/source/acceptance/setup fields in all three declarations. Confirm
+   that the current source, data, requirements and target conventions describe the same task.
+   This kit neither copies a workspace nor validates business/input equivalence.
+2. Define the exact task boundary before timing. Count configuration, adaptation, corrections
+   and review. Keep engine development investment and pipeline execution separate. Apply the
+   same installation/runtime-check scope to each method; these are not automatically timed.
+3. Observe actual manual, general-assistant and tool-assisted work. Record active intervals as
+   activity/seconds segments; independently record optional journey elapsed_seconds. Do not
+   subtract machine durations or timestamp gaps to infer human effort.
+4. Existing tool observations can expose a solution. Use an independent operator or fresh,
+   counterbalanced matched tasks when learning would contaminate a baseline. Do not present
+   reconstructed or guessed human time as measured; retain estimated/in_progress instead.
+5. Enter actual operator names and measured/estimated basis. Declare accepted only after the
+   same criteria were checked, not merely because the generator returned successfully.
+6. Keep every failed, blocked or interrupted attempt. New/changed tool attempts invalidate
+   tool-effort.json's attempts_sha256; prepare a fresh sibling kit rather than overwriting it.
+7. Summarize the original ledger with tool-effort.json and either manual-baseline.json or
+   assistant-baseline.json. Keep these files outside the attempt ledger. Different criteria,
+   source or first_use/reuse modes are not comparable. Negative savings remain visible.
+
+All declarations initially use basis estimated, outcome in_progress and empty segments.
+They are drafts, not acceptance evidence, real productivity measurements, execution consent
+or independent notebook-pilot review. Source/label binding is partial and operator-controlled.
+The existing scoped real pipeline trial is not a retrospective human baseline.
+"""
+    files = {
+        Path("tool-effort.json"): json.dumps(tool, sort_keys=True, indent=2) + "\n",
+        Path("manual-baseline.json"): json.dumps(manual, sort_keys=True, indent=2) + "\n",
+        Path("assistant-baseline.json"): json.dumps(assistant, sort_keys=True, indent=2) + "\n",
+        Path("measurement-summary.json"): json.dumps(summary, sort_keys=True, indent=2) + "\n",
+        Path("README.md"): instructions,
+    }
+    _require(
+        summarize_conversion_measurements(ledger)["attempts_sha256"] == summary["attempts_sha256"],
+        "Measurement ledger changed while preparing the comparison",
+    )
+    return write_project(destination, files)

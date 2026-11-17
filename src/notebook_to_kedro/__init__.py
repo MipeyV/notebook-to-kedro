@@ -43,6 +43,7 @@ from notebook_to_kedro.operations import (
     load_local_project_configuration,
     measure_local_operation,
     plan_project,
+    prepare_effort_comparison,
     run_local_operation,
     summarize_conversion_measurements,
 )
@@ -89,6 +90,7 @@ __all__ = [
     "plan_functional_workflow_path",
     "plan_notebook_path",
     "plan_project",
+    "prepare_effort_comparison",
     "prepare_functional_workflow",
     "render_conversion_report",
     "render_workflow_preparation",

@@ -45,3 +45,16 @@ termination may leave a missing or malformed outcome. Missing outcomes are unfin
 malformed evidence is rejected. No filesystem lock, global attempt discovery, automatic repair
 or acceptance authority is introduced. See the
 [operation reference](../reference/local-operations.md#opt-in-conversion-measurements).
+
+## Increment: pending comparison forms
+
+The operation API/CLI now prepares pending tool/manual/general-assistant declarations from a
+complete stable ledger containing successful generation. A new sibling directory holds three
+shared-criteria forms, the observed machine summary and prospective collection instructions.
+Validation and inventory recapture precede shared-writer publication. Forms remain estimated,
+in_progress and empty until actual human observations and acceptance are entered.
+
+This is a collection aid, not a workspace snapshot, automatic stopwatch, acceptance authority
+or productivity benchmark. Existing tool outputs can bias a manual baseline; independent
+operators or fresh counterbalanced tasks are needed when appropriate. New attempts require
+fresh inventory binding rather than silently overwriting earlier forms.
