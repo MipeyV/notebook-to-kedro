@@ -22,6 +22,7 @@ from notebook_to_kedro import (
     PlanRequest,
     load_effort_declaration,
     measure_local_operation,
+    prepare_effort_comparison,
     run_local_operation,
     summarize_conversion_measurements,
 )
@@ -499,3 +500,182 @@ def test_cli_measures_plan_generate_and_blocked_inspection(
         == 1
     )
     assert json.loads(capsys.readouterr().out)["status"] == "blocked"
+
+
+@pytest.fixture
+def generated_measurement(workspace: SimpleNamespace) -> SimpleNamespace:
+    measure_local_operation(
+        GenerateRequest(workspace.config, Path("generated")), workspace.directory, case_id="example"
+    )
+    return workspace
+
+
+def _comparison(workspace: SimpleNamespace, **changes: Any) -> tuple[Path, ...]:
+    arguments = {
+        "acceptance_criteria": (
+            "Preserve declared behavior and pass the same reviewed project checks"
+        ),
+        "setup_mode": "reuse",
+        "operator": "Prospective synthetic operator",
+    }
+    arguments.update(changes)
+    return prepare_effort_comparison(
+        workspace.ledger, workspace.ledger.parent / "comparison", **arguments
+    )
+
+
+def test_pending_comparison_kit_uses_same_case_and_never_invents_human_time(
+    generated_measurement: SimpleNamespace,
+) -> None:
+    workspace = generated_measurement
+    paths = _comparison(workspace)
+    assert len(paths) == 5
+    destination = workspace.ledger.parent / "comparison"
+    snapshot = load_effort_declaration(destination / "measurement-summary.json")
+    assert snapshot == summarize_conversion_measurements(workspace.ledger)
+    tool = load_effort_declaration(destination / "tool-effort.json")
+    for filename, method in (
+        ("manual-baseline.json", "manual"),
+        ("assistant-baseline.json", "general_assistant"),
+    ):
+        baseline = load_effort_declaration(destination / filename)
+        assert baseline["method"] == method
+        assert baseline["basis"] == tool["basis"] == "estimated"
+        assert baseline["outcome"] == tool["outcome"] == "in_progress"
+        assert baseline["segments"] == tool["segments"] == []
+        report = summarize_conversion_measurements(workspace.ledger, effort=tool, baseline=baseline)
+        assert report["comparison"]["status"] == "not_established"
+        assert report["comparison"]["human_saved_seconds"] is None
+    assert "learning" in (destination / "README.md").read_text()
+    original = (destination / "tool-effort.json").read_bytes()
+    with pytest.raises(ProjectGenerationError):
+        _comparison(workspace)
+    assert (destination / "tool-effort.json").read_bytes() == original
+
+
+@pytest.mark.parametrize("location", ["ledger", "child", "parent", "outside"])
+def test_comparison_must_be_a_new_sibling_of_ledger(
+    generated_measurement: SimpleNamespace, location: str
+) -> None:
+    workspace = generated_measurement
+    output = {
+        "ledger": workspace.ledger,
+        "child": workspace.ledger / "comparison",
+        "parent": workspace.ledger.parent,
+        "outside": workspace.ledger.parent.parent / "comparison",
+    }[location]
+    with pytest.raises(LocalOperationError, match="new sibling"):
+        prepare_effort_comparison(
+            workspace.ledger,
+            output,
+            acceptance_criteria="same",
+            setup_mode="reuse",
+            operator="pending",
+        )
+    assert not (workspace.ledger / "comparison").exists()
+
+
+@pytest.mark.parametrize("state", ["inspection_only", "unfinished", "changed_source"])
+def test_comparison_requires_complete_stable_generation(
+    workspace: SimpleNamespace, state: str
+) -> None:
+    if state == "inspection_only":
+        _record(workspace)
+    else:
+        measure_local_operation(
+            GenerateRequest(workspace.config, Path("generated")),
+            workspace.directory,
+            case_id="example",
+        )
+        if state == "unfinished":
+            (workspace.directory / "measurement.json").unlink()
+        else:
+            data = load_effort_declaration(workspace.directory / "measurement.json")
+            data["source_after"] = {"sha256": "0" * 64, "size_bytes": 0}
+            _save(workspace.directory / "measurement.json", data)
+    with pytest.raises(LocalOperationError, match="requires"):
+        _comparison(workspace)
+    assert not (workspace.ledger.parent / "comparison").exists()
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("acceptance_criteria", ""),
+        ("acceptance_criteria", "x" * 4097),
+        ("operator", ""),
+        ("operator", 1),
+        ("setup_mode", "unknown"),
+    ],
+)
+def test_comparison_draft_fields_are_validated_before_writes(
+    generated_measurement: SimpleNamespace, field: str, value: Any
+) -> None:
+    workspace = generated_measurement
+    with pytest.raises(LocalOperationError):
+        _comparison(workspace, **{field: value})
+    assert not (workspace.ledger.parent / "comparison").exists()
+
+
+def test_comparison_rejects_ledger_drift_during_preparation(
+    generated_measurement: SimpleNamespace, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    workspace = generated_measurement
+    summary = summarize_conversion_measurements(workspace.ledger)
+    calls = iter((summary, {**summary, "attempts_sha256": "0" * 64}))
+    monkeypatch.setattr(measurements, "summarize_conversion_measurements", lambda _: next(calls))
+    with pytest.raises(LocalOperationError, match="changed while"):
+        _comparison(workspace)
+    assert not (workspace.ledger.parent / "comparison").exists()
+
+
+def test_comparison_retains_failed_generation_attempts(
+    workspace: SimpleNamespace, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    ticks = iter(range(4))
+    monkeypatch.setattr(time, "perf_counter_ns", lambda: next(ticks))
+    existing = workspace.root / "existing"
+    existing.mkdir()
+    with pytest.raises(LocalOperationError):
+        measure_local_operation(
+            GenerateRequest(workspace.config, existing), workspace.directory, case_id="example"
+        )
+    measure_local_operation(
+        GenerateRequest(workspace.config, Path("generated")),
+        workspace.ledger / "attempt-02",
+        case_id="example",
+    )
+    _comparison(workspace)
+    snapshot = load_effort_declaration(
+        workspace.ledger.parent / "comparison/measurement-summary.json"
+    )
+    assert [attempt["observation"]["status"] for attempt in snapshot["attempts"]] == [
+        "failed",
+        "generated",
+    ]
+
+
+def test_cli_prepares_pending_comparison(
+    generated_measurement: SimpleNamespace, capsys: pytest.CaptureFixture[str]
+) -> None:
+    workspace = generated_measurement
+    assert (
+        main(
+            [
+                "project",
+                "prepare-effort-comparison",
+                str(workspace.ledger),
+                str(workspace.ledger.parent / "comparison"),
+                "--acceptance-criteria",
+                "same reviewed conversion",
+                "--setup-mode",
+                "reuse",
+                "--operator",
+                "pending operator",
+            ]
+        )
+        == 0
+    )
+    result = json.loads(capsys.readouterr().out)
+    assert result["status"] == "collection_pending"
+    assert len(result["files"]) == 5

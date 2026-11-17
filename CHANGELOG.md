@@ -29,6 +29,12 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Added API/CLI preparation of prospective effort comparison kits: pending tool/manual/general-
+  assistant forms, shared criteria/source/setup fields, machine snapshot and collection guidance.
+  Complete stable generation records and a new sibling destination are required; inventory is
+  rechecked before shared-writer publication. Prepared a local three-case static pilot, with human
+  collection and real productivity evidence still pending.
+
 - Added opt-in local-operation timing and conversion effort summaries through API/CLI. Exclusive
   reservations retain failures/interruption and expose unfinished attempts. Human effort binds to
   the current inventory; matched operator-declared baselines can report separate human/elapsed

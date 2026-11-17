@@ -167,6 +167,9 @@ with `--case-id` and a new `--measurement-dir`. `project measurement-summary` re
 times and retained attempts. Human effort and manual baselines are explicit declarations;
 pipeline execution time alone does not establish conversion time saved.
 
+`project prepare-effort-comparison` prepares pending tool/manual/general-assistant forms with
+shared task criteria and the current measurement inventory, ready for prospective human collection.
+
 The initial [VS Code extension](docs/guides/vscode-extension.md) exposes these operations from
 Explorer with guided configuration creation, interpreter selection, diagnostics, read-only previews and confirmed
 generation. Build its installable VSIX with `npm ci` and `npm run package` in `extensions/vscode`.

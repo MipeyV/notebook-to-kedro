@@ -97,6 +97,13 @@ its absent human/baseline evidence correctly leaves savings unestablished. Next 
 accepted tasks with real human effort across manual/general-assistant/tool methods, separating
 initial setup from reuse. Preparation/install/runtime timing and interface controls need later slices.
 
+Pending comparison-kit preparation now exports consistent tool/manual/general-assistant forms,
+criteria and observed inventory snapshots. A local pilot has two controlled cases and one
+already-prepared private real workflow, with all nine static operations completed. Human
+collection and comparable accepted baselines remain pending. Next perform prospective timed
+tasks with actual operators, accounting for learning/order effects and the chosen task boundary.
+The real prepared-workflow case excludes prior adapter work and establishes no end-to-end gain.
+
 ## Whole-notebook evaluation next gate
 
 A [draft complete synthetic notebook](../evaluation/synthetic-notebook-pilot.md) now exercises
