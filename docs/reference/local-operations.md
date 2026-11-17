@@ -331,6 +331,12 @@ common independent acceptance; the public synthetic corpus and aggregate observa
 the prepared starting state, separate production/acceptance clocks, corrections and limitations.
 This adds evidence rather than a new measurement or provider API.
 
+The subsequent [boundary-focused extension](../experiments/prepared-agent-comparison.md#boundary-focused-extension)
+retains blocked inspect/plan/generate attempts for oversized regression contracts, helper control
+flow and shared mutable fan-out. Agents met the same frozen task intent in separate projects, but
+the engine published no project for these inputs. Refusal durations must not be presented as accepted
+conversion latency. Inspection success alone does not establish generation eligibility.
+
 The separate `prepare-workflow` API/CLI operation previews declared orchestration before I/O
 configuration and optionally publishes a new review copy. It is not an additional schema 1.0
 local operation or VS Code command. Existing inspect/plan/generate behavior remains unchanged;

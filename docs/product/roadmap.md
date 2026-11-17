@@ -45,6 +45,14 @@ subsecond with configuration already supplied. Synthetic sources/prompts and agg
 are preserved. Next include larger/unsupported inputs and prospectively timed configuration,
 corrections and review, with failures and supported-subset boundaries counted explicitly.
 
+The later [boundary-focused batch](../experiments/prepared-agent-comparison.md#boundary-focused-extension)
+now records all three agent projects accepted and all three tool conversions blocked. It exposes
+the 64 KiB regression-contract budget on an eight-step/140-cleaned-row example, unsupported control
+flow inside helpers, and unsupported shared mutable fan-out. Prioritize a separately scoped bounded
+fixture-backed test contract, then helper-body coverage and a source-order/identity contract before
+broader graph support. These remain proposals; limits were not relaxed to pass the experiment.
+This targeted batch is not a representative conversion success rate or a human productivity study.
+
 Source accounting and supported graph checks are implemented. E2 now has
 [functional inspection](../reference/functional-blocks.md) and a bounded
 [linear workflow conversion](../reference/functional-workflows.md), with source-accounted
