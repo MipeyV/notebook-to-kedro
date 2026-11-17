@@ -89,6 +89,14 @@ engine/runtime operations. This is one frozen-case integration result; broad rea
 visual equivalence and scientific quality thresholds remain open. Optimization retains a separate
 acceptance contract.
 
+An opt-in [conversion effort measurement slice](../reference/local-operations.md#opt-in-conversion-measurements)
+now records existing local operation durations and retained attempts, plus bound operator-declared
+human effort and optional comparable baselines. It separates machine time, human active time and
+declared journey elapsed time. An actual static-example run exercises all three measured operations;
+its absent human/baseline evidence correctly leaves savings unestablished. Next collect matched
+accepted tasks with real human effort across manual/general-assistant/tool methods, separating
+initial setup from reuse. Preparation/install/runtime timing and interface controls need later slices.
+
 ## Whole-notebook evaluation next gate
 
 A [draft complete synthetic notebook](../evaluation/synthetic-notebook-pilot.md) now exercises

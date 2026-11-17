@@ -9,6 +9,7 @@ Historical measurements retain their original corpus, runtime and limitations.
 
 | Capability | Current status |
 | --- | --- |
+| Conversion effort measurements | Opt-in API/CLI times inspect/plan/generate and retains failed/blocked/interrupted/unfinished attempts without changing operation envelopes. Summaries bind declared human effort to current attempt inventories and optionally compare matching manual/general-assistant baselines. No human time is inferred; absent baselines produce no saving. Setup, installation, runtime validation and whole-journey elapsed time remain outside automatic timing. No real productivity gain is established yet. |
 | Deterministic notebook conversion | Operational for the controlled subset in the compatibility policy. |
 | Generation reliability | Public API enforces plan validation and compile-only Python preflight; contained/nonoverlapping copied targets and regular sources are checked before private preparation and rename publication. No overwrite option. |
 | Source completeness | High-level notebook planning blocks unhandled/duplicated statements, task/import drift, unsupported catalog relocation and inconsistent source-derived parameters/dependencies. A separate read-only audit exposes every parsed statement. |

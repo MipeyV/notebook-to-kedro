@@ -210,6 +210,12 @@ cases and standards. Measure complete-project success, manual corrections, revie
 latency and total cost. Include rejected/unfinished attempts. Validate consistency and maintenance
 benefits across projects; model scores alone do not demonstrate a commercial advantage.
 
+An initial opt-in [operation measurement API/CLI](../reference/local-operations.md#opt-in-conversion-measurements)
+now captures inspect/plan/generate timings and retained attempts. Human active time, accepted task
+criteria, initial-setup/reuse context and manual/general-assistant baselines remain explicit
+operator declarations. Missing baselines imply no measured saving. This supplies instrumentation
+for the evaluation workstream, not evidence of a productivity or commercial advantage by itself.
+
 ## Commercial hypotheses
 
 B2B packaging may include an open-source core, enterprise integrations/support, managed or
