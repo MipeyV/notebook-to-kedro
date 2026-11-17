@@ -31,6 +31,13 @@ review effort, failures/unfinished attempts, latency and cost. Actual human revi
 whole-notebook model campaign; it does not block deterministic core development. Customer discovery
 and broader source/library contracts accompany the relevant slices.
 
+An initial [one-prompt agent check](../reference/local-operations.md#one-prompt-agent-check)
+now records successful independent acceptance for both a fresh coding agent and the converter
+on one prepared synthetic functional script. It does not cover notebook conversion, human effort,
+cost or a representative corpus. Extend the comparison to larger matched tasks and prospectively
+observed preparation/correction/review before estimating productivity; do not divide clocks with
+different boundaries into a claimed speedup.
+
 Source accounting and supported graph checks are implemented. E2 now has
 [functional inspection](../reference/functional-blocks.md) and a bounded
 [linear workflow conversion](../reference/functional-workflows.md), with source-accounted

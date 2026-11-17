@@ -40,6 +40,41 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-11-17 - Run one frozen-prompt coding-agent comparison
+
+### Completed
+
+- At the user's request, gave one fixed prompt and fresh context to a coding agent for a new
+  isolated copy of the controlled scalar functional task. No corrective coordinator follow-up,
+  converter solution or transformation API was supplied; only the shared file writer was allowed.
+- Both agent and converter projects passed independent structural/AST/catalog/parameter checks,
+  three pipeline/six node oracles, the Kedro CLI and delivered tests. Both suites rejected two
+  arithmetic mutations in private copies. Agent tests passed 11/11; converter tests passed 9/9.
+- Observed an approximate 319 s agent dispatch/completion window and 0.356 s converter in-process
+  setup/static operations. Successful common acceptance took 8.710 s and 8.488 s respectively.
+  Preserve different clock boundaries; no human effort or saving is inferred.
+- Retained the agent's metadata/temp-directory/API test-harness failures and internal correction.
+  The coordinator's first tool check hit a Windows pytest temporary-directory error (4.556 s);
+  corrected the shared checker for both projects without repairing either canonical candidate.
+- Rechecked all six shared/original input files and candidate inventories unchanged. The agent
+  additionally built its wheel offline; no installation or real financial runtime was performed.
+  Detailed prompts, candidates, inventories and failed/successful logs stay ignored locally.
+- All 75 documentation checks, Ruff and format checks passed for this documentation-only
+  evidence update. Core/interface code is unchanged; the full engine suite was not rerun.
+
+### Decisions
+
+- This is an external coding-agent experiment, not a new product provider transport. Exact model
+  identifier, tokens/cost and prospectively observed human intervals were unavailable.
+- One tiny prepared functional script in a reused environment is not a notebook or representative
+  productivity study. Agent timing includes authorship/corrections/tests/extra build; converter
+  timing excludes prior source/config preparation and separately reported runtime acceptance.
+
+### Next step
+
+- Use larger matched notebook tasks and prospectively record preparation, corrections and review,
+  retaining failures and comparable accepted outcomes before estimating human or commercial gain.
+
 ## 2026-11-17 - Prepare prospective effort comparison kits
 
 ### Completed

@@ -288,6 +288,43 @@ installation and runtime validation. This is preparation of differing scoped tas
 representative corpus or a measured productivity comparison. Detailed records remain ignored
 locally; protected files from the earlier private runtime trial were rechecked unchanged.
 
+### One-prompt agent check
+
+On 2026-11-17, a user-requested external coding-agent experiment used fresh context, one fixed
+detailed prompt and the same prepared synthetic functional script/configuration/profile/oracles
+as the converter. The agent received no corrective coordinator follow-up or converter solution.
+It could use only the generic shared writer to publish its authored files, never transformation
+or test-rendering APIs. This is separate from engine providers; no transport was implemented.
+
+Both projects passed independent checks against actual catalogs/registered pipelines: two connected
+prefixed nodes, preserved helper ASTs, JSON input/output, assign-mode memory intermediate, explicit
+parameters, three pipeline and six node expectations, standard Kedro CLI execution and delivered
+tests. Their tests rejected two arithmetic source mutations in separate copies. Canonical candidate
+inventories and all six shared input files were rechecked unchanged.
+
+| Observation | Coding agent | Deterministic converter |
+| --- | --- | --- |
+| Delivered tests passing independently | 11 (nine supplied expectations plus two AST checks) | 9 |
+| Production phase observation | Approximately 319 s dispatch-to-completion clock window | 0.356 s in-process setup/imports and inspect/plan/generate |
+| Successful common independent acceptance | 8.710 s | 8.488 s |
+| Retained unsuccessful verification | Metadata probe, Windows temp-directory errors, obsolete DataCatalog.add test-harness call corrected internally | First coordinator check hit Windows temp-directory access errors (4.556 s); common harness corrected |
+
+The agent window includes reading, authoring, internal corrections, its tests, CLI checks and a
+voluntary offline wheel build, plus coordinator/tool scheduling at one-second clock resolution.
+Converter timing begins with already supplied configuration and excludes prior source/specification
+preparation, process startup, human review and the separately reported acceptance. The agent's wheel
+build is additional evidence; common acceptance did not build/install either project. No speedup
+ratio is inferred from these different boundaries. Exact agent model identifier, tokens and cost
+were not exposed; human preparation/correction/review intervals remain uncollected.
+
+The initial coordinator failure is preserved. Both candidates then used the same corrected checker
+with new contained pytest temporary directories; neither canonical candidate was repaired by the
+coordinator. The agent also retained its own failed attempts. Detailed prompt, inventories, candidate
+projects and logs remain ignored locally. The original manual-first input case remains unchanged.
+This one tiny functional script and ready environment establish a scoped successful example,
+not notebook accuracy, fresh-environment installation, independent human acceptance or productivity.
+No real financial workflow/data was exercised and broader pilot review retains its own scope.
+
 The separate `prepare-workflow` API/CLI operation previews declared orchestration before I/O
 configuration and optionally publishes a new review copy. It is not an additional schema 1.0
 local operation or VS Code command. Existing inspect/plan/generate behavior remains unchanged;
