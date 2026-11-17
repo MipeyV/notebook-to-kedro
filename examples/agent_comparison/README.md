@@ -28,3 +28,8 @@ update only those path references for a repeat. Use the locked development envir
 actual Python path. Source/specification reading, configuration authoring and environment setup
 were not timed in the original converter lane. Running or reusing these data grants no independent
 human review or live pilot approval. See ../../docs/experiments/prepared-agent-comparison.md.
+
+The separate [challenge batch](challenges/README.md) adds larger and unsupported inputs, with
+three accepted agent projects and three blocked tool conversions. Its corpus.json and
+observations.json preserve every original boundary outcome; these earlier supported-case files
+are unchanged. Choose the intended batch explicitly when materializing or comparing tasks.

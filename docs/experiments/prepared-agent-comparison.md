@@ -5,6 +5,10 @@
 Status: observed on 2026-11-17. These are user-requested external coding-agent experiments,
 separate from product model providers and the pending whole-notebook pilot review.
 
+The first sections retain the supported-case batch. A later [boundary-focused batch](#boundary-focused-extension)
+adds larger and deliberately unsupported inputs, including all blocked outcomes. They have different
+selection criteria and must not be pooled into a general conversion success rate.
+
 ## Scope and common acceptance
 
 Following the earlier [two-node scalar check](../reference/local-operations.md#one-prompt-agent-check),
@@ -93,3 +97,68 @@ procedural-notebook comparison or the separate nine-task whole-notebook LLM pilo
 source/data/runtime or broader pilot approval was used. The next comparison should include larger
 and unsupported inputs plus prospectively observed configuration, corrections and review. Preserve
 blocked outcomes instead of treating quick refusal as successful conversion.
+
+## Boundary-focused extension
+
+On the same date, the user authorized larger, less-clean and unsupported cases. A new
+[data-only challenge corpus](../../examples/agent_comparison/challenges/README.md) preserves three
+frozen sources, workflow/profile/expectation files and portable prompts. Existing supported-case
+inputs and observations remain unchanged. Engine commit 54a24873baf71f2fd1663d732cc4d31394a92e54
+was unchanged throughout this batch; no limit, source rule, expectation or input was relaxed.
+
+Three fresh agents again received one prompt each, ran concurrently in the ready environment and
+received no corrective coordinator hints. All three agent projects passed independent acceptance.
+All three tool conversions were blocked and published no project. Those tool intervals end in
+refusal, so there is no successful-conversion speedup comparison for this batch.
+
+| Case | Frozen task | Agent outcome / approximate production window | Tool outcome |
+| --- | --- | --- | --- |
+| larger-ml-notebook | Eight steps, 74 source lines, 142 raw records reduced to 140 pairs, 100 training/40 holdout rows, three scenarios and 24 node expectations | Passed / 254.0 s | Inspection passed; planning/generation rejected the regression contract above 64 KiB |
+| messy-control-flow | Three helpers with loops/conditionals, clipping/missing-value errors, stale saved notebook output and nonmonotonic execution counts | Passed / 212.9 s | Inspection blocked by straight-line helper restrictions; planning/generation failed |
+| shared-mutable-fanout | Four calls with one buffer consumed twice, ordered mutations and source identity assertions | Passed / 230.9 s | Inspection passed; planning/generation rejected aliasing/fan-out |
+
+| Case | Independently passing delivered tests | Independent acceptance | Tests failing after the arithmetic mutation |
+| --- | --- | --- | --- |
+| larger-ml-notebook | 42 | 13.627 s | 10 |
+| messy-control-flow | 23 | 7.049 s | 10 |
+| shared-mutable-fanout | 14 | 5.626 s | 10 |
+
+Independent checks covered all nine pipeline expectations and 33 supplied JSON node expectations,
+ThreadRunner behavior, standard Kedro CLI, preserved helper ASTs, source-order graph dependencies,
+exact defaults/catalogs, candidate-contained inputs and arithmetic mutations on private copies.
+The messy case additionally preserved both ValueError messages and published no report for those
+failed invocations. The fan-out case additionally ran the actual registered nodes and verified both
+consumer outputs reference the identical buffer, with exactly left/right events in source order.
+No JSON per-node contract was invented for its reference-sensitive intermediate. Candidate/input
+inventories remained unchanged during coordinator acceptance. All 79 delivered tests passed.
+
+The larger case exposed an unanticipated fixture-size boundary, rather than a large-data benchmark:
+its original regression JSON is 358,514 bytes and lossless whitespace compaction is still 81,334
+bytes, above the existing 65,536-byte loader budget. The [documented contract limit](../reference/generated-workflow-tests.md)
+remained intact. The coordinator initially expected this case to be supported; its outer preflight
+assertion failed after retaining all attempts and the blocked result. No contract was compacted,
+split, trimmed or removed to produce a passing conversion. Source inspection passing alone does
+not establish end-to-end eligibility.
+
+Raw engine evidence retains one blocked inspection, two successful inspections and all six failed
+plan/generate operations. Control-flow diagnostics include BL004/BL006, and generation errors
+remain LO002 with their original messages. In-process attempt totals were 0.320 s, 0.332 s and
+0.321 s respectively. No runtime acceptance was run for the tool because no project existed.
+These are failure/coverage observations, not faster accepted projects or saved human time.
+
+Agents passed their first publication/tests/CLI checks without candidate corrections. Initial
+default-token prompt-access failures were retained; the fan-out agent also corrected an unsupported
+PowerShell UTC probe before authoring. Intentional mutation copies/failures remain in local logs.
+The exact model identifier, token cost and prospectively measured human preparation/review remain
+unavailable. Agent intervals use the same approximate pre-dispatch UTC reference to agent-recorded
+completion convention; coordinator-observed windows are also retained separately (281 s, 228 s,
+250 s). Independent acceptance time remains separate. No build, installation, dependency resolution,
+financial source/data/runtime or separate whole-notebook pilot approval was involved.
+
+This batch intentionally probes boundaries and has one attempt per method/case. It establishes
+three agent successes and three tool blockages on these tasks, not general accuracy estimates.
+Together with the earlier supported batch, it distinguishes fast prepared conversion from broader
+source coverage. Concrete follow-up candidates are bounded fixture-backed regression contracts,
+preserving control flow inside called helpers, and an explicit shared-data/source-order contract.
+Dynamic orchestration and mutable identity must retain separate acceptance evidence; no fallback,
+automatic repair or new capability is implemented by this report.

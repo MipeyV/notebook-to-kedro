@@ -40,6 +40,46 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-11-17 - Preserve larger and unsupported comparison outcomes
+
+### Completed
+
+- After PR 104 merged, created a dedicated branch and froze three targeted synthetic cases:
+  an eight-step notebook with 142 raw/140 cleaned records, a notebook with loop/conditional helpers
+  and stale saved output, and reference-sensitive shared mutable fan-out with ordered mutations.
+- All three fresh-context agents passed their first candidate publication/tests/CLI checks with
+  one prompt and no coordinator correction. Independent checks passed nine pipeline and 33 JSON
+  node expectations, threading, AST/default/catalog/source-order fidelity, two preserved failure
+  paths, actual-node shared identity/events and three arithmetic mutations. All 79 tests passed.
+- All three engine conversions were blocked with no project published. Retained two successful
+  inspections, one blocked inspection, and all six failed planning/generation attempts. The larger
+  contract is 358,514 bytes (81,334 losslessly compacted), above the existing 65,536-byte budget.
+  Its originally expected support was disproved; the outer preflight assertion failure remains
+  retained. No input, oracle, rule or budget was changed or rerun to produce an accepted project.
+- Preserved approximate agent production windows of 254.0, 212.9 and 230.9 seconds, with separate
+  independent acceptance. Tool refusal intervals are not successful conversion or productivity.
+  Exact model/cost and actual human setup/review intervals remain unavailable.
+- Extended the existing measured report, product status/roadmap and data-only corpus with a
+  separate challenge batch. Original supported-case records stay unchanged. Detailed candidates,
+  logs and the local experiment-specific checker remain ignored. No engine/interface API changed.
+- All 76 documentation checks, Ruff and format checks passed. All 21 public input files and three
+  prompts round-trip to frozen bytes; materialized copies reproduce all expected static blockages
+  without execution/publication. The full engine suite/builds/host tests were not rerun because
+  this increment changes data/documentation only.
+
+### Decisions
+
+- Preserve counterexamples to the earlier supported-case latency advantage. This targeted batch
+  establishes task-specific coverage boundaries, not a representative accuracy rate or gain.
+- Bounded fixture-backed regression contracts are the first concrete follow-up candidate; helper
+  control flow and shared-data/source-order semantics need separate reviewed engineering scopes.
+  The separate whole-notebook pilot and real financial runtime approvals remain untouched.
+
+### Next step
+
+- Choose a bounded fixture-backed test-contract increment from the observed oversized fixture,
+  retaining source fidelity, explicit expectations and resource limits before larger comparisons.
+
 ## 2026-11-17 - Expand the prepared agent-versus-converter comparison
 
 ### Completed

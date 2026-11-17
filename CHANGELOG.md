@@ -29,6 +29,11 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Extended the prepared comparison with three frozen boundary cases and all blocked tool attempts.
+  External agent projects passed independent AST/behavior/threading/error/identity/test/mutation
+  checks; oversized regression fixtures, helper control flow and shared mutable fan-out still block
+  this engine. Preserve actual outcomes without weakening budgets or claiming faster conversion.
+
 - Preserved a data-only three-case prepared coding-agent comparison corpus and portable prompts.
   Both methods passed matched independent behavior/threading/CLI/test/mutation checks on an ML
   notebook, ordered join and local package/resource. Aggregate observations retain corrections,

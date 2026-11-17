@@ -1,0 +1,375 @@
+{
+  "schema_version": "1.0",
+  "date": "2026-11-17",
+  "engine_commit": "54a24873baf71f2fd1663d732cc4d31394a92e54",
+  "scope": "Targeted boundary batch of synthetic functional sources; these are not a representative sample or the separately gated whole-notebook pilot.",
+  "cases": [
+    {
+      "case_id": "larger-ml-notebook",
+      "description": "Eight-stage regression notebook; 142 raw rows, 140 cleaned pairs, 100 training and 40 holdout rows per scenario.",
+      "source_lines": 74,
+      "node_count": 8,
+      "frozen_at": "2026-11-17T21:19:06.018989+00:00",
+      "input_inventory": {
+        "workflow.ipynb": {
+          "sha256": "f0ba07108bd08146fe01f0483733f62faceea2800823dbdaa2f650cadf83f4d0",
+          "size": 6202
+        },
+        "raw_batch.json": {
+          "sha256": "c0afde73227276b1097c17f6ae4072cededfe604084e3ecd3736ae2548b5a3b5",
+          "size": 5512
+        },
+        "project.json": {
+          "sha256": "f88821403a00d0742517da8314ffc77d54d026eacffbf0cf6bb20383d3f9d010",
+          "size": 320
+        },
+        "workflow.json": {
+          "sha256": "a534793fff27b3a56433c3cb219345169180a9a39eeff9a790dd47421477e32b",
+          "size": 337
+        },
+        "profile.json": {
+          "sha256": "fbcc13e8452104e47d08a36b2c5eb0b83c619fb41e864b424dc47791435f1862",
+          "size": 155
+        },
+        "regression.json": {
+          "sha256": "fdef75b0fa71e141768353d6ce3cf2ac1339e4ce7e37fa77a67e0ffbb3dabc80",
+          "size": 358514
+        },
+        "acceptance.json": {
+          "sha256": "8c1035b57e9dd4aa65f825a85cb7d643cd7ab6060a4b03b14f39b067cde35671",
+          "size": 4865
+        }
+      },
+      "original_prompt_sha256": "25e6ee2258dbcd3a89901bbe92b29939ff3b45e98746db303ce5dd9050faf713",
+      "portable_prompt_sha256": "822e2fa40b7d32af6d1635644e72824a4400049b7450574ff4c0b364cc7e49f8",
+      "original_tool_expectation": "supported",
+      "agent": {
+        "outcome": "passed_independent_acceptance",
+        "dispatch_reference_utc": "2026-11-17T21:20:45+00:00",
+        "agent_recorded_completion_utc": "2026-11-17T21:24:58.951259+00:00",
+        "coordinator_observed_completion_utc": "2026-11-17T21:25:26+00:00",
+        "approx_production_window_seconds": 253.951259,
+        "coordinator_observation_window_seconds": 281.0,
+        "independent_acceptance_seconds": 13.62674820004031,
+        "delivered_tests_passed": 42,
+        "pipeline_oracles": 3,
+        "json_node_oracles": 24,
+        "failure_path_oracles": 0,
+        "shared_identity": null,
+        "arithmetic_mutation": {
+          "replacement_count": 1,
+          "exit_code": 1,
+          "seconds": 5.438455399998929,
+          "passed": 32,
+          "failed": 10,
+          "errors": 0
+        },
+        "candidate_unchanged_during_coordinator_acceptance": true,
+        "candidate_corrections": 0,
+        "preflight_failures": "Initial default prompt access denied; scoped read succeeded."
+      },
+      "tool": {
+        "outcome": "blocked_conversion",
+        "no_project_published": true,
+        "runtime_validation": "not_run_no_project",
+        "in_process_inspect_plan_generate_attempts_seconds": 0.32006450003245845,
+        "attempts": [
+          {
+            "operation": "01-inspect",
+            "status": "inspected",
+            "diagnostics": null
+          },
+          {
+            "operation": "02-plan",
+            "status": "failed",
+            "exception": "LocalOperationError",
+            "code": "LO002",
+            "message": "LO002: Regression contract exceeds 64 KiB"
+          },
+          {
+            "operation": "03-generate",
+            "status": "failed",
+            "exception": "LocalOperationError",
+            "code": "LO002",
+            "message": "LO002: Regression contract exceeds 64 KiB"
+          }
+        ],
+        "operation_seconds": {
+          "01-inspect": 0.0326342,
+          "02-plan": 0.0187713,
+          "03-generate": 0.022017
+        },
+        "inspection_error_diagnostics": []
+      },
+      "contract_bytes": 358514,
+      "lossless_compact_contract_bytes": 81334,
+      "contract_limit_bytes": 65536,
+      "prompt_count": 1,
+      "coordinator_corrective_followups": 0,
+      "exact_agent_model_identifier": null,
+      "human_preparation_seconds": null,
+      "human_review_seconds": null,
+      "cost": null
+    },
+    {
+      "case_id": "messy-control-flow",
+      "description": "Draft functional notebook with for/if, missing-value errors, clipping, stale saved output and nonmonotonic execution counts.",
+      "source_lines": 34,
+      "node_count": 3,
+      "frozen_at": "2026-11-17T21:19:06.033030+00:00",
+      "input_inventory": {
+        "workflow.ipynb": {
+          "sha256": "c946f3cffeeffa840322ed7094464b66a8018254169dff7163d59d89a3de61eb",
+          "size": 2299
+        },
+        "raw_values.json": {
+          "sha256": "8c6e100608718fb2278c1a727766d09926706c3db4ed949d16f1893bfba780af",
+          "size": 41
+        },
+        "project.json": {
+          "sha256": "fbd92fb39e2db9f73af89d4d0abfad07929917c79274e910e37a30e6dfab0329",
+          "size": 320
+        },
+        "workflow.json": {
+          "sha256": "e6738f1525369adf551cf6b8dc94527d41603e2a6222f8826f830569ee36e5bd",
+          "size": 273
+        },
+        "profile.json": {
+          "sha256": "fbcc13e8452104e47d08a36b2c5eb0b83c619fb41e864b424dc47791435f1862",
+          "size": 155
+        },
+        "regression.json": {
+          "sha256": "214c4b3e428f3394a47c77405dbe6929d84f6456dfba46a03e451245e7c674c2",
+          "size": 4158
+        },
+        "acceptance.json": {
+          "sha256": "21d0e6b01b87275c043127bae791e32e5d6e6495f2ec72f90fc33717887cf3c0",
+          "size": 2420
+        }
+      },
+      "original_prompt_sha256": "ec279557bcd2d9ec888f07d850c32846e19b9fda06e63100f1bf8277df6197fb",
+      "portable_prompt_sha256": "72ad47c98955a7ba08b78dfce59b2adf6c9707ba3c96cf5fb2620da9c156974c",
+      "original_tool_expectation": "control_flow_unsupported",
+      "agent": {
+        "outcome": "passed_independent_acceptance",
+        "dispatch_reference_utc": "2026-11-17T21:20:54+00:00",
+        "agent_recorded_completion_utc": "2026-11-17T21:24:26.931121+00:00",
+        "coordinator_observed_completion_utc": "2026-11-17T21:24:42+00:00",
+        "approx_production_window_seconds": 212.931121,
+        "coordinator_observation_window_seconds": 228.0,
+        "independent_acceptance_seconds": 7.048812700028066,
+        "delivered_tests_passed": 23,
+        "pipeline_oracles": 3,
+        "json_node_oracles": 9,
+        "failure_path_oracles": 2,
+        "shared_identity": null,
+        "arithmetic_mutation": {
+          "replacement_count": 1,
+          "exit_code": 1,
+          "seconds": 2.1733920000260696,
+          "passed": 13,
+          "failed": 10,
+          "errors": 0
+        },
+        "candidate_unchanged_during_coordinator_acceptance": true,
+        "candidate_corrections": 0,
+        "preflight_failures": "Initial default prompt access denied; scoped read succeeded."
+      },
+      "tool": {
+        "outcome": "blocked_conversion",
+        "no_project_published": true,
+        "runtime_validation": "not_run_no_project",
+        "in_process_inspect_plan_generate_attempts_seconds": 0.3316249000490643,
+        "attempts": [
+          {
+            "operation": "01-inspect",
+            "status": "blocked",
+            "diagnostics": null
+          },
+          {
+            "operation": "02-plan",
+            "status": "failed",
+            "exception": "LocalOperationError",
+            "code": "LO002",
+            "message": "LO002: Workflow requires complete, recomputed functional analysis"
+          },
+          {
+            "operation": "03-generate",
+            "status": "failed",
+            "exception": "LocalOperationError",
+            "code": "LO002",
+            "message": "LO002: Workflow requires complete, recomputed functional analysis"
+          }
+        ],
+        "operation_seconds": {
+          "01-inspect": 0.0280253,
+          "02-plan": 0.0078503,
+          "03-generate": 0.0075081
+        },
+        "inspection_error_diagnostics": [
+          {
+            "code": "BL004",
+            "message": "Only straight-line assignment/assertion/call/return bodies are supported."
+          },
+          {
+            "code": "BL006",
+            "message": "A local name is read before its straight-line binding."
+          },
+          {
+            "code": "BL004",
+            "message": "Only straight-line assignment/assertion/call/return bodies are supported."
+          },
+          {
+            "code": "BL006",
+            "message": "A local name is read before its straight-line binding."
+          },
+          {
+            "code": "BL004",
+            "message": "Only straight-line assignment/assertion/call/return bodies are supported."
+          }
+        ]
+      },
+      "contract_bytes": 4158,
+      "lossless_compact_contract_bytes": 1676,
+      "contract_limit_bytes": 65536,
+      "prompt_count": 1,
+      "coordinator_corrective_followups": 0,
+      "exact_agent_model_identifier": null,
+      "human_preparation_seconds": null,
+      "human_review_seconds": null,
+      "cost": null
+    },
+    {
+      "case_id": "shared-mutable-fanout",
+      "description": "Four calls sharing a mutable buffer across two consumers; exact object identity and left-before-right effects are source semantics.",
+      "source_lines": 26,
+      "node_count": 4,
+      "frozen_at": "2026-11-17T21:19:06.043268+00:00",
+      "input_inventory": {
+        "workflow.py": {
+          "sha256": "05968dec787d1ac6244608a37faa9e8405141c2a76420d47486ef3ec4bfa05e5",
+          "size": 942
+        },
+        "raw_values.json": {
+          "sha256": "036eb11498b236cfd91aa300523eb9776240b65ab107af082f64cf15b11dba0d",
+          "size": 24
+        },
+        "project.json": {
+          "sha256": "eb42be43340d68c3ab31c601b415f635f7f401ac20f478b7bcdad5df26390eae",
+          "size": 320
+        },
+        "workflow.json": {
+          "sha256": "bb69ca817e0f20de85524795a772dcd1d4cbc6471f6f418d3e9665447dc9f5df",
+          "size": 241
+        },
+        "profile.json": {
+          "sha256": "fbcc13e8452104e47d08a36b2c5eb0b83c619fb41e864b424dc47791435f1862",
+          "size": 155
+        },
+        "regression.json": {
+          "sha256": "986ac03195d763b665ca7a114bcd63aad832dd49e1403f2db11ae0c73f56463b",
+          "size": 1074
+        },
+        "acceptance.json": {
+          "sha256": "ce80af71f6d0eb904acb24ab09cb1cedbdf3bec8ca5c1b4206a8903e066fe330",
+          "size": 1804
+        }
+      },
+      "original_prompt_sha256": "2c506e207a959fa644ee1d4f76d7f3d188b79665b142b9a7c42571e2741947f7",
+      "portable_prompt_sha256": "419756112a59438fa41864e10ea815cf63717d7e13aed06eee3fe72dabfbade5",
+      "original_tool_expectation": "fanout_unsupported",
+      "agent": {
+        "outcome": "passed_independent_acceptance",
+        "dispatch_reference_utc": "2026-11-17T21:21:16+00:00",
+        "agent_recorded_completion_utc": "2026-11-17T21:25:06.894145+00:00",
+        "coordinator_observed_completion_utc": "2026-11-17T21:25:26+00:00",
+        "approx_production_window_seconds": 230.894145,
+        "coordinator_observation_window_seconds": 250.0,
+        "independent_acceptance_seconds": 5.625502599985339,
+        "delivered_tests_passed": 14,
+        "pipeline_oracles": 3,
+        "json_node_oracles": 0,
+        "failure_path_oracles": 0,
+        "shared_identity": "passed",
+        "arithmetic_mutation": {
+          "replacement_count": 1,
+          "exit_code": 1,
+          "seconds": 1.7971224999637343,
+          "passed": 4,
+          "failed": 10,
+          "errors": 0
+        },
+        "candidate_unchanged_during_coordinator_acceptance": true,
+        "candidate_corrections": 0,
+        "preflight_failures": "Initial default prompt access denied; scoped read succeeded. Unsupported PowerShell Get-Date -AsUTC probe corrected; no candidate repair."
+      },
+      "tool": {
+        "outcome": "blocked_conversion",
+        "no_project_published": true,
+        "runtime_validation": "not_run_no_project",
+        "in_process_inspect_plan_generate_attempts_seconds": 0.3212249000207521,
+        "attempts": [
+          {
+            "operation": "01-inspect",
+            "status": "inspected",
+            "diagnostics": null
+          },
+          {
+            "operation": "02-plan",
+            "status": "failed",
+            "exception": "LocalOperationError",
+            "code": "LO002",
+            "message": "LO002: Data and mapping parameters must be consumed at most once; aliasing/fan-out is unsupported"
+          },
+          {
+            "operation": "03-generate",
+            "status": "failed",
+            "exception": "LocalOperationError",
+            "code": "LO002",
+            "message": "LO002: Data and mapping parameters must be consumed at most once; aliasing/fan-out is unsupported"
+          }
+        ],
+        "operation_seconds": {
+          "01-inspect": 0.0065693,
+          "02-plan": 0.008472,
+          "03-generate": 0.0084583
+        },
+        "inspection_error_diagnostics": []
+      },
+      "contract_bytes": 1074,
+      "lossless_compact_contract_bytes": 526,
+      "contract_limit_bytes": 65536,
+      "prompt_count": 1,
+      "coordinator_corrective_followups": 0,
+      "exact_agent_model_identifier": null,
+      "human_preparation_seconds": null,
+      "human_review_seconds": null,
+      "cost": null
+    }
+  ],
+  "setup_mode": "reuse",
+  "agent_context": "Three concurrent fresh-context agents, inherited session model, one frozen prompt each.",
+  "environment": {
+    "kedro": "1.5.0",
+    "kedro-datasets": "8.1.0",
+    "numpy": "2.5.2",
+    "pandas": "2.3.3",
+    "scikit-learn": "1.9.0",
+    "pytest": "9.1.1",
+    "nbformat": "5.11.1"
+  },
+  "coordinator_checker_sha256": "199a40fb379f6de1f1d05a10735b1edd6ba1d4636b624801e86fc9916267215f",
+  "engine_changes": false,
+  "criterion_changes": false,
+  "human_productivity_established": false,
+  "timing_note": "Agent UTC window includes authoring and self-verification, with orchestration/scheduling. Independent acceptance is separate. Tool intervals end in refusal, so no successful-conversion latency comparison or speedup is valid.",
+  "retained_failure_note": "Larger-case preflight originally expected support and its outer assertion failed after preserving all three attempts and blocked observation. The actual 358514-byte contract, and even its 81334-byte lossless compact representation, exceed 65536 bytes. Nothing was compacted, omitted, split or retried to make generation pass.",
+  "limits": [
+    "All sources/configuration/oracles supplied; human setup/review not measured",
+    "One run per method/case; targeted cases and concurrent agents do not estimate general accuracy or latency distributions",
+    "No wheel/install/build or dependency resolution",
+    "Coding-agent service is external to the engine; no provider transport was added",
+    "Candidate projects/logs/local checker remain ignored; public corpus is data only",
+    "No real financial data/runtime or independent pilot review approval"
+  ]
+}
