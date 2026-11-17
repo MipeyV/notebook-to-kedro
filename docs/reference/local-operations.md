@@ -325,6 +325,12 @@ This one tiny functional script and ready environment establish a scoped success
 not notebook accuracy, fresh-environment installation, independent human acceptance or productivity.
 No real financial workflow/data was exercised and broader pilot review retains its own scope.
 
+A later [three-case expansion](../experiments/prepared-agent-comparison.md) now exercises an
+explicit-function ML notebook, ordered join and original package/resource. Both methods passed
+common independent acceptance; the public synthetic corpus and aggregate observations preserve
+the prepared starting state, separate production/acceptance clocks, corrections and limitations.
+This adds evidence rather than a new measurement or provider API.
+
 The separate `prepare-workflow` API/CLI operation previews declared orchestration before I/O
 configuration and optionally publishes a new review copy. It is not an additional schema 1.0
 local operation or VS Code command. Existing inspect/plan/generate behavior remains unchanged;
