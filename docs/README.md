@@ -95,6 +95,7 @@ the dedicated experiment reports for their frozen settings, decisions and limita
 
 | Document | Status | Purpose |
 | --- | --- | --- |
+| [Prepared coding-agent comparison](experiments/prepared-agent-comparison.md) | Measured: 2026-11-17 | Three additional prepared functional cases: ML notebook, ordered join and package/resource; independent matched acceptance, retained corrections and separate timing boundaries. |
 | [Local code-model comparison](experiments/local-code-model-comparison.md) | Measured | Controlled full-code comparison on the eight-task development corpus. |
 | [Statement-retention prompt](experiments/node-code-statement-retention.md) | Rejected experiment | Preserved evidence for the regressive v5 candidate. |
 | [Body-only model measurements](experiments/node-body-local-measurements.md) | Measured | Repeated body runs and replays on the development corpus. |

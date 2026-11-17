@@ -38,6 +38,13 @@ cost or a representative corpus. Extend the comparison to larger matched tasks a
 observed preparation/correction/review before estimating productivity; do not divide clocks with
 different boundaries into a claimed speedup.
 
+The [expanded prepared comparison](../experiments/prepared-agent-comparison.md) now adds an
+explicit-function ML notebook, a four-node source-ordered join and a local package/resource case.
+Both methods passed the same independent acceptance on all three; converter production remained
+subsecond with configuration already supplied. Synthetic sources/prompts and aggregate records
+are preserved. Next include larger/unsupported inputs and prospectively timed configuration,
+corrections and review, with failures and supported-subset boundaries counted explicitly.
+
 Source accounting and supported graph checks are implemented. E2 now has
 [functional inspection](../reference/functional-blocks.md) and a bounded
 [linear workflow conversion](../reference/functional-workflows.md), with source-accounted

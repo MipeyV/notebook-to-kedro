@@ -29,6 +29,11 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Preserved a data-only three-case prepared coding-agent comparison corpus and portable prompts.
+  Both methods passed matched independent behavior/threading/CLI/test/mutation checks on an ML
+  notebook, ordered join and local package/resource. Aggregate observations retain corrections,
+  supported-subset scope and separate production/acceptance timing; no engine API or human saving.
+
 - Added API/CLI preparation of prospective effort comparison kits: pending tool/manual/general-
   assistant forms, shared criteria/source/setup fields, machine snapshot and collection guidance.
   Complete stable generation records and a new sibling destination are required; inventory is

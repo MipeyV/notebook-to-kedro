@@ -40,6 +40,46 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-11-17 - Expand the prepared agent-versus-converter comparison
+
+### Completed
+
+- On a dedicated branch after PR 103 merged, froze three additional synthetic tasks: an unexecuted
+  functional NumPy/scikit-learn regression notebook, four-node ordered JSON join/candidate workflow,
+  and original local package/dataclass/resource workflow. Sources, configuration and explicit oracles
+  were shared by both methods. No financial data or separately gated whole-notebook pilot was used.
+- Three fresh-context coding agents ran concurrently with one prompt each and no coordinator
+  correction. Only the generic shared publication writer was allowed, never transformation APIs.
+  ML/package agents corrected retained string-key publication errors; join needed no implementation
+  correction. The converter completed all nine static operations without correction.
+- Both methods passed independent AST/catalog/parameter/order/byte checks, nine pipeline and
+  21 JSON node expectations each, threaded runs, the standard Kedro CLI, delivered tests and three
+  arithmetic mutations. Agent suites passed 44 tests; converter suites passed 30. Canonical/input
+  inventories remained unchanged during coordinator acceptance. Typed JSON node oracles remain
+  absent for the package dataclass; additional agent tests do not fill that engine capability gap.
+- Approximate agent reference-to-recorded-completion windows were 207.4, 234.0 and 193.8 seconds.
+  Converter in-process production took 0.435, 0.399 and 0.422 seconds. Common acceptance is separately
+  recorded; source/config preparation, human review and costs were not measured. No ratio is inferred.
+- Published only synthetic data, portable prompts and aggregate observations under
+  examples/agent_comparison, with an indexed measured report. Detailed candidates, logs and the
+  experiment-specific coordinator checker remain ignored locally. No engine/interface API changed.
+- All 76 documentation checks, Ruff and format checks passed. All 27 published input files and
+  three portable prompts round-trip to frozen bytes; materialized cases inspect/plan successfully.
+  Core/interface code is unchanged, so the full engine suite and host tests were not rerun.
+
+### Decisions
+
+- These supported prepared tasks confirm lower converter production latency with matching
+  acceptance. One attempt each, concurrent agents and different clock boundaries do not establish
+  general notebook coverage, controlled model latency or human productivity.
+- Retain failures, internal corrections, explicit typed-oracle gaps and unknown model/cost fields.
+  This is a corpus/evidence increment, not a framework, remote provider or live campaign runner.
+
+### Next step
+
+- Add larger and unsupported cases and prospectively observe configuration/correction/review time;
+  account for blocked attempts before making broader product or commercial claims.
+
 ## 2026-11-17 - Run one frozen-prompt coding-agent comparison
 
 ### Completed

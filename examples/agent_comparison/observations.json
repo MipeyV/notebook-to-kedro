@@ -1,0 +1,285 @@
+{
+  "schema_version": "1.0",
+  "date": "2026-11-17",
+  "engine_commit": "2e7ebff2d0f6808a91bad1ceaaf8e7f498d15bb6",
+  "cases": [
+    {
+      "case_id": "ml-notebook",
+      "description": "Unexecuted functional notebook: NumPy preparation, scikit-learn fit/predict, MAE report.",
+      "node_count": 3,
+      "pipeline_oracles": 3,
+      "node_oracles": 9,
+      "frozen_at": "2026-11-17T20:49:11.549760+00:00",
+      "input_inventory": {
+        "workflow.ipynb": {
+          "sha256": "bffbb64d644d52c75d1ca776ba2e305f6d7869467b70fba1b9498b430290468e",
+          "size": 2684
+        },
+        "batch.json": {
+          "sha256": "33bc46ab512558264517fd85dabe96bc2fe7fdbf2c23ed3220e23757409ea043",
+          "size": 239
+        },
+        "workflow.json": {
+          "sha256": "45625909d7678e685e0d5168439735f19c5a019d366cf6243c865715c0e0d6a9",
+          "size": 223
+        },
+        "project.json": {
+          "sha256": "ec2ca613b28fecccf45c3577e34b84bcf8ba45bc4b399559c2d1d2b5080e006c",
+          "size": 312
+        },
+        "profile.json": {
+          "sha256": "542b45f0ec4e6af4c083b081726e5bf31e7b63f77b8a1429af909212b4637cc9",
+          "size": 154
+        },
+        "regression.json": {
+          "sha256": "d109e15a7226239048b6b7877f3594ac6ab9ff169106378581daa8f11b76f32e",
+          "size": 10252
+        },
+        "acceptance.json": {
+          "sha256": "686bc29fd46b06bb2bb92bf1c2a90de285a1a5f1a45c45f496e8249c54bbc6f8",
+          "size": 1905
+        }
+      },
+      "original_prompt_sha256": "d52dcc5c914e58495efd2cd65cd348205220faed682e8716ad693f5c4dd56c33",
+      "portable_prompt_sha256": "e6b0cf5d2708d810abab96ce7481d36ec2b70810dd1f01df8ba074d811b5fdfe",
+      "agent": {
+        "status": "passed",
+        "dispatch_reference_utc": "2026-11-17T20:49:36+00:00",
+        "agent_recorded_completion_utc": "2026-11-17T20:53:03.428+00:00",
+        "coordinator_observed_completion_utc": "2026-11-17T20:53:17+00:00",
+        "approx_reference_to_recorded_completion_seconds": 207.428,
+        "coordinator_observation_window_seconds": 221.0,
+        "independent_acceptance_seconds": 10.696659700013697,
+        "delivered_tests": 16,
+        "mutant_failed_tests": 9,
+        "internal_corrections": "String-to-Path keys corrected after first generic writer failure; no business repair."
+      },
+      "tool": {
+        "status": "passed",
+        "in_process_seconds": 0.4346415000036359,
+        "operation_seconds": {
+          "inspect": 0.0369816,
+          "plan": 0.0243339,
+          "generate": 0.044774
+        },
+        "independent_acceptance_seconds": 11.291467799979728,
+        "delivered_tests": 12,
+        "mutant_failed_tests": 6,
+        "internal_corrections": 0
+      },
+      "independent_checks": {
+        "threaded_runner": "passed",
+        "kedro_cli": "passed",
+        "asts": "passed",
+        "source_order": "passed",
+        "package_files_preserved": null,
+        "candidate_and_inputs_unchanged": true
+      },
+      "prompt_count": 1,
+      "coordinator_corrective_followups": 0,
+      "exact_agent_model_identifier": null,
+      "human_effort_seconds": null,
+      "cost": null
+    },
+    {
+      "case_id": "ordered-join",
+      "description": "Four ordered nodes, two independent JSON loaders, normalization, joined candidate mapping.",
+      "node_count": 4,
+      "pipeline_oracles": 3,
+      "node_oracles": 12,
+      "frozen_at": "2026-11-17T20:49:11.561666+00:00",
+      "input_inventory": {
+        "workflow.py": {
+          "sha256": "ef39fd3d0415aec7c7792bee0716ed613b16cf74d7d3d2ba8007fc4dc0b158a4",
+          "size": 797
+        },
+        "raw_observations.json": {
+          "sha256": "69415c50dd3e8c67d4ea901d7ffaa61fe7af59fc4b9197c13e43449a33bd9928",
+          "size": 17
+        },
+        "raw_protocol.json": {
+          "sha256": "08b0cef271fc0f7d9e1fd69958dfe8bb16cfa2ecfb2f8f4ddd3ff2115433c144",
+          "size": 36
+        },
+        "workflow.json": {
+          "sha256": "842c0b0b6caec8078beda721f891ddc14223215931cf52a354adcbcd8bd9322f",
+          "size": 345
+        },
+        "project.json": {
+          "sha256": "3a662f1c3d56c7e7af0884e667104cfff04c2e7e807b369f501e6dafc8acd1a3",
+          "size": 310
+        },
+        "profile.json": {
+          "sha256": "542b45f0ec4e6af4c083b081726e5bf31e7b63f77b8a1429af909212b4637cc9",
+          "size": 154
+        },
+        "regression.json": {
+          "sha256": "b89f49aca0461d9b893bdd934ae8496266f20d5c764558cff741f1eb0bcfdee7",
+          "size": 5165
+        },
+        "acceptance.json": {
+          "sha256": "d1a1ac7fd5f242a37cac9c732e273db32802cf6a51d6b2182098adc382b2af62",
+          "size": 1517
+        }
+      },
+      "original_prompt_sha256": "9c3a6cd8e610ef3bdd6be9f846bbbab9a45f1c737d76761cf92b15bdb9978b3a",
+      "portable_prompt_sha256": "4674517db005ddb8e3968c39b0c3e04ab8473fc815dbea4b221a1c68e159c514",
+      "agent": {
+        "status": "passed",
+        "dispatch_reference_utc": "2026-11-17T20:49:46+00:00",
+        "agent_recorded_completion_utc": "2026-11-17T20:53:40+00:00",
+        "coordinator_observed_completion_utc": "2026-11-17T20:54:00+00:00",
+        "approx_reference_to_recorded_completion_seconds": 234.0,
+        "coordinator_observation_window_seconds": 254.0,
+        "independent_acceptance_seconds": 4.830011399986688,
+        "delivered_tests": 21,
+        "mutant_failed_tests": 10,
+        "internal_corrections": "No implementation corrections; intentional arithmetic mutation restored."
+      },
+      "tool": {
+        "status": "passed",
+        "in_process_seconds": 0.3992061999742873,
+        "operation_seconds": {
+          "inspect": 0.0056747,
+          "plan": 0.0184438,
+          "generate": 0.0422864
+        },
+        "independent_acceptance_seconds": 5.791000300028827,
+        "delivered_tests": 15,
+        "mutant_failed_tests": 6,
+        "internal_corrections": 0
+      },
+      "independent_checks": {
+        "threaded_runner": "passed",
+        "kedro_cli": "passed",
+        "asts": "passed",
+        "source_order": "passed",
+        "package_files_preserved": null,
+        "candidate_and_inputs_unchanged": true
+      },
+      "prompt_count": 1,
+      "coordinator_corrective_followups": 0,
+      "exact_agent_model_identifier": null,
+      "human_effort_seconds": null,
+      "cost": null
+    },
+    {
+      "case_id": "package-resource",
+      "description": "Original local package/import names, dataclass intermediate, package-relative JSON resource.",
+      "node_count": 2,
+      "pipeline_oracles": 3,
+      "node_oracles": 0,
+      "frozen_at": "2026-11-17T20:49:11.572736+00:00",
+      "input_inventory": {
+        "src/study_domain/__init__.py": {
+          "sha256": "f9e9b26be180e9a3fc6af6630bdcbd7be9b89720a95f4877a2935d3297f4a459",
+          "size": 42
+        },
+        "src/study_domain/workflow.py": {
+          "sha256": "96740775ee595f6a1f4f13f9e141f113296e29e951f7a43b1021039b0a02490c",
+          "size": 434
+        },
+        "src/study_domain/domain.py": {
+          "sha256": "70f195acb70357fbf471b081fe3c1f8f22fb61a693b0b485dfc408dab955c9b8",
+          "size": 97
+        },
+        "src/study_domain/settings.py": {
+          "sha256": "48cc4107906d4a76fe61c58bc73b564c017ed870fbbe9e34a4e955215146be6c",
+          "size": 197
+        },
+        "src/study_domain/transforms.py": {
+          "sha256": "1c6bfc2b5ec424b9127ed3769bf144484c6bca340fc189980bba973398169d7a",
+          "size": 353
+        },
+        "src/study_domain/assets/offset.json": {
+          "sha256": "2515cb58c07d2704e3ae43a20ef2eb01939005acf5ca3edf3c68a05f94937676",
+          "size": 17
+        },
+        "values.json": {
+          "sha256": "66e4c000f2000eb1cca164f97c441e14d438ca2599c8e79f4de6ecade0de8b32",
+          "size": 4
+        },
+        "workflow.json": {
+          "sha256": "4c4aef5ef39b359c5953923eb170e4a147ec569f6d0656a41d58a32237d7ab4f",
+          "size": 263
+        },
+        "project.json": {
+          "sha256": "8e05c0bbd606123cc59a4a2ee21e44fa5ae09c0f3865a0f029e9f8f58105fa2c",
+          "size": 331
+        },
+        "profile.json": {
+          "sha256": "542b45f0ec4e6af4c083b081726e5bf31e7b63f77b8a1429af909212b4637cc9",
+          "size": 154
+        },
+        "regression.json": {
+          "sha256": "b344d53e24cc4e0370267ab86870e35084019cb8ef72ff2e4d5bab721057c07c",
+          "size": 907
+        },
+        "acceptance.json": {
+          "sha256": "eb448d9c8c65795b685921224cf4cd74da5b8af85d1aff373d319ff77ae7d2b8",
+          "size": 1038
+        }
+      },
+      "original_prompt_sha256": "fb8778a19c4c9082c897c446592ff404b11ab82e0c9a5dda3b8ec19ae1e62142",
+      "portable_prompt_sha256": "11b04b89333d49a2aa1106099765ee7586410c6480031888618cfe90916b1ef8",
+      "agent": {
+        "status": "passed",
+        "dispatch_reference_utc": "2026-11-17T20:49:56+00:00",
+        "agent_recorded_completion_utc": "2026-11-17T20:53:09.766127+00:00",
+        "coordinator_observed_completion_utc": "2026-11-17T20:53:54+00:00",
+        "approx_reference_to_recorded_completion_seconds": 193.766127,
+        "coordinator_observation_window_seconds": 238.0,
+        "independent_acceptance_seconds": 4.943189799960237,
+        "delivered_tests": 7,
+        "mutant_failed_tests": 6,
+        "internal_corrections": "String-to-Path keys corrected after first generic writer failure; no business repair."
+      },
+      "tool": {
+        "status": "passed",
+        "in_process_seconds": 0.42159330000868067,
+        "operation_seconds": {
+          "inspect": 0.0041214,
+          "plan": 0.0336449,
+          "generate": 0.0599293
+        },
+        "independent_acceptance_seconds": 5.402490800013766,
+        "delivered_tests": 3,
+        "mutant_failed_tests": 3,
+        "internal_corrections": 0
+      },
+      "independent_checks": {
+        "threaded_runner": "passed",
+        "kedro_cli": "passed",
+        "asts": "passed",
+        "source_order": "passed",
+        "package_files_preserved": 6,
+        "candidate_and_inputs_unchanged": true
+      },
+      "prompt_count": 1,
+      "coordinator_corrective_followups": 0,
+      "exact_agent_model_identifier": null,
+      "human_effort_seconds": null,
+      "cost": null
+    }
+  ],
+  "setup_mode": "reuse",
+  "agent_context": "Three fresh coding agents, inherited session model, run concurrently; no cross-case access.",
+  "environment": {
+    "kedro": "1.5.0",
+    "kedro-datasets": "8.1.0",
+    "numpy": "2.5.2",
+    "scikit-learn": "1.9.0",
+    "pytest": "9.1.1",
+    "nbformat": "5.11.1"
+  },
+  "scope": "Prepared functional conversions only. Notebook contains explicit functions and no executed outputs; this does not run the separately gated nine-task whole-notebook pilot.",
+  "timing_boundaries": "Agent times are approximate UTC intervals from a coordinator reference immediately before dispatch to agent-recorded completion. Coordinator observation windows retained separately. Converter perf_counter durations include imports/config loading/inspect/plan/generate after interpreter entry, exclude startup and separately reported common acceptance. Human preparation/review excluded and unmeasured; no speedup ratio or productivity estimate.",
+  "limits": [
+    "One attempt per method/case; no randomization or repeated-run distribution",
+    "Concurrent agents share a host and service scheduling; no controlled latency benchmark",
+    "Detailed prompts include common temp-directory and current Kedro API guidance learned from the earlier microcase",
+    "No wheel build/install required/performed for these three cases",
+    "Local detailed logs/checker stay in ignored experiment artifacts; this corpus is data, not a new benchmark API",
+    "No provider transport, financial data/runtime, or independent human pilot approval added"
+  ]
+}
