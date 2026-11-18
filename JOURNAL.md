@@ -63,6 +63,13 @@ The newest entries are added at the top, immediately below this convention, so t
   strict mypy on 221 files and offline wheel/sdist builds. All 112 packaged engine modules match
   source bytes; new tests/example/ADR are included and nbformat remains the only runtime dependency.
   Interface contracts are unchanged; host UI tests were not rerun.
+- CI follow-up: Python 3.11/3.13 passed all 2,847 selected tests but failed the unchanged
+  coverage gate at 99.92%. The schema 1.2 renderer was exercised only by integration tests,
+  which those jobs exclude. Add two static generation tests covering inline/pinned-fixture
+  publication, delivered exception checks, captured bytes and declaration/gap metadata.
+  Reproducing the exact CI marker selection locally on Python 3.12 now passes 2,849 tests
+  with 100% line/branch coverage; runtime code, workflow selection and coverage thresholds
+  are unchanged. The secondary interpreter results are verified separately in GitHub Actions.
 
 ### Decisions
 

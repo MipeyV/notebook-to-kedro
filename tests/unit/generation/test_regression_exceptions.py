@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import ast
 import hashlib
 import json
 from pathlib import Path
@@ -11,6 +12,7 @@ import pytest
 
 from notebook_to_kedro import (
     WorkflowRegressionContract,
+    generate_functional_kedro_project,
     load_functional_workflow_configuration,
     load_workflow_regression_contract,
     plan_functional_workflow_path,
@@ -172,3 +174,74 @@ def test_fixture_exception_snapshot_and_hash_checks(tmp_path: Path) -> None:
     assert contract.resolved_dict() == _data(case)
     with pytest.raises(WorkflowRegressionError, match="SHA-256"):
         load_workflow_regression_contract(manifest)
+
+
+@pytest.mark.parametrize("fixtures", [False, True])
+def test_generation_delivers_explicit_outcomes_without_running_application_code(
+    tmp_path: Path, *, fixtures: bool
+) -> None:
+    data = load_workflow_regression_contract(EXAMPLE / "regression-exceptions.json").to_dict()
+    failure = data["scenarios"][-1]
+    failure["nodes"] = {
+        "step_0000_clean_values": {
+            "inputs": {"raw_values": [None], "missing_policy": "error"},
+            "raises": {"type": "ValueError", "message": "Missing observation"},
+        }
+    }
+    captures: tuple[str, ...] = ()
+    if fixtures:
+        captures = tuple(json.dumps(case) for case in data["scenarios"])
+        declaration = {
+            "schema_version": "1.2",
+            "storage": "fixtures",
+            "scenarios": [
+                {"path": f"case_{i}.json", "sha256": hashlib.sha256(text.encode()).hexdigest()}
+                for i, text in enumerate(captures)
+            ],
+        }
+    else:
+        declaration = data
+    contract = WorkflowRegressionContract.from_dict(declaration, fixture_jsons=captures)
+    project = tmp_path / "project"
+    generate_functional_kedro_project(
+        EXAMPLE / "workflow.py",
+        load_functional_workflow_configuration(EXAMPLE / "workflow.json"),
+        project,
+        project_root=EXAMPLE.parents[1],
+        regression_contract=contract,
+    )
+    module = (project / "tests/test_workflow_regressions.py").read_text(encoding="utf-8")
+    tree = ast.parse(module)
+    functions = {
+        node.name: ast.unparse(node) for node in tree.body if isinstance(node, ast.FunctionDef)
+    }
+    assert (
+        "_check_pipeline(pipeline, catalog, scenario, monkeypatch)"
+        in functions["test_pipeline_scenario"]
+    )
+    assert (
+        "assert type(error) is _EXCEPTION_TYPES[expectation['type']]"
+        in functions["_assert_exception"]
+    )
+    assert "notebook_to_kedro" not in module
+    metadata = json.loads((project / "tests/regression_cases.json").read_text())
+    emitted = metadata["contract"]
+    assert emitted["schema_version"] == "1.2"
+    assert emitted["storage"] == ("fixtures" if fixtures else "inline")
+    if fixtures:
+        for reference, source in zip(emitted["scenarios"], captures, strict=True):
+            assert (project / "tests" / reference["path"]).read_bytes() == source.encode()
+        assert "contract.get('storage') != 'fixtures'" in functions["_fixture_cases"]
+    else:
+        assert emitted == data
+    report = json.loads((project / "regression-coverage.json").read_text())
+    assert report["pipeline_scenarios"] == 5
+    assert report["pipeline_exception_scenarios"] == 2
+    assert report["node_exception_scenarios"] == {
+        "step_0000_clean_values": 1,
+        "step_0001_winsorize": 0,
+        "step_0002_summarize": 0,
+    }
+    assert report["execution_status"] == "not_run"
+    assert report["review_status"] == "not_authenticated"
+    assert "declared node function" in (project / "TESTING.md").read_text()
