@@ -2,7 +2,7 @@
 
 [Documentation index](../README.md)
 
-Status: E3 functional regression and bootstrap slices implemented by 2026-11-14. Explicit JSON
+Status: E3 functional regression and bootstrap slices extended on 2026-11-18. Explicit JSON
 expectations produce standalone pytest node/pipeline tests for linear functional workflows.
 An opt-in trusted-example check verifies wheel installation and Kedro startup in fresh environments.
 Richer comparators and procedural-notebook test generation remain future.
@@ -70,8 +70,8 @@ also supplies independent intermediate expectations for the two generated wrappe
   values, non-JSON values and unknown/missing fields are rejected.
 - Scenario input/parameter names exactly match workflow boundaries. Parameters follow the
   selected workflow schema: finite scalars in 1.0, also flat scalar-valued objects in 1.1/1.2/1.3.
-  Input/expected values can be nested finite JSON. The regression contract itself remains
-  schema 1.0. Application acceptance is tested only when pytest runs.
+  Input/expected values can be nested finite JSON. Regression and workflow schema versions are
+  independent. Application acceptance is tested only when pytest runs.
 - `expected` describes the one final output. `nodes` maps unprefixed step names from
   `plan-workflow` to cases containing exactly `inputs` and `expected`. Node inputs name wrapper
   arguments (source value names), not necessarily the original callee's parameter names.
@@ -135,6 +135,54 @@ This is a test-data format extension. Workflow schemas, raw file-reference input
 results and runtime artifact expectations retain their separate limits.
 [ADR 0020](../decisions/0020-bounded-regression-fixtures.md) records the snapshot/budget decision.
 
+### Explicit exception outcomes in schema 1.2
+
+Schema 1.2 requires `storage` (`inline` or `fixtures`) in addition to `schema_version` and
+`scenarios`. Inline cases retain the 64 KiB contract budget; fixture references retain all 1.1
+paths, hashes, immutable capture and byte budgets. Resolved fixtures return schema 1.2 with
+`storage: inline`. Existing 1.0/1.1 declarations and generated test formats stay compatible.
+
+Each pipeline or node case requires exactly one of `expected` and `raises`. For example:
+
+```json
+{
+  "schema_version": "1.2",
+  "storage": "inline",
+  "scenarios": [{
+    "id": "strict_missing",
+    "inputs": {"raw_values": [1.0, null]},
+    "parameters": {"missing_policy": "error", "lower": 0.0, "upper": 5.0},
+    "raises": {
+      "type": "ValueError",
+      "message": "Missing observation",
+      "node": "step_0000_clean_values"
+    }
+  }]
+}
+```
+
+Allowed concrete built-ins are ValueError, TypeError, KeyError, IndexError, RuntimeError,
+ZeroDivisionError and AssertionError. `message` is the exact literal `str(error)`, including
+KeyError's quotes, within 4 KiB UTF-8; empty messages are allowed. No regex, subclass matching,
+custom imports, broad Exception/BaseException or process-control exceptions are accepted.
+Pipeline `node` must name an existing unprefixed step. Node `raises` contains only `type` and
+`message`, since the enclosing node key already supplies its owner.
+
+Generated tests check exact concrete type and message. Pipeline tests additionally track the
+declared node function and require the same exception object to escape the runner; matching
+catalog/registry or other-node errors cannot satisfy that expectation. Catalog setup and registry
+construction occur outside the expected-exception context. Tests use the existing sequential
+runner and assert the final JSON output is absent in the fresh temporary workspace after the
+expected failure. Node tests copy inputs before entering their exception context.
+
+The [clipping example](../../examples/functional_control_flow/project.json) now selects
+[five pipeline scenarios](../../examples/functional_control_flow/regression-exceptions.json):
+three unchanged positive cases with nine node expectations, plus two explicit source failures,
+producing 14 shipped tests. The earlier 12-test regression.json remains unchanged. Generation
+does not execute source to discover exceptions, fill messages or approve expectations. Missing
+typed/file-reference/artifact oracles retain their limits. See
+[ADR 0022](../decisions/0022-explicit-regression-exceptions.md).
+
 ## Test behavior and gaps
 
 Each scenario creates one pipeline test. The suite loads the real generated catalog, writes
@@ -147,7 +195,8 @@ the generated layout fail rather than writing elsewhere.
 Only supplied node cases create node tests, with copied inputs to avoid cross-test mutation.
 Outputs are compared by canonical JSON representation without numeric tolerance. Dictionary
 order is ignored; `true`, `1` and `1.0` remain distinct. Python-specific types, approximate
-comparisons, error expectations and non-JSON results need later contracts. Application imports
+comparisons and non-JSON results need later contracts. Explicit errors use schema 1.2 above.
+Application imports
 and global state are shared within a pytest process; per-scenario process isolation is not claimed.
 
 `regression-coverage.json` always records scenario counts and missing expectations:
@@ -158,6 +207,8 @@ and global state are shared within a pytest process; per-scenario process isolat
 - `execution_status` is `not_run` and `review_status` is `not_authenticated`: this is a
   generation snapshot. Running/editing tests does not update it or its contract hash. Record
   later execution separately using pytest/CI results.
+- Schema 1.2 also records pipeline and per-node exception scenario counts. These remain
+  declarations, not measured execution results.
 
 Shipped files are `tests/test_workflow_regressions.py`, `tests/regression_cases.json`,
 `TESTING.md` and the gap snapshot. With expectations, the package declares an optional pytest

@@ -6,5 +6,5 @@
   "package_name": "control_flow_demo",
   "workflow_configuration": "examples/functional_control_flow/workflow.json",
   "architecture_profile": "examples/functional_control_flow/profile.json",
-  "regression_contract": "examples/functional_control_flow/regression.json"
+  "regression_contract": "examples/functional_control_flow/regression-exceptions.json"
 }

@@ -55,9 +55,12 @@ separates a 64 KiB manifest from pinned JSON scenarios (1 MiB/file, 8 MiB total)
 27 delivered tests plus independent CLI/threaded/mutation acceptance. A subsequent helper-body
 increment now preserves structured if/for/while and source errors with conservative definite
 bindings, while keeping the entrypoint graph explicit. The original clipping case now generates
-and its 12 supplied-JSON tests pass; independent error checks pass, but its original requirement
-for 14 shipped tests stays unmet without generated exception expectations. Prioritize that explicit
-test contract and a shared-data/source-order contract separately. The targeted comparison and
+and its 12 supplied-JSON tests passed, with independent errors verified and a delivery gap retained.
+A separate regression schema 1.2 increment now adds explicit concrete-type/literal-message/node
+exception expectations with inline or pinned fixture storage. A new run passes the original 14
+shipped tests and unchanged independent acceptance, without changing original inputs or criteria.
+Next prioritize a bounded shared-data/source-order contract for the remaining fan-out blocker.
+The targeted comparison and
 follow-ups are not representative accuracy or human productivity studies.
 
 Source accounting and supported graph checks are implemented. E2 now has

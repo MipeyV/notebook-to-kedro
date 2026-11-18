@@ -125,6 +125,12 @@ evidence stay distinct. Generation publishes captured text through the shared wr
 requests reload it. Analysis imports no pytest/Kedro dependency. See
 [ADR 0020](../decisions/0020-bounded-regression-fixtures.md).
 
+Regression schema 1.2 additionally declares inline/fixture storage and exact concrete built-in
+exception outcomes. Pipeline expectations identify the failing node; standalone tests track its
+exception object and require no final JSON output after failure. Catalog setup and registry
+loading stay outside that context. Generation still executes no source to discover expectations.
+[ADR 0022](../decisions/0022-explicit-regression-exceptions.md) records this bounded extension.
+
 A separate [developer paired-trial script](../guides/real-workflow-setup.md#developer-harness)
 now consumes a private frozen worksheet for one benchmark-shaped application. It runs through
 the selected installed runtime with explicit operator declarations and retained execution evidence.

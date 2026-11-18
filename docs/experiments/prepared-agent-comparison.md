@@ -212,4 +212,28 @@ Known blockers include early/multiple returns, try/with/match, deferred/dynamic 
 mutation writes and source fan-out. Conservative post-loop bindings can reject valid functions
 unless locals are preinitialized. Paths, iteration counts and termination are unverified. No
 additional agent call, install, financial runtime or separate pilot consent was involved. Explicit
-exception-test expectations and shared mutable data remain separate follow-up scopes.
+exception-test expectations and shared mutable data remained separate follow-up scopes at that
+revision. The exception increment is recorded below; shared mutable data remains unsupported.
+
+## Explicit-exception follow-up on 2026-11-18
+
+A new run keeps every original messy-control-flow input byte and the independent checker's
+minimum_tests=14 unchanged. Separate supplementary settings select regression schema 1.2 with
+the same three positive pipeline/nine node expectations and the two frozen failure scenarios.
+Each failure explicitly declares ValueError, the original literal message and its failing step.
+No expected value or failure was inferred from an execution. The earlier blocked and 12-test
+records above remain unchanged.
+
+Configuration loading plus inspect/plan/generate took 0.113 s in-process after imports/preparation.
+The unchanged independent checker passed in 6.016 s, including source AST/catalog/parameter/order
+checks, three positive cases with nine node oracles, both failure paths with no final report,
+ThreadRunner, Kedro CLI and all 14 shipped tests. The original arithmetic mutation produced six
+assertion failures, with eight remaining tests passing and no collection/runtime errors. Canonical
+project and original inputs remained unchanged by acceptance.
+
+Repository integration controls exercise script/notebook, default/custom profiles and inline/
+fixture storage. Wrong concrete type (including a subclass), literal message, failing node,
+absent exception, final-output publication, catalog setup and registry errors cannot satisfy an
+exception expectation. Node failures and fixture header validation have separate controls.
+No further agent call, financial execution, installation or pilot authorization was used. These
+prepared synthetic clocks establish neither human saving nor representative conversion accuracy.

@@ -40,6 +40,40 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-11-18 - Deliver explicit source exception regression tests
+
+### Completed
+
+- After PR 107 merged, added regression schema 1.2 with explicit inline or pinned-fixture storage
+  and exactly one JSON expected value or raises declaration per pipeline/node case. Preserve
+  existing 1.0/1.1 formats, immutable snapshots, byte/hash/path bounds and shared publication.
+- Restrict exceptions to seven concrete built-ins and literal messages within 4 KiB UTF-8.
+  Pipeline cases name a known unprefixed step. Standalone tests track its exception object,
+  require exact concrete type/message and no final JSON output in fresh temporary workspaces;
+  catalog setup/registry imports cannot count as expected business failures.
+- Add a separate clipping-example contract with the unchanged positive cases plus its two frozen
+  ValueError scenarios. A new local run keeps original corpus/input bytes and minimum_tests=14.
+  Unchanged independent acceptance passes all 14 shipped tests, AST/runtime/error/CLI/threaded
+  checks and the original mutation control (six failures, eight passes, zero errors).
+- Prepared configuration plus inspect/plan/generate took 0.113 s after imports/preparation;
+  independent acceptance took 6.016 s. Neither clock measures human effort or productivity.
+  Original blocked/12-test observations remain unchanged. No real-project/provider run occurs.
+- Verification: 213 focused contract/runtime/documentation checks; complete offline suite
+  3,123 passed with 100% line/branch coverage (10,144 statements, 3,040 branches), Ruff check/format,
+  strict mypy on 221 files and offline wheel/sdist builds. All 112 packaged engine modules match
+  source bytes; new tests/example/ADR are included and nbformat remains the only runtime dependency.
+  Interface contracts are unchanged; host UI tests were not rerun.
+
+### Decisions
+
+- Record [ADR 0022](docs/decisions/0022-explicit-regression-exceptions.md). No source execution
+  discovers test oracles; generated metadata remains not_run/not_authenticated.
+
+### Next step
+
+- Define a bounded shared-data/source-order contract for the remaining shared mutable fan-out
+  case, preserving original identity/mutation behavior and independent acceptance criteria.
+
 ## 2026-11-18 - Preserve structured control flow inside function bodies
 
 ### Completed
