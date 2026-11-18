@@ -146,8 +146,10 @@ requires definite locals on normal branch paths and conservatively does not expo
 bindings. BL104 records unknown runtime paths/counts/termination. Entrypoint if/for/while,
 early/multiple returns, try/with/match and source fan-out retain their existing blockers.
 The [paired example](../../examples/functional_control_flow/project.json) supports the existing
-local-operation commands and emits 12 positive supplied-JSON tests. Source exceptions are verified
-independently; generated exception expectations are not part of that JSON contract.
+local-operation commands and now selects an explicit schema 1.2 regression contract with 14
+shipped tests: 12 unchanged positive expectations and two source exception scenarios. The earlier
+positive-only regression.json remains unchanged. See the
+[exception contract](generated-workflow-tests.md#explicit-exception-outcomes-in-schema-12).
 
 In schemas 1.0/1.1, every call after the first must consume its predecessor's result. Data values can be consumed
 at most once across the workflow, including within a call; scalar parameters can be reused.

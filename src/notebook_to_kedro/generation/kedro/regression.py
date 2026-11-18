@@ -118,6 +118,106 @@ _FIXTURE_CASES = '''def _fixture_cases():
 
 CASES = _fixture_cases()'''
 
+_EXCEPTION_HELPERS = '''_EXCEPTION_TYPES = {
+    "ValueError": ValueError, "TypeError": TypeError, "KeyError": KeyError,
+    "IndexError": IndexError, "RuntimeError": RuntimeError,
+    "ZeroDivisionError": ZeroDivisionError, "AssertionError": AssertionError,
+}
+
+
+def _assert_exception(error, expectation):
+    """Match the concrete built-in type and literal message, without regex or imports."""
+    assert type(error) is _EXCEPTION_TYPES[expectation["type"]]
+    assert str(error) == expectation["message"]
+
+
+def _check_pipeline(pipeline, catalog, scenario, monkeypatch):
+    if "raises" not in scenario:
+        SequentialRunner().run(pipeline, catalog)
+        _assert_json(catalog.load(DATA["output_name"]), scenario["expected"])
+        return
+    expectation = scenario["raises"]
+    name = DATA["node_names"][expectation["node"]]
+    target = next(node for node in pipeline.nodes if node.name == name)
+    original, observed = target.func, []
+
+    @functools.wraps(original)
+    def tracked(*args, **kwargs):
+        try:
+            return original(*args, **kwargs)
+        except Exception as error:
+            observed.append(error)
+            raise
+
+    monkeypatch.setattr(target, "func", tracked)
+    with pytest.raises(_EXCEPTION_TYPES[expectation["type"]]) as caught:
+        SequentialRunner().run(pipeline, catalog)
+    _assert_exception(caught.value, expectation)
+    assert len(observed) == 1 and observed[0] is caught.value
+    assert not catalog.exists(DATA["output_name"])
+
+
+def _check_node(function, case):
+    inputs = copy.deepcopy(case["inputs"])
+    if "raises" not in case:
+        _assert_json(function(**inputs), case["expected"])
+        return
+    with pytest.raises(_EXCEPTION_TYPES[case["raises"]["type"]]) as caught:
+        function(**inputs)
+    _assert_exception(caught.value, case["raises"])
+'''
+
+
+def _with_exception_tests(module: str) -> str:
+    return (
+        module.replace("import copy\n", "import copy\nimport functools\n")
+        .replace(
+            "def _assert_json(actual, expected):",
+            _EXCEPTION_HELPERS + "\n\ndef _assert_json(actual, expected):",
+        )
+        .replace(
+            "    SequentialRunner().run(pipeline, catalog)\n"
+            '    _assert_json(catalog.load(DATA["output_name"]), scenario["expected"])',
+            "    _check_pipeline(pipeline, catalog, scenario, monkeypatch)",
+        )
+        .replace(
+            '        result = getattr(nodes, DATA["node_names"][name])'
+            '(**copy.deepcopy(case["inputs"]))\n'
+            '        _assert_json(result, case["expected"])',
+            '        _check_node(getattr(nodes, DATA["node_names"][name]), case)',
+        )
+    )
+
+
+def _fixture_data(
+    contract: WorkflowRegressionContract, files: dict[Path, str], report: dict[str, Any]
+) -> tuple[dict[str, Any], str]:
+    references, fixtures = [], []
+    for definition, source in zip(
+        contract.to_dict()["scenarios"], contract.fixture_jsons, strict=True
+    ):
+        relative = "regression_fixtures/" + definition["sha256"] + ".json"
+        files[Path("tests") / relative] = source
+        references.append({"path": relative, "sha256": definition["sha256"]})
+        fixtures.append(
+            {
+                "source": definition["path"],
+                "path": "tests/" + relative,
+                "sha256": definition["sha256"],
+                "size_bytes": len(source.encode("utf-8")),
+            }
+        )
+    data: dict[str, Any] = {"schema_version": "1.1", "scenarios": references}
+    module = _FIXTURE_CASES
+    if contract.to_dict()["schema_version"] == "1.2":
+        data.update(schema_version="1.2", storage="fixtures")
+        module = module.replace(
+            'contract["schema_version"] != "1.1"',
+            '(contract["schema_version"] != "1.2" or contract.get("storage") != "fixtures")',
+        )
+    report["fixtures"] = fixtures
+    return data, module
+
 
 def render_workflow_regression_tests(
     plan: FunctionalWorkflowPlan,
@@ -181,31 +281,25 @@ def render_workflow_regression_tests(
         return files
     declaration = contract.to_dict()
     module = _TEST_MODULE
-    if contract.fixture_jsons:
-        references = []
-        fixtures = []
-        for definition, source in zip(
-            declaration["scenarios"], contract.fixture_jsons, strict=True
-        ):
-            relative = "regression_fixtures/" + definition["sha256"] + ".json"
-            files[Path("tests") / relative] = source
-            references.append({"path": relative, "sha256": definition["sha256"]})
-            fixtures.append(
-                {
-                    "source": definition["path"],
-                    "path": "tests/" + relative,
-                    "sha256": definition["sha256"],
-                    "size_bytes": len(source.encode("utf-8")),
-                }
-            )
-        data = {"schema_version": "1.1", "scenarios": references}
-        report["fixtures"] = fixtures
+    exceptions = declaration["schema_version"] == "1.2"
+    if exceptions:
+        report["pipeline_exception_scenarios"] = sum("raises" in case for case in cases)
+        report["node_exception_scenarios"] = {
+            step.name: sum("raises" in case.get("nodes", {}).get(step.name, {}) for case in cases)
+            for step in plan.steps
+        }
         files[Path("regression-coverage.json")] = (
             json.dumps(report, sort_keys=True, indent=2) + "\n"
         )
-        module = _TEST_MODULE.replace(
+        module = _with_exception_tests(module)
+    if contract.fixture_jsons:
+        data, fixture_module = _fixture_data(contract, files, report)
+        files[Path("regression-coverage.json")] = (
+            json.dumps(report, sort_keys=True, indent=2) + "\n"
+        )
+        module = module.replace(
             "import copy\n", "import copy\nimport hashlib\nimport stat\n"
-        ).replace('CASES = DATA["contract"]["scenarios"]', _FIXTURE_CASES)
+        ).replace('CASES = DATA["contract"]["scenarios"]', fixture_module)
     metadata = {
         "schema_version": "1.0",
         "contract_sha256": contract.sha256,
@@ -236,5 +330,12 @@ def render_workflow_regression_tests(
             "identities. They are validated before collection; missing, modified or linked files "
             "fail before node execution. Original source paths are listed in "
             "regression-coverage.json.\n"
+        )
+    if exceptions:
+        files[Path("TESTING.md")] += (
+            "\nException expectations match a declared concrete built-in type and literal message. "
+            "Pipeline tests additionally require the exception from the declared node function "
+            "and no final report in the fresh temporary workspace. Fixture/catalog setup and "
+            "registry construction occur outside the expected-exception context.\n"
         )
     return files

@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 from notebook_to_kedro.exceptions import ProjectGenerationError, WorkflowRegressionError
+from notebook_to_kedro.generation.kedro.regression_outcomes import validate_outcome
 from notebook_to_kedro.generation.writer import validate_project_files
 from notebook_to_kedro.semantic.functional_config import FunctionalWorkflowConfiguration
 
@@ -25,6 +26,24 @@ MAX_REGRESSION_FIXTURE_BYTES = 1024 * 1024
 MAX_REGRESSION_FIXTURE_TOTAL_BYTES = 8 * 1024 * 1024
 _REPARSE_POINT = 0x400
 _SCENARIO_FIELDS = frozenset({"id", "inputs", "parameters", "expected", "nodes"})
+
+
+def _valid_header(data: dict[str, Any], storage: str) -> bool:
+    legacy = "1.0" if storage == "inline" else "1.1"
+    return (
+        data.get("schema_version") == legacy and set(data) == {"schema_version", "scenarios"}
+    ) or (
+        data.get("schema_version") == "1.2"
+        and data.get("storage") == storage
+        and set(data) == {"schema_version", "storage", "scenarios"}
+    )
+
+
+def _uses_fixtures(data: object) -> bool:
+    return isinstance(data, dict) and (
+        data.get("schema_version") == "1.1"
+        or (data.get("schema_version") == "1.2" and data.get("storage") == "fixtures")
+    )
 
 
 def _json_value(value: object, depth: int = 0) -> None:
@@ -52,14 +71,12 @@ def _unique_object(pairs: list[tuple[str, object]]) -> dict[str, object]:
 
 def _validate(data: object) -> None:
     _json_value(data)
-    if (
-        not isinstance(data, dict)
-        or set(data) != {"schema_version", "scenarios"}
-        or data["schema_version"] != "1.0"
-    ):
+    if not isinstance(data, dict) or not _valid_header(data, "inline"):
         raise WorkflowRegressionError(
-            "Regression contract requires schema_version 1.0 and scenarios"
+            "Regression contract requires inline schema 1.0 or schema 1.2 with explicit storage"
         )
+    exceptions = data["schema_version"] == "1.2"
+    allowed = _SCENARIO_FIELDS | ({"raises"} if exceptions else set())
     scenarios = data["scenarios"]
     if not isinstance(scenarios, list) or not 1 <= len(scenarios) <= MAX_SCENARIOS:
         raise WorkflowRegressionError("Regression contract requires 1 to 100 scenarios")
@@ -67,11 +84,13 @@ def _validate(data: object) -> None:
     for scenario in scenarios:
         if (
             not isinstance(scenario, dict)
-            or not {"id", "inputs", "parameters", "expected"} <= scenario.keys() <= _SCENARIO_FIELDS
+            or not {"id", "inputs", "parameters"} <= scenario.keys() <= allowed
         ):
             raise WorkflowRegressionError(
-                "Regression scenarios require id/inputs/parameters/expected; only nodes is optional"
+                "Regression scenarios require id/inputs/parameters and one explicit outcome; "
+                "only nodes is optional"
             )
+        validate_outcome(scenario, pipeline=True, exceptions=exceptions)
         name = scenario["id"]
         if (
             not isinstance(name, str)
@@ -89,19 +108,22 @@ def _validate(data: object) -> None:
         for case in scenario.get("nodes", {}).values():
             if (
                 not isinstance(case, dict)
-                or set(case) != {"inputs", "expected"}
+                or not {"inputs"}
+                <= case.keys()
+                <= ({"inputs", "expected", "raises"} if exceptions else {"inputs", "expected"})
                 or not isinstance(case["inputs"], dict)
             ):
                 raise WorkflowRegressionError(
-                    "Node cases require exactly inputs (object) and expected"
+                    "Node cases require inputs (object) and one explicit outcome"
                 )
+            validate_outcome(case, pipeline=False, exceptions=exceptions)
 
 
 def _fixture_definitions(data: dict[str, Any]) -> list[dict[str, str]]:
     _json_value(data)
     scenarios = data.get("scenarios")
     if (
-        set(data) != {"schema_version", "scenarios"}
+        not _valid_header(data, "fixtures")
         or not isinstance(scenarios, list)
         or not 1 <= len(scenarios) <= MAX_SCENARIOS
     ):
@@ -156,6 +178,8 @@ def _resolved_fixtures(data: dict[str, Any], captures: tuple[str, ...]) -> dict[
             )
         scenarios.append(json.loads(source, object_pairs_hook=_unique_object))
     resolved = {"schema_version": "1.0", "scenarios": scenarios}
+    if data["schema_version"] == "1.2":
+        resolved.update(schema_version="1.2", storage="inline")
     _validate(resolved)
     return resolved
 
@@ -204,7 +228,7 @@ class WorkflowRegressionContract:
             data = json.loads(self.canonical_json, object_pairs_hook=_unique_object)
             if not isinstance(self.fixture_jsons, tuple):
                 raise WorkflowRegressionError("Captured fixtures must be an immutable tuple")
-            if isinstance(data, dict) and data.get("schema_version") == "1.1":
+            if _uses_fixtures(data):
                 _resolved_fixtures(data, self.fixture_jsons)
             else:
                 if self.fixture_jsons:
@@ -231,11 +255,11 @@ class WorkflowRegressionContract:
         return cls(source, fixture_jsons)
 
     def to_dict(self) -> dict[str, Any]:
-        """Return a fresh declaration; schema 1.1 retains its pinned references."""
+        """Return a fresh declaration, retaining any pinned fixture references."""
         return json.loads(self.canonical_json)  # type: ignore[no-any-return]
 
     def resolved_dict(self) -> dict[str, Any]:
-        """Return fresh schema-1.0 values from captured text, without filesystem access."""
+        """Return fresh inline scenario values from captured text, without filesystem access."""
         data = self.to_dict()
         return _resolved_fixtures(data, self.fixture_jsons) if self.fixture_jsons else data
 
@@ -255,7 +279,7 @@ def load_workflow_regression_contract(path: str | Path) -> WorkflowRegressionCon
         source = content.decode("utf-8")
         data = json.loads(source, object_pairs_hook=_unique_object)
         captures: list[str] = []
-        if isinstance(data, dict) and data.get("schema_version") == "1.1":
+        if _uses_fixtures(data):
             root = Path(path).resolve().parent
             total = 0
             for definition in _fixture_definitions(data):
@@ -287,6 +311,8 @@ def validate_regression_binding(
         )
     steps = {step.name: step for step in plan.steps}
     for scenario in contract.resolved_dict()["scenarios"]:
+        if "raises" in scenario and scenario["raises"]["node"] not in steps:
+            raise WorkflowRegressionError("Pipeline exceptions must name a known unprefixed node")
         if set(scenario["inputs"]) != set(dict(plan.configuration.inputs)) or set(
             scenario["parameters"]
         ) != set(dict(plan.configuration.parameters)):

@@ -29,6 +29,12 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Added regression schema 1.2 with explicit inline/fixture storage and supplied concrete built-in
+  exception/literal-message expectations. Pipeline cases bind failures to a declared node and
+  require no final JSON output; setup/registry failures stay outside expected-error contexts.
+  Existing 1.0/1.1 formats remain compatible. A new clipping-notebook run passes its original 14
+  shipped tests and independent mutation/runtime acceptance, preserving historical records.
+
 - Added preserved if/for/while, raise/pass and loop break/continue inside functional helper
   bodies, with conservative definite-local bindings and BL104 runtime-path warnings. Keep one
   final value return, original helper ASTs and strict named-call entrypoint wiring. The clipping
