@@ -48,10 +48,13 @@ corrections and review, with failures and supported-subset boundaries counted ex
 The later [boundary-focused batch](../experiments/prepared-agent-comparison.md#boundary-focused-extension)
 now records all three agent projects accepted and all three tool conversions blocked. It exposes
 the 64 KiB regression-contract budget on an eight-step/140-cleaned-row example, unsupported control
-flow inside helpers, and unsupported shared mutable fan-out. Prioritize a separately scoped bounded
-fixture-backed test contract, then helper-body coverage and a source-order/identity contract before
-broader graph support. These remain proposals; limits were not relaxed to pass the experiment.
-This targeted batch is not a representative conversion success rate or a human productivity study.
+flow inside helpers, and unsupported shared mutable fan-out. That historical experiment remains
+unchanged. A subsequent bounded fixture-backed test contract is now implemented: regression 1.1
+separates a 64 KiB manifest from pinned JSON scenarios (1 MiB/file, 8 MiB total), retaining inline
+1.0 behavior. A new eight-step run preserves the original source/resolved oracles and passes all
+27 delivered tests plus independent CLI/threaded/mutation acceptance. Next scope helper-body
+coverage and a source-order/identity contract; those remain proposals. The targeted comparison
+and follow-up are not representative accuracy or human productivity studies.
 
 Source accounting and supported graph checks are implemented. E2 now has
 [functional inspection](../reference/functional-blocks.md) and a bounded

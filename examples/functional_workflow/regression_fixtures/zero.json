@@ -1,0 +1,10 @@
+{
+  "id": "zero",
+  "inputs": {
+    "values": 0.0
+  },
+  "parameters": {
+    "scale": 2.0
+  },
+  "expected": 0.0
+}

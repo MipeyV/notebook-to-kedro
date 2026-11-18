@@ -1,0 +1,10 @@
+{
+  "id": "fractional",
+  "inputs": {
+    "values": 1.25
+  },
+  "parameters": {
+    "scale": 4.0
+  },
+  "expected": 5.0
+}

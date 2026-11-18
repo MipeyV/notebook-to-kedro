@@ -2,7 +2,7 @@
 
 [Documentation index](../README.md)
 
-Status: implementation boundaries reviewed on 2026-11-16. The
+Status: implementation boundaries reviewed on 2026-11-18. The
 [proposed evolution](#proposed-evolution) is separate from current capabilities.
 
 ## Objective
@@ -113,6 +113,12 @@ adapter lineage is recomputed against source through the existing renderer. Sour
 ambient execution Git have separate report fields. Static capture, installed observations and
 future benchmark execution retain distinct evidence scopes.
 [ADR 0018](../decisions/0018-explicit-workflow-provenance.md) records the snapshot boundary.
+
+Fixture-backed regression schema 1.1 adds a bounded manifest and pinned JSON scenario snapshots
+to the existing delivered-test contract. Declaration, captured text, resolved values and runtime
+evidence stay distinct. Generation publishes captured text through the shared writer; local
+requests reload it. Analysis imports no pytest/Kedro dependency. See
+[ADR 0020](../decisions/0020-bounded-regression-fixtures.md).
 
 A separate [developer paired-trial script](../guides/real-workflow-setup.md#developer-harness)
 now consumes a private frozen worksheet for one benchmark-shaped application. It runs through

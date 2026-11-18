@@ -1,0 +1,17 @@
+{
+  "schema_version": "1.1",
+  "scenarios": [
+    {
+      "path": "regression_fixtures/negative_value.json",
+      "sha256": "3fa85f28c57ef6940462ecad6e4672482369d6831c75b8f3537fbf8ee867ab8e"
+    },
+    {
+      "path": "regression_fixtures/zero.json",
+      "sha256": "7ccc04e19cfb9bf5761dd3c15f9df75ccaa791bcb5f80871f7f6178bd586a99e"
+    },
+    {
+      "path": "regression_fixtures/fractional.json",
+      "sha256": "c8d5a70be7b5b79a71fe2975cfe8cb90ccf9c967a478064f055187ffd8f77a7f"
+    }
+  ]
+}

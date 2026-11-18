@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import subprocess
 import sys
 import xml.etree.ElementTree as ET
 from pathlib import Path
+from typing import Any
 
 import pytest
 
@@ -18,6 +20,8 @@ from notebook_to_kedro import (
     load_functional_workflow_configuration,
     load_workflow_regression_contract,
 )
+from notebook_to_kedro.exceptions import WorkflowRegressionError
+from notebook_to_kedro.generation.writer import write_project
 
 ROOT = Path(__file__).parents[2]
 EXAMPLE = ROOT / "examples/functional_workflow"
@@ -278,3 +282,180 @@ def test_shipped_package_pipeline_tests_keep_resources_and_report_typed_node_gap
     assert len(report.findall(".//failure")) == 2
     assert not report.findall(".//error")
     assert (example / "src/example_ml/assets/offset.json").read_bytes() == original
+
+
+def _fixture_contract(root: Path, scenarios: list[dict[str, Any]]) -> Path:
+    directory = root / "fixtures"
+    directory.mkdir()
+    references = []
+    for index, scenario in enumerate(scenarios):
+        source = json.dumps(scenario, indent=2).replace("\n", "\r\n").encode()
+        path = directory / f"scenario_{index}.json"
+        path.write_bytes(source)
+        references.append(
+            {"path": f"fixtures/{path.name}", "sha256": hashlib.sha256(source).hexdigest()}
+        )
+    path = root / "fixture-contract.json"
+    path.write_text(
+        json.dumps({"schema_version": "1.1", "scenarios": references}), encoding="utf-8"
+    )
+    return path
+
+
+@pytest.mark.integration
+@pytest.mark.parametrize("suffix", [".py", ".ipynb"])
+@pytest.mark.parametrize("custom_profile", [False, True])
+def test_fixture_suites_are_self_contained_and_detect_code_drift(
+    tmp_path: Path, suffix: str, *, custom_profile: bool
+) -> None:
+    data = load_workflow_regression_contract(EXAMPLE / "regression.json").to_dict()
+    contract_path = _fixture_contract(tmp_path, data["scenarios"])
+    contract = load_workflow_regression_contract(contract_path)
+    # The direct API publishes its validated snapshot, without reopening source fixtures.
+    for source_fixture in (tmp_path / "fixtures").iterdir():
+        source_fixture.unlink()
+    contract_path.unlink()
+    project = tmp_path / "project"
+    generate_functional_kedro_project(
+        EXAMPLE / ("workflow" + suffix),
+        load_functional_workflow_configuration(EXAMPLE / "workflow.json"),
+        project,
+        project_root=ROOT,
+        regression_contract=contract,
+        architecture_profile=KedroArchitectureProfile("fixture.test", "1.0.0", "training", "ml_")
+        if custom_profile
+        else None,
+    )
+    report = json.loads((project / "regression-coverage.json").read_text())
+    assert report["pipeline_scenarios"] == 3
+    assert report["missing_node_expectations"] == []
+    for fixture, captured in zip(report["fixtures"], contract.fixture_jsons, strict=True):
+        assert (project / fixture["path"]).read_bytes() == captured.encode()
+        assert hashlib.sha256(captured.encode()).hexdigest() == fixture["sha256"]
+    result, xml = _run(project, tmp_path / "fixture-pass.xml")
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert len(xml.findall(".//testcase")) == 5
+    source = project / "src/generated_workflow/workflow_source.py"
+    source.write_text(
+        source.read_text().replace("prepared = values * scale", "prepared = values + scale")
+        + "\n# fixture-suite negative control\n",
+        encoding="utf-8",
+    )
+    result, xml = _run(project, tmp_path / "fixture-code-drift.xml")
+    assert result.returncode == 1, result.stdout + result.stderr
+    assert len(xml.findall(".//failure")) == 4
+    assert not xml.findall(".//error")
+
+
+@pytest.mark.integration
+def test_runtime_fixture_guards_fail_before_application_import(tmp_path: Path) -> None:
+    data = load_workflow_regression_contract(EXAMPLE / "regression.json").to_dict()
+    contract = load_workflow_regression_contract(_fixture_contract(tmp_path, data["scenarios"]))
+    project = tmp_path / "project"
+    generate_functional_kedro_project(
+        EXAMPLE / "workflow.py",
+        load_functional_workflow_configuration(EXAMPLE / "workflow.json"),
+        project,
+        project_root=ROOT,
+        regression_contract=contract,
+    )
+    source = project / "src/generated_workflow/workflow_source.py"
+    source.write_text("raise AssertionError('APPLICATION_MUST_NOT_IMPORT')\n", encoding="utf-8")
+    metadata_path = project / "tests/regression_cases.json"
+    metadata = json.loads(metadata_path.read_text())
+    definition = metadata["contract"]["scenarios"][0]
+    fixture = project / "tests" / definition["path"]
+    original = fixture.read_bytes()
+    for index, (change, message) in enumerate(
+        (
+            ("hash", "SHA-256"),
+            ("size", "byte budget"),
+            ("directory", "regular files"),
+            ("escape", "contained generated paths"),
+            ("version", "Invalid generated"),
+            ("count", "Invalid generated"),
+            ("aggregate", "byte budget"),
+        )
+    ):
+        changed = json.loads(json.dumps(metadata))
+        if change == "hash":
+            fixture.write_bytes(original + b" ")
+        elif change == "size":
+            fixture.write_bytes(b" " * (1024 * 1024 + 1))
+        elif change == "directory":
+            fixture.unlink()
+            fixture.mkdir()
+        elif change == "escape":
+            changed["contract"]["scenarios"][0]["path"] = "../outside.json"
+        elif change == "version":
+            changed["contract"]["schema_version"] = "1.0"
+        elif change == "count":
+            changed["contract"]["scenarios"] *= 34
+        else:
+            payload = original + b" " * (1024 * 1024 - len(original))
+            digest = hashlib.sha256(payload).hexdigest()
+            large = project / "tests/regression_fixtures" / (digest + ".json")
+            large.write_bytes(payload)
+            changed["contract"]["scenarios"] = [
+                {"path": "regression_fixtures/" + digest + ".json", "sha256": digest}
+            ] * 9
+        metadata_path.write_text(json.dumps(changed), encoding="utf-8")
+        result, xml = _run(project, tmp_path / f"fixture-guard-{index}.xml")
+        assert result.returncode == 2, result.stdout + result.stderr
+        assert xml.findall(".//error")
+        assert message in result.stdout
+        assert "APPLICATION_MUST_NOT_IMPORT" not in result.stdout + result.stderr
+        if fixture.is_dir():
+            fixture.rmdir()
+        fixture.write_bytes(original)
+
+
+@pytest.mark.integration
+def test_eight_step_notebook_retains_every_oracle_and_ships_27_passing_tests(
+    tmp_path: Path,
+) -> None:
+    corpus = json.loads(
+        (ROOT / "examples/agent_comparison/challenges/corpus.json").read_text(encoding="utf-8")
+    )
+    case = next(c for c in corpus["cases"] if c["case_id"] == "larger-ml-notebook")
+    root = tmp_path / "source"
+    write_project(
+        root,
+        {Path(name): text for name, text in case["files"].items() if name.startswith("input/")},
+    )
+    with pytest.raises(WorkflowRegressionError, match="64 KiB"):
+        load_workflow_regression_contract(root / "input/regression.json")
+    expected = json.loads((root / "input/regression.json").read_text())
+    manifest = _fixture_contract(root / "input", expected["scenarios"])
+    contract = load_workflow_regression_contract(manifest)
+    assert contract.resolved_dict() == expected
+    assert len(contract.canonical_json.encode()) < 65536
+    assert sum(len(text.encode()) for text in contract.fixture_jsons) > 65536
+    project = tmp_path / "project"
+    generate_functional_kedro_project(
+        root / "input/workflow.ipynb",
+        load_functional_workflow_configuration(root / "input/workflow.json"),
+        project,
+        project_root=root,
+        package_name="eight_step_fixtures",
+        regression_contract=contract,
+        architecture_profile=KedroArchitectureProfile("fixture.large", "1.0.0", "training", "ml_"),
+    )
+    result, xml = _run(project, tmp_path / "eight-step.xml")
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert len(xml.findall(".//testcase")) == 27
+    assert not xml.findall(".//failure")
+    assert not xml.findall(".//error")
+    report = json.loads((project / "regression-coverage.json").read_text())
+    assert report["missing_node_expectations"] == []
+    assert report["pipeline_scenarios"] == 3
+    assert sum(report["node_scenarios"].values()) == 24
+    source = project / "src/eight_step_fixtures/workflow_source.py"
+    original = source.read_text()
+    changed = original.replace("+ fitted['intercept']", "- fitted['intercept']")
+    assert changed != original
+    source.write_text(changed + "\n# eight-step negative control\n", encoding="utf-8")
+    result, xml = _run(project, tmp_path / "eight-step-mutation.xml")
+    assert result.returncode == 1, result.stdout + result.stderr
+    assert len(xml.findall(".//failure")) == 6
+    assert not xml.findall(".//error")

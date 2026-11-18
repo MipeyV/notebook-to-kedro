@@ -47,6 +47,10 @@ and generation require it and report `LO001` before publication when it is missi
 `regression_contract` is optional.
 The notebook kind refuses workflow/regression settings rather than silently ignoring them.
 Existing workflow/profile/regression loaders remain authoritative for their separate schemas.
+Regression schema 1.1 may reference pinned JSON scenarios relative to its own directory;
+planning/generation capture them on each request and expose generated fixture bytes in previews.
+See the [fixture contract](generated-workflow-tests.md#scenario-fixtures-in-schema-11) for budgets,
+immutable direct-API snapshots and the distinction from runtime file-reference inputs.
 Inspection loads source facts only; planning/generation also load the relevant settings/data.
 
 ## Operation behavior

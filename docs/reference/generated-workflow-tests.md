@@ -63,7 +63,7 @@ also supplies independent intermediate expectations for the two generated wrappe
 }
 ```
 
-- Top-level fields are exactly `schema_version` (`1.0`) and `scenarios` (1 to 100 cases).
+- In inline schema 1.0, top-level fields are exactly `schema_version` and `scenarios` (1 to 100 cases).
   Every case requires `id`, `inputs`, `parameters`, `expected`; only `nodes` is optional.
 - IDs are unique lowercase identifiers with underscores/hyphens, at most 64 characters.
   Contracts are bounded to 64 KiB UTF-8 and 16 JSON nesting levels. Duplicate keys, non-finite
@@ -83,6 +83,57 @@ also supplies independent intermediate expectations for the two generated wrappe
 
 The frozen contract stores canonical JSON rather than mutable trees; exports are fresh copies.
 Its SHA-256 identifies supplied data, not correctness or approval.
+
+### Scenario fixtures in schema 1.1
+
+Added on 2026-11-18; schema 1.0 and its inline 64 KiB budget remain unchanged. A schema 1.1
+manifest stays within 64 KiB and references complete UTF-8 JSON scenario objects. Each fixture
+contains the same id/inputs/parameters/expected/optional nodes fields as an inline scenario.
+The [example manifest](../../examples/functional_workflow/regression-fixtures.json) resolves to
+exactly the earlier example's three scenarios:
+
+```json
+{
+  "schema_version": "1.1",
+  "scenarios": [
+    {"path": "regression_fixtures/negative_value.json", "sha256": "<64 lowercase hexadecimal digits>"}
+  ]
+}
+```
+
+Paths are relative to the manifest directory and distinct case-insensitively. Portable ASCII
+directory/file names use letters, digits, underscores and hyphens, ending in .json. Absolute,
+parent-relative, backslash, reserved-device and linked/reparse paths are rejected. All sources
+must be contained regular files. Limits are 100 references, 1 MiB/file and 8 MiB total, with the
+existing resolved 16-level depth, finite-JSON, duplicate-key/ID, binding and gap rules. No nested
+references or computed oracles are accepted. SHA-256 pins raw bytes including whitespace and
+line endings; the committed example fixtures use an LF Git attribute.
+
+The existing loader captures immutable fixture text without application imports or execution.
+WorkflowRegressionContract.to_dict() retains declaration/references; resolved_dict() returns a
+fresh schema 1.0 value tree without filesystem reads. Direct construction/from_dict can supply
+fixture_jsons as an immutable tuple of UTF-8 scenario strings in reference order; the same counts,
+hashes and budgets apply. Direct generation publishes this validated snapshot if source fixtures
+later change/disappear. Reload to observe changes. Local planning/generation reload the selected
+contract per request, so current hash drift fails before publication. Inspection does not load
+regression fixtures. This is not a concurrent-filesystem snapshot or reviewer authentication.
+
+The shared writer publishes original fixture bytes at tests/regression_fixtures/<sha256>.json,
+with generated references in tests/regression_cases.json. The gap report lists source reference,
+generated path, size and digest; contract_sha256 identifies the original canonical manifest.
+Test collection validates generated paths, regular files, budgets and hashes before application
+imports. Missing/modified/linked fixtures fail. Shipped tests need no original fixture directory
+or Notebook to Kedro installation. Editable declarations/hashes do not prove trusted authorship.
+
+Use the existing option with the new manifest:
+
+```bash
+uv run notebook-to-kedro generate-workflow examples/functional_workflow/workflow.py examples/functional_workflow/workflow.json generated/fixture_workflow --project-root . --regression-contract examples/functional_workflow/regression-fixtures.json
+```
+
+This is a test-data format extension. Workflow schemas, raw file-reference inputs, typed memory
+results and runtime artifact expectations retain their separate limits.
+[ADR 0020](../decisions/0020-bounded-regression-fixtures.md) records the snapshot/budget decision.
 
 ## Test behavior and gaps
 

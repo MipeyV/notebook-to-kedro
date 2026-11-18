@@ -6,11 +6,13 @@ import hashlib
 import json
 import math
 import re
-from dataclasses import dataclass
+import stat
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-from notebook_to_kedro.exceptions import WorkflowRegressionError
+from notebook_to_kedro.exceptions import ProjectGenerationError, WorkflowRegressionError
+from notebook_to_kedro.generation.writer import validate_project_files
 from notebook_to_kedro.semantic.functional_config import FunctionalWorkflowConfiguration
 
 if TYPE_CHECKING:
@@ -19,6 +21,9 @@ if TYPE_CHECKING:
 MAX_REGRESSION_BYTES = 65_536
 MAX_REGRESSION_DEPTH = 16
 MAX_SCENARIOS = 100
+MAX_REGRESSION_FIXTURE_BYTES = 1024 * 1024
+MAX_REGRESSION_FIXTURE_TOTAL_BYTES = 8 * 1024 * 1024
+_REPARSE_POINT = 0x400
 _SCENARIO_FIELDS = frozenset({"id", "inputs", "parameters", "expected", "nodes"})
 
 
@@ -92,11 +97,99 @@ def _validate(data: object) -> None:
                 )
 
 
+def _fixture_definitions(data: dict[str, Any]) -> list[dict[str, str]]:
+    _json_value(data)
+    scenarios = data.get("scenarios")
+    if (
+        set(data) != {"schema_version", "scenarios"}
+        or not isinstance(scenarios, list)
+        or not 1 <= len(scenarios) <= MAX_SCENARIOS
+    ):
+        raise WorkflowRegressionError("Fixture contracts require 1 to 100 scenario references")
+    seen: set[str] = set()
+    definitions: list[dict[str, str]] = []
+    for item in scenarios:
+        if (
+            not isinstance(item, dict)
+            or set(item) != {"path", "sha256"}
+            or not isinstance(item["path"], str)
+            or re.fullmatch(r"(?:[A-Za-z0-9_-]+/)*[A-Za-z0-9_-]+\.json", item["path"]) is None
+            or not isinstance(item["sha256"], str)
+            or re.fullmatch(r"[0-9a-f]{64}", item["sha256"]) is None
+            or item["path"].casefold() in seen
+        ):
+            raise WorkflowRegressionError(
+                "Scenario references require distinct portable relative JSON paths and SHA-256"
+            )
+        try:
+            validate_project_files({Path(item["path"]): ""})
+        except ProjectGenerationError as error:
+            raise WorkflowRegressionError(
+                "Fixture paths must be portable regular-file paths"
+            ) from error
+        seen.add(item["path"].casefold())
+        definitions.append(item)
+    return definitions
+
+
+def _resolved_fixtures(data: dict[str, Any], captures: tuple[str, ...]) -> dict[str, Any]:
+    definitions = _fixture_definitions(data)
+    if len(captures) != len(definitions):
+        raise WorkflowRegressionError("Fixture contracts require every captured scenario")
+    scenarios: list[Any] = []
+    total = 0
+    for definition, source in zip(definitions, captures, strict=True):
+        if not isinstance(source, str):
+            raise WorkflowRegressionError("Captured fixtures must be immutable UTF-8 JSON text")
+        content = source.encode("utf-8")
+        total += len(content)
+        if (
+            len(content) > MAX_REGRESSION_FIXTURE_BYTES
+            or total > MAX_REGRESSION_FIXTURE_TOTAL_BYTES
+        ):
+            raise WorkflowRegressionError(
+                "Regression fixtures exceed the 1 MiB/file or 8 MiB total budget"
+            )
+        if hashlib.sha256(content).hexdigest() != definition["sha256"]:
+            raise WorkflowRegressionError(
+                f"Regression fixture SHA-256 mismatch: {definition['path']}"
+            )
+        scenarios.append(json.loads(source, object_pairs_hook=_unique_object))
+    resolved = {"schema_version": "1.0", "scenarios": scenarios}
+    _validate(resolved)
+    return resolved
+
+
+def _read_fixture(root: Path, relative: str, remaining: int) -> bytes:
+    current = root
+    for part in Path(relative).parts:
+        current /= part
+        info = current.lstat()
+        if stat.S_ISLNK(info.st_mode) or getattr(info, "st_file_attributes", 0) & _REPARSE_POINT:
+            raise WorkflowRegressionError(
+                "Regression fixtures cannot traverse links or reparse points"
+            )
+        if not (stat.S_ISREG(info.st_mode) or stat.S_ISDIR(info.st_mode)):
+            raise WorkflowRegressionError(
+                "Regression fixtures require regular files and directories"
+            )
+    if not current.is_file() or not current.resolve().is_relative_to(root):
+        raise WorkflowRegressionError("Regression fixtures must be contained regular files")
+    with current.open("rb") as stream:
+        content = stream.read(min(MAX_REGRESSION_FIXTURE_BYTES, remaining) + 1)
+    if len(content) > MAX_REGRESSION_FIXTURE_BYTES or len(content) > remaining:
+        raise WorkflowRegressionError(
+            "Regression fixtures exceed the 1 MiB/file or 8 MiB total budget"
+        )
+    return content
+
+
 @dataclass(frozen=True, slots=True)
 class WorkflowRegressionContract:
     """Canonical serialized values prevent mutable nested expectations from drifting."""
 
     canonical_json: str
+    fixture_jsons: tuple[str, ...] = field(default=(), repr=False)
 
     def __post_init__(self) -> None:
         """Validate direct construction without executing source to infer an oracle."""
@@ -109,9 +202,16 @@ class WorkflowRegressionContract:
                     "Regression contract must be UTF-8 JSON within 64 KiB"
                 )
             data = json.loads(self.canonical_json, object_pairs_hook=_unique_object)
+            if not isinstance(self.fixture_jsons, tuple):
+                raise WorkflowRegressionError("Captured fixtures must be an immutable tuple")
+            if isinstance(data, dict) and data.get("schema_version") == "1.1":
+                _resolved_fixtures(data, self.fixture_jsons)
+            else:
+                if self.fixture_jsons:
+                    raise WorkflowRegressionError("Inline contracts cannot carry captured fixtures")
+                _validate(data)
         except (UnicodeError, json.JSONDecodeError, RecursionError) as error:
             raise WorkflowRegressionError("Cannot decode regression contract") from error
-        _validate(data)
         object.__setattr__(
             self,
             "canonical_json",
@@ -119,18 +219,25 @@ class WorkflowRegressionContract:
         )
 
     @classmethod
-    def from_dict(cls, data: object) -> WorkflowRegressionContract:
+    def from_dict(
+        cls, data: object, *, fixture_jsons: tuple[str, ...] = ()
+    ) -> WorkflowRegressionContract:
         """Copy supplied JSON expectations into immutable validated storage."""
         _json_value(data)
         try:
             source = json.dumps(data, sort_keys=True, allow_nan=False)
         except (TypeError, ValueError, RecursionError) as error:
             raise WorkflowRegressionError("Cannot serialize regression contract") from error
-        return cls(source)
+        return cls(source, fixture_jsons)
 
     def to_dict(self) -> dict[str, Any]:
-        """Return a fresh tree; callers cannot mutate the stored oracle."""
+        """Return a fresh declaration; schema 1.1 retains its pinned references."""
         return json.loads(self.canonical_json)  # type: ignore[no-any-return]
+
+    def resolved_dict(self) -> dict[str, Any]:
+        """Return fresh schema-1.0 values from captured text, without filesystem access."""
+        data = self.to_dict()
+        return _resolved_fixtures(data, self.fixture_jsons) if self.fixture_jsons else data
 
     @property
     def sha256(self) -> str:
@@ -145,8 +252,20 @@ def load_workflow_regression_contract(path: str | Path) -> WorkflowRegressionCon
             content = stream.read(MAX_REGRESSION_BYTES + 1)
         if len(content) > MAX_REGRESSION_BYTES:
             raise WorkflowRegressionError("Regression contract exceeds 64 KiB")
-        return WorkflowRegressionContract(content.decode("utf-8"))
-    except (OSError, UnicodeError) as error:
+        source = content.decode("utf-8")
+        data = json.loads(source, object_pairs_hook=_unique_object)
+        captures: list[str] = []
+        if isinstance(data, dict) and data.get("schema_version") == "1.1":
+            root = Path(path).resolve().parent
+            total = 0
+            for definition in _fixture_definitions(data):
+                raw = _read_fixture(
+                    root, definition["path"], MAX_REGRESSION_FIXTURE_TOTAL_BYTES - total
+                )
+                total += len(raw)
+                captures.append(raw.decode("utf-8"))
+        return WorkflowRegressionContract(source, tuple(captures))
+    except (OSError, UnicodeError, json.JSONDecodeError, RecursionError) as error:
         raise WorkflowRegressionError(f"Cannot read regression contract: {path}") from error
 
 
@@ -167,7 +286,7 @@ def validate_regression_binding(
             "JSON regression contracts do not define file-reference fixtures"
         )
     steps = {step.name: step for step in plan.steps}
-    for scenario in contract.to_dict()["scenarios"]:
+    for scenario in contract.resolved_dict()["scenarios"]:
         if set(scenario["inputs"]) != set(dict(plan.configuration.inputs)) or set(
             scenario["parameters"]
         ) != set(dict(plan.configuration.parameters)):
