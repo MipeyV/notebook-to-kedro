@@ -1,4 +1,4 @@
-"""Read-only analysis of explicit, straight-line Python functions across source units."""
+"""Read-only inspection of explicit functions with preserved bounded body constructs."""
 
 from __future__ import annotations
 
@@ -11,6 +11,7 @@ from collections import Counter
 from graphlib import CycleError, TopologicalSorter
 from typing import TYPE_CHECKING, Literal
 
+from notebook_to_kedro.analysis.functional_bindings import unbound_local_reads
 from notebook_to_kedro.analysis.python_ast import (
     BUILTIN_NAMES,
     DYNAMIC_CALLS,
@@ -107,7 +108,21 @@ def _body_checks(
     unit: SourceUnit, node: ast.FunctionDef, block_id: str, table: symtable.SymbolTable
 ) -> tuple[BlockDiagnostic, ...]:
     diagnostics: list[BlockDiagnostic] = []
-    allowed = (ast.Assign, ast.AnnAssign, ast.AugAssign, ast.Assert, ast.Expr, ast.Return)
+    allowed = (
+        ast.Assign,
+        ast.AnnAssign,
+        ast.AugAssign,
+        ast.Assert,
+        ast.Expr,
+        ast.Return,
+        ast.If,
+        ast.For,
+        ast.While,
+        ast.Raise,
+        ast.Break,
+        ast.Continue,
+        ast.Pass,
+    )
     forbidden = (
         ast.Lambda,
         ast.ListComp,
@@ -119,40 +134,37 @@ def _body_checks(
         ast.YieldFrom,
         ast.Await,
     )
-    if any(not isinstance(item, allowed) for item in node.body) or any(
+    if any(
+        isinstance(item, ast.stmt) and item is not node and not isinstance(item, allowed)
+        for item in ast.walk(node)
+    ) or any(
         isinstance(item, forbidden) for statement in node.body for item in ast.walk(statement)
     ):
         diagnostics.append(
             _issue(
                 "BL004",
-                "Only straight-line assignment/assertion/call/return bodies are supported.",
+                "Only assignments/calls, structured if/for/while, raises and a final return "
+                "are supported inside function bodies.",
                 unit,
                 node,
                 block_id,
             )
         )
     locals_ = {symbol.get_name() for symbol in table.get_symbols() if symbol.is_local()}
-    available = {
+    parameters = {
         arg.arg for arg in (*node.args.posonlyargs, *node.args.args, *node.args.kwonlyargs)
     }
+    diagnostics.extend(
+        _issue(
+            "BL006",
+            "A local name may be read before binding on a supported path.",
+            unit,
+            statement,
+            block_id,
+        )
+        for statement in unbound_local_reads(node.body, parameters, locals_)
+    )
     for statement in node.body:
-        reads = {
-            item.id
-            for item in ast.walk(statement)
-            if isinstance(item, ast.Name) and isinstance(item.ctx, ast.Load)
-        }
-        if isinstance(statement, ast.AugAssign) and isinstance(statement.target, ast.Name):
-            reads.add(statement.target.id)
-        if (reads & locals_) - available:
-            diagnostics.append(
-                _issue(
-                    "BL006",
-                    "A local name is read before its straight-line binding.",
-                    unit,
-                    statement,
-                    block_id,
-                )
-            )
         targets = [
             item
             for item in ast.walk(statement)
@@ -193,12 +205,6 @@ def _body_checks(
                         block_id,
                     )
                 )
-        if not isinstance(statement, ast.AnnAssign) or statement.value is not None:
-            available.update(
-                item.id
-                for item in ast.walk(statement)
-                if isinstance(item, ast.Name) and isinstance(item.ctx, ast.Store)
-            )
     return tuple(diagnostics)
 
 
@@ -281,6 +287,17 @@ def _function(
         return_contract[1] if return_contract is not None else None,
     )
     diagnostics.extend(_body_checks(unit, node, block_id, table))
+    if any(isinstance(item, (ast.If, ast.For, ast.While)) for item in ast.walk(node)):
+        diagnostics.append(
+            BlockDiagnostic(
+                "BL104",
+                "warning",
+                "Function control flow is preserved; paths, iteration counts and termination "
+                "are unverified.",
+                block.span,
+                block.id,
+            )
+        )
     if calls:
         diagnostics.append(
             BlockDiagnostic(

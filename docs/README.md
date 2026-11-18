@@ -139,6 +139,8 @@ the dedicated experiment reports for their frozen settings, decisions and limita
   separates operation durations, retained attempts and declared human/baseline comparisons.
 - [ADR 0020 - Bounded regression fixtures](decisions/0020-bounded-regression-fixtures.md)
   keeps metadata bounded while snapshotting pinned JSON scenarios for standalone delivered tests.
+- [ADR 0021 - Preserved helper control flow](decisions/0021-preserved-helper-control-flow.md)
+  extends function bodies with conservative local bindings while keeping orchestration explicit.
 - [ADR 0017 - Application-aware workflow preparation](decisions/0017-application-aware-workflow-preparation.md)
   records original project layout, metadata capture and subsequent explicit conversion.
 - [ADR 0016 - Explicit application distributions](decisions/0016-explicit-application-distributions.md)

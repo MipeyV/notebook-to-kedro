@@ -103,7 +103,10 @@ def test_named_tuple_returns_annotations_and_reference_edges() -> None:
         ("def f(x):\n    pass", "BL003"),
         ("def f(x):\n    return", "BL003"),
         ("def f(x):\n    if x:\n        return x\n    return x", "BL003"),
-        ("def f(x):\n    for y in x:\n        print(y)\n    return x", "BL004"),
+        (
+            "def f(x):\n    try:\n        print(x)\n    finally:\n        pass\n    return x",
+            "BL004",
+        ),
         ("def f(x):\n    y = [v for v in x]\n    return y", "BL004"),
         ("def f(x):\n    x.value = 2\n    return x", "BL004"),
         ("def f(x):\n    x[0] = 2\n    return x", "BL004"),

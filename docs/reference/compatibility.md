@@ -14,6 +14,12 @@ call assignments and a final named result. Multi-file reconstruction, dependency
 typed dataset boundaries remain unsupported. Existing schema 1.0 functional fingerprints change;
 local-operation envelopes and project-settings schema versions remain 1.0.
 
+Preserved function bodies also admit structured if/for/while, raises and loop break/continue,
+with conservative definite-local-binding checks and one final value return. Original helper ASTs
+stay intact. Nested imports/definitions, try/with/match, early/multiple returns, dynamic calls,
+comprehensions and mutation writes retain their blockers. Paths, iteration counts and termination
+are not proved. This does not enable conditional/iterative orchestration or arbitrary Python.
+
 Workflow configuration schema 1.0 keeps scalar-only parameters. Opt-in schema 1.1 adds flat
 string-keyed mappings of finite JSON scalars, with immutable settings and single-use mapping
 consumption at the node boundary. Arrays, nested mapping contents, dependency inference and
@@ -23,7 +29,8 @@ Workflow schema 1.2 retains the flat mapping and single-use rules while enforcin
 order using explicit ordering-only dependencies. Business wrapper signatures remain unchanged.
 Its plan/manifest uses schema 1.1 ordering metadata; local operations stay schema 1.0. Tests
 exercise SequentialRunner, ThreadRunner and adapter pickling, without claiming every process
-runner or arbitrary deployment. Control flow, source data reuse/fan-out and typed I/O remain unsupported.
+runner or arbitrary deployment. Dynamic orchestration, source data reuse/fan-out and typed I/O
+remain unsupported.
 
 Opt-in workflow schema 1.3 preserves one explicitly declared regular Python package containing
 the selected `.py` module, including raw resources and original imports. It inherits source-order
