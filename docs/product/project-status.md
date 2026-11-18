@@ -2,13 +2,14 @@
 
 [Documentation index](../README.md)
 
-Status: current implementation summary reviewed on 2026-11-17; historical evidence follows.
+Status: current implementation summary reviewed on 2026-11-18; historical evidence follows.
 Historical measurements retain their original corpus, runtime and limitations.
 
 ## Project status
 
 | Capability | Current status |
 | --- | --- |
+| Fixture-backed regression contracts | Regression schema 1.1 captures SHA-pinned JSON scenario files under a 64 KiB manifest, 1 MiB/file and 8 MiB total limits. Immutable snapshots produce standalone hash-checked fixture suites through existing API/CLI/local operations. Inline 1.0 output stays compatible. The prior eight-step notebook now passes 27 delivered tests plus independent runtime/CLI/threading/mutation checks with identical resolved expectations in a new fixture-backed run. Helper control flow/fan-out and typed/file-reference/artifact oracles retain their earlier limits. |
 | Prospective effort comparison kits | API/CLI prepares pending tool/manual/general-assistant forms from complete stable generation measurements, with common source/criteria/setup fields and an inventory snapshot. Two controlled cases and one private prepared real workflow have static operation records and collection kits. Human intervals, acceptance and actual productivity comparisons remain uncollected. No business execution or new stopwatch is supplied. |
 | One-prompt coding-agent evidence | An external fresh-context agent and the converter both passed independent Kedro/runtime/test/mutation checks on one prepared synthetic two-node functional script. Delivered tests passed 11/11 and 9/9 respectively. The approximate agent window was 319 s; preconfigured converter setup/operations took 0.356 s, with acceptance separate. These clocks have different boundaries; no human saving, cost or representative notebook comparison is established. See the [scoped observations](../reference/local-operations.md#one-prompt-agent-check). No provider transport was added. |
 | Expanded prepared comparisons | Three additional frozen cases now pass for both methods: a functional ML notebook, four-node ordered join and preserved local package/resource. Independent behavior/threading/CLI/test/mutation checks passed for all six candidates. Agent production windows were approximately 194-234 s; converter in-process production was 0.399-0.435 s, with common acceptance separate. Public synthetic inputs/prompts and [aggregate observations](../experiments/prepared-agent-comparison.md) retain corrections and timing boundaries. Human effort and repeated-run distributions remain pending; boundary-focused results are recorded separately below. |

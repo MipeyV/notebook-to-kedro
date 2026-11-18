@@ -40,6 +40,46 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-11-18 - Deliver bounded fixture-backed regression contracts
+
+### Completed
+
+- Added regression schema 1.1 with a bounded manifest of relative SHA-pinned complete scenario
+  JSON files. Preserve inline 1.0 and its output/budget. Fixtures are limited to 1 MiB each,
+  8 MiB total and 100 references, with resolved depth/finite/schema/binding checks unchanged.
+- Capture immutable UTF-8 text without application imports or execution. Direct API snapshots
+  publish through the shared writer; local requests reload and reject current hash drift before
+  publication. Generated suites check contained regular files, budgets and hashes before node
+  imports. Reports distinguish original references from generated digest paths.
+- Added compatible examples with pinned LF fixture bytes, a committed-example parity check,
+  snapshot/path/hash/link/reparse/budget/schema/drift controls and standalone runtime negative
+  controls. Existing CLI/local settings require no new command or engine dependency.
+- Reused the eight-step notebook and exactly equal resolved expectations in a new local run:
+  a 464-byte manifest with 287,792 fixture bytes. Generation completed and independent AST/
+  catalog/default/order, three-pipeline/24-node oracle, ThreadRunner, Kedro CLI and 27-test
+  checks passed. Original arithmetic mutation produced six expected assertion failures.
+  Canonical/input inventories stayed unchanged. Original blocked corpus/history remain intact.
+- The complete offline suite passed all 2,974 tests on Windows/Python 3.12.14 with 100% coverage
+  of 10,061 statements and 3,008 branches. All 183 targeted checks, strict mypy across 215 files,
+  Ruff and formatting passed. Source/wheel builds and engine byte parity passed; new tests/docs/
+  examples are present and nbformat remains the sole runtime requirement. The actual CLI fixture
+  example generated successfully. Interface source is unchanged; host tests were not rerun.
+- New configuration loading and three static operations took 0.175 s in-process after imports/
+  preparation; independent acceptance took 8.470 s. Human time and savings remain unmeasured.
+
+### Decisions
+
+- Record ADR 0020: bounded declarations and immutable captured scenario values are separate.
+  Raw bytes include line endings. No inferred expectations, automatic review, new runtime consent,
+  provider, typed/file-reference/artifact oracle or shared mutable-data support was added.
+- Scope this increment to the first observed blockage. Helper control flow and fan-out remain
+  separate engineering work; neither historical comparison failure was erased.
+
+### Next step
+
+- Extend helper-body coverage in a separate scope, preserving original code, failure behavior,
+  explicit orchestration boundaries and the source-fidelity acceptance checks.
+
 ## 2026-11-17 - Preserve larger and unsupported comparison outcomes
 
 ### Completed

@@ -28,7 +28,7 @@ The compatibility policy is authoritative for supported runtimes and library-sup
 | Document | Status | Purpose |
 | --- | --- | --- |
 | [Project overview](product/overview.md) | Original design | Context, intended interfaces, scope and principles extracted from the old README. |
-| [Detailed project status](product/project-status.md) | Reviewed: 2026-11-17 | Current capability matrix, implemented APIs and historical measurement context. |
+| [Detailed project status](product/project-status.md) | Reviewed: 2026-11-18 | Current capability matrix, implemented APIs and historical measurement context. |
 | [Conversion roadmap](product/roadmap.md) | V1 completed; V2 ongoing | Existing milestones and checkboxes, without changing completion claims. |
 | [Product vision](product/product-vision.md) | Direction; future features proposed | Existing-project and greenfield entrypoints, reusable enterprise standards, evidence and commercial hypotheses. |
 
@@ -137,6 +137,8 @@ the dedicated experiment reports for their frozen settings, decisions and limita
   records original Git context, published byte inventories and selected-interpreter metadata.
 - [ADR 0019 - Opt-in conversion measurements](decisions/0019-opt-in-conversion-measurements.md)
   separates operation durations, retained attempts and declared human/baseline comparisons.
+- [ADR 0020 - Bounded regression fixtures](decisions/0020-bounded-regression-fixtures.md)
+  keeps metadata bounded while snapshotting pinned JSON scenarios for standalone delivered tests.
 - [ADR 0017 - Application-aware workflow preparation](decisions/0017-application-aware-workflow-preparation.md)
   records original project layout, metadata capture and subsequent explicit conversion.
 - [ADR 0016 - Explicit application distributions](decisions/0016-explicit-application-distributions.md)

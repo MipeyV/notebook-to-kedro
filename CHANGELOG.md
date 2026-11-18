@@ -29,6 +29,12 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Added regression schema 1.1 with SHA-pinned scenario JSON fixtures: retain 64 KiB manifests,
+  bound fixtures to 1 MiB/file and 8 MiB total, capture immutable text and publish standalone
+  hash-checked fixture tests. Existing inline 1.0 behavior stays compatible. The eight-step
+  comparison case now passes all 27 supplied tests in a new fixture-backed run; control flow,
+  fan-out, typed/file-reference and artifact expectations retain their earlier limits.
+
 - Extended the prepared comparison with three frozen boundary cases and all blocked tool attempts.
   External agent projects passed independent AST/behavior/threading/error/identity/test/mutation
   checks; oversized regression fixtures, helper control flow and shared mutable fan-out still block

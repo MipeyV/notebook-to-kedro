@@ -162,3 +162,25 @@ source coverage. Concrete follow-up candidates are bounded fixture-backed regres
 preserving control flow inside called helpers, and an explicit shared-data/source-order contract.
 Dynamic orchestration and mutable identity must retain separate acceptance evidence; no fallback,
 automatic repair or new capability is implemented by this report.
+
+## Fixture-backed follow-up on 2026-11-18
+
+The original blocked batch and its frozen corpus/observations remain unchanged. A subsequent
+engine increment adds [regression schema 1.1](../reference/generated-workflow-tests.md#scenario-fixtures-in-schema-11),
+which captures bounded pinned scenario files separately from the manifest. A new local copy of
+the eight-step case uses this format; source and resolved expectation values match the original
+exactly. This is a new declaration, not a reinterpretation of the old oversized 1.0 attempt.
+
+The new manifest is 464 bytes with 287,792 fixture bytes. Inspect/plan/generate completed, and
+independent acceptance passed source/default/catalog/order checks, all three pipeline and 24 node
+expectations, ThreadRunner, the standard Kedro CLI, 27 shipped tests and the original arithmetic
+mutation (six assertion failures, no setup errors). Canonical candidate/input inventories remained
+unchanged during acceptance. Configuration loading plus three measured operations took 0.175 s
+in-process after imports/preparation; independent acceptance took 8.470 s. Preparation/review and
+startup were not timed, and no human saving or direct ratio against earlier agent clocks is inferred.
+
+Fixture source paths, hashes and generated destinations are reviewable in the new report. Local
+projects/logs stay ignored. The original inline declaration still exceeds its unchanged 64 KiB
+limit. Loop/conditional helper and mutable-fan-out cases remain blocked; neither was repaired or
+reclassified by the fixture format. No new agent call, installation, financial runtime or separate
+whole-notebook pilot approval was used for this follow-up.

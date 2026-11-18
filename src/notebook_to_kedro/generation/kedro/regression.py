@@ -84,6 +84,40 @@ if NODE_CASES:
         _assert_json(result, case["expected"])
 '''
 
+_FIXTURE_CASES = '''def _fixture_cases():
+    """Read only pinned, contained regular scenario files before application imports."""
+    contract = DATA["contract"]
+    definitions = contract["scenarios"]
+    if contract["schema_version"] != "1.1" or not 1 <= len(definitions) <= 100:
+        raise ValueError("Invalid generated fixture contract")
+    cases, total = [], 0
+    for definition in definitions:
+        digest = definition["sha256"]
+        if re.fullmatch(r"[0-9a-f]{64}", digest) is None or definition["path"] != (
+            "regression_fixtures/" + digest + ".json"
+        ):
+            raise ValueError("Regression fixtures require contained generated paths")
+        path = ROOT / "tests" / definition["path"]
+        for directory in (ROOT / "tests", path.parent):
+            info = directory.lstat()
+            if not stat.S_ISDIR(info.st_mode) or getattr(info, "st_file_attributes", 0) & 0x400:
+                raise ValueError("Regression fixture directories must be regular")
+        info = path.lstat()
+        if not stat.S_ISREG(info.st_mode) or getattr(info, "st_file_attributes", 0) & 0x400:
+            raise ValueError("Regression fixtures must be regular files")
+        with path.open("rb") as stream:
+            content = stream.read(min(1024 * 1024, 8 * 1024 * 1024 - total) + 1)
+        total += len(content)
+        if len(content) > 1024 * 1024 or total > 8 * 1024 * 1024:
+            raise ValueError("Regression fixture byte budget exceeded")
+        if hashlib.sha256(content).hexdigest() != digest:
+            raise ValueError("Regression fixture SHA-256 mismatch")
+        cases.append(json.loads(content.decode("utf-8")))
+    return cases
+
+
+CASES = _fixture_cases()'''
+
 
 def render_workflow_regression_tests(
     plan: FunctionalWorkflowPlan,
@@ -93,7 +127,7 @@ def render_workflow_regression_tests(
 ) -> dict[Path, str]:
     """Validate expectations and render tests/gaps without application imports or execution."""
     data: dict[str, Any] = (
-        {"schema_version": "1.0", "scenarios": []} if contract is None else contract.to_dict()
+        {"schema_version": "1.0", "scenarios": []} if contract is None else contract.resolved_dict()
     )
     if contract is not None:
         validate_regression_binding(contract, plan)
@@ -102,7 +136,7 @@ def render_workflow_regression_tests(
         step.name: sum(step.name in case.get("nodes", {}) for case in cases) for step in plan.steps
     }
     gaps = [name for name, count in counts.items() if count == 0]
-    report = {
+    report: dict[str, Any] = {
         "schema_version": "1.0",
         "status": "no_expectations" if contract is None else "expectations_provided",
         "contract_sha256": None if contract is None else contract.sha256,
@@ -145,6 +179,33 @@ def render_workflow_regression_tests(
                 "the JSON regression contract does not define artifact fixtures.\n"
             )
         return files
+    declaration = contract.to_dict()
+    module = _TEST_MODULE
+    if contract.fixture_jsons:
+        references = []
+        fixtures = []
+        for definition, source in zip(
+            declaration["scenarios"], contract.fixture_jsons, strict=True
+        ):
+            relative = "regression_fixtures/" + definition["sha256"] + ".json"
+            files[Path("tests") / relative] = source
+            references.append({"path": relative, "sha256": definition["sha256"]})
+            fixtures.append(
+                {
+                    "source": definition["path"],
+                    "path": "tests/" + relative,
+                    "sha256": definition["sha256"],
+                    "size_bytes": len(source.encode("utf-8")),
+                }
+            )
+        data = {"schema_version": "1.1", "scenarios": references}
+        report["fixtures"] = fixtures
+        files[Path("regression-coverage.json")] = (
+            json.dumps(report, sort_keys=True, indent=2) + "\n"
+        )
+        module = _TEST_MODULE.replace(
+            "import copy\n", "import copy\nimport hashlib\nimport stat\n"
+        ).replace('CASES = DATA["contract"]["scenarios"]', _FIXTURE_CASES)
     metadata = {
         "schema_version": "1.0",
         "contract_sha256": contract.sha256,
@@ -154,8 +215,8 @@ def render_workflow_regression_tests(
         "output_name": plan.configuration.outputs[0][0],
         "contract": data,
     }
-    compile(_TEST_MODULE, "tests/test_workflow_regressions.py", "exec", dont_inherit=True)
-    files[Path("tests/test_workflow_regressions.py")] = _TEST_MODULE
+    compile(module, "tests/test_workflow_regressions.py", "exec", dont_inherit=True)
+    files[Path("tests/test_workflow_regressions.py")] = module
     files[Path("tests/regression_cases.json")] = (
         json.dumps(metadata, sort_keys=True, indent=2) + "\n"
     )
@@ -169,4 +230,11 @@ def render_workflow_regression_tests(
         "are not a proof of business intent, a recorded execution result or authenticated review.\n"
         "Fresh dependency installation is not verified by generation.\n"
     )
+    if contract.fixture_jsons:
+        files[Path("TESTING.md")] += (
+            "\nScenario fixtures are copied under tests/regression_fixtures with pinned SHA-256 "
+            "identities. They are validated before collection; missing, modified or linked files "
+            "fail before node execution. Original source paths are listed in "
+            "regression-coverage.json.\n"
+        )
     return files

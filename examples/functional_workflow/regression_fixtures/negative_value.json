@@ -1,0 +1,25 @@
+{
+  "id": "negative_value",
+  "inputs": {
+    "values": -3.0
+  },
+  "parameters": {
+    "scale": 2.0
+  },
+  "expected": 6.0,
+  "nodes": {
+    "step_0000_prepare_values": {
+      "inputs": {
+        "values": -3.0,
+        "scale": 2.0
+      },
+      "expected": -6.0
+    },
+    "step_0001_summarize": {
+      "inputs": {
+        "prepared": -6.0
+      },
+      "expected": 6.0
+    }
+  }
+}
