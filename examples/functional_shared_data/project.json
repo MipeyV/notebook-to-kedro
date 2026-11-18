@@ -1,0 +1,10 @@
+{
+  "schema_version": "1.0",
+  "project_root": "../..",
+  "source_kind": "functional",
+  "source": "examples/functional_shared_data/workflow.ipynb",
+  "package_name": "shared_data_demo",
+  "workflow_configuration": "examples/functional_shared_data/workflow.json",
+  "architecture_profile": "examples/functional_shared_data/profile.json",
+  "regression_contract": "examples/functional_shared_data/regression.json"
+}

@@ -29,8 +29,12 @@ Workflow schema 1.2 retains the flat mapping and single-use rules while enforcin
 order using explicit ordering-only dependencies. Business wrapper signatures remain unchanged.
 Its plan/manifest uses schema 1.1 ordering metadata; local operations stay schema 1.0. Tests
 exercise SequentialRunner, ThreadRunner and adapter pickling, without claiming every process
-runner or arbitrary deployment. Dynamic orchestration, source data reuse/fan-out and typed I/O
-remain unsupported.
+runner or arbitrary deployment. An optional versioned `shared_data` policy on schemas 1.2 through
+1.7 admits only explicitly named intermediate outputs consumed at least twice, with source order
+and assign-mode object retention within one process. Catalog inputs, mutable parameters, final/
+unused values and undeclared reuse remain rejected. SequentialRunner/ThreadRunner are exercised;
+process runners and arbitrary concurrency are unsupported. Plans with this policy use schema 1.7;
+local envelopes remain 1.0. Dynamic orchestration and richer typed I/O retain their limits.
 
 Opt-in workflow schema 1.3 preserves one explicitly declared regular Python package containing
 the selected `.py` module, including raw resources and original imports. It inherits source-order

@@ -12,6 +12,8 @@ from notebook_to_kedro.analysis.functional import analyze_functional_blocks
 from notebook_to_kedro.exceptions import FunctionalWorkflowError
 from notebook_to_kedro.ir.functional import BlockSpan
 
+MIN_SHARED_CONSUMPTIONS = 2
+
 if TYPE_CHECKING:
     from notebook_to_kedro.ir.application_project import ApplicationDistribution
     from notebook_to_kedro.ir.file_inputs import FileReferenceInventory
@@ -105,6 +107,28 @@ class FunctionalWorkflowPlan:
             payload["schema_version"] = "1.6"
             payload["application_distribution"] = self.application_distribution.to_dict()
             payload["application_distribution_sha256"] = self.application_distribution.sha256
+        if self.configuration.shared_data is not None:
+            payload["schema_version"] = "1.7"
+            producers = {step.output: step.id for step in self.steps}
+            payload["data_sharing"] = {
+                "policy": "source_ordered_references",
+                "execution_scope": "single_process",
+                "copy_mode": "assign",
+                "runtime_validation": "not_run",
+                "values": [
+                    {
+                        "value": name,
+                        "producer_step": producers[name],
+                        "consumers": [
+                            {"step_id": step.id, "argument": argument}
+                            for step in self.steps
+                            for argument, value in step.inputs
+                            if value == name
+                        ],
+                    }
+                    for name in self.configuration.shared_data.values
+                ],
+            }
         return json.dumps(payload, sort_keys=True, indent=2) + "\n"
 
     def artifact_bindings(self) -> list[dict[str, str]]:
@@ -208,7 +232,7 @@ def plan_functional_workflow(
     file_inputs: tuple[FileReferenceInventory, ...] = (),
     application_distribution: ApplicationDistribution | None = None,
 ) -> FunctionalWorkflowPlan:
-    """Recompute facts and require single-use data flow with explicit call-order semantics."""
+    """Recompute facts and enforce declared data reuse with explicit call-order semantics."""
     _validate_package_context(analysis, configuration, source_package)
     if configuration.application_project is not None:
         if (
@@ -260,6 +284,9 @@ def plan_functional_workflow(
             name for name, value in configuration.parameters if not isinstance(value, tuple)
         },
         source_order=configuration.schema_version in ("1.2", "1.3", "1.4", "1.5", "1.6", "1.7"),
+        shared_values=frozenset()
+        if configuration.shared_data is None
+        else frozenset(configuration.shared_data.values),
     )
     if any(
         sum(destination.parameter in {value for _, value in step.inputs} for step in steps) != 1
@@ -279,6 +306,7 @@ def plan_functional_steps(
     *,
     reusable_parameters: set[str],
     source_order: bool,
+    shared_values: frozenset[str] = frozenset(),
 ) -> tuple[FunctionalWorkflowStep, ...]:
     """Validate explicit call wiring, independently of persistent I/O configuration."""
     node = cast("ast.FunctionDef", ast.parse(entry.source).body[0])
@@ -288,6 +316,7 @@ def plan_functional_steps(
     )
     if not steps or steps[-1].output != entry.outputs[0]:
         raise FunctionalWorkflowError("Entrypoint must return the final call result")
+    _validate_shared_values(steps, shared_values, source_order=source_order)
     available = set(entry.parameters)
     consumed: set[str] = set()
     previous: str | None = None
@@ -298,10 +327,11 @@ def plan_functional_steps(
                 "Workflow needs bound values and distinct single-assignment outputs"
             )
         data_values = [value for value in values if value not in reusable_parameters]
-        if len(data_values) != len(set(data_values)) or set(data_values) & consumed:
+        restricted = [value for value in data_values if value not in shared_values]
+        if len(restricted) != len(set(restricted)) or set(restricted) & consumed:
             raise FunctionalWorkflowError(
                 "Data and mapping parameters must be consumed at most once; "
-                "aliasing/fan-out is unsupported"
+                "only declared shared intermediate outputs may be reused"
             )
         if not source_order and previous is not None and previous not in data_values:
             raise FunctionalWorkflowError(
@@ -311,3 +341,21 @@ def plan_functional_steps(
         available.add(step.output)
         previous = step.output
     return steps
+
+
+def _validate_shared_values(
+    steps: tuple[FunctionalWorkflowStep, ...], values: frozenset[str], *, source_order: bool
+) -> None:
+    if values and (
+        not source_order
+        or not values <= {step.output for step in steps[:-1]}
+        or any(
+            sum(value == name for step in steps for _, value in step.inputs)
+            < MIN_SHARED_CONSUMPTIONS
+            for name in values
+        )
+    ):
+        raise FunctionalWorkflowError(
+            "Shared data requires source order and intermediate outputs consumed at least twice; "
+            "catalog inputs, parameters and final outputs cannot be declared shared"
+        )

@@ -2,7 +2,7 @@
 
 [Documentation index](../README.md)
 
-Status: engine/operations/local-interface delivery priorities updated on 2026-11-17;
+Status: engine/operations/local-interface delivery priorities updated on 2026-11-19;
 historical V1/V2 checkboxes are preserved.
 The broader product direction is recorded in [Product vision](product-vision.md).
 
@@ -18,7 +18,7 @@ reusable core and is exercised through API/CLI first.
 | --- | --- | --- | --- |
 | 0 | Preserve the existing conversion foundation | Deterministic notebook analysis/generation, safe publication and default/custom Kedro naming profiles. | Implemented; scope and evidence remain bounded. |
 | E1 | Source completeness and graph fidelity | Every parsed statement has a supported destination or blocks conversion. Cross-check task AST/provenance, imports, selected parameter values, catalog relocation and source dependencies. Exercise the first rewrite of a catalog input. | Initial source-accounting/API guard and dataset-graph correction implemented in this increment; arbitrary semantics remain unsupported. |
-| E2 | Functional blocks and a structured Python input | Reuse immutable facts; demonstrate one workflow presented as notebook and structured script reaching the same checked Kedro behavior. Derive a small source-independent representation from these actual cases. | Initial bounded slices implemented: explicit-function analysis, JSON I/O, scalar/flat candidate parameters, named linear wiring and opt-in source-ordered independent calls/joins, with paired generation/tests and profiles. Data fan-out, dynamic orchestration, richer typed I/O and multi-file analysis remain unsupported; no universal ProjectSpec. |
+| E2 | Functional blocks and a structured Python input | Reuse immutable facts; demonstrate one workflow presented as notebook and structured script reaching the same checked Kedro behavior. Derive a small source-independent representation from these actual cases. | Bounded slices implemented: explicit-function analysis, JSON I/O, scalar/flat candidate parameters, named linear wiring, source-ordered independent calls/joins and explicitly declared shared intermediates, with paired generation/tests and profiles. Unrestricted sharing, dynamic orchestration, richer typed I/O and multi-file analysis remain unsupported; no universal ProjectSpec. |
 | E3 | Tests delivered with generated projects | Reviewed observable contracts/fixtures, pytest regression generation and fresh-environment bootstrap checks. Preserve missing expectations as explicit gaps; generated tests alone do not validate business intent. | Initial functional-workflow slices implemented: explicit JSON expectations, shipped node/pipeline pytest tests, gaps/negative controls, plus trusted-example wheel installation and CLI bootstrap in fresh environments with a separate CI matrix. Broader comparators, dependency inference/locking and procedural-notebook tests remain outstanding. |
 | E4 | Local operation contracts and first interface | Stable typed API/CLI requests/results for implemented tasks, local configuration, plan/diff inspection and explicit execution controls. Prototype a local app or VS Code extension with conversion/audit/profile operations first. | Initial contracts, VS Code prototype and settings assistant implemented. Functional inspection can precede workflow I/O. An initial real-project return-expression blocker is resolved; workflow/I/O setup and multi-module limitations remain. Broader workflow validation, automatic environment integration, existing-project diffs and approval-bound apply remain proposed. |
 | E5 | Existing Kedro project inspection and standardization | Read-only node/pipeline/catalog/config reconstruction, standards diagnostics, reviewable change plans and idempotence tests. Initially generate into a new destination; safe patch application requires its own conflict/ownership contract. | Proposed. |
@@ -59,7 +59,14 @@ and its 12 supplied-JSON tests passed, with independent errors verified and a de
 A separate regression schema 1.2 increment now adds explicit concrete-type/literal-message/node
 exception expectations with inline or pinned fixture storage. A new run passes the original 14
 shipped tests and unchanged independent acceptance, without changing original inputs or criteria.
-Next prioritize a bounded shared-data/source-order contract for the remaining fan-out blocker.
+A subsequent optional shared_data policy now binds repeated intermediate references to producers,
+consumer arguments and source order, preserving assign-mode identity within one process. A new
+shared-buffer run passes original AST/identity/order/CLI/threaded acceptance and four shipped
+tests, retaining original inputs/criteria and explicitly adding one constructor node oracle.
+All three frozen boundary cases now have separate accepted prepared follow-ups; the original
+blocked batch remains unchanged. Next extend prospective matched preparation/correction/review
+and fresh cases before claiming broader accuracy or human savings. Unrestricted sharing,
+dynamic orchestration, typed node oracles and process runners retain their own gaps.
 The targeted comparison and
 follow-ups are not representative accuracy or human productivity studies.
 

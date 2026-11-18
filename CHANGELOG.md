@@ -29,6 +29,12 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Added optional shared-data policy 1.0 on source-ordered workflow schemas 1.2-1.7: explicitly
+  declared intermediate references retain identity and mutation order through assign-mode
+  datasets. Default single-use, catalog-input and mapping-parameter guards remain unchanged.
+  Plans/manifests record producer/consumer bindings in schema 1.7. The frozen shared-buffer case
+  now passes unchanged independent acceptance and four supplied tests in a separate follow-up.
+
 - Added regression schema 1.2 with explicit inline/fixture storage and supplied concrete built-in
   exception/literal-message expectations. Pipeline cases bind failures to a declared node and
   require no final JSON output; setup/registry failures stay outside expected-error contexts.

@@ -237,3 +237,33 @@ absent exception, final-output publication, catalog setup and registry errors ca
 exception expectation. Node failures and fixture header validation have separate controls.
 No further agent call, financial execution, installation or pilot authorization was used. These
 prepared synthetic clocks establish neither human saving nor representative conversion accuracy.
+
+## Explicit shared-data follow-up on 2026-11-18
+
+A new local run preserves every original shared-mutable-fanout input byte and the unchanged
+independent checker's minimum_tests=4. Supplementary workflow settings explicitly declare the
+buffer intermediate as shared. The three original pipeline oracles remain unchanged; a separate
+constructor node oracle is transcribed from the original literal return, giving four shipped
+tests. That declaration/preparation effort is outside the measured production interval. No
+business expectation is inferred by the engine or collected from execution.
+
+Configuration loading plus inspect/plan/generate took 0.091 s in-process after imports/preparation.
+Independent acceptance passed in 5.599 s: original helper ASTs, catalog/parameters, four singleton
+ordered groups, actual registered-node shared identity and left/right mutation trace, all three
+pipeline cases, ThreadRunner, Kedro CLI and four shipped tests. The original arithmetic mutation
+produced three assertion failures, one passing constructor test and no errors. Canonical project
+and original inputs remained unchanged by acceptance. Original blocked observations are retained.
+
+Repository checks exercise paired script/notebook input, default/custom profiles and both
+SequentialRunner/ThreadRunner, including intermediate/nested identity, unchanged source results
+and stop-on-error without retry. Replacing assign storage with deepcopy breaks the source identity
+assertion. Removing the left-to-right dependency deterministically permits the wrong mutation
+order under ThreadRunner. Duplicate arguments in one call can explicitly share one intermediate.
+API/CLI/local generation stay static and use the existing writer; no new provider, financial run
+or pilot authorization is involved.
+
+This contract covers declared intermediate references within one process, not general DAG
+inference, shared catalog inputs/parameters, process runners or arbitrary concurrent mutation.
+JSON cannot express aliases between independent node arguments, so three node-oracle gaps remain
+explicit. The three frozen boundary cases now have separate accepted prepared follow-ups; this
+does not revise the original blocked batch or establish representative success/human productivity.

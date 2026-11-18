@@ -43,6 +43,7 @@ from notebook_to_kedro.semantic.functional_config import (
     FunctionalWorkflowConfiguration,
     load_functional_workflow_configuration,
 )
+from notebook_to_kedro.semantic.shared_data import SharedDataPolicy
 from notebook_to_kedro.semantic.source_accounting import (
     ConversionSourceAudit,
     audit_conversion_source,
@@ -127,6 +128,7 @@ __all__ = [
     "FileReferenceInput",
     "FunctionalWorkflowConfiguration",
     "KedroArchitectureProfile",
+    "SharedDataPolicy",
     "WorkflowCall",
     "WorkflowPreparationDefinition",
     "WorkflowRegressionContract",

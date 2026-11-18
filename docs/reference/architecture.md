@@ -2,7 +2,7 @@
 
 [Documentation index](../README.md)
 
-Status: implementation boundaries reviewed on 2026-11-18. The
+Status: implementation boundaries reviewed on 2026-11-19. The
 [proposed evolution](#proposed-evolution) is separate from current capabilities.
 
 ## Objective
@@ -50,6 +50,13 @@ IDs and argument collisions, then emits a callable adapter with an ordering-only
 to the preceding assign-mode memory result. Business node signatures and original ASTs stay
 unchanged. The manifest distinguishes these inputs from actual function arguments.
 [ADR 0010](../decisions/0010-source-ordered-functional-joins.md) records the effect/order boundary.
+
+An optional separately versioned shared-data policy now declares specific intermediate outputs
+that may be reused on schemas 1.2 through 1.7. Recomputed producer/consumer bindings retain source
+order and assign-mode reference identity within one process; boundary inputs and mutable parameters
+stay single-use. Plan schema 1.7 separates this decision from source facts and unmeasured runtime
+behavior. The existing renderer/writer, API/CLI and local operations compose the declaration.
+[ADR 0023](../decisions/0023-explicit-ordered-shared-data.md) records its bounded scope.
 
 Workflow schema 1.3 additionally declares one regular local source package. Static capture
 records raw file identities, AST hashes and syntactic imports without execution. Package-aware

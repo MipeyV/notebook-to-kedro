@@ -40,6 +40,43 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-11-19 - Declare shared intermediate references without changing source semantics
+
+### Completed
+
+- After PR 108 merged, added optional shared_data policy 1.0 to source-ordered schemas 1.2-1.7.
+  Only declared nonfinal intermediate outputs consumed at least twice may be reused. Unknown,
+  unused, final, boundary and parameter declarations fail; undeclared values stay single-use.
+- Reuse existing assign-mode intermediates and adjacent source ordering, preserving original
+  ASTs, signatures, object identities, effects and exception propagation without retries.
+  Plan/manifest schema 1.7 records exact producer/consumer arguments and single-process scope.
+  API/CLI/local previews compose the concrete policy; preparation remains single-use.
+- Added paired examples, immutable/binding/publication guards, package composition and actual
+  SequentialRunner/ThreadRunner identity/order/failure checks. Negative controls change storage
+  to deepcopy or remove the required order edge. Duplicate arguments can share a declared value.
+- A new frozen-case follow-up preserves all original inputs and minimum_tests=4. Supplementary
+  settings add the explicit buffer policy and one constructor oracle to three unchanged pipeline
+  oracles. Independent AST/identity/order/CLI/threaded acceptance passes four shipped tests;
+  original arithmetic mutation gives three failures, one pass, zero errors. Generation operations
+  took 0.091 s after preparation/imports; acceptance took 5.599 s. Preparation/human effort is not
+  measured and no productivity gain is inferred. Original blocked outcomes remain unchanged.
+- Verification: 266 focused checks; complete offline suite 3,198 passed; exact secondary CI
+  selection 2,886 passed (312 deselected), both at 100% line/branch coverage (10,185 statements,
+  3,054 branches). Ruff check/format, strict mypy on 224 files and offline wheel/sdist checks pass.
+  All 113 engine modules match packaged bytes and nbformat remains the only runtime requirement.
+  Interface envelopes are unchanged; local host UI tests were not rerun.
+
+### Decisions
+
+- [ADR 0023](docs/decisions/0023-explicit-ordered-shared-data.md) keeps the closed policy independently
+  versioned, preserving existing workflow versions/default output. Runtime evidence remains
+  distinct from not_run metadata. No new dependency, financial execution or pilot approval.
+
+### Next step
+
+- Extend prospective matched preparation/correction/review and fresh source cases. Process
+  runners, unrestricted sharing and aliased/typed node oracles require separate contracts.
+
 ## 2026-11-18 - Deliver explicit source exception regression tests
 
 ### Completed

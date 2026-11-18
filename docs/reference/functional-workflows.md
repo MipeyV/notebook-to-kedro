@@ -3,13 +3,14 @@
 [Documentation index](../README.md)
 
 Status: bounded E2 generation slice implemented on 2026-11-12, extended with opt-in ordered
-joins and explicit local package preservation on 2026-11-15. It converts explicit single-use workflows from scripts or notebook cells.
+joins/local packages on 2026-11-15 and declared shared intermediates on 2026-11-19. It converts
+explicit workflows from scripts or notebook cells, with single-use data by default.
 Schemas 1.0/1.1 require a linear data chain; schema 1.2 preserves source order across independent
 calls and joins; schema 1.3 additionally preserves one declared Python package and schema 1.4 adds
 explicit raw-file path inputs with sibling sidecars. Schemas 1.5/1.6 add explicit memory results
 and owned artifact destinations. Schema 1.7 adds application distribution capture on 2026-11-16.
-General DAG inference,
-data fan-out and cross-module workflow discovery remain outside this slice. The first
+An optional versioned shared-data policy admits named intermediate references in source order.
+General DAG inference, unrestricted fan-out and cross-module workflow discovery remain outside this slice. The first
 [generated-test increment](generated-workflow-tests.md) now optionally delivers pytest
 regressions from explicit expectations. A separate opt-in trusted-example bootstrap check
 now installs generated wheels and runs shipped tests plus the Kedro CLI in fresh environments.
@@ -52,7 +53,8 @@ The old `plan`/`generate` notebook operations retain their existing contract.
 The JSON configuration has exactly five fields in schemas 1.0/1.1/1.2, six in schema 1.3 and
 seven in schemas 1.4/1.5 (adding `file_inputs`), eight in schema 1.6 (adding
 `artifact_destinations`) and nine in schema 1.7 (adding `application_project`).
-unknown/duplicate fields are rejected. The
+Schemas 1.2 through 1.7 additionally accept the optional closed `shared_data` policy below.
+Unknown/duplicate fields are rejected. The
 file is bounded to 64 KiB. The same immutable configuration validates direct Python construction.
 
 ```json
@@ -144,7 +146,8 @@ They are copied with the original helper signature/body AST and single final val
 without inferred nodes or path evaluation. The [binding checker](functional-blocks.md#initial-supported-subset)
 requires definite locals on normal branch paths and conservatively does not export new loop
 bindings. BL104 records unknown runtime paths/counts/termination. Entrypoint if/for/while,
-early/multiple returns, try/with/match and source fan-out retain their existing blockers.
+early/multiple returns and try/with/match retain their existing blockers. Shared references at
+the orchestration boundary require the explicit policy below.
 The [paired example](../../examples/functional_control_flow/project.json) supports the existing
 local-operation commands and now selects an explicit schema 1.2 regression contract with 14
 shipped tests: 12 unchanged positive expectations and two source exception scenarios. The earlier
@@ -157,7 +160,8 @@ Mapping parameters are also single-use across entrypoint calls, including duplic
 within one call. Sharing a mutable mapping through repeated `params:` loads could change
 mutation/identity behavior, so the planner rejects it. A mapping returned from its consuming
 function can flow through the existing assign-mode intermediate datasets.
-These restrictions reject data fan-out and aliases at the orchestration boundary. Independent
+Without the shared-data declaration below, these restrictions reject data fan-out and aliases
+at the orchestration boundary. Independent
 calls require the explicit schema 1.2 mode below. Module-identity globals such as `__name__` are rejected.
 Unused function definitions and imports remain in the relocated module, rather than disappearing.
 Unknown dependency availability, library effects, ambient notebook state and runtime errors are
@@ -195,8 +199,8 @@ and business node signatures remain unchanged, including for generated standalon
 The complete registered pipeline is ordered even with a runner capable of concurrent execution.
 Trusted tests check SequentialRunner and ThreadRunner plus an adapter pickle round-trip;
 this is not a claim that every process runner/deployment is verified. Partial pipeline selection
-and hand-edited graphs have their own behavior. Source reuse/fan-out and dynamic orchestration
-remain unsupported.
+and hand-edited graphs have their own behavior. Undeclared source reuse and dynamic orchestration
+remain unsupported. Explicit intermediate sharing has the narrower contract below.
 
 Schema 1.2 plans export plan schema 1.1 with `ordering.policy: source_order` and explicit
 `ordering.after` edges. The generated manifest also records `ordering_inputs`, their existing
@@ -578,10 +582,53 @@ as invented notebook cells. A private `ConversionPlan` adapter reuses rendering;
 It is not a new notebook-facts schema or a bypass of the old notebook source-accounting guard.
 
 Intermediate datasets use `MemoryDataset(copy_mode="assign")` to preserve the object passed
-between calls. The linear graph preserves call order; each input dataset is loaded at most once.
+between calls. The source-ordered graph preserves call order. Catalog boundary inputs remain
+single-use; declared shared intermediates can be loaded by several ordered consumers.
 Output catalog entries are added after graph rendering, so a persistent final output is not
 mistaken for a pre-existing catalog input and renamed as a rewrite. The shared renderer and
 writer retain validation, compile preflight, profile compatibility and no-overwrite publication.
+
+### Shared intermediate references (policy 1.0)
+
+On source-ordered workflow schemas 1.2 through 1.7, optionally declare exactly which intermediate
+values may be consumed more than once. The policy has its own version, preserving existing
+workflow versions, required fields and output when this field is absent:
+
+```json
+"shared_data": {"schema_version": "1.0", "values": ["buffer"]}
+```
+
+The closed policy accepts 1 to 100 distinct lowercase public ASCII names, each at most 64
+characters, stored as an immutable tuple in Python. Use
+`SharedDataPolicy(("buffer",))` for direct construction. Each name must be an actual nonfinal
+call output with at least two argument occurrences in the recomputed entrypoint. Declaration
+of unknown, unused, singly consumed or final values, catalog inputs or parameters fails before
+publication. Schemas 1.0/1.1 cannot opt in. Every undeclared data/mapping value remains single-use.
+Repeated use within one call is allowed only for a declared intermediate and forwards the same
+object to both original arguments. No purity or mutation classification is inferred.
+
+The [paired example](../../examples/functional_shared_data/project.json) uses the unchanged
+source pattern: create one buffer, call left then right with that buffer, then combine both
+results. Its original identity/order assertions remain inside the business function. The graph
+adds the existing ordering-only edge from left to right and uses assign-mode intermediate
+datasets throughout. Business wrapper signatures, source ASTs, mutation methods, scalar parameter
+handling and failure propagation remain unchanged. No copies, serialization or automatic retries
+are inserted between calls. Full registered pipelines are exercised with SequentialRunner and
+ThreadRunner. This is a single-process contract; process runners, partial pipeline selection,
+manually changed graphs/catalogs and concurrent external mutation are not covered.
+
+Plans/manifests with this opt-in use plan schema 1.7 and a `data_sharing` section containing the
+policy, assign mode, execution scope, producer and ordered consumer step/argument bindings.
+`runtime_validation` remains `not_run`. Analysis facts, workflow configuration versions and
+local-operation envelopes remain separate. The existing settings file, API/CLI and local preview/
+generation compose the policy; orchestration preparation retains its stricter single-use contract.
+
+The example delivers three original pipeline expectations and one explicitly supplied constructor
+node expectation (four tests). JSON cannot encode shared identity between separate node arguments;
+the remaining node-oracle gaps stay explicit rather than inventing aliased fixtures. The full
+pipeline preserves the source assertions, while repository runtime checks additionally verify
+reference identity, mutation order and stop-on-error under both supported runners. See
+[ADR 0023](../decisions/0023-explicit-ordered-shared-data.md).
 
 ## Application projects in preparation schema 1.1
 
@@ -705,7 +752,7 @@ and detect an arithmetic change, without requiring ordering inputs in node expec
 
 The first E3 increment now supplies explicit JSON contracts and tests delivered with generated
 projects, followed by a separate trusted-example fresh dependency bootstrap check. General
-dynamic orchestration branching, data fan-out, richer datasets, dependency inference and broader ML workflows need additional
+dynamic orchestration branching, unrestricted data sharing, richer datasets, dependency inference and broader ML workflows need additional
 contracts and behavioral cases. The existing whole-notebook pilot's human review remains pending.
 
 The package fixture checks relative imports, an internal dataclass and file-relative JSON

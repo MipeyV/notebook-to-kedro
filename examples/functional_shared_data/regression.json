@@ -1,0 +1,85 @@
+{
+  "schema_version": "1.0",
+  "scenarios": [
+    {
+      "id": "positive",
+      "inputs": {
+        "raw_values": [
+          1.0,
+          2.0,
+          3.0
+        ]
+      },
+      "parameters": {
+        "gain": 2.0,
+        "bias": 1.0
+      },
+      "expected": {
+        "left_score": 12.0,
+        "right_score": 7.0,
+        "events": [
+          "left",
+          "right"
+        ]
+      },
+      "nodes": {
+        "step_0000_create_buffer": {
+          "inputs": {
+            "raw_values": [
+              1.0,
+              2.0,
+              3.0
+            ]
+          },
+          "expected": {
+            "values": [
+              1.0,
+              2.0,
+              3.0
+            ],
+            "events": []
+          }
+        }
+      }
+    },
+    {
+      "id": "negative",
+      "inputs": {
+        "raw_values": [
+          -2.0,
+          0.5
+        ]
+      },
+      "parameters": {
+        "gain": 3.0,
+        "bias": -0.5
+      },
+      "expected": {
+        "left_score": -4.5,
+        "right_score": -2.0,
+        "events": [
+          "left",
+          "right"
+        ]
+      }
+    },
+    {
+      "id": "empty",
+      "inputs": {
+        "raw_values": []
+      },
+      "parameters": {
+        "gain": 2.0,
+        "bias": 1.0
+      },
+      "expected": {
+        "left_score": 0.0,
+        "right_score": 1.0,
+        "events": [
+          "left",
+          "right"
+        ]
+      }
+    }
+  ]
+}

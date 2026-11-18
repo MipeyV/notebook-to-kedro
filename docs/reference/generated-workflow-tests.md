@@ -185,6 +185,12 @@ typed/file-reference/artifact oracles retain their limits. See
 
 ## Test behavior and gaps
 
+An explicit shared-data workflow still uses supplied JSON outcomes. JSON node cases cannot
+represent identity links between separate argument values. The shared-buffer example supplies
+three pipeline oracles plus one constructor oracle, leaving three node gaps. Original assertions
+inside the full pipeline and separate repository identity/order checks exercise the shared graph;
+generation invents neither aliased node fixtures nor business expectations.
+
 Each scenario creates one pipeline test. The suite loads the real generated catalog, writes
 scenario inputs into pytest's temporary directory, injects scenario parameters and runs the
 actual registered pipeline. It checks persisted output through the catalog. Original input
