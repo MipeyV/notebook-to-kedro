@@ -40,6 +40,46 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-11-18 - Preserve structured control flow inside function bodies
+
+### Completed
+
+- After PR 106 merged, extended pure functional inspection to preserve if/for/while, raise/pass,
+  loop break/continue and loop else inside original function ASTs. Keep the single final value
+  return, nested unsupported/dynamic/mutation-write/global/cycle guards and strict entrypoint wiring.
+- Added conservative definite-local-binding checks: normal branch intersections, no fallthrough
+  after raise/return/break/continue, body-local for targets and no promotion of new loop bindings.
+  BL104 warns that runtime paths/counts/termination remain unverified. Facts schemas are unchanged.
+- Added paired script/notebook examples and controls for conditional/unbound locals, hidden nested
+  constructs, explicit orchestration refusal and analysis without source execution. Runtime tests
+  compare original functions and actual registered pipelines under both runners/formats/profiles,
+  preserving exact errors, call order and intermediate identity, plus while/else behavior.
+- A new copy of the unchanged frozen clipping case now inspects/plans/generates. Independent
+  source/default/catalog/oracle/thread/CLI checks and 12 shipped tests pass, with both original
+  ValueError paths preserved. The unchanged checker still fails the original 14-shipped-test
+  requirement. Preserve that gap: JSON value expectations do not generate exception tests.
+  Separate shipped-suite arithmetic controls fail all six affected tests without setup errors.
+- Record ADR 0021 and extend existing reference/status/roadmap/evaluation documents. Original
+  blocked corpus/history, real runtime approvals and the separate whole-notebook pilot stay intact.
+- The complete offline suite passed all 3,068 tests on Windows/Python 3.12.14 with 100% coverage
+  of 10,099 statements and 3,024 branches. All 319 targeted checks, strict mypy across 218 files,
+  Ruff and formatting passed. Offline source/wheel builds match engine source, include the new
+  tests/docs/examples and retain nbformat as the sole runtime requirement. The actual local CLI
+  example generated successfully. Interface source is unchanged; host tests were not rerun.
+
+### Decisions
+
+- Keep helper body control flow inside functions instead of inferring graph branches or dropping
+  local-binding validation. Conservative loop binding may reject valid source; do not claim
+  arbitrary Python, termination proof, execution consent or a fully accepted original comparison.
+- Treat explicit exception-test expectations and shared mutable fan-out as separate scopes.
+  No new analysis dependency, provider, data serializer or interface rule is introduced.
+
+### Next step
+
+- Define supplied failure expectations so error preservation can be delivered as generated tests;
+  retain the explicit source-order/identity gate before adding shared-data graph support.
+
 ## 2026-11-18 - Deliver bounded fixture-backed regression contracts
 
 ### Completed

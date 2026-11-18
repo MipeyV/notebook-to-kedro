@@ -34,6 +34,11 @@ instruction ASTs live in a relocated module with a source manifest; Python tasks
 notebook cells. [ADR 0006](../decisions/0006-linear-functional-workflow-generation.md) records
 ordering, identity and bounded I/O decisions. The old notebook conversion contracts are unchanged.
 
+Structured if/for/while remain inside original function bodies, with conservative definite-local
+bindings and BL104 runtime-path/termination warnings. Their ASTs are not expanded into a graph.
+The workflow entrypoint still has explicit named-call wiring and one final named result.
+[ADR 0021](../decisions/0021-preserved-helper-control-flow.md) records the body/graph distinction.
+
 Workflow configuration schema 1.1 optionally carries flat scalar-valued candidate mappings
 as immutable pairs, rendered back to ordinary `parameters.yml` objects. The planner treats them
 as single-use values to preserve mutation/identity semantics. Regression binding validates

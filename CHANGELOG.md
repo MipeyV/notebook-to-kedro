@@ -29,6 +29,12 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Added preserved if/for/while, raise/pass and loop break/continue inside functional helper
+  bodies, with conservative definite-local bindings and BL104 runtime-path warnings. Keep one
+  final value return, original helper ASTs and strict named-call entrypoint wiring. The clipping
+  notebook converts and its 12 JSON tests pass; source exceptions are independently verified.
+  Generated exception tests and mutable fan-out remain outside this increment.
+
 - Added regression schema 1.1 with SHA-pinned scenario JSON fixtures: retain 64 KiB manifests,
   bound fixtures to 1 MiB/file and 8 MiB total, capture immutable text and publish standalone
   hash-checked fixture tests. Existing inline 1.0 behavior stays compatible. The eight-step

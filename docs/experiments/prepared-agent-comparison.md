@@ -184,3 +184,32 @@ projects/logs stay ignored. The original inline declaration still exceeds its un
 limit. Loop/conditional helper and mutable-fan-out cases remain blocked; neither was repaired or
 reclassified by the fixture format. No new agent call, installation, financial runtime or separate
 whole-notebook pilot approval was used for this follow-up.
+
+## Preserved-helper follow-up on 2026-11-18
+
+A separate engine increment now retains structured if/for/while inside function bodies without
+rewriting their ASTs or allowing conditional/iterative orchestration. A new local copy of the
+original messy-control-flow case keeps every original input/configuration/expectation byte.
+Inspect/plan/generate now complete. Configuration loading and the three operations took 0.088 s
+in-process after imports/preparation; this does not measure human effort or whole-journey time.
+
+The unchanged independent checker confirms source AST/default/catalog/order, three normal
+pipeline/nine node oracles, both original ValueError messages with no failed-invocation report,
+ThreadRunner, the standard Kedro CLI and 12 passing shipped tests. It then retains its original
+failure: the comparison required at least 14 shipped tests. That criterion was not lowered and
+this is not a fully accepted original comparison outcome. The finite-JSON contract has no explicit
+failure expectations; the two source error paths are independently validated, not generated as
+exception tests. Private logs retain this delivery gap rather than replacing the failed record.
+
+Separate repository tests compare original functions with registered pipelines across both source
+formats, profiles and sequential/threaded runners, including call order, intermediate identity
+and exact exception type/arguments. Shipped 12-case suites detect the original arithmetic mutation
+with six assertion failures. Additional while/break/continue/else runner cases check retained
+behavior. Analysis imports/executes no application or notebook cells. A paired public example is
+available at examples/functional_control_flow; the frozen original corpus remains unchanged.
+
+Known blockers include early/multiple returns, try/with/match, deferred/dynamic constructs,
+mutation writes and source fan-out. Conservative post-loop bindings can reject valid functions
+unless locals are preinitialized. Paths, iteration counts and termination are unverified. No
+additional agent call, install, financial runtime or separate pilot consent was involved. Explicit
+exception-test expectations and shared mutable data remain separate follow-up scopes.

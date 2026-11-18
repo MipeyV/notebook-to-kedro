@@ -6,6 +6,8 @@ Status: first E2 analysis slice, implemented on 2026-11-06. A separate
 [linear workflow adapter](functional-workflows.md), implemented on 2026-11-12, now adds explicit
 entrypoints, JSON I/O and checked paired Kedro behavior. Inspection schema 1.1 adds explicit
 return-expression facts and support for terminal value expressions on 2026-11-14.
+Preserved structured function-body control flow was added on 2026-11-18; inspection facts retain
+their existing schemas. Workflow entrypoint graph rules remain separate.
 
 ## Usage
 
@@ -82,19 +84,28 @@ relative-import blocker. See the [package contract](functional-workflows.md#expl
 
 The first slice covers library-style, single-file Python and equivalent function-based notebooks:
 absolute explicitly named imports, leading module/cell docstrings and synchronous top-level
-functions. Functions have ordinary positional parameters and straight-line assignments,
-assertions, expressions/calls and exactly one final return with an explicit value. Return
+functions. Functions have ordinary positional parameters, assignments, assertions, expressions/
+calls, structured if/for/while blocks, raise/pass and loop break/continue, with exactly one final
+return containing an explicit value. Whole bodies remain source, not inferred Kedro subgraphs. Return
 expressions use the same body/dependency checks as assignments: calls, arithmetic, attributes,
 subscripting, literals/containers, comparisons and conditional/Boolean expressions retain their
 original evaluation semantics. Comprehensions, generators, lambdas, assignment expressions,
 dynamic execution, unresolved globals and indirect/local callable targets remain blocked.
-Local reads must follow binding. An annotation without a value does not bind a local name.
+Local reads must have a binding on every supported normal path. An annotation without a value
+does not bind a name. Branch joins intersect bindings from paths that can fall through; raising,
+returning, breaking and continuing paths do not fall through. Loop targets are bound inside the
+body, but target/body/else assignments are not assumed available after a loop: the analysis does
+not prove iteration counts, break reachability or termination. Preinitialize values that must be
+available afterwards. This conservative check can reject valid paths it does not prove.
+Unsupported constructs remain checked even inside nested or unreachable blocks. Conditional
+expressions retain conservative name-read checks; no predicates or source code are evaluated.
 Non-call annotations are retained with a warning; types and definition-time behavior are unverified.
 
 Blockers cover syntax/compile errors, module-level executable code (including a main guard),
 ambiguous imports or definitions, relative/star imports, decorators, defaults, positional-only,
-keyword-only/variadic/generic signatures, annotation calls, unsupported returns, control flow,
-nested definitions, comprehensions and other deferred/dynamic expressions, attribute/subscript
+keyword-only/variadic/generic signatures, annotation calls, unsupported/multiple/early returns,
+try/with/match, imports or nested definitions inside functions, comprehensions and other
+deferred/dynamic expressions, attribute/subscript
 writes, unresolved globals, recursion/cycles and indirect/local callable targets. This slice
 does not split procedural cells automatically, reconstruct multi-file projects or infer catalog
 I/O. Function calls can still have external effects; their presence always warns.
@@ -106,13 +117,14 @@ I/O. Function calls can still have external effects; their presence always warns
 | BL003 | Unsupported function signature or return contract. |
 | BL004 | Unsupported body construct, mutation write or dynamic namespace call. |
 | BL005 | Unresolved global names in a function. |
-| BL006 | Local read before a supported straight-line binding. |
+| BL006 | Local read without a definite binding on a supported normal path. |
 | BL007 | Cyclic function references. |
 | BL008 | Indirect/local callable target. |
 | BL009 | No explicit synchronous functions found. |
 | BL101 | Call effects and identities are unverified (warning). |
 | BL102 | Known fit-method pattern may mutate the receiver (warning). |
 | BL103 | Annotations are retained but unverified (warning). |
+| BL104 | Function control flow is retained; paths, iteration counts and termination are unverified. |
 
 `complete` means at least one block and no error diagnostics for this inspection subset. It
 does not approve execution, establish equivalence, validate business intent or permit generation.
@@ -122,6 +134,14 @@ The workflow adapter can now preserve these returns inside called functions and 
 Its entrypoint still requires explicit named call assignments followed by the final result's
 name. Static acceptance of a standalone expression-returning function does not infer that
 orchestration, JSON I/O, external dependencies or an executable multi-module project.
+
+The [control-flow script](../../examples/functional_control_flow/workflow.py) and
+[notebook](../../examples/functional_control_flow/workflow.ipynb) retain missing-value policy,
+loop clipping and ValueError behavior. Recorded notebook outputs/execution counts remain ignored.
+For/while else blocks are retained with the same conservative post-loop binding policy. The
+workflow planner still rejects if/for/while statements in the entrypoint: named call assignments
+and a final named return are required. Data reuse/fan-out is unchanged. See
+[ADR 0021](../decisions/0021-preserved-helper-control-flow.md).
 
 ## Paired example and fingerprint
 

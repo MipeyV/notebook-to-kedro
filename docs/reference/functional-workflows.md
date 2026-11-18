@@ -139,6 +139,16 @@ original Python function. The wrapper's dataset name comes from the explicit ent
 assignment, not from a fabricated return name. The entrypoint itself still requires a named
 final call result; a direct `return summarize(prepared)` there needs a separate wiring extension.
 
+Structured if/for/while, raise/pass and loop break/continue can remain inside called functions.
+They are copied with the original helper signature/body AST and single final value return,
+without inferred nodes or path evaluation. The [binding checker](functional-blocks.md#initial-supported-subset)
+requires definite locals on normal branch paths and conservatively does not export new loop
+bindings. BL104 records unknown runtime paths/counts/termination. Entrypoint if/for/while,
+early/multiple returns, try/with/match and source fan-out retain their existing blockers.
+The [paired example](../../examples/functional_control_flow/project.json) supports the existing
+local-operation commands and emits 12 positive supplied-JSON tests. Source exceptions are verified
+independently; generated exception expectations are not part of that JSON contract.
+
 In schemas 1.0/1.1, every call after the first must consume its predecessor's result. Data values can be consumed
 at most once across the workflow, including within a call; scalar parameters can be reused.
 Mapping parameters are also single-use across entrypoint calls, including duplicate arguments
@@ -183,7 +193,7 @@ and business node signatures remain unchanged, including for generated standalon
 The complete registered pipeline is ordered even with a runner capable of concurrent execution.
 Trusted tests check SequentialRunner and ThreadRunner plus an adapter pickle round-trip;
 this is not a claim that every process runner/deployment is verified. Partial pipeline selection
-and hand-edited graphs have their own behavior. Source reuse/fan-out and dynamic control flow
+and hand-edited graphs have their own behavior. Source reuse/fan-out and dynamic orchestration
 remain unsupported.
 
 Schema 1.2 plans export plan schema 1.1 with `ordering.policy: source_order` and explicit
@@ -693,7 +703,7 @@ and detect an arithmetic change, without requiring ordering inputs in node expec
 
 The first E3 increment now supplies explicit JSON contracts and tests delivered with generated
 projects, followed by a separate trusted-example fresh dependency bootstrap check. General
-control-flow branching, data fan-out, richer datasets, dependency inference and broader ML workflows need additional
+dynamic orchestration branching, data fan-out, richer datasets, dependency inference and broader ML workflows need additional
 contracts and behavioral cases. The existing whole-notebook pilot's human review remains pending.
 
 The package fixture checks relative imports, an internal dataclass and file-relative JSON

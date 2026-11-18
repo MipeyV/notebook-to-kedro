@@ -1,0 +1,220 @@
+{
+  "schema_version": "1.0",
+  "scenarios": [
+    {
+      "id": "missing_and_outliers",
+      "inputs": {
+        "raw_values": [
+          null,
+          -5.0,
+          2.0,
+          10.0,
+          2.0
+        ]
+      },
+      "parameters": {
+        "missing_policy": "drop",
+        "lower": 0.0,
+        "upper": 5.0
+      },
+      "expected": {
+        "count": 4,
+        "mean": 2.25,
+        "min": 0.0,
+        "max": 5.0
+      },
+      "nodes": {
+        "step_0000_clean_values": {
+          "inputs": {
+            "raw_values": [
+              null,
+              -5.0,
+              2.0,
+              10.0,
+              2.0
+            ],
+            "missing_policy": "drop"
+          },
+          "expected": [
+            -5.0,
+            2.0,
+            10.0,
+            2.0
+          ]
+        },
+        "step_0001_winsorize": {
+          "inputs": {
+            "cleaned": [
+              -5.0,
+              2.0,
+              10.0,
+              2.0
+            ],
+            "lower": 0.0,
+            "upper": 5.0
+          },
+          "expected": [
+            0.0,
+            2.0,
+            5.0,
+            2.0
+          ]
+        },
+        "step_0002_summarize": {
+          "inputs": {
+            "bounded": [
+              0.0,
+              2.0,
+              5.0,
+              2.0
+            ]
+          },
+          "expected": {
+            "count": 4,
+            "mean": 2.25,
+            "min": 0.0,
+            "max": 5.0
+          }
+        }
+      }
+    },
+    {
+      "id": "normal",
+      "inputs": {
+        "raw_values": [
+          1.0,
+          2.0,
+          3.0
+        ]
+      },
+      "parameters": {
+        "missing_policy": "drop",
+        "lower": 0.0,
+        "upper": 5.0
+      },
+      "expected": {
+        "count": 3,
+        "mean": 2.0,
+        "min": 1.0,
+        "max": 3.0
+      },
+      "nodes": {
+        "step_0000_clean_values": {
+          "inputs": {
+            "raw_values": [
+              1.0,
+              2.0,
+              3.0
+            ],
+            "missing_policy": "drop"
+          },
+          "expected": [
+            1.0,
+            2.0,
+            3.0
+          ]
+        },
+        "step_0001_winsorize": {
+          "inputs": {
+            "cleaned": [
+              1.0,
+              2.0,
+              3.0
+            ],
+            "lower": 0.0,
+            "upper": 5.0
+          },
+          "expected": [
+            1.0,
+            2.0,
+            3.0
+          ]
+        },
+        "step_0002_summarize": {
+          "inputs": {
+            "bounded": [
+              1.0,
+              2.0,
+              3.0
+            ]
+          },
+          "expected": {
+            "count": 3,
+            "mean": 2.0,
+            "min": 1.0,
+            "max": 3.0
+          }
+        }
+      }
+    },
+    {
+      "id": "negative",
+      "inputs": {
+        "raw_values": [
+          -10.0,
+          -3.0,
+          -1.0
+        ]
+      },
+      "parameters": {
+        "missing_policy": "drop",
+        "lower": -5.0,
+        "upper": 0.0
+      },
+      "expected": {
+        "count": 3,
+        "mean": -3.0,
+        "min": -5.0,
+        "max": -1.0
+      },
+      "nodes": {
+        "step_0000_clean_values": {
+          "inputs": {
+            "raw_values": [
+              -10.0,
+              -3.0,
+              -1.0
+            ],
+            "missing_policy": "drop"
+          },
+          "expected": [
+            -10.0,
+            -3.0,
+            -1.0
+          ]
+        },
+        "step_0001_winsorize": {
+          "inputs": {
+            "cleaned": [
+              -10.0,
+              -3.0,
+              -1.0
+            ],
+            "lower": -5.0,
+            "upper": 0.0
+          },
+          "expected": [
+            -5.0,
+            -3.0,
+            -1.0
+          ]
+        },
+        "step_0002_summarize": {
+          "inputs": {
+            "bounded": [
+              -5.0,
+              -3.0,
+              -1.0
+            ]
+          },
+          "expected": {
+            "count": 3,
+            "mean": -3.0,
+            "min": -5.0,
+            "max": -1.0
+          }
+        }
+      }
+    }
+  ]
+}
