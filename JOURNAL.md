@@ -71,6 +71,12 @@ The newest entries are added at the top, immediately below this convention, so t
   difference. Copy the example into a private temporary workspace and keep publication within
   its declared root. Verify all 36 shared-data unit cases with both local and external temporary
   roots; engine containment, workflow behavior and coverage requirements remain unchanged.
+- Stabilize the arithmetic negative control against Python's timestamp/size bytecode cache.
+  A deterministic reproduction with changed arithmetic but identical size/mtime reused old
+  bytecode (four passes); changing size while retaining that timestamp executed the mutation
+  (three failures, one pass). Append a harmless test-only comment and deliberately restore
+  the old timestamp, then verify all four source/profile variants. No engine/source contract,
+  oracle, test-count criterion or coverage threshold changes.
 
 ### Decisions
 

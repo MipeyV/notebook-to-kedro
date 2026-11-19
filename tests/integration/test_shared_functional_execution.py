@@ -288,9 +288,12 @@ def test_four_shipped_tests_detect_the_original_arithmetic_mutation(
     assert "4 passed" in result.stdout
     path = next((project / "src").glob("*/workflow_source.py"))
     source = path.read_text()
+    original_stat = path.stat()
     changed = source.replace(" * gain", " + gain")
     assert changed != source
-    path.write_text(changed, encoding="utf-8")
+    # Change size even if the source's timestamp falls within the cached bytecode's second.
+    path.write_text(changed + "\n# Deliberate synthetic arithmetic regression.\n", encoding="utf-8")
+    os.utime(path, ns=(original_stat.st_atime_ns, original_stat.st_mtime_ns))
     result = _run_shipped(project, tmp_path / "mutated")
     assert result.returncode == 1, result.stdout + result.stderr
     assert "3 failed, 1 passed" in result.stdout
