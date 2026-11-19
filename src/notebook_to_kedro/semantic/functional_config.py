@@ -14,6 +14,7 @@ from notebook_to_kedro.exceptions import FunctionalWorkflowError
 from notebook_to_kedro.semantic.application_project import ApplicationProject
 from notebook_to_kedro.semantic.artifacts import MAX_ARTIFACT_DESTINATIONS, ArtifactDestination
 from notebook_to_kedro.semantic.file_inputs import FileReferenceInput
+from notebook_to_kedro.semantic.shared_data import SharedDataPolicy
 
 if TYPE_CHECKING:
     from notebook_to_kedro.ir.facts import JsonPrimitive
@@ -87,6 +88,7 @@ class FunctionalWorkflowConfiguration:
     file_inputs: tuple[tuple[str, FileReferenceInput], ...] = ()
     artifact_destinations: tuple[tuple[str, ArtifactDestination], ...] = ()
     application_project: ApplicationProject | None = None
+    shared_data: SharedDataPolicy | None = None
 
     def __post_init__(self) -> None:
         """Validate both direct API values and decoded configuration."""
@@ -157,6 +159,16 @@ class FunctionalWorkflowConfiguration:
             _validate_parameter(value, self.schema_version)
         self._validate_artifacts()
         self._validate_application()
+        self._validate_shared_data()
+
+    def _validate_shared_data(self) -> None:
+        if self.shared_data is not None and (
+            not isinstance(self.shared_data, SharedDataPolicy)
+            or self.schema_version in ("1.0", "1.1")
+        ):
+            raise FunctionalWorkflowError(
+                "Shared data requires an immutable SharedDataPolicy and source-ordered schema 1.2+"
+            )
 
     def _validate_application(self) -> None:
         if self.schema_version == "1.7":
@@ -230,12 +242,16 @@ class FunctionalWorkflowConfiguration:
             }
         if self.application_project is not None:
             data["application_project"] = self.application_project.to_dict()
+        if self.shared_data is not None:
+            data["shared_data"] = self.shared_data.to_dict()
         return data
 
     @classmethod
     def from_dict(cls, data: object) -> FunctionalWorkflowConfiguration:
         """Reject unknown fields and non-mapping boundaries."""
         fields = _FIELDS
+        if isinstance(data, dict) and "shared_data" in data:
+            fields = fields | {"shared_data"}
         if isinstance(data, dict) and data.get("schema_version") in (
             "1.3",
             "1.4",
@@ -286,6 +302,7 @@ class FunctionalWorkflowConfiguration:
             ApplicationProject.from_dict(data["application_project"])
             if "application_project" in data
             else None,
+            SharedDataPolicy.from_dict(data["shared_data"]) if "shared_data" in data else None,
         )
 
 

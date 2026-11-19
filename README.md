@@ -107,7 +107,10 @@ remain inside their owning node, including direct expression returns. Entrypoint
 named calls: schemas 1.0/1.1 require a linear data chain, while opt-in schema 1.2 preserves source
 order across independent calls and joins. Schema 1.3 additionally preserves one explicitly declared
 local Python package and its resources under its original import name; it does not infer external
-dependencies or reconstruct project metadata. Data fan-out and control flow remain future work. Supply
+dependencies or reconstruct project metadata. Original helper bodies retain supported control flow.
+An explicit [shared-data policy](docs/reference/functional-workflows.md#shared-intermediate-references-policy-10)
+can share named intermediate objects while preserving source order within one process. Dynamic
+orchestration and sharing catalog inputs or mutable parameters remain unsupported. Supply
 `--regression-contract examples/functional_workflow/regression.json` to also deliver
 [pytest node/pipeline regressions](docs/reference/generated-workflow-tests.md) based on explicit
 expected values. Missing expectations are reported; generation never executes code to infer them.

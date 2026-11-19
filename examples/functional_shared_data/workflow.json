@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.2",
+  "entrypoint": "workflow",
+  "inputs": {
+    "raw_values": "examples/functional_shared_data/raw_values.json"
+  },
+  "parameters": {
+    "gain": 2.0,
+    "bias": 1.0
+  },
+  "outputs": {
+    "report": "data/08_reporting/report.json"
+  },
+  "shared_data": {
+    "schema_version": "1.0",
+    "values": [
+      "buffer"
+    ]
+  }
+}
