@@ -142,6 +142,7 @@ the dedicated experiment reports for their frozen settings, decisions and limita
 - [ADR 0021 - Preserved helper control flow](decisions/0021-preserved-helper-control-flow.md)
 - [ADR 0022 - Explicit regression exception outcomes](decisions/0022-explicit-regression-exceptions.md)
 - [ADR 0023 - Explicit source-ordered shared data](decisions/0023-explicit-ordered-shared-data.md)
+- [ADR 0024 - Procedural mixed-cell ownership](decisions/0024-procedural-mixed-cell-ownership.md)
   extends function bodies with conservative local bindings while keeping orchestration explicit.
 - [ADR 0017 - Application-aware workflow preparation](decisions/0017-application-aware-workflow-preparation.md)
   records original project layout, metadata capture and subsequent explicit conversion.

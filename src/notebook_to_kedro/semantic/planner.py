@@ -21,6 +21,7 @@ from notebook_to_kedro.ir import (
     SymbolKind,
     TaskCandidate,
 )
+from notebook_to_kedro.semantic.procedural_cells import task_cells
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -36,13 +37,16 @@ SUPPORTED_PARAMETER_KEYWORDS = {
 
 
 def plan_tasks(facts: NotebookFacts) -> ConversionPlan:
-    """Propose one task candidate per analyzable code cell with data outputs."""
+    """Propose cell business tasks with separate import/catalog ownership."""
     catalog_datasets, catalog_statement_ids = _catalog_entries(facts)
     catalog_dataset_names = {dataset.name for dataset in catalog_datasets}
+    cells, relocated_inputs = task_cells(
+        facts, catalog_statement_ids, tuple(dataset.name for dataset in catalog_datasets)
+    )
     import_names = {symbol.name for symbol in facts.symbols if symbol.kind is SymbolKind.IMPORT}
     data_symbols = {symbol.name for symbol in facts.symbols if symbol.kind is not SymbolKind.IMPORT}
     task_names_by_cell = _task_names_by_cell(
-        facts,
+        cells,
         import_names=import_names,
         data_symbols=data_symbols,
         catalog_statement_ids=catalog_statement_ids,
@@ -71,7 +75,7 @@ def plan_tasks(facts: NotebookFacts) -> ConversionPlan:
 
     candidates = tuple(
         candidate
-        for cell in facts.cells
+        for cell in cells
         if (
             candidate := _task_candidate(
                 cell,
@@ -82,6 +86,7 @@ def plan_tasks(facts: NotebookFacts) -> ConversionPlan:
                     catalog_statement_ids=catalog_statement_ids,
                     parameters_by_cell=parameters_by_cell,
                     task_names_by_cell=task_names_by_cell,
+                    relocated_inputs_by_cell=relocated_inputs,
                 ),
             )
         )
@@ -115,6 +120,7 @@ class _PlanningContext:
     catalog_statement_ids: frozenset[str]
     parameters_by_cell: dict[str, tuple[str, ...]]
     task_names_by_cell: dict[str, str]
+    relocated_inputs_by_cell: dict[str, tuple[str, ...]]
 
 
 def _task_candidate(
@@ -149,7 +155,7 @@ def _task_candidate(
         name=context.task_names_by_cell[cell.id],
         source_cell_ids=(cell.id,),
         statement_ids=tuple(statement.id for statement in cell.statements),
-        inputs=_ordered_names(inputs),
+        inputs=_ordered_names((*context.relocated_inputs_by_cell.get(cell.id, ()), *inputs)),
         outputs=outputs,
         source=cell.source,
         parameters=context.parameters_by_cell.get(cell.id, ()),
@@ -158,7 +164,7 @@ def _task_candidate(
 
 
 def _task_names_by_cell(
-    facts: NotebookFacts,
+    cells: tuple[CellFacts, ...],
     *,
     import_names: set[str],
     data_symbols: set[str],
@@ -167,7 +173,7 @@ def _task_names_by_cell(
     names_by_cell: dict[str, str] = {}
     used_names: dict[str, int] = {}
     current_heading: str | None = None
-    for cell in facts.cells:
+    for cell in cells:
         if cell.kind is CellKind.MARKDOWN:
             current_heading = _markdown_heading(cell.source) or current_heading
             continue

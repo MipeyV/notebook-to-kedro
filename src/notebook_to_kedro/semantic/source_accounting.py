@@ -326,6 +326,7 @@ def audit_conversion_source(facts: NotebookFacts, plan: ConversionPlan) -> Conve
     diagnostics.extend(_task_checks(facts, plan))
     diagnostics.extend(_graph_checks(facts, plan, tuple(records)))
     diagnostics.extend(_parameter_checks(facts, plan))
+    diagnostics.extend(_mixed_cell_checks(facts, plan, tuple(records)))
     return ConversionSourceAudit(
         facts.notebook.path,
         facts.notebook.content_sha256,
@@ -333,6 +334,90 @@ def audit_conversion_source(facts: NotebookFacts, plan: ConversionPlan) -> Conve
         tuple(records),
         tuple(diagnostics),
     )
+
+
+def _mixed_cell_checks(
+    facts: NotebookFacts, plan: ConversionPlan, records: tuple[StatementDisposition, ...]
+) -> tuple[PlanDiagnostic, ...]:
+    kinds: dict[str, set[str]] = {}
+    for record in records:
+        kinds.setdefault(record.source_cell_id, set()).add(record.disposition)
+    if not any(
+        "task" in values and values & {"module_import", "catalog"} for values in kinds.values()
+    ):
+        return ()
+    business = {record.statement_id for record in records if record.disposition == "task"}
+    business_calls = {
+        call_id
+        for cell in facts.cells
+        for statement in cell.statements
+        if statement.id in business
+        for call_id in statement.call_ids
+    }
+    if any(
+        call.id in business_calls and call.qualified_name.endswith(".read_csv")
+        for cell in facts.cells
+        for call in cell.calls
+    ):
+        return (
+            _issue(
+                "SA008",
+                "Mixed-cell CSV readers require exact supported catalog relocation; "
+                "nested, dynamic or option-bearing readers are not inferred.",
+            ),
+        )
+    first_task = next(index for index, record in enumerate(records) if record.disposition == "task")
+    first_catalog = next(
+        (index for index, record in enumerate(records) if record.disposition == "catalog"),
+        len(records),
+    )
+    if (
+        len(plan.catalog_datasets) > 1
+        or any(record.disposition == "module_import" for record in records[first_catalog:])
+        or any(
+            record.disposition in {"module_import", "catalog"} for record in records[first_task:]
+        )
+        or tuple(item for task in plan.task_candidates for item in task.statement_ids)
+        != tuple(record.statement_id for record in records if record.disposition == "task")
+    ):
+        return (
+            _issue(
+                "SA008",
+                "Mixed cells require leading imports followed by CSV loading, at most one "
+                "catalog source and original task order.",
+            ),
+        )
+    if any(
+        not set(previous.outputs) & set(current.inputs)
+        for previous, current in zip(plan.task_candidates, plan.task_candidates[1:], strict=False)
+    ):
+        return (_issue("SA008", "Mixed-cell business tasks require a source-ordered data chain."),)
+    return _mixed_catalog_checks(plan)
+
+
+def _mixed_catalog_checks(plan: ConversionPlan) -> tuple[PlanDiagnostic, ...]:
+    origins = {dataset.name for dataset in plan.catalog_datasets}
+    if not origins <= set(plan.task_candidates[0].inputs):
+        return (
+            _issue(
+                "SA008",
+                "Mixed-cell CSV loading must feed the first business task, even "
+                "when its body ignores or overwrites that input.",
+            ),
+        )
+    loaded: set[str] = set()
+    for task in plan.task_candidates:
+        if origins & set(task.inputs) & loaded:
+            return (
+                _issue(
+                    "SA008",
+                    "Mixed-cell catalog inputs cannot be reloaded across tasks; "
+                    "forward a rewritten value explicitly.",
+                ),
+            )
+        loaded.update(origins & set(task.inputs))
+        origins.difference_update(task.outputs)
+    return ()
 
 
 def enforce_source_accounting(facts: NotebookFacts, plan: ConversionPlan) -> ConversionPlan:

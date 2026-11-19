@@ -29,6 +29,12 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Added bounded procedural mixed-cell planning without user-defined functions. Leading imports
+  and one exact local CSV load have separate ownership; retained business blocks keep original
+  statement ASTs/IDs and use the existing renderer. SA008 rejects unsafe order, omitted/duplicate
+  catalog reads and independent task graphs. A four-node/five-parameter ML example is validated
+  against source behavior with real catalogs, parameters, runners, profiles and Kedro CLI.
+
 - Added optional shared-data policy 1.0 on source-ordered workflow schemas 1.2-1.7: explicitly
   declared intermediate references retain identity and mutation order through assign-mode
   datasets. Default single-use, catalog-input and mapping-parameter guards remain unchanged.

@@ -70,6 +70,14 @@ dynamic orchestration, typed node oracles and process runners retain their own g
 The targeted comparison and
 follow-ups are not representative accuracy or human productivity studies.
 
+The original procedural notebook path now has a separate bounded mixed-cell extension: leading
+imports and one exact CSV load can be separated from cell business statements, without requiring
+user-defined functions. Original facts and per-statement ownership stay intact; SA008 guards
+first-load/source-order/data-chain eligibility. A public four-node/five-parameter ML example
+matches source predictions/accuracy through actual catalogs, parameters, both runners/profiles
+and Kedro CLI. Next extend additional procedural layouts and explicit test contracts using
+independent behavioral cases; do not infer arbitrary scope/alias handling or drop exploratory cells.
+
 Source accounting and supported graph checks are implemented. E2 now has
 [functional inspection](../reference/functional-blocks.md) and a bounded
 [linear workflow conversion](../reference/functional-workflows.md), with source-accounted
