@@ -22,6 +22,13 @@ Notebook source
 
 Each boundary has a typed contract. Source facts, semantic inferences, and accepted transformations must never be mixed in the same model.
 
+The original procedural notebook planner also supports bounded mixed import/catalog/business
+cells without user-defined functions. Internal cell views retain original statement IDs and ASTs
+while proposing single ownership. Original facts stay untouched. The independent source audit
+validates the leading import/one-CSV preamble, first load, business data chain and lack of raw
+catalog reloads before the shared renderer/writer. Existing unmixed plans retain their output;
+wire schemas are unchanged. See [ADR 0024](../decisions/0024-procedural-mixed-cell-ownership.md).
+
 A separate [functional inspection path](functional-blocks.md) now accepts a `.py` module or real
 notebook code cells: source adapters -> `SourceUnit` -> pure analysis -> `FunctionalAnalysis`.
 It records explicit function interfaces, reference edges, source spans and blockers without

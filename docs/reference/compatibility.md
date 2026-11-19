@@ -210,8 +210,12 @@ Complex scopes, conditional writes, dynamic execution, shell commands, and Jupyt
 
 The high-level planning/generation path now applies [source accounting](source-accounting.md).
 Standalone expressions/assertions/side-effect cells that the cell-oriented planner cannot place,
-mixed import/task or catalog/task cells, unresolved inputs and non-exact catalog relocation block
-conversion rather than disappear silently. Current catalog relocation accepts an earlier bound
+unsafe mixed cells, unresolved inputs and non-exact catalog relocation block conversion rather
+than disappear silently. A bounded procedural extension accepts mixed cells with leading imports,
+at most one exact local CSV load and a source-ordered business data chain. Each instruction has
+one import/catalog/task owner; catalog reads cannot disappear or reload across tasks. Imports
+interleaved after loading/business, independent steps and retained nested/dynamic CSV readers
+are rejected. Current catalog relocation accepts an earlier bound
 pandas reader with one positional literal local CSV path and no options. Retaining a loader in
 task code is distinct from inferring a catalog entry. These stricter checks do not establish
 arbitrary Python equivalence; low-level planners remain proposals and direct generation needs

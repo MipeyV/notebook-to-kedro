@@ -40,6 +40,43 @@ The newest entries are added at the top, immediately below this convention, so t
 
 ---
 
+## 2026-11-19 - Convert bounded procedural mixed cells without source functions
+
+### Completed
+
+- After PR 109 merged, extended the original notebook path to separate leading shared imports
+  and one exact CSV boundary from mixed-cell business blocks. Derived views retain original
+  facts/IDs/spans; statements are claimed exactly once and task AST checks remain unchanged.
+- Force the first CSV read even when its body ignores/overwrites it. Independent SA008 guards
+  require imports before loading, a leading preamble, original task order and a business data
+  chain; reject raw catalog reloads, retained dynamic/nested CSV readers and omitted read inputs.
+  Exact source reader options/alias checks remain enforced. Unmixed plans stay compatible.
+- Added a public no-function ML notebook and local settings: four nodes, five parameters and
+  CSV copying through the common writer. Reference/pipeline checks compare predictions/accuracy
+  under both source layouts, default/custom profiles and SequentialRunner/ThreadRunner. Actual
+  catalog reads occur once; stored outputs/execution counts do not supply an oracle. Original
+  preparation assertions stop the pipeline. Kedro CLI passes and a business mutation disagrees
+  with the unchanged reference without modifying the canonical generated source.
+- Existing API/CLI/local operations compose the change. No new dependency, provider call,
+  real-project execution, inferred productivity gain or pending pilot approval is introduced.
+- Verification: 1,034 compatibility checks, 169 focused static/runtime/documentation checks,
+  and the full offline suite (3,231 passed). The secondary CI selection passes 2,905 tests
+  with 326 deselected. Both suites reach 100% line/branch coverage (10,233 statements,
+  3,076 branches); Ruff check/format and strict mypy on 227 files pass. The synthetic CSV has
+  an exact .gitignore exception for source packaging; other files under that data folder stay
+  excluded. Final package and CI outcomes are recorded with the PR.
+
+### Decisions
+
+- [ADR 0024](docs/decisions/0024-procedural-mixed-cell-ownership.md) records the narrow ownership
+  extension. Facts/planning/audit/local envelopes retain their schemas. Low-level views remain
+  proposals; the independent high-level source audit controls eligibility before generation.
+
+### Next step
+
+- Expand procedural layouts and explicit delivered-test contracts with independent cases;
+  exploratory cells, arbitrary scopes/aliases and richer I/O remain reported gaps.
+
 ## 2026-11-19 - Declare shared intermediate references without changing source semantics
 
 ### Completed

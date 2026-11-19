@@ -49,12 +49,14 @@ No implicit exclusion policy or human approval is inferred from a passing audit.
 | `SA005` | Ordered shared imports differ from source. |
 | `SA006` | Declared inputs lack earlier task/catalog producers, source dependency inputs are missing, outputs are not source writes, or source names are unresolved. |
 | `SA007` | Selected parameter values differ from deterministic extraction, or task/argument/source-cell bindings are inconsistent. |
+| `SA008` | Mixed-cell promotion cannot preserve the required import/CSV preamble, first read, source task order or linear data chain; unsupported retained CSV readers and catalog reloads also block. |
 
 Catalog relocation supports a single ordinary assignment from an earlier bound pandas import,
 with exactly one positional literal local path and no reader keywords/unpacking. Compare dataset
 type, copied filepath and source filepath with the current renderer's convention. Rebinding the
-reader alias, reader options, remote URIs, multiple catalog claims and mixed loader/task cells
-cannot silently pass. A loader kept wholly in task code remains a code statement; accounting
+reader alias, reader options, remote URIs and multiple catalog claims cannot silently pass.
+Supported mixed cells use the separate ownership/order checks below. A loader kept wholly in
+an unchanged legacy task remains a code statement; accounting
 does not make its runtime paths portable or invent a catalog connector.
 
 Parameter checks reuse the current deterministic extraction rules. Hybrid task/parameter prefixes
@@ -85,8 +87,36 @@ target graph checks and the shared writer, but cannot establish completeness aga
 source. Do not consume serialized audit results as approval; recompute from the current supplied
 facts/plan. The fingerprint includes diagnostics, so changing a plan also changes audit identity.
 
-This first increment rejects unsupported standalone side effects/assertions and mixed cells.
-It does not split arbitrary cells, model object identity/aliasing or all nested scopes, prove
+Unsupported standalone side effects/assertions and unsafe mixed cells remain rejected.
+The bounded mixed-cell extension below separates only leading imports/catalog instructions;
+it does not split arbitrary business blocks, model object identity/aliasing or all nested scopes, prove
 safe import hoisting/side-effect ordering, lock changing files, validate data schemas, generate
 project tests or replace behavioral comparison. See [ADR 0004](../decisions/0004-shared-engine-and-local-interface.md)
 and the [roadmap](../product/roadmap.md) for the next functional-block/Python slice.
+
+## Procedural mixed cells
+
+The historical notebook path accepts ordinary code cells without user-defined functions. Added
+on 2026-11-19, a bounded extension handles cells that combine imports, a CSV assignment and
+business statements. It uses derived planning views; original NotebookFacts, cell IDs, statement
+IDs, source spans and raw notebook bytes remain unchanged. No source cell is synthesized.
+
+Shared imports and supported CSV statements are removed only from the proposed task's ownership
+and source; remaining statements stay in their original cell and order, with the same AST.
+Business writes, calls and boundary inputs are derived from those retained statements. An
+in-cell rewrite such as df = df.dropna() receives the catalog df as an input and exports the
+rewritten df; the existing renderer assigns a distinct dataset version. A promoted CSV read
+must feed the first business task even if overwritten/ignored, so its load is not lost.
+
+The independently recomputed audit requires all shared imports first, then at most one catalog
+CSV load, then business tasks forming a source-ordered data chain. Imports after CSV loading,
+imports/readers after business statements, reversed or independent tasks and repeated raw catalog
+loads are blocked by SA008. An explicit business rewrite can feed the existing intermediate
+dataset instead. CSV calls left inside a newly mixed task are rejected, including nested/dynamic
+readers. Unsupported promoted options still fail SA004; no option is dropped or replaced.
+
+This extends earlier blocked mixed cases. Previously supported unmixed plans retain their output.
+Low-level planning views remain proposals; high-level planning enforces accounting, and direct
+generation can pass source_facts for the same audit. Facts/planning/audit wire schemas remain 1.0.
+This is not arbitrary control-flow, alias, side-effect or library analysis. See
+[ADR 0024](../decisions/0024-procedural-mixed-cell-ownership.md).

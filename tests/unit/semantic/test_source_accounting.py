@@ -107,7 +107,13 @@ def test_changed_module_imports_are_rejected(imports: tuple[str, ...]) -> None:
 
 def test_import_hoisting_and_task_ownership_cannot_duplicate_one_instruction() -> None:
     facts = _facts("import math\nx = 1")
-    audit = audit_conversion_source(facts, plan_tasks(facts))
+    plan = plan_tasks(facts)
+    task = replace(
+        plan.task_candidates[0],
+        source=facts.cells[0].source,
+        statement_ids=tuple(statement.id for statement in facts.cells[0].statements),
+    )
+    audit = audit_conversion_source(facts, replace(plan, task_candidates=(task,)))
     assert not audit.complete
     assert audit.statements[0].disposition == "unhandled"
 
@@ -155,6 +161,14 @@ def test_catalog_claims_are_one_to_one_and_bound_to_supported_source(change: str
         plan = replace(plan, catalog_datasets=(replace(dataset, source_filepath="other.csv"),))
     elif change == "duplicate":
         plan = replace(plan, catalog_datasets=(dataset, dataset))
+    elif change == "mixed":
+        cell = facts.cells[-1]
+        task = replace(
+            plan.task_candidates[0],
+            source=cell.source,
+            statement_ids=tuple(statement.id for statement in cell.statements),
+        )
+        plan = replace(plan, task_candidates=(task,))
     assert "SA004" in _codes(facts, plan)
 
 

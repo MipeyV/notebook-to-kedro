@@ -83,6 +83,26 @@ server; invalid responses, connection failures, and unsafe suggestions fall back
 deterministic plan and are identified in its diagnostics. When static constraints permit no task
 merges, hybrid mode returns the deterministic plan without contacting Ollama.
 
+### Notebooks without user-defined functions
+
+The original notebook path accepts procedural code; functions are not required. The
+[mixed-cell example](examples/procedural_notebook/workflow.ipynb) combines imports, CSV loading
+and preparation in its first code cell, followed by ordinary split, training and evaluation
+cells. It generates four nodes, a CSV catalog and five extracted parameters:
+
+```bash
+uv run notebook-to-kedro plan examples/procedural_notebook/workflow.ipynb
+uv run notebook-to-kedro generate examples/procedural_notebook/workflow.ipynb generated/procedural_project
+```
+
+The existing local/VS Code operations can select
+[its settings](examples/procedural_notebook/project.json). This initial mixed-cell scope requires
+leading imports, at most one supported CSV load and a data chain preserving source order.
+Unsafe cells remain blocking diagnostics; source is never silently omitted. See
+[source accounting](docs/reference/source-accounting.md#procedural-mixed-cells) for limits.
+Generated regression-test contracts currently target explicit functional workflows; procedural
+test generation remains separate work.
+
 ## Documentation
 
 Inspect explicit functions in a structured script or notebook without executing code:
