@@ -65,6 +65,12 @@ The newest entries are added at the top, immediately below this convention, so t
   3,054 branches). Ruff check/format, strict mypy on 224 files and offline wheel/sdist checks pass.
   All 113 engine modules match packaged bytes and nbformat remains the only runtime requirement.
   Interface envelopes are unchanged; local host UI tests were not rerun.
+- CI portability follow-up: the local-operation fixture originally used the repository as
+  project_root and pytest's temporary destination, which Linux correctly rejected as outside
+  that root. Local verification used a repository-contained basetemp and missed this layout
+  difference. Copy the example into a private temporary workspace and keep publication within
+  its declared root. Verify all 36 shared-data unit cases with both local and external temporary
+  roots; engine containment, workflow behavior and coverage requirements remain unchanged.
 
 ### Decisions
 

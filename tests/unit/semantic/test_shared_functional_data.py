@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import ast
 import json
+import shutil
 import sys
 from dataclasses import replace
 from pathlib import Path
@@ -206,12 +207,15 @@ def test_forged_shared_steps_are_recomputed_before_publication() -> None:
 def test_existing_local_operations_preview_and_publish_the_selected_shared_policy(
     tmp_path: Path,
 ) -> None:
-    config = load_local_project_configuration(EXAMPLE / "project.json")
+    workspace = tmp_path / "workspace"
+    example = workspace / "examples/functional_shared_data"
+    shutil.copytree(EXAMPLE, example, ignore=shutil.ignore_patterns("__pycache__"))
+    config = load_local_project_configuration(example / "project.json")
     preview = run_local_operation(PlanRequest(config))
     assert isinstance(preview, PlanningResult)
     manifest = next(file for file in preview.files if file.path == "functional-workflow.json")
     assert json.loads(manifest.content)["data_sharing"]["policy"] == "source_ordered_references"
-    generated = run_local_operation(GenerateRequest(config, tmp_path / "project"))
+    generated = run_local_operation(GenerateRequest(config, workspace / "project"))
     assert isinstance(generated, GenerationResult)
     assert (generated.destination / manifest.path).read_text() == manifest.content
     assert generated.to_dict()["execution_status"] == "not_run"
