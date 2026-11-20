@@ -45,7 +45,10 @@ limited naming/organization contract. `source_kind` is exactly `notebook` or `fu
 Functional inspection accepts settings before `workflow_configuration` is defined. Planning
 and generation require it and report `LO001` before publication when it is missing.
 `regression_contract` is optional.
-The notebook kind refuses workflow/regression settings rather than silently ignoring them.
+The notebook kind refuses functional workflow settings. Its optional `regression_contract`
+uses the separate [notebook regression schema](generated-notebook-tests.md), including pinned
+CSV fixtures and supplied typed observations. Inspection does not load that contract;
+project planning and generation validate and render it through the shared backend.
 Existing workflow/profile/regression loaders remain authoritative for their separate schemas.
 Regression schema 1.1 may reference pinned JSON scenarios relative to its own directory;
 planning/generation capture them on each request and expose generated fixture bytes in previews.

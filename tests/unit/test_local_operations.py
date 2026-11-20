@@ -110,7 +110,7 @@ def test_configuration_is_explicit_anchored_and_immutable(
         {
             **{key: value for key, value in _settings().items() if key != "workflow_configuration"},
             "source_kind": "notebook",
-            "regression_contract": "regression.json",
+            "regression_contract": "../regression.json",
         },
         _settings(architecture_profile=None),
         _settings(regression_contract=17),

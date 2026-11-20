@@ -10,12 +10,14 @@ from typing import TYPE_CHECKING
 
 from notebook_to_kedro.api import (
     analyze_functional_blocks_path,
+    analyze_notebook_path,
     capture_workflow_provenance,
     create_semantic_planner,
     generate_functional_kedro_project,
     generate_kedro_project,
     load_functional_workflow_configuration,
     load_kedro_profile,
+    load_notebook_regression_contract,
     load_workflow_preparation_definition,
     load_workflow_regression_contract,
     plan_functional_workflow_path,
@@ -292,6 +294,11 @@ def _add_source_parsers(subparsers: argparse._SubParsersAction[argparse.Argument
         help="Python package name for the generated Kedro project",
     )
     _add_conversion_arguments(generate_parser)
+    generate_parser.add_argument(
+        "--regression-contract",
+        type=Path,
+        help="explicit notebook regression expectations and CSV fixtures",
+    )
 
 
 def _add_workflow_parsers(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
@@ -611,6 +618,12 @@ def _generate(args: argparse.Namespace) -> int:
         args.output_dir,
         package_name=args.package_name,
         architecture_profile=profile,
+        source_facts=None
+        if args.regression_contract is None
+        else analyze_notebook_path(args.notebook, project_root=args.project_root),
+        regression_contract=None
+        if args.regression_contract is None
+        else load_notebook_regression_contract(args.regression_contract),
     )
     sys.stdout.write(f"Created Kedro project at `{args.output_dir}`\n")
     for path in created_files:

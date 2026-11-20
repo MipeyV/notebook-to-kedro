@@ -42,3 +42,7 @@ examples/procedural_notebook/data/*
 .vscode/
 .DS_Store
 Thumbs.db
+!examples/procedural_regression/data/
+examples/procedural_regression/data/*
+!examples/procedural_regression/data/training.csv
+!examples/procedural_regression/data/empty.csv

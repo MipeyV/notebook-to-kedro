@@ -5,7 +5,9 @@
 Status: E3 functional regression and bootstrap slices extended on 2026-11-18. Explicit JSON
 expectations produce standalone pytest node/pipeline tests for linear functional workflows.
 An opt-in trusted-example check verifies wheel installation and Kedro startup in fresh environments.
-Richer comparators and procedural-notebook test generation remain future.
+Richer functional comparators remain future. Procedural notebooks now use a separate
+[explicit CSV/typed regression contract](generated-notebook-tests.md); functional JSON schemas
+and bootstrap boundaries stay unchanged.
 
 ## Generate and run
 
