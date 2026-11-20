@@ -1,5 +1,22 @@
 # Development Journal
 
+## 2026-11-20 — Nested financial estimators
+
+Added two authored nine-cell notebooks on byte-identical baseline financial records: a credit
+preprocessing/logistic Pipeline and a lapse CalibratedClassifierCV wrapping preprocessing and
+a soft vote. Internal models remain inside training nodes; no graph inference or engine change.
+Eight source/Kedro pairs match all leaf outputs under both profiles/runners. Eighteen integration
+checks cover fitted preprocessing on each training subset, calendar separation, nested probability
+averages, independent metrics/thresholds, ten shipped tests, CLI and deliberate component changes.
+
+Preserved two statically complete runtime boundaries: a fitted external alias succeeds in source
+but fails after default Kedro memory copies; temporal stacking fails in both source and Kedro
+with sklearn's partition error. Neither is silently repaired. The fitted model remains memory-only
+and lacks a generated oracle. Lapse recall remains zero and cost exceeds the no-alert baseline;
+calibration machinery does not establish scientific quality. See the
+[measured report](docs/evaluation/nested-financial-models.md). Fresh installation of these cases,
+general alias handling, persistence and prospective human effort remain separate work.
+
 ## 2026-11-20 — Synthetic banking and insurance cases
 
 Added two reproducible, entirely invented portfolios: 4,200 credit snapshots and 5,040 policy

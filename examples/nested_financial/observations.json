@@ -1,0 +1,295 @@
+{
+  "schema_version": "1.0",
+  "recorded_at_utc": "2026-11-20T22:20:31.476277+00:00",
+  "scope": "Trusted synthetic composed-estimator conversion; not scientific or productivity validation",
+  "python": "3.12.14 (main, Sep  1 2026, 14:17:39) [MSC v.1944 64 bit (AMD64)]",
+  "versions": {
+    "notebook-to-kedro": "0.1.0",
+    "kedro": "1.5.0",
+    "pandas": "2.3.3",
+    "numpy": "2.5.2",
+    "scikit-learn": "1.9.0"
+  },
+  "cases": [
+    {
+      "case": "credit_pipeline",
+      "source_sha256": "73c8fb1e792030913be505f66c156904b130fef8a6a3a59a76546d582f40136a",
+      "portfolio_sha256": "187febaefd828428cf3954f2009114e646f45aaa4b2142f544877d145b0f2a13",
+      "regression_sha256": "5ea88599074e05222c31eeb6a4cef468584f11ef17fb5395c0c4bdc73f9d5efb",
+      "metrics": {
+        "roc_auc": 0.56599518,
+        "average_precision": 0.1256507,
+        "brier": 0.08872582,
+        "precision": 0.10714286,
+        "recall": 0.10169492,
+        "alert_rate": 0.09333333,
+        "positive_rate": 0.09833333,
+        "threshold": 0.15,
+        "true_negatives": 491,
+        "false_positives": 50,
+        "false_negatives": 53,
+        "true_positives": 6,
+        "cost_units": 686
+      },
+      "counts": {
+        "train_rows": 1800,
+        "validation_rows": 600,
+        "test_rows": 600,
+        "excluded_followup_rows": 0,
+        "embargo_rows": 1200
+      },
+      "status": "matched",
+      "runs": [
+        {
+          "profile": "default",
+          "runner": "SequentialRunner",
+          "nodes": 9,
+          "status": "matched",
+          "compared_leaf_outputs": [
+            "candidate_thresholds",
+            "cohort_counts",
+            "feature_columns",
+            "feature_names",
+            "fitted_model",
+            "horizon_months",
+            "matrix",
+            "scored_test",
+            "summary",
+            "validation_alerts",
+            "validation_costs",
+            "validation_false_alerts",
+            "validation_misses",
+            "validation_scores"
+          ],
+          "fitted_component_checks": "training-only medians/modes/categories/scaler; nested probabilities; calendar separation for calibration"
+        },
+        {
+          "profile": "default",
+          "runner": "ThreadRunner",
+          "nodes": 9,
+          "status": "matched",
+          "compared_leaf_outputs": [
+            "candidate_thresholds",
+            "cohort_counts",
+            "feature_columns",
+            "feature_names",
+            "fitted_model",
+            "horizon_months",
+            "matrix",
+            "scored_test",
+            "summary",
+            "validation_alerts",
+            "validation_costs",
+            "validation_false_alerts",
+            "validation_misses",
+            "validation_scores"
+          ],
+          "fitted_component_checks": "training-only medians/modes/categories/scaler; nested probabilities; calendar separation for calibration"
+        },
+        {
+          "profile": "custom",
+          "runner": "SequentialRunner",
+          "nodes": 9,
+          "status": "matched",
+          "compared_leaf_outputs": [
+            "candidate_thresholds",
+            "cohort_counts",
+            "feature_columns",
+            "feature_names",
+            "fitted_model",
+            "horizon_months",
+            "matrix",
+            "scored_test",
+            "summary",
+            "validation_alerts",
+            "validation_costs",
+            "validation_false_alerts",
+            "validation_misses",
+            "validation_scores"
+          ],
+          "fitted_component_checks": "training-only medians/modes/categories/scaler; nested probabilities; calendar separation for calibration"
+        },
+        {
+          "profile": "custom",
+          "runner": "ThreadRunner",
+          "nodes": 9,
+          "status": "matched",
+          "compared_leaf_outputs": [
+            "candidate_thresholds",
+            "cohort_counts",
+            "feature_columns",
+            "feature_names",
+            "fitted_model",
+            "horizon_months",
+            "matrix",
+            "scored_test",
+            "summary",
+            "validation_alerts",
+            "validation_costs",
+            "validation_false_alerts",
+            "validation_misses",
+            "validation_scores"
+          ],
+          "fitted_component_checks": "training-only medians/modes/categories/scaler; nested probabilities; calendar separation for calibration"
+        }
+      ]
+    },
+    {
+      "case": "lapse_calibrated_vote",
+      "source_sha256": "4a1e13297a67d515efe43aca6fa216d83bd8980093c61b9d304c67b3156edf15",
+      "portfolio_sha256": "9b73b10594e293e251578e03f2100f29c2d1135183aa2e3304a2f3778dec8666",
+      "regression_sha256": "f2a2350dc6e5db1602e961af5d8d67e1401abd3c6c193df57321aae2e97bc5cb",
+      "metrics": {
+        "roc_auc": 0.63389657,
+        "average_precision": 0.14416055,
+        "brier": 0.08741345,
+        "precision": 0.0,
+        "recall": 0.0,
+        "alert_rate": 0.00138889,
+        "positive_rate": 0.09583333,
+        "threshold": 0.5,
+        "true_negatives": 650,
+        "false_positives": 1,
+        "false_negatives": 69,
+        "true_positives": 0,
+        "cost_units": 277
+      },
+      "counts": {
+        "train_rows": 2160,
+        "validation_rows": 720,
+        "test_rows": 720,
+        "excluded_followup_rows": 0,
+        "embargo_rows": 1440
+      },
+      "status": "matched",
+      "runs": [
+        {
+          "profile": "default",
+          "runner": "SequentialRunner",
+          "nodes": 9,
+          "status": "matched",
+          "compared_leaf_outputs": [
+            "candidate_thresholds",
+            "cohort_counts",
+            "feature_columns",
+            "feature_names",
+            "fitted_model",
+            "horizon_months",
+            "matrix",
+            "scored_test",
+            "summary",
+            "validation_alerts",
+            "validation_costs",
+            "validation_false_alerts",
+            "validation_misses",
+            "validation_scores"
+          ],
+          "fitted_component_checks": "training-only medians/modes/categories/scaler; nested probabilities; calendar separation for calibration"
+        },
+        {
+          "profile": "default",
+          "runner": "ThreadRunner",
+          "nodes": 9,
+          "status": "matched",
+          "compared_leaf_outputs": [
+            "candidate_thresholds",
+            "cohort_counts",
+            "feature_columns",
+            "feature_names",
+            "fitted_model",
+            "horizon_months",
+            "matrix",
+            "scored_test",
+            "summary",
+            "validation_alerts",
+            "validation_costs",
+            "validation_false_alerts",
+            "validation_misses",
+            "validation_scores"
+          ],
+          "fitted_component_checks": "training-only medians/modes/categories/scaler; nested probabilities; calendar separation for calibration"
+        },
+        {
+          "profile": "custom",
+          "runner": "SequentialRunner",
+          "nodes": 9,
+          "status": "matched",
+          "compared_leaf_outputs": [
+            "candidate_thresholds",
+            "cohort_counts",
+            "feature_columns",
+            "feature_names",
+            "fitted_model",
+            "horizon_months",
+            "matrix",
+            "scored_test",
+            "summary",
+            "validation_alerts",
+            "validation_costs",
+            "validation_false_alerts",
+            "validation_misses",
+            "validation_scores"
+          ],
+          "fitted_component_checks": "training-only medians/modes/categories/scaler; nested probabilities; calendar separation for calibration"
+        },
+        {
+          "profile": "custom",
+          "runner": "ThreadRunner",
+          "nodes": 9,
+          "status": "matched",
+          "compared_leaf_outputs": [
+            "candidate_thresholds",
+            "cohort_counts",
+            "feature_columns",
+            "feature_names",
+            "fitted_model",
+            "horizon_months",
+            "matrix",
+            "scored_test",
+            "summary",
+            "validation_alerts",
+            "validation_costs",
+            "validation_false_alerts",
+            "validation_misses",
+            "validation_scores"
+          ],
+          "fitted_component_checks": "training-only medians/modes/categories/scaler; nested probabilities; calendar separation for calibration"
+        }
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "case": "credit_pipeline",
+      "filename": "boundary_fitted_alias.ipynb",
+      "status": "alias_fidelity_gap",
+      "static_source_accounting": "complete",
+      "source_sha256": "1198002ec2db86883ff408dd1739582046f53f0e31849dd359f703c932b5a30c",
+      "source": {
+        "status": "passed"
+      },
+      "kedro": {
+        "status": "failed",
+        "type": "NotFittedError",
+        "message": "This ColumnTransformer instance is not fitted yet. Call 'fit' with appropriate arguments before using this estimator."
+      }
+    },
+    {
+      "case": "lapse_calibrated_vote",
+      "filename": "boundary_stacking_timeseries.ipynb",
+      "status": "preserved_source_failure",
+      "static_source_accounting": "complete",
+      "source_sha256": "946de9cf5efe9749581cc69617094e66daa9f996b376ee08acbef6dc78cbc6ae",
+      "source": {
+        "status": "failed",
+        "type": "ValueError",
+        "message": "cross_val_predict only works for partitions"
+      },
+      "kedro": {
+        "status": "failed",
+        "type": "ValueError",
+        "message": "cross_val_predict only works for partitions"
+      }
+    }
+  ]
+}

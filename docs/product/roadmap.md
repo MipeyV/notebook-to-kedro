@@ -83,6 +83,14 @@ The initial assertion-only and raw-catalog-reuse layouts stay blocked, and weak 
 remain recorded. Next extend independent cases and measured preparation/correction effort;
 do not infer arbitrary scope/alias handling or drop exploratory cells.
 
+A [nested-model extension](../evaluation/nested-financial-models.md) now reuses those records
+with ColumnTransformer/Pipeline preprocessing and a temporally calibrated soft vote, preserving
+the inner estimators inside training nodes. Fitted-state and paired-runtime checks pass on the
+authored working layouts. Static completeness still admits an external fitted-alias failure;
+temporal stacking preserves its source library error. Next scope alias-fidelity diagnostics
+and independent new cases before extending support claims; estimator persistence and automatic
+model-graph inference remain separate work.
+
 Source accounting and supported graph checks are implemented. E2 now has
 [functional inspection](../reference/functional-blocks.md) and a bounded
 [linear workflow conversion](../reference/functional-workflows.md), with source-accounted

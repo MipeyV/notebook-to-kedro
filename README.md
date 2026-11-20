@@ -91,6 +91,10 @@ credit records and 5,040 synthetic policy records, with ten-cell procedural note
 validation, explicit tests and preserved unsupported layouts. See the
 [measured conversion evidence](docs/evaluation/banking-insurance-cases.md) and modeling limits.
 
+The [nested-model extension](examples/nested_financial/README.md) reuses the same records with
+ColumnTransformer/Pipeline preprocessing and a temporally calibrated voting ensemble. Its
+nine-node cases retain fitted-alias and temporal-stacking failures as runtime boundaries.
+
 Optional [delivered notebook tests](docs/reference/generated-notebook-tests.md) use supplied
 expectations and SHA-pinned CSV fixtures via `generate --regression-contract`. The
 [three-node example](examples/procedural_regression/workflow.ipynb) ships five standalone
