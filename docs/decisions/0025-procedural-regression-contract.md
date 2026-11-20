@@ -21,3 +21,12 @@ step, without a converter dependency or automatic consent for a real pilot.
 
 See the [implemented contract](../reference/generated-notebook-tests.md) for validation,
 budgets, standalone execution and remaining limitations.
+
+## Follow-up: isolated bootstrap, 2026-11-20
+
+Extend the fixed-example developer/CI bootstrap with two procedural profile variants, reusing
+its wheel installation and source-free execution boundary. Keep the ordinary Kedro CLI check;
+observe memory-only results through a checker-owned SequentialRunner subclass selected by a
+second CLI invocation. A separate in-memory calculation mutation must fail that observer after
+runner completion. This adds verification evidence, not a new runtime API, result serializer,
+generated application hook or execution consent. Static generation/review snapshots stay intact.

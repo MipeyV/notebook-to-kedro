@@ -59,7 +59,8 @@ Both the API and CLI enforce plan validation. Rendered Python is compiled withou
 and files/data are prepared privately before publication. These structural checks do not establish
 behavioral equivalence or installation success. A separate
 [trusted-example bootstrap check](docs/reference/generated-workflow-tests.md#fresh-environment-bootstrap)
-builds and installs generated wheels in fresh environments and checks tests plus `kedro run`.
+builds and installs fixed functional/procedural example wheels in fresh environments and checks
+tests plus `kedro run`.
 High-level notebook planning also performs [source accounting](docs/reference/source-accounting.md):
 omitted or duplicated statements, changed task/import evidence and unsupported CSV relocation
 block generation. Unsupported standalone assertions/side-effect cells are reported for review.

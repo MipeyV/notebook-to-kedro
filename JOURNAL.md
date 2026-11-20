@@ -1,5 +1,30 @@
 # Development Journal
 
+## 2026-11-20 — Isolated procedural project bootstrap
+
+Extended the opt-in trusted-example bootstrap from four functional variants to six, adding
+the procedural decision-tree notebook under default/custom naming profiles. Wheel building,
+fresh venv installation and source-free execution share one helper. Each variant must execute
+five shipped tests and the ordinary Kedro CLI without the converter in its runtime environment.
+
+A separate checker-owned SequentialRunner selected by the CLI observes memory-only procedural
+predictions and error against fixed independent expectations. Another isolated invocation adds
+one to predictions through an in-memory node wrapper; only the expected post-run observation
+mismatch and exit code satisfy that negative control. Source/configuration/input hashes and
+original missing-oracle snapshots remain protected; the observer is not generated application
+code or an artifact persistence contract. The existing three-version CI matrix uploads both
+observation reports. Twenty offline checks cover the harness guards without installation/network.
+
+The first Windows Python 3.12.14 fresh-resolution attempt passed all four functional variants,
+then failed one of five procedural-default tests because application control refused the
+scikit-learn 1.9.1 `_radius_neighbors` DLL. The custom procedural variant was not run. Logs,
+versions and failed evidence remain preserved. No system policy or generated dependency range
+was changed. A separate new-environment run with NumPy 2.5.2, SciPy 1.18.0 and scikit-learn 1.9.0
+constraints from the existing development lock passed all six variants, with Kedro 1.8.0,
+pandas 2.3.3 and pytest 9.2.0. Both procedural CLI observations matched and both deliberate
+mutations were rejected. This is selected-version evidence, not a successful unconstrained
+Windows resolution or a general notebook/dependency claim. No real project/provider was run.
+
 ## 2026-11-19 — Explicit procedural project regressions
 
 Added a separate immutable notebook regression contract with bounded SHA-pinned UTF-8 CSV

@@ -176,7 +176,9 @@ an oracle by execution or imports application code during generation. Expectatio
 status and later execution stay distinct; [ADR 0007](../decisions/0007-explicit-generated-regression-tests.md)
 records this first E3 slice. A separate opt-in developer/CI bootstrap check builds generated
 wheels, installs their declared dependencies into fresh venvs and executes only the committed
-functional example. Source-free execution copies prove installed-package use; logs and runtime
+functional and procedural examples. Source-free execution copies prove installed-package use;
+a checker-owned sequential CLI observer checks memory-only procedural results and a deliberate
+prediction mutation without changing application files. Logs and runtime
 identities remain separate from static generation and its `not_run` snapshot. The check is not
 part of the runtime API and adds no core dependency or arbitrary-source execution service.
 

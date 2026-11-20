@@ -90,7 +90,7 @@ jobs:
       - name: Install only locked engine dependencies
         run: uv sync --locked --no-default-groups --python ${{ matrix.python-version }}
 
-      - name: Build, install and execute trusted generated examples
+      - name: Build, install and verify six trusted generated variants
         run: >-
           uv run --no-default-groups --python ${{ matrix.python-version }}
           python tools/check_generated_bootstrap.py generated/bootstrap
@@ -105,6 +105,8 @@ jobs:
             generated/bootstrap/*/runtime.json
             generated/bootstrap/*/evidence.json
             generated/bootstrap/*/pytest.xml
+            generated/bootstrap/*/observed-cli.json
+            generated/bootstrap/*/negative-control.json
           if-no-files-found: warn
           retention-days: 14
 
