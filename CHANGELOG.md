@@ -29,6 +29,12 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Added two synthetic nested-estimator cases on unchanged financial portfolios: sklearn
+  ColumnTransformer/Pipeline preprocessing, logistic regression and a temporally calibrated
+  soft-voting ensemble. Fitted-state, probability, calendar-gap, CLI/shipped-test and component
+  mutation checks cover both naming profiles/runners. External fitted-alias and temporal-stacking
+  failures remain runtime evidence; no engine rule, copy policy or dependency surface changes.
+
 - Added deterministic synthetic credit-default and policy-lapse cases: 4,200/5,040 records,
   data dictionaries, temporal cohorts, missingness/drift, procedural notebooks, local settings
   and explicit ten-test regression contracts. Independent source/Kedro/metric/threshold checks,

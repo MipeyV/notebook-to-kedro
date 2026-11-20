@@ -1,0 +1,84 @@
+{
+  "columns": {
+    "monthly_premium": {
+      "role": "feature",
+      "as_of_snapshot": true,
+      "type": "numeric",
+      "description": "Current premium, synthetic currency units per month"
+    },
+    "premium_increase_pct": {
+      "role": "feature",
+      "as_of_snapshot": true,
+      "type": "numeric",
+      "description": "Known premium change at snapshot, percent"
+    },
+    "tenure_months": {
+      "role": "feature",
+      "as_of_snapshot": true,
+      "type": "numeric",
+      "description": "Elapsed policy tenure at snapshot, months"
+    },
+    "auto_pay": {
+      "role": "feature",
+      "as_of_snapshot": true,
+      "type": "numeric",
+      "description": "Automatic payment enabled at snapshot, binary"
+    },
+    "missed_payments_6m": {
+      "role": "feature",
+      "as_of_snapshot": true,
+      "type": "numeric",
+      "description": "Missed payments in the preceding six months"
+    },
+    "service_contacts_6m": {
+      "role": "feature",
+      "as_of_snapshot": true,
+      "type": "numeric",
+      "description": "Servicing contacts in the preceding six months"
+    },
+    "portal_visits_30d": {
+      "role": "feature",
+      "as_of_snapshot": true,
+      "type": "numeric",
+      "description": "Customer portal visits in the preceding 30 days"
+    },
+    "budget_share_pct": {
+      "role": "feature",
+      "as_of_snapshot": true,
+      "type": "numeric",
+      "description": "Simulated premium-to-budget ratio, percent"
+    },
+    "coverage_units": {
+      "role": "feature",
+      "as_of_snapshot": true,
+      "type": "numeric",
+      "description": "Arbitrary synthetic coverage units"
+    },
+    "product_type": {
+      "role": "feature",
+      "as_of_snapshot": true,
+      "type": "categorical",
+      "description": "Simulated life-policy product category"
+    },
+    "payment_frequency": {
+      "role": "feature",
+      "as_of_snapshot": true,
+      "type": "categorical",
+      "description": "Contractual premium payment frequency"
+    },
+    "sales_channel": {
+      "role": "feature",
+      "as_of_snapshot": true,
+      "type": "categorical",
+      "description": "Sales channel; embedded appears only in the test cohort"
+    }
+  },
+  "excluded_columns": {
+    "policy_id": "Identifier; never a predictor",
+    "snapshot_month": "Cohort metadata",
+    "followup_months": "Label completeness; never a predictor",
+    "outcome_end_month": "Future observation metadata; never a predictor",
+    "event_month": "Future event metadata; never a predictor",
+    "lapse_12m": "Target"
+  }
+}

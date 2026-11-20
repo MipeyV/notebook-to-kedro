@@ -1,0 +1,2 @@
+policy_id,snapshot_month,monthly_premium,premium_increase_pct,tenure_months,auto_pay,missed_payments_6m,service_contacts_6m,portal_visits_30d,budget_share_pct,coverage_units,product_type,payment_frequency,sales_channel,followup_months,outcome_end_month,event_month,lapse_12m
+SYN-INSURANCE_LAPSE-000000,201801,393,13,24,1,,4,11,14,180,savings,,broker,12,201901,201803,2

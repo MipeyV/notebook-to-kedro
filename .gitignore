@@ -53,3 +53,10 @@ examples/banking_insurance/*/data/*
 !examples/banking_insurance/*/data/duplicate.csv
 !examples/banking_insurance/*/data/immature.csv
 !examples/banking_insurance/*/data/invalid_target.csv
+!examples/nested_financial/*/data/
+examples/nested_financial/*/data/*
+!examples/nested_financial/*/data/portfolio.csv
+!examples/nested_financial/*/data/empty.csv
+!examples/nested_financial/*/data/duplicate.csv
+!examples/nested_financial/*/data/immature.csv
+!examples/nested_financial/*/data/invalid_target.csv
