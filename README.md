@@ -86,6 +86,11 @@ merges, hybrid mode returns the deterministic plan without contacting Ollama.
 
 ### Notebooks without user-defined functions
 
+The [banking/insurance corpus](examples/banking_insurance/README.md) supplies 4,200 synthetic
+credit records and 5,040 synthetic policy records, with ten-cell procedural notebooks, temporal
+validation, explicit tests and preserved unsupported layouts. See the
+[measured conversion evidence](docs/evaluation/banking-insurance-cases.md) and modeling limits.
+
 Optional [delivered notebook tests](docs/reference/generated-notebook-tests.md) use supplied
 expectations and SHA-pinned CSV fixtures via `generate --regression-contract`. The
 [three-node example](examples/procedural_regression/workflow.ipynb) ships five standalone

@@ -1,0 +1,84 @@
+{
+  "columns": {
+    "monthly_income": {
+      "role": "feature",
+      "as_of_snapshot": true,
+      "type": "numeric",
+      "description": "Monthly income, synthetic currency units; before the loan snapshot"
+    },
+    "existing_debt_payment": {
+      "role": "feature",
+      "as_of_snapshot": true,
+      "type": "numeric",
+      "description": "Existing monthly debt service, synthetic currency units"
+    },
+    "loan_amount": {
+      "role": "feature",
+      "as_of_snapshot": true,
+      "type": "numeric",
+      "description": "Requested principal, synthetic currency units"
+    },
+    "term_months": {
+      "role": "feature",
+      "as_of_snapshot": true,
+      "type": "numeric",
+      "description": "Contract term in months"
+    },
+    "interest_rate_bp": {
+      "role": "feature",
+      "as_of_snapshot": true,
+      "type": "numeric",
+      "description": "Simulated annual contractual rate in basis points"
+    },
+    "utilization_pct": {
+      "role": "feature",
+      "as_of_snapshot": true,
+      "type": "numeric",
+      "description": "Existing revolving-credit utilization, percent"
+    },
+    "late_payments_12m": {
+      "role": "feature",
+      "as_of_snapshot": true,
+      "type": "numeric",
+      "description": "Count of late payments in the preceding 12 months"
+    },
+    "employment_months": {
+      "role": "feature",
+      "as_of_snapshot": true,
+      "type": "numeric",
+      "description": "Employment tenure at snapshot, months"
+    },
+    "internal_score": {
+      "role": "feature",
+      "as_of_snapshot": true,
+      "type": "numeric",
+      "description": "Arbitrary synthetic internal score, not a commercial credit score"
+    },
+    "employment_type": {
+      "role": "feature",
+      "as_of_snapshot": true,
+      "type": "categorical",
+      "description": "Simulated employment category"
+    },
+    "loan_purpose": {
+      "role": "feature",
+      "as_of_snapshot": true,
+      "type": "categorical",
+      "description": "Declared simulated loan purpose"
+    },
+    "origination_channel": {
+      "role": "feature",
+      "as_of_snapshot": true,
+      "type": "categorical",
+      "description": "Origination channel; partner_app appears only in the test cohort"
+    }
+  },
+  "excluded_columns": {
+    "loan_id": "Identifier; never a predictor",
+    "snapshot_month": "Cohort metadata",
+    "followup_months": "Label completeness; never a predictor",
+    "outcome_end_month": "Future observation metadata; never a predictor",
+    "event_month": "Future event metadata; never a predictor",
+    "default_12m": "Target"
+  }
+}

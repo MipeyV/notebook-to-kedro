@@ -1,0 +1,271 @@
+{
+  "schema_version": "1.0",
+  "fixtures": {
+    "portfolio": {
+      "path": "data/portfolio.csv",
+      "sha256": "187febaefd828428cf3954f2009114e646f45aaa4b2142f544877d145b0f2a13"
+    },
+    "empty": {
+      "path": "data/empty.csv",
+      "sha256": "0c3a61fe1e6ed6657351fa60385675c9c13ce77a7870101c031b0d39c806e080"
+    },
+    "duplicate": {
+      "path": "data/duplicate.csv",
+      "sha256": "d0b1cbd26425e2577661e4298a67c254558738891dac1bd04b1969f4e3b802b9"
+    },
+    "immature": {
+      "path": "data/immature.csv",
+      "sha256": "7594c16b01765bb9549d57133bc7c704b732cb8583005a66417d6a4b6ab8e9ad"
+    },
+    "invalid_target": {
+      "path": "data/invalid_target.csv",
+      "sha256": "dc3b99adc4f787c530f684dad85ea59efc60a6c30771f50873f88c71efa96cd2"
+    }
+  },
+  "scenarios": [
+    {
+      "id": "baseline",
+      "inputs": {
+        "raw": "portfolio"
+      },
+      "parameters": {
+        "train_model.n_estimators": 40,
+        "train_model.random_state": 42
+      },
+      "expected": {
+        "cohort_counts": {
+          "kind": "json",
+          "value": {
+            "train_rows": 1800,
+            "validation_rows": 600,
+            "test_rows": 600,
+            "excluded_followup_rows": 0,
+            "embargo_rows": 1200
+          }
+        },
+        "feature_names": {
+          "kind": "json",
+          "value": [
+            "monthly_income",
+            "existing_debt_payment",
+            "loan_amount",
+            "term_months",
+            "interest_rate_bp",
+            "utilization_pct",
+            "late_payments_12m",
+            "employment_months",
+            "internal_score",
+            "employment_type_other",
+            "employment_type_salaried",
+            "employment_type_self_employed",
+            "loan_purpose_debt_consolidation",
+            "loan_purpose_home_improvement",
+            "loan_purpose_personal",
+            "loan_purpose_vehicle",
+            "origination_channel_branch",
+            "origination_channel_broker",
+            "origination_channel_web"
+          ]
+        }
+      },
+      "nodes": {
+        "task-0009": {
+          "inputs": {
+            "y_test": {
+              "kind": "series",
+              "name": "default_12m",
+              "index": [
+                0,
+                1,
+                2,
+                3
+              ],
+              "index_name": null,
+              "dtype": "int64",
+              "data": [
+                0,
+                0,
+                1,
+                1
+              ]
+            },
+            "test_scores": {
+              "kind": "array",
+              "dtype": "float64",
+              "data": [
+                0.1,
+                0.4,
+                0.35,
+                0.8
+              ]
+            },
+            "test_predictions": {
+              "kind": "array",
+              "dtype": "int64",
+              "data": [
+                0,
+                0,
+                0,
+                1
+              ]
+            },
+            "threshold": {
+              "kind": "json",
+              "value": 0.5
+            }
+          },
+          "expected": {
+            "matrix": {
+              "kind": "array",
+              "dtype": "int64",
+              "data": [
+                [
+                  2,
+                  0
+                ],
+                [
+                  1,
+                  1
+                ]
+              ]
+            },
+            "metrics": {
+              "kind": "json",
+              "value": {
+                "roc_auc": 0.75,
+                "average_precision": 0.83333333,
+                "brier": 0.158125,
+                "precision": 1.0,
+                "recall": 0.5,
+                "alert_rate": 0.25,
+                "positive_rate": 0.5,
+                "threshold": 0.5,
+                "true_negatives": 2,
+                "false_positives": 0,
+                "false_negatives": 1,
+                "true_positives": 1,
+                "cost_units": 12
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "empty",
+      "inputs": {
+        "raw": "empty"
+      },
+      "parameters": {
+        "train_model.n_estimators": 40,
+        "train_model.random_state": 42
+      },
+      "raises": {
+        "type": "AssertionError",
+        "message": "Empty portfolio",
+        "node": "task-0001"
+      },
+      "nodes": {
+        "task-0001": {
+          "inputs": {
+            "raw": {
+              "kind": "csv",
+              "fixture": "empty"
+            }
+          },
+          "raises": {
+            "type": "AssertionError",
+            "message": "Empty portfolio"
+          }
+        }
+      }
+    },
+    {
+      "id": "duplicate",
+      "inputs": {
+        "raw": "duplicate"
+      },
+      "parameters": {
+        "train_model.n_estimators": 40,
+        "train_model.random_state": 42
+      },
+      "raises": {
+        "type": "AssertionError",
+        "message": "Duplicate entity IDs",
+        "node": "task-0001"
+      },
+      "nodes": {
+        "task-0001": {
+          "inputs": {
+            "raw": {
+              "kind": "csv",
+              "fixture": "duplicate"
+            }
+          },
+          "raises": {
+            "type": "AssertionError",
+            "message": "Duplicate entity IDs"
+          }
+        }
+      }
+    },
+    {
+      "id": "immature",
+      "inputs": {
+        "raw": "immature"
+      },
+      "parameters": {
+        "train_model.n_estimators": 40,
+        "train_model.random_state": 42
+      },
+      "raises": {
+        "type": "AssertionError",
+        "message": "No complete outcome windows",
+        "node": "task-0001"
+      },
+      "nodes": {
+        "task-0001": {
+          "inputs": {
+            "raw": {
+              "kind": "csv",
+              "fixture": "immature"
+            }
+          },
+          "raises": {
+            "type": "AssertionError",
+            "message": "No complete outcome windows"
+          }
+        }
+      }
+    },
+    {
+      "id": "invalid_target",
+      "inputs": {
+        "raw": "invalid_target"
+      },
+      "parameters": {
+        "train_model.n_estimators": 40,
+        "train_model.random_state": 42
+      },
+      "raises": {
+        "type": "AssertionError",
+        "message": "Invalid target",
+        "node": "task-0001"
+      },
+      "nodes": {
+        "task-0001": {
+          "inputs": {
+            "raw": {
+              "kind": "csv",
+              "fixture": "invalid_target"
+            }
+          },
+          "raises": {
+            "type": "AssertionError",
+            "message": "Invalid target"
+          }
+        }
+      }
+    }
+  ]
+}

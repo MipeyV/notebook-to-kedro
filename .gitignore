@@ -46,3 +46,10 @@ Thumbs.db
 examples/procedural_regression/data/*
 !examples/procedural_regression/data/training.csv
 !examples/procedural_regression/data/empty.csv
+!examples/banking_insurance/*/data/
+examples/banking_insurance/*/data/*
+!examples/banking_insurance/*/data/portfolio.csv
+!examples/banking_insurance/*/data/empty.csv
+!examples/banking_insurance/*/data/duplicate.csv
+!examples/banking_insurance/*/data/immature.csv
+!examples/banking_insurance/*/data/invalid_target.csv

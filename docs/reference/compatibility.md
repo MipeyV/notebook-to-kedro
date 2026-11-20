@@ -361,6 +361,13 @@ runtime change and why it is not a same-runtime comparison with older model meas
 
 ## Compatibility tests
 
+The [synthetic banking/insurance cases](../evaluation/banking-insurance-cases.md) add selected
+runtime evidence for ten-cell procedural workflows with temporal partitioning, pandas
+imputation/dummy encoding and a seeded forest. Their source-accounting, paired execution and
+independent metric checks do not establish generic library semantics, arbitrary notebook
+support or fresh-environment installation of those larger workflows. Their two unsupported
+layouts remain explicit refusal fixtures.
+
 Compatibility claims require automated evidence:
 
 - all supported Python versions run the unit and contract suites;
