@@ -1,5 +1,22 @@
 # Development Journal
 
+## 2026-11-19 — Explicit procedural project regressions
+
+Added a separate immutable notebook regression contract with bounded SHA-pinned UTF-8 CSV
+captures and supplied JSON, numeric, NumPy-array and flat pandas observations. The shared
+backend binds source task IDs and leaf datasets through its actual naming/profile rules;
+original source accounting stays mandatory. API, CLI and local operations use the same path.
+Default notebook generation and functional regression contracts remain unchanged.
+
+The new three-cell decision-tree notebook has hand-specified training targets and zero
+in-sample absolute error. Its five shipped tests cover positive/error pipeline cases and
+three node cases. Business mutation, fixture tampering and catalog/setup failures have negative
+controls. Reports keep execution not_run and review not_authenticated, with explicit missing
+positive model and evaluation-node expectations. No real project, provider or pilot was run.
+
+Model/artifact oracles, richer pandas types and procedural fresh-environment bootstrap remain
+separate increments. See [ADR 0025](docs/decisions/0025-procedural-regression-contract.md).
+
 This file provides a chronological record of **Notebook to Kedro** development.
 
 It keeps track of:

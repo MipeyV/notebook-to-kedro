@@ -62,11 +62,9 @@ class LocalProjectConfiguration:
             or (self.package_name.startswith("_") or keyword.iskeyword(self.package_name))
         ):
             raise LocalOperationError("LO001", "package_name must be a public Python identifier")
-        if self.source_kind == "notebook" and (
-            self.workflow_configuration is not None or self.regression_contract is not None
-        ):
+        if self.source_kind == "notebook" and self.workflow_configuration is not None:
             raise LocalOperationError(
-                "LO001", "Notebook operations do not accept workflow or regression settings"
+                "LO001", "Notebook operations do not accept workflow settings"
             )
         object.__setattr__(self, "project_root", root)
         for field in (

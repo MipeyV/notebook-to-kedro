@@ -2,6 +2,12 @@
 
 [Documentation index](../README.md)
 
+The opt-in [notebook regression renderer](generated-notebook-tests.md) binds supplied fixtures
+and observations to the existing backend's dataset entries and resolved profile names.
+It requires source facts/accounting, emits compile-checked standalone tests through the shared
+writer and leaves execution separate. Its contract is independent of functional JSON regressions;
+neither the local service nor the VS Code interface owns comparator or transformation rules.
+
 Status: implementation boundaries reviewed on 2026-11-19. The
 [proposed evolution](#proposed-evolution) is separate from current capabilities.
 

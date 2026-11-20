@@ -29,6 +29,13 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Added opt-in standalone pytest regressions for procedural notebook projects through API,
+  `generate --regression-contract` and local settings. A separate bounded contract captures
+  pinned CSV fixtures and explicit JSON/numeric/array/pandas observations, binds real graph
+  names/profiles and reports missing positive/node/output expectations. Generation stays static;
+  default output and functional contracts are unchanged. A three-node synthetic example ships
+  five checks; model serialization and arbitrary typed/artifact oracles remain unsupported.
+
 - Added bounded procedural mixed-cell planning without user-defined functions. Leading imports
   and one exact local CSV load have separate ownership; retained business blocks keep original
   statement ASTs/IDs and use the existing renderer. SA008 rejects unsafe order, omitted/duplicate

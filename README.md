@@ -85,6 +85,11 @@ merges, hybrid mode returns the deterministic plan without contacting Ollama.
 
 ### Notebooks without user-defined functions
 
+Optional [delivered notebook tests](docs/reference/generated-notebook-tests.md) use supplied
+expectations and SHA-pinned CSV fixtures via `generate --regression-contract`. The
+[three-node example](examples/procedural_regression/workflow.ipynb) ships five standalone
+pytest checks and reports missing positive node oracles. Generation does not execute them.
+
 The original notebook path accepts procedural code; functions are not required. The
 [mixed-cell example](examples/procedural_notebook/workflow.ipynb) combines imports, CSV loading
 and preparation in its first code cell, followed by ordinary split, training and evaluation
@@ -100,8 +105,8 @@ The existing local/VS Code operations can select
 leading imports, at most one supported CSV load and a data chain preserving source order.
 Unsafe cells remain blocking diagnostics; source is never silently omitted. See
 [source accounting](docs/reference/source-accounting.md#procedural-mixed-cells) for limits.
-Generated regression-test contracts currently target explicit functional workflows; procedural
-test generation remains separate work.
+Notebook tests use their own [explicit fixture contract](docs/reference/generated-notebook-tests.md),
+independently of functional workflow regression schemas.
 
 ## Documentation
 

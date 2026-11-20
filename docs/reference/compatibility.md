@@ -123,6 +123,12 @@ an installed engine with schema 1.0 local operations. Build tooling requires Nod
 
 [Documentation index](../README.md)
 
+Procedural generated projects can optionally include [standalone regressions](generated-notebook-tests.md)
+with supplied pinned CSV fixtures and finite JSON/numeric/array/flat pandas observations.
+This notebook-specific contract does not expand functional JSON regression schemas or provide
+model/artifact serialization. The five-test synthetic decision-tree example is bounded evidence;
+procedural fresh-environment bootstrap and arbitrary notebook support are separate work.
+
 ## Purpose
 
 Compatibility is defined separately for:
