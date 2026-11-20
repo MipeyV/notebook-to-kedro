@@ -127,7 +127,9 @@ Procedural generated projects can optionally include [standalone regressions](ge
 with supplied pinned CSV fixtures and finite JSON/numeric/array/flat pandas observations.
 This notebook-specific contract does not expand functional JSON regression schemas or provide
 model/artifact serialization. The five-test synthetic decision-tree example is bounded evidence;
-procedural fresh-environment bootstrap and arbitrary notebook support are separate work.
+an opt-in [fresh-environment check](generated-notebook-tests.md#fresh-environment-bootstrap)
+now exercises the example's wheel, shipped tests and CLI with both profiles, independently
+of routine offline verification. Arbitrary notebook support remains separate work.
 
 ## Purpose
 

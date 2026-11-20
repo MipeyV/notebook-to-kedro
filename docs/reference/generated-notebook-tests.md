@@ -104,3 +104,55 @@ positive expectations. One node's negative case does not supply its positive out
 It is neither measured runtime coverage nor authenticated review. The example deliberately
 retains a missing positive model oracle and an uncovered evaluation-node case. Source fidelity
 and supplied regression success do not prove the source's business correctness.
+
+## Fresh-environment bootstrap
+
+The separate opt-in developer/CI check now includes this committed procedural example under
+default and custom profiles, alongside the four existing functional variants:
+
+```bash
+uv run python tools/check_generated_bootstrap.py generated/bootstrap-local
+```
+
+Each variant builds a wheel and installs its declared `[test]` dependencies in a new venv,
+without system packages or the converter. An isolated import probe checks installed-package
+location and records resolved distribution versions. Execution uses copied configuration,
+data and tests, an empty `src` directory and an empty pytest `pythonpath`; the five shipped
+tests and ordinary `python -I -m kedro run` must pass without a source-tree fallback.
+
+The pipeline's final outputs are memory-only. A second real CLI invocation therefore selects
+a checker-owned SequentialRunner subclass through Kedro's `--runner` option. It delegates
+unchanged to SequentialRunner and observes the resulting datasets after completion. It requires
+float64 predictions `[0.0, 1.0, 4.0, 9.0]` and absolute error `0.0`, independent of the shipped
+regression declaration. The resulting `observed-cli.json` is checker evidence, not a generated
+application artifact or a new persistence contract.
+
+A separate isolated invocation wraps the installed evaluation node in memory, adds one to its
+predictions and runs the same CLI observer. It must exit with code 1 **after the runner finishes**
+and report exactly `[1.0, 2.0, 5.0, 10.0]` with `observation_mismatch`. Setup/import failures,
+unrelated errors, missing reports or an unexpected mutation cannot satisfy this control. No
+installed wheel file, source notebook or generated application node is edited.
+
+The check retains logs, JUnit XML, runtime identities and observation/negative-control reports
+within each new case directory. `evidence.json` links source, fixture, contract and wheel hashes,
+stages, observations and unchanged original regression gaps. Configuration/data hashes are
+compared against their pre-test copies, and the original generated project must stay unchanged.
+Failures retain evidence and stop the batch; remaining cases are not claimed as executed.
+
+CI runs this same six-variant command on Python 3.11, 3.12 and 3.13 and uploads its evidence even
+on failure. Configuring the matrix alone does not establish a passing run. Dependencies resolve
+from generated ranges using fresh environments, with downloads potentially cached by uv;
+versions identify the specific run rather than a generated lockfile or every supported version.
+No real project or provider is executed. Model serialization, positive model/node oracles,
+scientific validation and arbitrary notebook support remain outside this check. Generation's
+`not_run`/`not_authenticated` report is preserved unchanged.
+
+On 2026-11-20, the first Windows Python 3.12.14 fresh-resolution run passed the four functional
+variants, then failed one of five procedural-default tests: Windows application control refused
+a scikit-learn 1.9.1 `_radius_neighbors` DLL. The procedural-custom variant did not run. That
+failed attempt and its resolved versions remain preserved. A separate run constrained to the
+existing development lock's NumPy 2.5.2, SciPy 1.18.0 and scikit-learn 1.9.0 passed all six fresh
+installations, using Kedro 1.8.0, pandas 2.3.3 and pytest 9.2.0. Both procedural CLI observations
+matched and both mutations were rejected. Generated dependency ranges and system protections
+were unchanged; this does not establish unconstrained Windows resolution or every compatible
+version. CI checks default resolution independently on Linux.

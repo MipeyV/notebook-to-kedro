@@ -29,6 +29,13 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Extended the opt-in generated-project bootstrap from four functional variants to six,
+  adding the procedural decision-tree notebook with default/custom profiles. Fresh wheel
+  installation, source-free shipped tests and standard Kedro CLI execution share the existing
+  harness. A checker-owned sequential CLI observer validates independent memory-only results
+  and a deliberate prediction mutation; reports retain runtime identities, hashes, failures
+  and unchanged inputs/configuration/source/gaps. CI uploads these reports on Python 3.11-3.13.
+
 - Added opt-in standalone pytest regressions for procedural notebook projects through API,
   `generate --regression-contract` and local settings. A separate bounded contract captures
   pinned CSV fixtures and explicit JSON/numeric/array/pandas observations, binds real graph

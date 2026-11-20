@@ -2,13 +2,14 @@
 
 [Documentation index](../README.md)
 
-Status: current implementation summary reviewed on 2026-11-19; historical evidence follows.
+Status: current implementation summary reviewed on 2026-11-20; historical evidence follows.
 Historical measurements retain their original corpus, runtime and limitations.
 
 ## Project status
 
 | Capability | Current status |
 | --- | --- |
+| Isolated procedural installation checks | The opt-in bootstrap now exercises six fixed functional/procedural variants with installed wheels, source-free tests and ordinary Kedro CLI execution. Procedural CLI observations and a deliberate in-memory prediction mutation have separate reports; inputs/configuration/source and original oracle gaps remain protected. A Windows Python 3.12 selected-version run passed all six; the original fresh-resolution scikit-learn DLL refusal remains recorded. The existing Linux Python 3.11/3.12/3.13 CI matrix runs the extended command; configured checks alone are not a passing-run claim. |
 | Procedural mixed-cell notebooks | The original notebook path now handles leading imports, one exact local CSV load and business code in mixed cells without user-defined functions. Derived views retain original facts/IDs/spans; independent SA008 guards preserve first load and source-ordered data chains, block late/interleaved imports, independent tasks and raw catalog reloads. The public ML notebook generates four nodes and five parameters; real CSV/parameter/Kedro/CLI checks match source predictions and accuracy under both runners/profiles. Optional [procedural regressions](../reference/generated-notebook-tests.md) now ship explicit pinned CSV fixtures and JSON/numeric/array/flat pandas node/pipeline checks, with missing positive expectations reported. Arbitrary notebook scope/alias reconstruction, model serialization and richer I/O remain future work. |
 | Declared shared intermediate references | An optional closed shared_data policy 1.0 on source-ordered workflow schemas 1.2-1.7 admits named intermediate outputs consumed at least twice. Assign-mode storage and adjacent source ordering preserve identity/mutations within one process; catalog inputs, mutable parameters and undeclared reuse remain blocked. The original shared-buffer case now passes independent AST/identity/order/CLI/threaded acceptance and four shipped tests with a separate constructor oracle. Original inputs, minimum criteria and blocked observations remain unchanged. Process runners, general fan-out inference and aliased JSON node fixtures are unsupported. |
 | Explicit regression exceptions | Regression schema 1.2 supports supplied expected JSON values or exact concrete built-in exception/message outcomes, using inline or pinned fixture storage. Pipeline failures must escape the declared node and leave no final JSON output in the fresh test workspace; setup/registry errors cannot satisfy them. The clipping notebook passes its original 14-shipped-test requirement in a separate new run, plus unchanged independent AST/runtime/CLI/threaded/mutation checks. Original comparison/follow-up records remain preserved. |
@@ -42,7 +43,7 @@ Historical measurements retain their original corpus, runtime and limitations.
 
 Generation itself does not verify dependency installation, full DAG semantics or runtime behavior.
 The [explicit bootstrap check](../reference/generated-workflow-tests.md#fresh-environment-bootstrap)
-is separate, limited to the trusted functional example and records resolved runtime versions.
+is separate, limited to the trusted functional/procedural examples and records resolved runtime versions. Its six variants include source-free wheel execution, fixed procedural CLI observations and a deliberate prediction mutation; this is not arbitrary-project installation support.
 Parent directories can remain after a failure; concurrent filesystem edits
 and abrupt termination are outside the writer's guarantees. See the
 [architecture](../reference/architecture.md#filesystem-writing) and

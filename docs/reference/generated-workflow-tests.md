@@ -230,8 +230,9 @@ From the repository root, explicitly run the network/install check:
 uv run python tools/check_generated_bootstrap.py generated/bootstrap-local
 ```
 
-The destination must not exist. This developer tool executes only the committed functional
-example, presented as `.py` and `.ipynb`, with default and custom profiles. It is separate from
+The destination must not exist. This developer tool executes six fixed variants: the committed
+functional example presented as `.py` and `.ipynb`, and the procedural decision-tree notebook,
+each with default and custom profiles. It is separate from
 normal generation and the offline pytest suite; it does not accept arbitrary source paths or
 provide a general project execution service. It builds each project's wheel using the declared
 Hatchling backend, creates a separate standard-library venv without system packages or pip,
@@ -243,8 +244,12 @@ An isolated Python probe checks that the package imports from the venv and that
 Tests and `python -m kedro run` then use a copy of the generated configuration, data and tests
 with an **empty source directory**. Pytest's `pythonpath` setting is overridden to empty.
 Both commands must therefore use the installed wheel rather than the generated source tree.
-The check requires all five tests to execute successfully, verifies the persisted CLI result
-`6.0`, and checks input/parameter preservation. Execution is trusted fixture code, not a sandbox.
+The check requires all five tests per variant to execute successfully. Functional cases verify
+the persisted CLI result `6.0` and input/parameter preservation. The procedural cases also check
+memory-only CLI predictions against independent expectations, retain a deliberate calculation
+mutation as a negative control and check configuration/input/generated-source preservation;
+see [procedural bootstrap details](generated-notebook-tests.md#fresh-environment-bootstrap).
+Execution is trusted fixture code, not a sandbox.
 
 The check keeps build/install/command logs, JUnit XML, runtime identity and per-case
 `evidence.json` with source/configuration/expectation/wheel hashes and stage outcomes.
@@ -256,7 +261,7 @@ The separate CI bootstrap job configures Python 3.11/3.12/3.13 on Linux. Its gen
 installs only locked core dependencies, and reports/logs are uploaded even on failure.
 Generated dependencies are resolved from declared ranges, independently of the engine's
 development lock; recorded versions identify a run, not a committed generated-project lock.
-This checks one synthetic example and selected resolved versions, not arbitrary dependencies,
+This checks two synthetic examples and selected resolved versions, not arbitrary dependencies,
 every version in the supported ranges, production readiness or independent human review.
 
 Generated projects now declare a build backend and explicit source-package inclusion, use the
