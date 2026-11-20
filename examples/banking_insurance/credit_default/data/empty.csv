@@ -1,0 +1,1 @@
+loan_id,snapshot_month,monthly_income,existing_debt_payment,loan_amount,term_months,interest_rate_bp,utilization_pct,late_payments_12m,employment_months,internal_score,employment_type,loan_purpose,origination_channel,followup_months,outcome_end_month,event_month,default_12m

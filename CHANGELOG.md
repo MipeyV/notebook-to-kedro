@@ -29,6 +29,13 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Added deterministic synthetic credit-default and policy-lapse cases: 4,200/5,040 records,
+  data dictionaries, temporal cohorts, missingness/drift, procedural notebooks, local settings
+  and explicit ten-test regression contracts. Independent source/Kedro/metric/threshold checks,
+  holdout perturbations and score inversions exercise both profiles and runners. Assertion-only
+  and raw-catalog-reuse layouts remain blocked fixtures. Measured weak model outcomes are
+  retained; no engine guard, runtime dependency or scientific/productivity claim is changed.
+
 - Extended the opt-in generated-project bootstrap from four functional variants to six,
   adding the procedural decision-tree notebook with default/custom profiles. Fresh wheel
   installation, source-free shipped tests and standard Kedro CLI execution share the existing

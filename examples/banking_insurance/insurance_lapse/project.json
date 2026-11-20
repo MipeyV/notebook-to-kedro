@@ -1,0 +1,8 @@
+{
+  "schema_version": "1.0",
+  "project_root": ".",
+  "source": "workflow.ipynb",
+  "source_kind": "notebook",
+  "package_name": "insurance_lapse",
+  "regression_contract": "regression.json"
+}

@@ -1,5 +1,26 @@
 # Development Journal
 
+## 2026-11-20 — Synthetic banking and insurance cases
+
+Added two reproducible, entirely invented portfolios: 4,200 credit snapshots and 5,040 policy
+snapshots, with 12 predictors each, missingness, imbalanced events and temporal/channel shifts.
+Each ten-cell notebook fits preprocessing on training only, selects its threshold on validation
+and scores the held-out 2024 cohort. Embargo years separate 12-month outcome windows. Metadata
+and source define targets, feature roles, dates and illustrative costs; no real data is used.
+
+Both cases generate ten nodes and two recognized parameters through the existing engine.
+They ship ten explicit regressions, including a hand-calculated metric oracle and source error
+cases; absent model-score/node oracles remain gaps. Eight original/Kedro executions matched all
+leaf outputs under both profiles/runners. Sixteen integration checks passed, including shipped
+tests, CLI, independent metrics/thresholds, holdout perturbations and score inversions.
+
+The frozen selected-runtime snapshot retains weak credit AUC and an all-alert policy, plus a
+lapse result worse than the no-alert cost baseline. This verifies conversion, not predictive or
+economic usefulness. The initial assertion-only layout and raw-catalog reuse are retained as
+SA002/SA008 boundary notebooks; no source-accounting rule was weakened. Fresh installation of
+these larger cases, broader notebooks, calibration and human effort remain separate work.
+See the [case report](docs/evaluation/banking-insurance-cases.md).
+
 ## 2026-11-20 — Isolated procedural project bootstrap
 
 Extended the opt-in trusted-example bootstrap from four functional variants to six, adding

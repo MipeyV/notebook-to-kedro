@@ -76,9 +76,12 @@ user-defined functions. Original facts and per-statement ownership stay intact; 
 first-load/source-order/data-chain eligibility. A public four-node/five-parameter ML example
 matches source predictions/accuracy through actual catalogs, parameters, both runners/profiles
 and Kedro CLI. A separate explicit contract now supplies pinned CSV fixtures and typed
-node/pipeline regressions, retaining missing positive oracles. Next extend additional procedural
-layouts and independent behavioral cases; do not infer arbitrary scope/alias handling or drop
-exploratory cells.
+node/pipeline regressions, retaining missing positive oracles. Two subsequent
+[synthetic banking/insurance cases](../evaluation/banking-insurance-cases.md) now exercise ten-node
+temporal ML workflows, independent metrics/thresholds, both profiles/runners and source failures.
+The initial assertion-only and raw-catalog-reuse layouts stay blocked, and weak modeling results
+remain recorded. Next extend independent cases and measured preparation/correction effort;
+do not infer arbitrary scope/alias handling or drop exploratory cells.
 
 Source accounting and supported graph checks are implemented. E2 now has
 [functional inspection](../reference/functional-blocks.md) and a bounded

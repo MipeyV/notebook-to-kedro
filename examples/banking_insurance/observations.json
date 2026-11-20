@@ -1,0 +1,263 @@
+{
+  "schema_version": "1.0",
+  "recorded_at_utc": "2026-11-20T10:24:31.493812+00:00",
+  "scope": "Trusted synthetic source/Kedro conversion; not scientific or productivity validation",
+  "python": "3.12.14 (main, Sep  1 2026, 14:17:39) [MSC v.1944 64 bit (AMD64)]",
+  "versions": {
+    "notebook-to-kedro": "0.1.0",
+    "kedro": "1.5.0",
+    "pandas": "2.3.3",
+    "numpy": "2.5.2",
+    "scikit-learn": "1.9.0"
+  },
+  "cases": [
+    {
+      "case": "credit_default",
+      "source_sha256": "ba042723fd86340824da87ca71b855df9c10965d13261ace95a8193330c741ff",
+      "portfolio_sha256": "187febaefd828428cf3954f2009114e646f45aaa4b2142f544877d145b0f2a13",
+      "regression_sha256": "fc57cf55d5a3be4c1d16b031cd1e636d4431ac9194d0921f779f99015978e957",
+      "metrics": {
+        "roc_auc": 0.52661424,
+        "average_precision": 0.1060063,
+        "brier": 0.23900605,
+        "precision": 0.09833333,
+        "recall": 1.0,
+        "alert_rate": 1.0,
+        "positive_rate": 0.09833333,
+        "threshold": 0.15,
+        "true_negatives": 0,
+        "false_positives": 541,
+        "false_negatives": 0,
+        "true_positives": 59,
+        "cost_units": 541
+      },
+      "counts": {
+        "train_rows": 1800,
+        "validation_rows": 600,
+        "test_rows": 600,
+        "excluded_followup_rows": 0,
+        "embargo_rows": 1200
+      },
+      "scored_probabilities_sha256": "0357d697a1a64549db5699e5efa69e76ef17ee41c1cb8837eae269693a5111f3",
+      "status": "matched",
+      "runs": [
+        {
+          "profile": "default",
+          "runner": "SequentialRunner",
+          "nodes": 10,
+          "status": "matched",
+          "compared_leaf_outputs": [
+            "candidate_thresholds",
+            "category_modes",
+            "cohort_counts",
+            "feature_columns",
+            "feature_names",
+            "horizon_months",
+            "matrix",
+            "numeric_medians",
+            "scored_test",
+            "summary",
+            "validation_alerts",
+            "validation_costs",
+            "validation_false_alerts",
+            "validation_misses",
+            "validation_scores"
+          ]
+        },
+        {
+          "profile": "default",
+          "runner": "ThreadRunner",
+          "nodes": 10,
+          "status": "matched",
+          "compared_leaf_outputs": [
+            "candidate_thresholds",
+            "category_modes",
+            "cohort_counts",
+            "feature_columns",
+            "feature_names",
+            "horizon_months",
+            "matrix",
+            "numeric_medians",
+            "scored_test",
+            "summary",
+            "validation_alerts",
+            "validation_costs",
+            "validation_false_alerts",
+            "validation_misses",
+            "validation_scores"
+          ]
+        },
+        {
+          "profile": "custom",
+          "runner": "SequentialRunner",
+          "nodes": 10,
+          "status": "matched",
+          "compared_leaf_outputs": [
+            "candidate_thresholds",
+            "category_modes",
+            "cohort_counts",
+            "feature_columns",
+            "feature_names",
+            "horizon_months",
+            "matrix",
+            "numeric_medians",
+            "scored_test",
+            "summary",
+            "validation_alerts",
+            "validation_costs",
+            "validation_false_alerts",
+            "validation_misses",
+            "validation_scores"
+          ]
+        },
+        {
+          "profile": "custom",
+          "runner": "ThreadRunner",
+          "nodes": 10,
+          "status": "matched",
+          "compared_leaf_outputs": [
+            "candidate_thresholds",
+            "category_modes",
+            "cohort_counts",
+            "feature_columns",
+            "feature_names",
+            "horizon_months",
+            "matrix",
+            "numeric_medians",
+            "scored_test",
+            "summary",
+            "validation_alerts",
+            "validation_costs",
+            "validation_false_alerts",
+            "validation_misses",
+            "validation_scores"
+          ]
+        }
+      ]
+    },
+    {
+      "case": "insurance_lapse",
+      "source_sha256": "2e513509a89fcd80382381db1fec65f5321b2aa2612e4f723857427a61f141e5",
+      "portfolio_sha256": "9b73b10594e293e251578e03f2100f29c2d1135183aa2e3304a2f3778dec8666",
+      "regression_sha256": "99ffd6b488cdcac3f7f6ba1cf68ff161ad48fad9ccada6028532e07444c9608b",
+      "metrics": {
+        "roc_auc": 0.60451034,
+        "average_precision": 0.13575934,
+        "brier": 0.22765269,
+        "precision": 0.14285714,
+        "recall": 0.05797101,
+        "alert_rate": 0.03888889,
+        "positive_rate": 0.09583333,
+        "threshold": 0.65,
+        "true_negatives": 627,
+        "false_positives": 24,
+        "false_negatives": 65,
+        "true_positives": 4,
+        "cost_units": 284
+      },
+      "counts": {
+        "train_rows": 2160,
+        "validation_rows": 720,
+        "test_rows": 720,
+        "excluded_followup_rows": 0,
+        "embargo_rows": 1440
+      },
+      "scored_probabilities_sha256": "6127f9f9092081fef0ba763b756ddbec3df12a7506012aebbd77356c509a3ef5",
+      "status": "matched",
+      "runs": [
+        {
+          "profile": "default",
+          "runner": "SequentialRunner",
+          "nodes": 10,
+          "status": "matched",
+          "compared_leaf_outputs": [
+            "candidate_thresholds",
+            "category_modes",
+            "cohort_counts",
+            "feature_columns",
+            "feature_names",
+            "horizon_months",
+            "matrix",
+            "numeric_medians",
+            "scored_test",
+            "summary",
+            "validation_alerts",
+            "validation_costs",
+            "validation_false_alerts",
+            "validation_misses",
+            "validation_scores"
+          ]
+        },
+        {
+          "profile": "default",
+          "runner": "ThreadRunner",
+          "nodes": 10,
+          "status": "matched",
+          "compared_leaf_outputs": [
+            "candidate_thresholds",
+            "category_modes",
+            "cohort_counts",
+            "feature_columns",
+            "feature_names",
+            "horizon_months",
+            "matrix",
+            "numeric_medians",
+            "scored_test",
+            "summary",
+            "validation_alerts",
+            "validation_costs",
+            "validation_false_alerts",
+            "validation_misses",
+            "validation_scores"
+          ]
+        },
+        {
+          "profile": "custom",
+          "runner": "SequentialRunner",
+          "nodes": 10,
+          "status": "matched",
+          "compared_leaf_outputs": [
+            "candidate_thresholds",
+            "category_modes",
+            "cohort_counts",
+            "feature_columns",
+            "feature_names",
+            "horizon_months",
+            "matrix",
+            "numeric_medians",
+            "scored_test",
+            "summary",
+            "validation_alerts",
+            "validation_costs",
+            "validation_false_alerts",
+            "validation_misses",
+            "validation_scores"
+          ]
+        },
+        {
+          "profile": "custom",
+          "runner": "ThreadRunner",
+          "nodes": 10,
+          "status": "matched",
+          "compared_leaf_outputs": [
+            "candidate_thresholds",
+            "category_modes",
+            "cohort_counts",
+            "feature_columns",
+            "feature_names",
+            "horizon_months",
+            "matrix",
+            "numeric_medians",
+            "scored_test",
+            "summary",
+            "validation_alerts",
+            "validation_costs",
+            "validation_false_alerts",
+            "validation_misses",
+            "validation_scores"
+          ]
+        }
+      ]
+    }
+  ]
+}

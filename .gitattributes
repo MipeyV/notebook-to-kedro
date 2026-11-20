@@ -11,3 +11,5 @@
 uv.lock text eol=lf
 extensions/vscode/** text eol=lf
 examples/functional_workflow/regression_fixtures/*.json text eol=lf
+examples/banking_insurance/*.json text eol=lf
+examples/banking_insurance/*/*.json text eol=lf

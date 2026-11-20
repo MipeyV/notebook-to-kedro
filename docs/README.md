@@ -67,6 +67,9 @@ The compatibility policy is authoritative for supported runtimes and library-sup
 
 ## Evaluation
 
+The [banking/insurance cases](evaluation/banking-insurance-cases.md) add synthetic procedural
+datasets, independent checks, measured limitations and preserved conversion refusals.
+
 These documents define corpora and protocols. Some also retain earlier observations; consult
 the dedicated experiment reports for their frozen settings, decisions and limitations.
 
