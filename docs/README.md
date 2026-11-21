@@ -63,7 +63,7 @@ The compatibility policy is authoritative for supported runtimes and library-sup
 | [Functional workflow to Kedro](reference/functional-workflows.md) | Explicit linear entrypoints, JSON I/O/scalar parameters, source accounting, generation and paired execution evidence. |
 | [Tests delivered with functional projects](reference/generated-workflow-tests.md) | Explicit expectations, standalone pytest tests, gaps/negative controls and opt-in fresh-environment wheel/Kedro bootstrap evidence. |
 | [Tests delivered with notebook projects](reference/generated-notebook-tests.md) | Explicit pinned CSV fixtures, typed observations, standalone pytest, missing-oracle reports and isolated procedural wheel/CLI checks. |
-| [Notebook model outputs](reference/model-outputs.md) | Explicit single-leaf versioned pickle storage, declaration preview and separate reload evidence. |
+| [Notebook model outputs](reference/model-outputs.md) | Explicit single-leaf versioned pickle storage, declaration preview and supplied fresh-process prediction checks. |
 | [Local project operations](reference/local-operations.md) | Explicit root-anchored settings, typed inspect/plan/generate requests/results, real file previews and static-only publication boundaries. |
 
 ## Evaluation
@@ -110,6 +110,9 @@ the dedicated experiment reports for their frozen settings, decisions and limita
 | [Fresh v3 format measurements](experiments/fresh-v3-format-measurements.md) | Measured | Same-runtime repeated comparisons on four fresh tasks. |
 
 ## Decisions and history
+
+- [ADR 0027 - Generated model reload checks](decisions/0027-generated-model-reload-checks.md):
+  supplied prediction probes and standalone tests for the actual persisted version.
 
 - [ADR 0025: explicit procedural regression contracts](decisions/0025-procedural-regression-contract.md):
   independent supplied oracles, typed observations and unchanged default/functional generation.

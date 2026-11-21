@@ -1,5 +1,22 @@
 # Development Journal
 
+## 2026-11-21 - Delivered persisted-model prediction checks
+
+Extended the notebook regression contract with optional schema 1.1 model_checks. Explicit
+positive scenarios, bounded array/frame/pinned-CSV probes, predict/predict_proba methods and
+numeric oracles bind to the declared model leaf. Generation validates and compiles text without
+model execution or new analysis dependencies. Default/schema 1.0 output remains unchanged.
+
+Delivered tests run training in isolated temporary versioned storage, check the original
+scenario expectations and load the exact saved artifact in a fresh Python process. They
+compare shape, dtype, finite values and explicit tolerances, with artifact hashes before/after.
+A new four-row authored example supplies labels/probabilities without deriving an oracle by
+execution. Selected-runtime integration checks include plain/nested models, both profiles,
+CSV/inline-frame probes and deliberately wrong models, corrupt pickles, false oracles and
+changed storage declarations. Original financial data/source/oracle/observation snapshots
+remain unchanged. Full fitted-state, scientific quality and fresh-install coverage of these
+new cases remain separate. See [ADR 0027](docs/decisions/0027-generated-model-reload-checks.md).
+
 ## 2026-11-21 - Explicit persisted notebook model leaf
 
 Added one opt-in model_output identifier through notebook generation API, CLI and local settings.

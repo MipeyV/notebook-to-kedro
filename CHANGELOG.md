@@ -35,6 +35,12 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Added notebook regression schema 1.1 with explicit model prediction probes/oracles. Generated
+  tests save the declared model in temporary versioned storage, reload it in a fresh process
+  and compare predict/predict_proba results with explicit tolerances. Generation stays static,
+  schema 1.0 remains unchanged and missing full-model oracles remain visible. A small reproducible
+  example and altered-model/corruption/oracle/catalog controls exercise the opt-in path.
+
 - Added explicit notebook model_output selection through API, CLI and local settings. One latest
   leaf binds to local versioned PickleDataset storage with source accounting, declaration metadata
   and no source/parameter rewrite. Generated regressions validate the declaration but remain

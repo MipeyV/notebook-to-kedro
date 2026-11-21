@@ -1,0 +1,9 @@
+{
+  "model_output": "fitted_model",
+  "package_name": "reloaded_tree",
+  "project_root": ".",
+  "regression_contract": "regression.json",
+  "schema_version": "1.0",
+  "source": "workflow.ipynb",
+  "source_kind": "notebook"
+}
