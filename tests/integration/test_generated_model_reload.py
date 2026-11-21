@@ -102,9 +102,12 @@ def test_delivered_reload_checks_run_for_plain_and_nested_models(
     assert result.returncode == 0, result.stdout + result.stderr
     assert "4 passed" in result.stdout
     assert not (project / "data/06_models").exists()
-    artifacts = list(
-        (tmp_path / "executed").glob("*/data/06_models/model.pkl/model-check/model.pkl")
-    )
+    artifacts = {
+        artifact.resolve()
+        for artifact in (tmp_path / "executed").glob(
+            "*/data/06_models/model.pkl/model-check/model.pkl"
+        )
+    }
     assert len(artifacts) == 2
     assert all(artifact.is_file() for artifact in artifacts)
 
