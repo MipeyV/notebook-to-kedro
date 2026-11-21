@@ -15,6 +15,11 @@ Current tests verify refusal through API, CLI and local operations while the wor
 retain their runtime/CLI/component checks. The historical account below describes the earlier
 measurement, including the two then-statically-complete runtime boundaries.
 
+A separate 2026-11-21 [model output slice](../reference/model-outputs.md) adds opt-in versioned
+storage and selected-runtime reload checks for the unchanged working notebooks. That evidence
+is separate from the original memory-only snapshot, which is not rewritten to claim persistence.
+The existing six-variant fresh-install bootstrap is unchanged.
+
 ## Acceptance and observations
 
 Two nine-cell notebooks exercise ColumnTransformer, nested preprocessing Pipelines, logistic

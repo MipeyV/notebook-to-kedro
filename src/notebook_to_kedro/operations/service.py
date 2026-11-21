@@ -74,11 +74,12 @@ def _prepare(
             package_name=config.package_name,
             architecture_profile=profile,
             source_facts=None
-            if config.regression_contract is None
+            if config.regression_contract is None and config.model_output is None
             else analyze_notebook_path(config.source, project_root=config.project_root),
             regression_contract=None
             if config.regression_contract is None
             else load_notebook_regression_contract(config.regression_contract),
+            model_output=config.model_output,
         )
     else:
         if config.workflow_configuration is None:

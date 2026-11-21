@@ -8,6 +8,13 @@ It requires source facts/accounting, emits compile-checked standalone tests thro
 writer and leaves execution separate. Its contract is independent of functional JSON regressions;
 neither the local service nor the VS Code interface owns comparator or transformation rules.
 
+An optional [notebook model output](model-outputs.md) binds one explicitly selected latest leaf
+to versioned local PickleDataset storage. The shared renderer requires source accounting, emits
+a declaration manifest/guide and keeps business ASTs and default output unchanged. Generated
+regressions validate the storage declaration but still run in memory; model reload evidence is
+separate. No ML library is imported during analysis. See
+[ADR 0026](../decisions/0026-explicit-notebook-model-output.md).
+
 Status: implementation boundaries reviewed on 2026-11-19. The
 [proposed evolution](#proposed-evolution) is separate from current capabilities.
 

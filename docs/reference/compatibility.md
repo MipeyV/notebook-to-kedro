@@ -359,6 +359,19 @@ runtime change and why it is not a same-runtime comparison with older model meas
 - Direct dependencies are not pinned to exact versions in published metadata unless compatibility requires it.
 - Generated projects record their own dependency constraints and lockfile independently.
 
+## Explicit notebook model storage
+
+An opt-in [model output declaration](model-outputs.md) selects one latest source leaf for local
+versioned PickleDataset storage. Original source facts/accounting are required. Intermediate,
+unknown, ordering-consumed and reserved parameter datasets are refused before publication.
+There is no model-type inference, serializer hook, custom path, source rewrite or analysis-time
+model/library execution. Default generated output remains unchanged.
+
+Selected locked-runtime checks on Python 3.12 with Kedro 1.5.0 and kedro-datasets 8.1.0 cover
+both nested financial models, naming profiles and sequential/threaded runners, plus CLI reruns
+and fresh-process reload. These are matching-environment checks, not portable model export or
+fresh-install coverage of those larger cases. Functional-workflow I/O schemas are unchanged.
+
 ## Compatibility tests
 
 The [synthetic banking/insurance cases](../evaluation/banking-insurance-cases.md) add selected

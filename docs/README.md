@@ -63,6 +63,7 @@ The compatibility policy is authoritative for supported runtimes and library-sup
 | [Functional workflow to Kedro](reference/functional-workflows.md) | Explicit linear entrypoints, JSON I/O/scalar parameters, source accounting, generation and paired execution evidence. |
 | [Tests delivered with functional projects](reference/generated-workflow-tests.md) | Explicit expectations, standalone pytest tests, gaps/negative controls and opt-in fresh-environment wheel/Kedro bootstrap evidence. |
 | [Tests delivered with notebook projects](reference/generated-notebook-tests.md) | Explicit pinned CSV fixtures, typed observations, standalone pytest, missing-oracle reports and isolated procedural wheel/CLI checks. |
+| [Notebook model outputs](reference/model-outputs.md) | Explicit single-leaf versioned pickle storage, declaration preview and separate reload evidence. |
 | [Local project operations](reference/local-operations.md) | Explicit root-anchored settings, typed inspect/plan/generate requests/results, real file previews and static-only publication boundaries. |
 
 ## Evaluation
@@ -156,6 +157,8 @@ the dedicated experiment reports for their frozen settings, decisions and limita
   extends function bodies with conservative local bindings while keeping orchestration explicit.
 - [ADR 0025 - Fitted Pipeline alias guard](decisions/0025-fitted-pipeline-alias-guard.md)
   rejects bounded dependencies on shared fitted state without changing source or memory policies.
+- [ADR 0026 - Explicit notebook model output](decisions/0026-explicit-notebook-model-output.md)
+  binds one declared leaf to local versioned storage without changing business code or inferring types.
 - [ADR 0017 - Application-aware workflow preparation](decisions/0017-application-aware-workflow-preparation.md)
   records original project layout, metadata capture and subsequent explicit conversion.
 - [ADR 0016 - Explicit application distributions](decisions/0016-explicit-application-distributions.md)

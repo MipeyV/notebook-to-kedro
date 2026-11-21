@@ -13,7 +13,13 @@ from notebook_to_kedro.exceptions import LocalOperationError
 MAX_LOCAL_CONFIGURATION_BYTES = 65_536
 _REQUIRED = frozenset({"schema_version", "project_root", "source", "source_kind"})
 _OPTIONAL = frozenset(
-    {"package_name", "workflow_configuration", "architecture_profile", "regression_contract"}
+    {
+        "package_name",
+        "workflow_configuration",
+        "architecture_profile",
+        "regression_contract",
+        "model_output",
+    }
 )
 
 
@@ -42,6 +48,7 @@ class LocalProjectConfiguration:
     architecture_profile: Path | None = None
     regression_contract: Path | None = None
     schema_version: str = "1.0"
+    model_output: str | None = None
 
     def __post_init__(self) -> None:
         """Validate direct API settings as well as loaded JSON."""
@@ -66,6 +73,15 @@ class LocalProjectConfiguration:
             raise LocalOperationError(
                 "LO001", "Notebook operations do not accept workflow settings"
             )
+        if self.model_output is not None and (
+            self.source_kind != "notebook"
+            or not isinstance(self.model_output, str)
+            or not self.model_output.isidentifier()
+            or keyword.iskeyword(self.model_output)
+        ):
+            raise LocalOperationError(
+                "LO001", "model_output requires a notebook source and a Python identifier"
+            )
         object.__setattr__(self, "project_root", root)
         for field in (
             "source",
@@ -88,6 +104,8 @@ class LocalProjectConfiguration:
             "source": self.source.relative_to(self.project_root).as_posix(),
             "package_name": self.package_name,
         }
+        if self.model_output is not None:
+            data["model_output"] = self.model_output
         for field in ("workflow_configuration", "architecture_profile", "regression_contract"):
             value = getattr(self, field)
             if value is not None:
@@ -145,6 +163,7 @@ def load_local_project_configuration(path: str | Path) -> LocalProjectConfigurat
             source_kind=data["source_kind"],
             package_name=data.get("package_name", "generated_project"),
             schema_version=data["schema_version"],
+            model_output=data.get("model_output"),
             **{
                 key: _relative_file(data[key])
                 for key in ("workflow_configuration", "architecture_profile", "regression_contract")
