@@ -259,7 +259,7 @@ Pattern support is introduced operation by operation and documented with fixture
 
 Readable node naming is a Level 1 planner feature. It currently recognizes simple scikit-learn workflow patterns and otherwise derives valid identifiers from Markdown headings when present.
 
-The first preprocessing pattern supports a single explicit `StandardScaler` object in ordinary top-to-bottom code. Literal `with_mean` and `with_std` arguments are extracted into generated parameters. Selected [nested financial examples](../evaluation/nested-financial-models.md) also preserve authored `ColumnTransformer`, `Pipeline`, voting and calibration source inside ordinary nodes. This supplies composition-specific runtime evidence, not automatic interpretation of arbitrary nested preprocessing graphs. An external fitted-preprocessor alias still exposes a runtime fidelity gap despite complete static accounting.
+The first preprocessing pattern supports a single explicit `StandardScaler` object in ordinary top-to-bottom code. Literal `with_mean` and `with_std` arguments are extracted into generated parameters. Selected [nested financial examples](../evaluation/nested-financial-models.md) also preserve authored `ColumnTransformer`, `Pipeline`, voting and calibration source inside ordinary nodes. This supplies composition-specific runtime evidence, not automatic interpretation of arbitrary nested preprocessing graphs. A bounded [SA009 guard](source-accounting.md#fitted-pipeline-aliases) now refuses external component alias reads that can depend on shared fitted state across task memory copies; dynamic aliases and arbitrary wrappers remain outside its scope.
 
 Pandas preprocessing support currently improves plan naming for direct dataframe rewrites and extracts selected literal `fillna` and `drop(columns=...)` arguments into Kedro parameters. It does not yet infer schemas, validate column existence, parameterize `assign` expressions, or support broad dataframe transformation graphs.
 
@@ -370,8 +370,9 @@ layouts remain explicit refusal fixtures.
 
 The separate [nested-model cases](../evaluation/nested-financial-models.md) reuse the same data
 and exercise nine-node graphs with fitted-state checks under both profiles/runners. Their
-fitted-alias boundary generates but fails at runtime; temporal stacking fails in the source
-library and Kedro alike. Static source completeness alone is not behavioral equivalence.
+fitted-alias boundary historically generated and failed at runtime; SA009 now blocks that layout
+before publication. Temporal stacking fails in the source library and Kedro alike. Original source
+and measured failure records remain unchanged; static completeness is not behavioral equivalence.
 
 Compatibility claims require automated evidence:
 

@@ -1,5 +1,22 @@
 # Development Journal
 
+## 2026-11-21 - Bounded fitted Pipeline alias guard
+
+Added SA009 to the recomputed source audit after the nested credit case exposed a source-success/
+Kedro-failure alias boundary. A pure AST scan tracks direct imported Pipeline/make_pipeline
+constructors, literal named steps, direct bindings and fit calls against proposed task owners.
+It rejects external prototype reuse without changing source ASTs, memory policies or dependencies.
+Model-owned access and local construction/fitting/export remain eligible; separately constructed
+and fitted pipelines need separate copy-boundary reasoning. Annotation-only statements and
+immutable disabled/passthrough steps do not invent new object identities.
+
+The original boundary source and measured failure snapshot remain unchanged. Updated acceptance
+requires refusal before any destination is published through high-level planning, direct
+generation with source facts, CLI and local operations. Working nested-estimator cases retain
+their runtime evidence. Dynamic factories/containers, nested wrappers, control flow and general
+alias fidelity remain outside this conservative guard. See
+[ADR 0025](docs/decisions/0025-fitted-pipeline-alias-guard.md).
+
 ## 2026-11-20 — Nested financial estimators
 
 Added two authored nine-cell notebooks on byte-identical baseline financial records: a credit

@@ -35,6 +35,12 @@ validates the leading import/one-CSV preamble, first load, business data chain a
 catalog reloads before the shared renderer/writer. Existing unmixed plans retain their output;
 wire schemas are unchanged. See [ADR 0024](../decisions/0024-procedural-mixed-cell-ownership.md).
 
+The recomputed source audit also rejects a bounded fitted Pipeline alias hazard with SA009.
+A pure source-binding scan resolves direct constructors/fit calls and proposed task ownership;
+no sklearn import, source execution, automatic repair or memory policy change is involved.
+See [ADR 0025](../decisions/0025-fitted-pipeline-alias-guard.md) and the
+[source audit scope](source-accounting.md#fitted-pipeline-aliases).
+
 A separate [functional inspection path](functional-blocks.md) now accepts a `.py` module or real
 notebook code cells: source adapters -> `SourceUnit` -> pure analysis -> `FunctionalAnalysis`.
 It records explicit function interfaces, reference edges, source spans and blockers without

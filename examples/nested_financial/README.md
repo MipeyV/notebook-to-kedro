@@ -53,14 +53,17 @@ checks the baseline portfolio identity and uses the shared writer without overwr
 
 ## Runtime boundaries retained
 
-Both boundary notebooks have complete static source accounting and can generate a project.
-They are runtime evidence, not statically refused layouts:
+The original 2026-11-20 observations recorded both boundaries as statically complete and
+generatable. Since 2026-11-21, the fitted-alias layout is blocked before publication by
+[SA009](../../docs/reference/source-accounting.md#fitted-pipeline-aliases). Its source and original
+runtime failure record remain unchanged. Temporal stacking remains a runtime boundary:
 
 - [Fitted external alias](credit_pipeline/boundary_fitted_alias.ipynb): the source reads feature
   names through the external `preprocessor` alias after Pipeline fitting. The source succeeds;
   default Kedro MemoryDataset copies leave that separate prototype unfitted, raising
   `NotFittedError`. The working source instead reads the fitted component owned by the returned
-  model. This is an unresolved conversion alias-fidelity gap. No copy policy is weakened.
+  model. The new guard rejects this bounded unsupported layout rather than repairing aliases.
+  No copy policy is weakened and arbitrary alias handling remains unsupported.
 - [Temporal stacking](lapse_calibrated_vote/boundary_stacking_timeseries.ipynb): both source and
   Kedro raise `ValueError: cross_val_predict only works for partitions`. Stacking's
   [cross_val_predict](https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.cross_val_predict.html)
