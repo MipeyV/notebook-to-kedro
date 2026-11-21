@@ -1,0 +1,430 @@
+{
+  "baseline": null,
+  "human_effort": null,
+  "human_savings": null,
+  "independent_scientific_oracle": false,
+  "observed_on": "2026-11-22",
+  "oracle_basis": "captured_original_source",
+  "prior_attempts": [
+    {
+      "attempt": "v1",
+      "installations_run": 0,
+      "reason": "Unsupported setup_mode label; corrected to reuse.",
+      "stage": "effort_comparison_preparation",
+      "status": "failed",
+      "unattempted_cases": 1
+    },
+    {
+      "attempt": "v2",
+      "profiles": [
+        "default"
+      ],
+      "status": "passed",
+      "variants": 2
+    }
+  ],
+  "references": {
+    "credit_pipeline": {
+      "capture_sha256": "3cb8c31e191a2ade48a7b20b12c8d1c8134a9e198d2b423fef8b9f081f7baaee",
+      "independent_scientific_oracle": false,
+      "model_checks": [
+        {
+          "abs_tol": 0,
+          "expected": {
+            "data": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "dtype": "int64",
+            "kind": "array"
+          },
+          "id": "reload-predict",
+          "input": {
+            "fixture": "model-probe",
+            "kind": "csv"
+          },
+          "method": "predict",
+          "rel_tol": 0,
+          "scenario": "baseline"
+        },
+        {
+          "abs_tol": 1e-10,
+          "expected": {
+            "data": [
+              [
+                0.9560343766058772,
+                0.04396562339412276
+              ],
+              [
+                0.8907192863611471,
+                0.10928071363885296
+              ],
+              [
+                0.8453282790561637,
+                0.15467172094383627
+              ],
+              [
+                0.9254126979379409,
+                0.07458730206205912
+              ],
+              [
+                0.8592707753727475,
+                0.14072922462725246
+              ],
+              [
+                0.9215822322667002,
+                0.07841776773329978
+              ],
+              [
+                0.9320086876224383,
+                0.06799131237756176
+              ],
+              [
+                0.9141881347008027,
+                0.08581186529919727
+              ]
+            ],
+            "dtype": "float64",
+            "kind": "array"
+          },
+          "id": "reload-predict-proba",
+          "input": {
+            "fixture": "model-probe",
+            "kind": "csv"
+          },
+          "method": "predict_proba",
+          "rel_tol": 0,
+          "scenario": "baseline"
+        }
+      ],
+      "oracle_basis": "captured_original_source",
+      "original_regression_sha256": "5ea88599074e05222c31eeb6a4cef468584f11ef17fb5395c0c4bdc73f9d5efb",
+      "portfolio_sha256": "187febaefd828428cf3954f2009114e646f45aaa4b2142f544877d145b0f2a13",
+      "positions": [
+        0,
+        1,
+        2,
+        3,
+        100,
+        200,
+        300,
+        400
+      ],
+      "probe_cohort": "validation",
+      "probe_sha256": "ca8a1bd46ba26e8194877f5364d65d4d2f2bc110debe0597800ba58409299f24",
+      "python": "3.12.14 (main, Sep  1 2026, 14:17:39) [MSC v.1944 64 bit (AMD64)]",
+      "source_sha256": "73c8fb1e792030913be505f66c156904b130fef8a6a3a59a76546d582f40136a",
+      "versions": {
+        "kedro": "1.5.0",
+        "kedro-datasets": "8.1.0",
+        "numpy": "2.5.2",
+        "pandas": "2.3.3",
+        "pytest": "9.1.1",
+        "scikit-learn": "1.9.0",
+        "scipy": "1.18.0"
+      }
+    },
+    "lapse_calibrated_vote": {
+      "capture_sha256": "fdb9771890feb2b10d15d7c819adcffb4c2e3ce194f8d5adb8b40d8301245982",
+      "independent_scientific_oracle": false,
+      "model_checks": [
+        {
+          "abs_tol": 0,
+          "expected": {
+            "data": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "dtype": "int64",
+            "kind": "array"
+          },
+          "id": "reload-predict",
+          "input": {
+            "fixture": "model-probe",
+            "kind": "csv"
+          },
+          "method": "predict",
+          "rel_tol": 0,
+          "scenario": "baseline"
+        },
+        {
+          "abs_tol": 1e-10,
+          "expected": {
+            "data": [
+              [
+                0.9175058739772618,
+                0.08249412602273813
+              ],
+              [
+                0.8669285765116069,
+                0.1330714234883931
+              ],
+              [
+                0.9143661779206985,
+                0.08563382207930137
+              ],
+              [
+                0.8926063382778047,
+                0.10739366172219539
+              ],
+              [
+                0.9218230921074811,
+                0.0781769078925189
+              ],
+              [
+                0.9220921101080058,
+                0.07790788989199411
+              ],
+              [
+                0.9037748292174449,
+                0.09622517078255516
+              ],
+              [
+                0.8839378354504235,
+                0.11606216454957652
+              ]
+            ],
+            "dtype": "float64",
+            "kind": "array"
+          },
+          "id": "reload-predict-proba",
+          "input": {
+            "fixture": "model-probe",
+            "kind": "csv"
+          },
+          "method": "predict_proba",
+          "rel_tol": 0,
+          "scenario": "baseline"
+        }
+      ],
+      "oracle_basis": "captured_original_source",
+      "original_regression_sha256": "f2a2350dc6e5db1602e961af5d8d67e1401abd3c6c193df57321aae2e97bc5cb",
+      "portfolio_sha256": "9b73b10594e293e251578e03f2100f29c2d1135183aa2e3304a2f3778dec8666",
+      "positions": [
+        0,
+        1,
+        2,
+        3,
+        100,
+        200,
+        300,
+        400
+      ],
+      "probe_cohort": "validation",
+      "probe_sha256": "f7d4f71316e147a2757cf07291db90d63a8eb523b78bf7819f7bd0df1c97d18f",
+      "python": "3.12.14 (main, Sep  1 2026, 14:17:39) [MSC v.1944 64 bit (AMD64)]",
+      "source_sha256": "4a1e13297a67d515efe43aca6fa216d83bd8980093c61b9d304c67b3156edf15",
+      "versions": {
+        "kedro": "1.5.0",
+        "kedro-datasets": "8.1.0",
+        "numpy": "2.5.2",
+        "pandas": "2.3.3",
+        "pytest": "9.1.1",
+        "scikit-learn": "1.9.0",
+        "scipy": "1.18.0"
+      }
+    }
+  },
+  "runs": [
+    {
+      "case": "credit_pipeline",
+      "cli_reload": "matched",
+      "elapsed_seconds": 41.5405748,
+      "false_oracle_control": "rejected_after_storage",
+      "false_oracle_failures": 2,
+      "generated_project_unchanged": true,
+      "generation_execution_status": "not_run",
+      "missing_pipeline_outputs": [
+        "candidate_thresholds",
+        "feature_columns",
+        "fitted_model",
+        "horizon_months",
+        "matrix",
+        "scored_test",
+        "summary",
+        "validation_alerts",
+        "validation_costs",
+        "validation_false_alerts",
+        "validation_misses",
+        "validation_scores"
+      ],
+      "operation_seconds": {
+        "generate": 0.0656222,
+        "inspect": 0.0374148,
+        "plan": 0.0387004
+      },
+      "passed_tests": 12,
+      "profile": "default",
+      "runtime_constraints_sha256": "0665d1fa170baf7a6355f492d1cff2bf6d3cb8c49c43c51f16e3f9cdc826633e",
+      "source_unchanged": true,
+      "status": "passed",
+      "subprocess_seconds": {
+        "build.log": 0.8086034,
+        "cli-reload.log": 2.5632323,
+        "false-oracle.log": 10.4196175,
+        "install.log": 2.6002885,
+        "kedro.log": 3.2344025,
+        "pytest.log": 19.1739674,
+        "reference.log": 2.0537719,
+        "runtime.json": 0.177519,
+        "venv.log": 0.1213152
+      },
+      "wheel_sha256": "a10379113b39a0dd4227fdb8e7ec55f72b280ffc68dd8af56a8c8b427468c8fc",
+      "workspace_preparation_seconds": 0.0283205
+    },
+    {
+      "case": "credit_pipeline",
+      "cli_reload": "matched",
+      "elapsed_seconds": 45.4489921,
+      "false_oracle_control": "rejected_after_storage",
+      "false_oracle_failures": 2,
+      "generated_project_unchanged": true,
+      "generation_execution_status": "not_run",
+      "missing_pipeline_outputs": [
+        "candidate_thresholds",
+        "feature_columns",
+        "fitted_model",
+        "horizon_months",
+        "matrix",
+        "scored_test",
+        "summary",
+        "validation_alerts",
+        "validation_costs",
+        "validation_false_alerts",
+        "validation_misses",
+        "validation_scores"
+      ],
+      "operation_seconds": {
+        "generate": 0.1601714,
+        "inspect": 0.0107096,
+        "plan": 0.0910449
+      },
+      "passed_tests": 12,
+      "profile": "custom",
+      "runtime_constraints_sha256": "0665d1fa170baf7a6355f492d1cff2bf6d3cb8c49c43c51f16e3f9cdc826633e",
+      "source_unchanged": true,
+      "status": "passed",
+      "subprocess_seconds": {
+        "build.log": 0.8409954,
+        "cli-reload.log": 2.7952433,
+        "false-oracle.log": 10.8672348,
+        "install.log": 3.5211191,
+        "kedro.log": 3.8154238,
+        "pytest.log": 20.2599328,
+        "reference.log": 2.3038802,
+        "runtime.json": 0.2873267,
+        "venv.log": 0.1121938
+      },
+      "wheel_sha256": "3f37944c56352d1079fe4ba6bec5a934cf9cae0defb34cbae5387d1aa80762f3",
+      "workspace_preparation_seconds": 0.0470671
+    },
+    {
+      "case": "lapse_calibrated_vote",
+      "cli_reload": "matched",
+      "elapsed_seconds": 46.2036706,
+      "false_oracle_control": "rejected_after_storage",
+      "false_oracle_failures": 2,
+      "generated_project_unchanged": true,
+      "generation_execution_status": "not_run",
+      "missing_pipeline_outputs": [
+        "candidate_thresholds",
+        "feature_columns",
+        "fitted_model",
+        "horizon_months",
+        "matrix",
+        "scored_test",
+        "summary",
+        "validation_alerts",
+        "validation_costs",
+        "validation_false_alerts",
+        "validation_misses",
+        "validation_scores"
+      ],
+      "operation_seconds": {
+        "generate": 0.1674185,
+        "inspect": 0.0213388,
+        "plan": 0.1311504
+      },
+      "passed_tests": 12,
+      "profile": "default",
+      "runtime_constraints_sha256": "0665d1fa170baf7a6355f492d1cff2bf6d3cb8c49c43c51f16e3f9cdc826633e",
+      "source_unchanged": true,
+      "status": "passed",
+      "subprocess_seconds": {
+        "build.log": 0.9946184,
+        "cli-reload.log": 2.6007088,
+        "false-oracle.log": 10.9886039,
+        "install.log": 3.0181566,
+        "kedro.log": 3.7532591,
+        "pytest.log": 20.9116284,
+        "reference.log": 2.8630021,
+        "runtime.json": 0.259764,
+        "venv.log": 0.1124856
+      },
+      "wheel_sha256": "e1066d860cda32424ee776564370f520e0831e8422772cef2f47da96e36461ed",
+      "workspace_preparation_seconds": 0.0469848
+    },
+    {
+      "case": "lapse_calibrated_vote",
+      "cli_reload": "matched",
+      "elapsed_seconds": 46.7739737,
+      "false_oracle_control": "rejected_after_storage",
+      "false_oracle_failures": 2,
+      "generated_project_unchanged": true,
+      "generation_execution_status": "not_run",
+      "missing_pipeline_outputs": [
+        "candidate_thresholds",
+        "feature_columns",
+        "fitted_model",
+        "horizon_months",
+        "matrix",
+        "scored_test",
+        "summary",
+        "validation_alerts",
+        "validation_costs",
+        "validation_false_alerts",
+        "validation_misses",
+        "validation_scores"
+      ],
+      "operation_seconds": {
+        "generate": 0.1307033,
+        "inspect": 0.0167519,
+        "plan": 0.0960809
+      },
+      "passed_tests": 12,
+      "profile": "custom",
+      "runtime_constraints_sha256": "0665d1fa170baf7a6355f492d1cff2bf6d3cb8c49c43c51f16e3f9cdc826633e",
+      "source_unchanged": true,
+      "status": "passed",
+      "subprocess_seconds": {
+        "build.log": 0.8939056,
+        "cli-reload.log": 2.4012833,
+        "false-oracle.log": 12.2259513,
+        "install.log": 3.3663795,
+        "kedro.log": 3.6558069,
+        "pytest.log": 20.4213797,
+        "reference.log": 2.762807,
+        "runtime.json": 0.2758946,
+        "venv.log": 0.1518258
+      },
+      "wheel_sha256": "a05d6a554c062ed20b42bdba4c5ae903d03018fb6976672cfdf6b9341cf64b4f",
+      "workspace_preparation_seconds": 0.0457526
+    }
+  ],
+  "schema_version": "1.0",
+  "setup_mode": "prepared_synthetic_reuse",
+  "status": "passed",
+  "timing_scope": "Machine stage/operation/preparation durations are nested within total elapsed; human work and manual VS Code interaction are unmeasured."
+}

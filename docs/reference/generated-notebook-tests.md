@@ -87,7 +87,11 @@ The separate [small example](../../examples/model_reload/README.md) supplies han
 label and probability oracles. Repository integration checks exercise plain and nested models,
 both naming profiles, CSV and inline-frame probes, and failures for an altered persisted model,
 corrupt pickle, wrong supplied oracle and changed storage declaration. These cases are outside
-the existing six-variant fresh-install bootstrap matrix. See
+the existing six-variant fresh-install bootstrap matrix. A separate
+[financial installation journey](../evaluation/nested-financial-models.md#measured-installation-journeys)
+now extends these probes to the two nested financial models, using explicitly captured original-source
+references and fresh installations constrained to that reference runtime. It retains original
+scientific limitations and pending human effort measurements. See
 [ADR 0027](../decisions/0027-generated-model-reload-checks.md).
 
 ## Explicit contract

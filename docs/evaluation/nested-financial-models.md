@@ -56,6 +56,67 @@ test positives at the selected threshold. Calibration machinery and a lower Brie
 establish calibration quality or economic usefulness. No data, model or threshold was tuned
 after inspecting these test results. Original baseline results remain preserved separately.
 
+## Measured installation journeys
+
+Follow-up, 2026-11-22: `tools/check_financial_journey.py` composes the existing local operations,
+model-output declaration and notebook schema 1.1 tests. The two original working notebooks are
+copied unchanged into new workspaces. Both naming profiles are exercised. This is an opt-in
+developer journey; analysis/generation remain static and no private financial-mdl code or data
+is used.
+
+An explicit reference subprocess executes the original notebook and selects validation positions
+0, 1, 2, 3, 100, 200, 300 and 400 without using predictions or targets to choose rows. It serializes
+those feature rows to CSV, reloads that representation and captures predict/predict_proba values.
+These are source-derived regression references, not independent scientific expectations or
+held-out performance estimates. Full estimator state remains outside the generated contract.
+
+The journey creates a new settings file and explicit regression contract through the shared
+writer. Existing operation measurements cover inspect, plan and generate; the exact file/copy
+preview must match publication. Each generated wheel is installed with its test extra in a fresh
+venv without system packages or the converter. Seven known runtime packages (NumPy, pandas,
+SciPy, scikit-learn, Kedro, kedro-datasets and pytest) match the reference interpreter via an
+explicit constraints file. Other dependencies resolve normally. This is neither automatic
+dependency inference nor unconstrained/cross-version portability evidence.
+
+Twelve delivered tests run from copied configuration/data/tests with an empty src directory.
+Ordinary `python -I -m kedro run` then saves one model version. A new process reloads that exact
+version and checks both reference probes; hashes must remain unchanged. A separate runtime copy
+inverts the supplied labels and reverses probability columns. Both selected reload tests must
+fail with the fresh-process comparison diagnostic, rather than an import/setup failure. Original
+source, generated project, input/configuration/test files and CLI-saved model bytes are protected
+by postflight identities.
+
+The separate [journey snapshot](../../examples/nested_financial/journey-observations.json) records
+the selected Windows Python 3.12 results and timing scopes. The first engineering attempt failed
+after generation because its effort form used an unsupported setup-mode label; no installation
+ran and the remaining case was not attempted. Its local evidence is retained. A subsequent
+two-case default run passed, followed by the four-profile-case run recorded in the new snapshot.
+The original observations.json and unfavorable model results above are unchanged.
+
+| Selected Windows run | Total case elapsed | Inspect + preview + generate |
+| --- | --- | --- |
+| Credit, default | 41.54 s | 0.142 s |
+| Credit, custom | 45.45 s | 0.262 s |
+| Lapse, default | 46.20 s | 0.320 s |
+| Lapse, custom | 46.77 s | 0.244 s |
+
+These are prepared-case machine observations. New venvs can reuse uv's package/download cache;
+this is not a cold-machine benchmark or a representative user-effort comparison.
+
+Machine evidence includes reference execution, workspace preparation, operation timings,
+build/install/test/CLI/reload/control subprocess durations and total case elapsed time. These
+scopes overlap: preparation and subprocess times are included in total elapsed time. They must
+not be added to that total. Human configuration, adaptation, correction and review remain
+unmeasured. The existing effort-comparison kit emits pending declarations; savings and baselines
+stay null. Prepared sources and source-derived references do not represent an unassisted first use.
+
+The generated JOURNEY.md links the configuration usable in VS Code, the full preview and the
+installation/evidence artifacts. The harness calls the same local operations as the extension;
+it does not exercise or time a person's UI interaction. CI runs these four fixed journeys in a
+separate Python 3.12 job and retains partial evidence on failure. The existing six-variant
+bootstrap is unchanged. Broader libraries, independent prospective user trials and scientific
+acceptance remain separate work.
+
 ## Static completeness and runtime failures
 
 The fitted-alias boundary succeeds in the original source and fails in Kedro with an unfitted

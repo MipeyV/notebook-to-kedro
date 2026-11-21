@@ -35,6 +35,12 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Added an opt-in fixed financial-model journey combining measured local operations, exact
+  file previews, fresh wheel installations, twelve delivered tests per variant, Kedro CLI,
+  exact-version prediction reload and false-oracle rejection. Source-derived validation probes,
+  matching runtime constraints and pending human effort are explicit. Both nested models and
+  naming profiles have a separate Python 3.12 CI job; original corpus evidence is preserved.
+
 - Added notebook regression schema 1.1 with explicit model prediction probes/oracles. Generated
   tests save the declared model in temporary versioned storage, reload it in a fresh process
   and compare predict/predict_proba results with explicit tolerances. Generation stays static,

@@ -2,7 +2,7 @@
 
 [Documentation index](../README.md)
 
-Status: engine/operations/local-interface delivery priorities updated on 2026-11-21;
+Status: engine/operations/local-interface delivery priorities updated on 2026-11-22;
 historical V1/V2 checkboxes are preserved.
 The broader product direction is recorded in [Product vision](product-vision.md).
 
@@ -94,7 +94,11 @@ support claims. An initial [model output declaration](../reference/model-outputs
 one latest notebook leaf to local versioned pickle storage, with separate reload checks. Further
 serializers, full model/artifact comparators and automatic model-graph inference remain
 separate work. Explicit generated prediction probes now cover local storage/reload in a new
-small example; broader independent model cases and installation evidence are next.
+small example. A subsequent fixed financial journey now exercises both nested models/profiles
+through measured local operations, installed wheels, delivered tests, CLI and fresh-process
+reload. Its explicit source-derived validation probes and matching-runtime constraints retain
+scientific and human-effort gaps. Next measure independent user preparation/correction/review
+and expand library/runtime coverage before claiming broader productivity or support.
 
 Source accounting and supported graph checks are implemented. E2 now has
 [functional inspection](../reference/functional-blocks.md) and a bounded

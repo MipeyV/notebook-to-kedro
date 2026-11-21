@@ -2,13 +2,14 @@
 
 [Documentation index](../README.md)
 
-Status: current implementation summary reviewed on 2026-11-21; historical evidence follows.
+Status: current implementation summary reviewed on 2026-11-22; historical evidence follows.
 Historical measurements retain their original corpus, runtime and limitations.
 
 ## Project status
 
 | Capability | Current status |
 | --- | --- |
+| Financial model user journeys | A fixed-case developer harness now composes configuration, measured inspect/preview/generate, fresh wheel installation, twelve delivered tests, Kedro CLI and exact-version prediction reload for both nested models/profiles. Explicit original-source capture supplies eight validation probes; seven runtime package versions match the reference. False-oracle controls and protected identities retain bounded installation/fidelity evidence. Machine times and pending human effort remain separate; the manual VS Code interaction is not exercised. See [journey scope](../evaluation/nested-financial-models.md#measured-installation-journeys). |
 | Generated model reload tests | Explicit notebook regression schema 1.1 supplies predict/predict_proba probes and numeric oracles for a declared model leaf. Delivered pytest checks save in isolated temporary storage and reload the exact version in a fresh process. Plain/nested examples, profiles and negative controls are exercised in the selected locked runtime. Generation remains static/not_run; missing model-object oracles and original financial evidence remain unchanged. See [contract](../reference/generated-notebook-tests.md#explicit-persisted-model-prediction-checks). |
 | Explicit notebook model output | Optional model_output binds one latest leaf to local versioned stdlib-pickle storage through API/CLI/local settings, requiring original source facts. Generation saves no model or infers runtime type. Both nested financial models pass selected-runtime fitted-state/prediction reload checks under both profiles/runners, CLI version preservation and fresh-process reload. Supplied regressions remain memory-only with unchanged missing model oracles. No new engine dependency or functional-workflow persistence contract is added; see [scope](../reference/model-outputs.md). |
 | Fitted Pipeline alias guard | SA009 now rejects a bounded named-component reuse hazard across proposed task memory-copy boundaries. Direct import/assignment aliases, literal Pipeline/make_pipeline steps and direct fit calls are checked without importing sklearn or executing source. The original credit fitted-alias layout is refused before publication; model-owned access and local fitting/export remain eligible. This is a conservative diagnostic, not a general alias solver, repair or copy-policy change. See [scope](../reference/source-accounting.md#fitted-pipeline-aliases). |

@@ -54,6 +54,36 @@ and the fitted object have no golden oracle; `regression-coverage.json` retains 
 Generation and the example builder perform no model fitting or notebook execution. The builder
 checks the baseline portfolio identity and uses the shared writer without overwriting targets.
 
+## Complete measured installation journey
+
+From a source checkout with `uv sync --locked`, run this opt-in developer check into a new
+directory:
+
+```bash
+uv run python tools/check_financial_journey.py generated/financial-journey
+```
+
+It exercises both cases under default/custom profiles (use `--profile default` or `custom`
+for two variants). Explicit original-source execution captures predict/predict_proba references
+on eight predetermined validation positions. These are source-fidelity references, not
+independent scientific oracles. The original notebooks, records, contracts and observations
+stay unchanged. New copies contain `project-journey.json`, pinned probes and schema 1.1 tests.
+
+The check measures shared inspect/preview/generate operations, verifies preview/publication
+identity, builds a wheel and installs its test extra in a new venv. Seven known runtime package
+versions are constrained to the reference interpreter's versions; this is matching-runtime
+evidence, not unconstrained dependency resolution or a full dependency lock. The installed
+project has an empty src directory and no converter. Twelve shipped tests, ordinary Kedro CLI,
+exact-version fresh-process prediction reload and two false-oracle failures are required.
+
+Each variant retains logs, JUnit, runtime identities, hashes, operation attempts and pending
+human effort forms. `JOURNEY.md` links its prepared configuration and review artifacts. Select
+`workspace/project-journey.json` in VS Code to inspect/preview and choose a new generation
+destination. That manual UI interaction is not exercised or timed by the harness. Machine
+timings exclude operator work; no human savings are inferred. The separate CI journey job
+runs this command on Python 3.12 alongside the unchanged six-variant bootstrap matrix.
+See the [measured report](../../docs/evaluation/nested-financial-models.md#measured-installation-journeys).
+
 ## Runtime boundaries retained
 
 The original 2026-11-20 observations recorded both boundaries as statically complete and

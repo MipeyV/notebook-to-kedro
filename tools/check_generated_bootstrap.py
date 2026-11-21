@@ -10,6 +10,7 @@ import os
 import shutil
 import subprocess
 import sys
+import time
 import xml.etree.ElementTree as ET
 from contextlib import chdir
 from pathlib import Path
@@ -152,16 +153,20 @@ def _command(
     }
     stages.append(stage)
     LOGGER.info("Running %s", log)
-    with log.open("w", encoding="utf-8") as stream:
-        result = subprocess.run(
-            command,
-            cwd=directory,
-            env=_environment(),
-            stdout=stream,
-            stderr=subprocess.STDOUT,
-            timeout=900,
-            check=False,
-        )
+    started = time.perf_counter_ns()
+    try:
+        with log.open("w", encoding="utf-8") as stream:
+            result = subprocess.run(
+                command,
+                cwd=directory,
+                env=_environment(),
+                stdout=stream,
+                stderr=subprocess.STDOUT,
+                timeout=900,
+                check=False,
+            )
+    finally:
+        stage["duration_ns"] = time.perf_counter_ns() - started
     stage.update(
         returncode=result.returncode,
         status="passed" if result.returncode == expected_returncode else "failed",
@@ -170,12 +175,14 @@ def _command(
         raise RuntimeError(f"Command failed ({result.returncode}); see {log}")
 
 
-def _install_and_test(
+def _install_and_test(  # noqa: PLR0913
     directory: Path,
     project: Path,
     evidence: dict[str, Any],
     *,
     package_name: str,
+    expected_tests: int = EXPECTED_TESTS,
+    constraints: Path | None = None,
 ) -> Path:
     """Build a wheel and exercise shipped tests without engine or source-tree fallback."""
     uv = shutil.which("uv")
@@ -206,7 +213,8 @@ def _install_and_test(
     )
     python = _python(directory)
     _command(
-        [uv, "--no-config", "pip", "install", "--python", str(python), f"{wheel}[test]"],
+        [uv, "--no-config", "pip", "install", "--python", str(python), f"{wheel}[test]"]
+        + ([] if constraints is None else ["--constraint", str(constraints)]),
         directory,
         directory / "install.log",
         stages,
@@ -246,11 +254,11 @@ def _install_and_test(
         stages,
     )
     report = ET.parse(directory / "pytest.xml").getroot()
-    if len(report.findall(".//testcase")) != EXPECTED_TESTS or any(
+    if len(report.findall(".//testcase")) != expected_tests or any(
         report.findall(f".//{kind}") for kind in ("failure", "error", "skipped")
     ):
-        raise RuntimeError("Expected five executed, passing node/pipeline regressions")
-    evidence["passed_tests"] = EXPECTED_TESTS
+        raise RuntimeError(f"Expected {expected_tests} executed, passing regressions")
+    evidence["passed_tests"] = expected_tests
     return runtime_project
 
 
