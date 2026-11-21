@@ -93,7 +93,9 @@ validation, explicit tests and preserved unsupported layouts. See the
 
 The [nested-model extension](examples/nested_financial/README.md) reuses the same records with
 ColumnTransformer/Pipeline preprocessing and a temporally calibrated voting ensemble. Its
-nine-node cases retain fitted-alias and temporal-stacking failures as runtime boundaries.
+nine-node cases retain original failure evidence. The fitted-alias layout is now blocked by
+[SA009](docs/reference/source-accounting.md#fitted-pipeline-aliases); temporal stacking retains
+its original source library error.
 
 Optional [delivered notebook tests](docs/reference/generated-notebook-tests.md) use supplied
 expectations and SHA-pinned CSV fixtures via `generate --regression-contract`. The

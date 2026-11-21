@@ -14,6 +14,7 @@ from typing import TYPE_CHECKING, Literal
 
 from notebook_to_kedro.exceptions import ConversionPlanValidationError
 from notebook_to_kedro.ir import PlanDiagnostic
+from notebook_to_kedro.semantic.fitted_aliases import fitted_alias_checks
 from notebook_to_kedro.semantic.planner import plan_tasks
 from notebook_to_kedro.semantic.validation import validate_conversion_plan
 
@@ -327,6 +328,7 @@ def audit_conversion_source(facts: NotebookFacts, plan: ConversionPlan) -> Conve
     diagnostics.extend(_graph_checks(facts, plan, tuple(records)))
     diagnostics.extend(_parameter_checks(facts, plan))
     diagnostics.extend(_mixed_cell_checks(facts, plan, tuple(records)))
+    diagnostics.extend(fitted_alias_checks(facts, plan))
     return ConversionSourceAudit(
         facts.notebook.path,
         facts.notebook.content_sha256,

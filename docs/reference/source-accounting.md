@@ -50,6 +50,7 @@ No implicit exclusion policy or human approval is inferred from a passing audit.
 | `SA006` | Declared inputs lack earlier task/catalog producers, source dependency inputs are missing, outputs are not source writes, or source names are unresolved. |
 | `SA007` | Selected parameter values differ from deterministic extraction, or task/argument/source-cell bindings are inconsistent. |
 | `SA008` | Mixed-cell promotion cannot preserve the required import/CSV preamble, first read, source task order or linear data chain; unsupported retained CSV readers and catalog reloads also block. |
+| `SA009` | A recognized Pipeline component alias is read after fitting across task boundaries that can detach its fitted state through memory copies. |
 
 Catalog relocation supports a single ordinary assignment from an earlier bound pandas import,
 with exactly one positional literal local path and no reader keywords/unpacking. Compare dataset
@@ -93,6 +94,32 @@ it does not split arbitrary business blocks, model object identity/aliasing or a
 safe import hoisting/side-effect ordering, lock changing files, validate data schemas, generate
 project tests or replace behavioral comparison. See [ADR 0004](../decisions/0004-shared-engine-and-local-interface.md)
 and the [roadmap](../product/roadmap.md) for the next functional-block/Python slice.
+
+## Fitted Pipeline aliases
+
+Added on 2026-11-21, SA009 conservatively rejects a bounded object-identity hazard exposed by
+the [nested financial corpus](../evaluation/nested-financial-models.md). For example, a named
+preprocessor created in one task, passed as a step to a Pipeline fitted in another, and later
+read through its original name can remain unfitted in Kedro because memory datasets copy it.
+Reading the fitted component through the returned model (`model.named_steps[...]`) avoids that
+particular external alias. The tool reports the risk; it does not rewrite user code.
+
+The pure scan resolves source-ordered imports and direct aliases for `sklearn.pipeline.Pipeline`
+and `make_pipeline`, literal step lists/tuples, named assignments and direct named `fit`,
+`fit_transform` or `fit_predict` calls. It follows the actual proposed task ownership, not cell
+boundaries or generated names. If construction and fitting share a task, local component use
+and components exported from that task retain eligibility. If construction and fitting are
+separate, even a separately loaded prototype used within the fitting task can be detached.
+Direct rebinding, valueless annotations and immutable disabled/passthrough values are handled.
+
+This detects a potential unsupported dependency on shared fitted state, not a proof that the
+source succeeds or that every flagged access reads learned attributes. Caching/cloning options,
+custom factories, dynamic step containers, chained calls, control-flow-dependent aliases,
+nested wrappers and arbitrary object graphs are not interpreted. Absence of SA009 is not a
+general alias or equivalence guarantee. No source library is imported or executed, no copy
+policy is changed and the existing facts/planning/audit schemas remain unchanged. As with the
+other source checks, direct low-level generation needs `source_facts` to recompute this audit.
+See [ADR 0025](../decisions/0025-fitted-pipeline-alias-guard.md).
 
 ## Procedural mixed cells
 
