@@ -20,6 +20,12 @@ See the [compatibility policy](docs/reference/compatibility.md) for support boun
 The tool does not promise automatic production deployment or support for arbitrary Spark/cloud
 workflows. It preserves source provenance and reports unsupported or ambiguous behavior.
 
+An optional [model output declaration](docs/reference/model-outputs.md) saves one selected
+notebook leaf through versioned local storage. Explicit
+[prediction probes](docs/reference/generated-notebook-tests.md#explicit-persisted-model-prediction-checks)
+can generate standalone tests that reload its saved version in a fresh process. Generation
+remains static and expected predictions must be supplied.
+
 ## Installation
 
 Notebook to Kedro requires Python 3.11, 3.12, or 3.13. Until the package is published to PyPI,

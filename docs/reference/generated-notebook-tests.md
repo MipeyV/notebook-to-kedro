@@ -38,8 +38,57 @@ The separate [model output declaration](model-outputs.md) can accompany this tes
 For that opt-in only, the generated suite verifies the exact additional model catalog entry
 and removes it before constructing its isolated in-memory produced datasets. Other catalog
 changes remain errors. It creates no model files, infers no fitted-object oracle and retains
-all existing missing-expectation gaps. Persistence/reload checks are separate from these
-calculation regressions. Omitting model_output preserves the original test module/payload.
+all existing missing-expectation gaps. Persistence/reload checks require the explicit schema
+1.1 extension below. Omitting model_output preserves the original test module/payload.
+
+## Explicit persisted-model prediction checks
+
+Notebook regression schema `1.1` has the same root fields as `1.0`, plus required
+`model_checks`. Schema `1.0` remains unchanged. A nonempty list requires explicit
+`model_output` selection. Each check has exactly these fields:
+
+```json
+{
+  "id": "reload-labels",
+  "scenario": "baseline",
+  "method": "predict",
+  "input": {"kind": "csv", "fixture": "probe"},
+  "expected": {"kind": "array", "dtype": "int64", "data": [0, 1]},
+  "abs_tol": 0,
+  "rel_tol": 0
+}
+```
+
+IDs are unique ASCII identifiers matching `[a-z][a-z0-9_-]{0,63}`. The scenario must be
+an existing positive pipeline case. Only `predict` and `predict_proba` are supported;
+inputs are existing array/frame/CSV descriptors. Expected values must be nonempty numeric
+vectors or matrices. Both tolerances are explicit finite nonnegative numbers. Exact array
+shape/dtype and finite values are checked before the tolerance comparison. No hooks,
+arbitrary methods, expressions or automatic oracle capture are accepted.
+
+At most 100 checks are accepted within the existing manifest/fixture budgets. Probe-only
+CSV fixtures count as used and are captured by the same pinned-byte mechanism. Generation
+validates declarations and compiles emitted code; it never fits a model or derives predictions.
+
+Each delivered check runs the declared scenario with a real versioned PickleDataset under
+its own pytest temporary directory. It also checks the scenario's original output expectations.
+A fresh Python process loads the exact saved version and compares probe predictions against
+the supplied oracle. Artifact SHA-256 checks surround loading and prediction. The generated
+worker uses the project's test/runtime dependencies without importing the converter. A failed
+reload or comparison fails pytest. Ordinary node/pipeline regressions remain memory-only.
+
+Generation reports check counts, methods and `model_reload_status: not_run`. The model manifest
+declares the supplied storage-test capability, while execution/reload statuses remain `not_run`
+and runtime type remains unverified. Missing model-object oracles remain gaps: a finite probe
+does not establish complete fitted-state equivalence, generalization or business correctness.
+This does not provide a code sandbox, portable model format or cross-version guarantee.
+
+The separate [small example](../../examples/model_reload/README.md) supplies hand-declared
+label and probability oracles. Repository integration checks exercise plain and nested models,
+both naming profiles, CSV and inline-frame probes, and failures for an altered persisted model,
+corrupt pickle, wrong supplied oracle and changed storage declaration. These cases are outside
+the existing six-variant fresh-install bootstrap matrix. See
+[ADR 0027](../decisions/0027-generated-model-reload-checks.md).
 
 ## Explicit contract
 

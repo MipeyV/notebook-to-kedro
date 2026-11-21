@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any
 
 from notebook_to_kedro.exceptions import ProjectGenerationError, WorkflowRegressionError
+from notebook_to_kedro.generation.kedro.notebook_model_checks import validate_model_checks
 from notebook_to_kedro.generation.kedro.notebook_regression_values import validate_descriptor
 from notebook_to_kedro.generation.kedro.regression_contract import (
     MAX_REGRESSION_BYTES,
@@ -32,17 +33,20 @@ def _identifier(value: object) -> bool:
 
 def _definitions(data: object) -> dict[str, Any]:
     _json_value(data)
+    fields = {"schema_version", "fixtures", "scenarios"}
+    if isinstance(data, dict) and data.get("schema_version") == "1.1":
+        fields.add("model_checks")
     if (
         not isinstance(data, dict)
-        or set(data) != {"schema_version", "fixtures", "scenarios"}
-        or data["schema_version"] != "1.0"
+        or set(data) != fields
+        or data["schema_version"] not in ("1.0", "1.1")
         or not isinstance(data["fixtures"], dict)
         or len(data["fixtures"]) > MAX_SCENARIOS
         or not isinstance(data["scenarios"], list)
         or len(data["scenarios"]) > MAX_SCENARIOS
     ):
         raise WorkflowRegressionError(
-            "Notebook regressions require schema 1.0, fixtures and scenarios"
+            "Notebook regressions require schema 1.0 or 1.1, fixtures and scenarios"
         )
     paths: set[str] = set()
     for name, item in data["fixtures"].items():
@@ -113,6 +117,7 @@ def _scenarios(data: dict[str, Any]) -> None:
             used.update(v["fixture"] for v in node["inputs"].values() if v["kind"] == "csv")
             if "expected" in node:
                 _values(node["expected"], fixtures, inputs=False)
+    used.update(validate_model_checks(data))
     if used != fixtures:
         raise WorkflowRegressionError("Every declared fixture must be used by a scenario")
 

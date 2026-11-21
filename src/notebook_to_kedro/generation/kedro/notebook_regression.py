@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 from notebook_to_kedro.exceptions import WorkflowRegressionError
+from notebook_to_kedro.generation.kedro.model_reload_template import MODEL_TESTS, MODEL_WORKER
 from notebook_to_kedro.generation.kedro.notebook_test_template import TEST_MODULE
 
 if TYPE_CHECKING:
@@ -86,13 +87,16 @@ def render_notebook_regressions(  # noqa: PLR0913
     )
     data = contract.to_dict()
     cases = data["scenarios"]
+    model_checks = data.get("model_checks", [])
+    if model_checks and model_output is None:
+        raise WorkflowRegressionError("Model reload checks require an explicit model_output")
     _validate_binding(cases, binding, {parameter.name for parameter in plan.parameters}, leaves)
     observed = {output for case in cases for output in case.get("expected", {})}
     covered = {name for case in cases for name in case.get("nodes", {})}
     positive = {
         name for case in cases for name, node in case.get("nodes", {}).items() if "expected" in node
     }
-    report = {
+    report: dict[str, Any] = {
         "schema_version": "1.0",
         "execution_status": "not_run",
         "review_status": "not_authenticated",
@@ -123,6 +127,24 @@ def render_notebook_regressions(  # noqa: PLR0913
             "No tests are emitted when the explicit scenario list is empty.\n"
         ),
     }
+    if model_checks:
+        report.update(
+            model_reload_checks=len(model_checks),
+            model_reload_methods=sorted({check["method"] for check in model_checks}),
+            model_reload_status="not_run",
+        )
+        report["limitations"] += (
+            " Supplied reload probes check finite numeric predictions only, not full object "
+            "state, scientific quality or deployment readiness."
+        )
+        files[Path("regression-coverage.json")] = (
+            json.dumps(report, indent=2, sort_keys=True) + "\n"
+        )
+        files[Path("TESTING.md")] += (
+            "\nModel reload tests train the declared positive scenario in an isolated test "
+            "workspace, save the selected model, then reload it in a fresh Python process. "
+            "Only supplied probes/prediction oracles are checked; generation runs none of them.\n"
+        )
     if not cases:
         return files
     for name, text in contract.fixture_texts:
@@ -151,6 +173,17 @@ def render_notebook_regressions(  # noqa: PLR0913
             '        raise ValueError("Regression model catalog declaration changed")\n'
             '    if config != DATA["catalog"]:\n',
         )
+    if model_checks:
+        module = module.replace(
+            "def _catalog(case, tmp_path, monkeypatch):",
+            "def _catalog(case, tmp_path, monkeypatch, save_version=None):",
+        ).replace(
+            "catalog = DataCatalog.from_config(prepared)",
+            "catalog = DataCatalog.from_config(prepared, save_version=save_version)",
+        )
+        module += MODEL_TESTS
+        compile(MODEL_WORKER, "tests/_model_reload_worker.py", "exec", dont_inherit=True)
+        files[Path("tests/_model_reload_worker.py")] = MODEL_WORKER
     files[Path("tests/regression_cases.json")] = (
         json.dumps(payload, indent=2, sort_keys=True) + "\n"
     )

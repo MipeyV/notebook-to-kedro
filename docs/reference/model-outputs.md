@@ -91,6 +91,9 @@ A fresh-catalog save-version collision must refuse to replace the original bytes
 The ten supplied regressions per example remain memory-only. They verify the exact declared
 model catalog entry, remove only that entry for their isolated run and retain all missing model
 oracles. A deliberately changed storage backend must fail those tests before a model is saved.
-They do not establish persistence, scientific quality or business value; reload checks are separate.
+They do not establish persistence, scientific quality or business value. An additional explicit
+[notebook regression schema 1.1](generated-notebook-tests.md#explicit-persisted-model-prediction-checks)
+now generates real storage/fresh-process prediction checks from supplied probes and oracles.
+The original financial contracts and their missing model-object oracles remain unchanged.
 The new cases are not added to the existing six-variant fresh-install bootstrap matrix.
 See [ADR 0026](../decisions/0026-explicit-notebook-model-output.md).

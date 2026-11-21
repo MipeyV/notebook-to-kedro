@@ -60,3 +60,8 @@ examples/nested_financial/*/data/*
 !examples/nested_financial/*/data/duplicate.csv
 !examples/nested_financial/*/data/immature.csv
 !examples/nested_financial/*/data/invalid_target.csv
+!examples/model_reload/data/
+examples/model_reload/data/*
+!examples/model_reload/data/training.csv
+!examples/model_reload/data/empty.csv
+!examples/model_reload/data/probe.csv

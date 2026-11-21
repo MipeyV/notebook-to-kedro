@@ -1,0 +1,96 @@
+{
+  "fixtures": {
+    "empty": {
+      "path": "data/empty.csv",
+      "sha256": "9c6536d38fa37da58fac066342747e6d20fdace12ab5b287cf04506f2afe95b0"
+    },
+    "probe": {
+      "path": "data/probe.csv",
+      "sha256": "1c089f2c510877066e1f48819b7fefcc9831267aef29d71c8a14896dfba8ce0b"
+    },
+    "training": {
+      "path": "data/training.csv",
+      "sha256": "04789fc387a79d7461f01d22cfa55a1c019213f8c03595e2e6878c15be373de1"
+    }
+  },
+  "model_checks": [
+    {
+      "abs_tol": 0,
+      "expected": {
+        "data": [
+          0,
+          1
+        ],
+        "dtype": "int64",
+        "kind": "array"
+      },
+      "id": "reload-labels",
+      "input": {
+        "fixture": "probe",
+        "kind": "csv"
+      },
+      "method": "predict",
+      "rel_tol": 0,
+      "scenario": "baseline"
+    },
+    {
+      "abs_tol": 1e-12,
+      "expected": {
+        "data": [
+          [
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0
+          ]
+        ],
+        "dtype": "float64",
+        "kind": "array"
+      },
+      "id": "reload-probabilities",
+      "input": {
+        "fixture": "probe",
+        "kind": "csv"
+      },
+      "method": "predict_proba",
+      "rel_tol": 0,
+      "scenario": "baseline"
+    }
+  ],
+  "scenarios": [
+    {
+      "expected": {
+        "predictions": {
+          "data": [
+            0,
+            0,
+            1,
+            1
+          ],
+          "dtype": "int64",
+          "kind": "array"
+        }
+      },
+      "id": "baseline",
+      "inputs": {
+        "df": "training"
+      },
+      "parameters": {}
+    },
+    {
+      "id": "empty",
+      "inputs": {
+        "df": "empty"
+      },
+      "parameters": {},
+      "raises": {
+        "message": "",
+        "node": "task-0000",
+        "type": "AssertionError"
+      }
+    }
+  ],
+  "schema_version": "1.1"
+}

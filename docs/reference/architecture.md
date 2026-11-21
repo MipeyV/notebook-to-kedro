@@ -11,9 +11,11 @@ neither the local service nor the VS Code interface owns comparator or transform
 An optional [notebook model output](model-outputs.md) binds one explicitly selected latest leaf
 to versioned local PickleDataset storage. The shared renderer requires source accounting, emits
 a declaration manifest/guide and keeps business ASTs and default output unchanged. Generated
-regressions validate the storage declaration but still run in memory; model reload evidence is
-separate. No ML library is imported during analysis. See
-[ADR 0026](../decisions/0026-explicit-notebook-model-output.md).
+regressions validate the storage declaration and run in memory by default. Explicit notebook
+regression schema 1.1 additionally renders isolated storage/fresh-process prediction tests from
+supplied probes and oracles; declarations and later execution evidence remain distinct. No ML library is imported during analysis. See
+[ADR 0026](../decisions/0026-explicit-notebook-model-output.md) and
+[ADR 0027](../decisions/0027-generated-model-reload-checks.md).
 
 Status: implementation boundaries reviewed on 2026-11-19. The
 [proposed evolution](#proposed-evolution) is separate from current capabilities.

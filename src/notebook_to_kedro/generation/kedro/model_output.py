@@ -42,7 +42,7 @@ class ModelOutputBinding:
         )
         return "\n".join(lines) + "\n"
 
-    def files(self) -> dict[Path, str]:
+    def files(self, *, reload_checks: int = 0) -> dict[Path, str]:
         """Describe the declaration without claiming a saved/reloaded model exists."""
         manifest = {
             "schema_version": "1.0",
@@ -72,12 +72,26 @@ class ModelOutputBinding:
             "Only load self-produced, trusted pickle files: unpickling can execute code. "
             "Kedro owns version lookup/save behavior; no concurrent writer lock, transaction, "
             "partial-file cleanup or arbitrary-object serialization guarantee is added.\n\n"
-            "If supplied regression tests are generated, they verify the exact catalog "
-            "declaration but replace produced datasets with memory datasets in isolated "
-            "test workspaces. They do not save/reload this model or infer an object oracle. "
-            "Missing model expectations remain in `regression-coverage.json`. Validate reload "
-            "behavior and predictions separately before relying on an artifact.\n"
         )
+        if reload_checks:
+            manifest["generated_regressions_validate_storage"] = True
+            manifest["generated_model_reload_checks"] = reload_checks
+            guide += (
+                f"The supplied regression contract declares {reload_checks} model reload "
+                "checks. They train in isolated workspaces, save this model and compare "
+                "fresh-process predictions with supplied numeric oracles. Generation does "
+                "not run these checks; execution/reload statuses above remain not_run. "
+                "Calculation regressions still use memory datasets. Full-object expectations "
+                "and scientific acceptance remain separate gaps.\n"
+            )
+        else:
+            guide += (
+                "If supplied regression tests are generated, they verify the exact catalog "
+                "declaration but replace produced datasets with memory datasets in isolated "
+                "test workspaces. They do not save/reload this model or infer an object oracle. "
+                "Missing model expectations remain in `regression-coverage.json`. Validate reload "
+                "behavior and predictions separately before relying on an artifact.\n"
+            )
         return {
             Path("model-output.json"): json.dumps(manifest, sort_keys=True, indent=2) + "\n",
             Path("MODEL_OUTPUT.md"): guide,

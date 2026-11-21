@@ -151,7 +151,13 @@ def render_kedro_project(  # noqa: PLR0912, PLR0913
     if storage is not None:
         path = Path("conf/base/catalog.yml")
         files[path] = files.get(path, "") + storage.catalog_source()
-        files.update(storage.files())
+        files.update(
+            storage.files(
+                reload_checks=0
+                if regression_contract is None
+                else len(regression_contract.to_dict().get("model_checks", []))
+            )
+        )
     if plan.parameters:
         files[Path("conf/base/parameters.yml")] = _parameters(plan)
     if architecture_profile is not None:
