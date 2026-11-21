@@ -299,6 +299,10 @@ def _add_source_parsers(subparsers: argparse._SubParsersAction[argparse.Argument
         type=Path,
         help="explicit notebook regression expectations and CSV fixtures",
     )
+    generate_parser.add_argument(
+        "--model-output",
+        help="explicit source leaf symbol to save as a local versioned pickle model",
+    )
 
 
 def _add_workflow_parsers(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
@@ -619,11 +623,12 @@ def _generate(args: argparse.Namespace) -> int:
         package_name=args.package_name,
         architecture_profile=profile,
         source_facts=None
-        if args.regression_contract is None
+        if args.regression_contract is None and args.model_output is None
         else analyze_notebook_path(args.notebook, project_root=args.project_root),
         regression_contract=None
         if args.regression_contract is None
         else load_notebook_regression_contract(args.regression_contract),
+        model_output=args.model_output,
     )
     sys.stdout.write(f"Created Kedro project at `{args.output_dir}`\n")
     for path in created_files:

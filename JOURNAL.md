@@ -1,5 +1,22 @@
 # Development Journal
 
+## 2026-11-21 - Explicit persisted notebook model leaf
+
+Added one opt-in model_output identifier through notebook generation API, CLI and local settings.
+Original source facts and accounting remain mandatory. Binding uses the latest actual generated
+leaf, including rebound names/profiles, and rejects intermediate, ordering-consumed or reserved
+parameter datasets. Fixed local versioned PickleDataset storage uses the stdlib backend already
+available in the generated project dependencies; analysis imports no model/serializer library.
+
+Generation emits only catalog/declaration/guide text. Supplied tests verify the model catalog
+entry exactly but retain isolated memory outputs and unchanged missing-model oracles. Both
+nested financial models pass fitted-state/prediction reload under both profiles/runners, CLI
+version preservation, fresh-process reload and fresh-catalog collision checks. Their source,
+data, original settings, expectations and observation snapshots remain unchanged; optional
+project-model.json settings are reproducible. Matching-environment checks do not establish
+portable export, arbitrary serialization, scientific quality or fresh-install coverage of
+these larger models. See [ADR 0026](docs/decisions/0026-explicit-notebook-model-output.md).
+
 ## 2026-11-21 - Bounded fitted Pipeline alias guard
 
 Added SA009 to the recomputed source audit after the nested credit case exposed a source-success/

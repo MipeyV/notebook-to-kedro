@@ -13,6 +13,7 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from notebook_to_kedro.generation.kedro.generator import _PipelineEntry
+    from notebook_to_kedro.generation.kedro.model_output import ModelOutputBinding
     from notebook_to_kedro.generation.kedro.notebook_regression_contract import (
         NotebookRegressionContract,
     )
@@ -74,6 +75,7 @@ def render_notebook_regressions(  # noqa: PLR0913
     package_name: str,
     pipeline_name: str,
     source_sha256: str,
+    model_output: ModelOutputBinding | None = None,
 ) -> dict[Path, str]:
     """Render only supplied oracles; absent cases remain explicit generation-time gaps."""
     binding = _binding(plan, entries, names)
@@ -134,9 +136,24 @@ def render_notebook_regressions(  # noqa: PLR0913
         "package_name": package_name,
         "nodes_module": f"{package_name}.pipelines.{pipeline_name}.nodes",
     }
+    module = TEST_MODULE
+    if model_output is not None:
+        payload["model_output"] = {
+            "dataset": model_output.dataset,
+            "configuration": model_output.catalog_config(),
+        }
+        # A model-only catalog still needs validation when there are no CSV inputs.
+        module = module.replace(' if DATA[\n        "catalog"\n    ] else {}', "")
+        module = module.replace(
+            '    if config != DATA["catalog"]:\n',
+            '    storage = DATA["model_output"]\n'
+            '    if config.pop(storage["dataset"], None) != storage["configuration"]:\n'
+            '        raise ValueError("Regression model catalog declaration changed")\n'
+            '    if config != DATA["catalog"]:\n',
+        )
     files[Path("tests/regression_cases.json")] = (
         json.dumps(payload, indent=2, sort_keys=True) + "\n"
     )
-    compile(TEST_MODULE, "tests/test_notebook_regressions.py", "exec", dont_inherit=True)
-    files[Path("tests/test_notebook_regressions.py")] = TEST_MODULE
+    compile(module, "tests/test_notebook_regressions.py", "exec", dont_inherit=True)
+    files[Path("tests/test_notebook_regressions.py")] = module
     return files

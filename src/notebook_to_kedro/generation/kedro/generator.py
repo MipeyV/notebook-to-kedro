@@ -11,6 +11,7 @@ from textwrap import indent
 from typing import TYPE_CHECKING, cast
 
 from notebook_to_kedro.exceptions import ConversionPlanValidationError, ProjectGenerationError
+from notebook_to_kedro.generation.kedro.model_output import bind_model_output
 from notebook_to_kedro.generation.kedro.notebook_regression import render_notebook_regressions
 from notebook_to_kedro.generation.kedro.profiles import (
     DEFAULT_KEDRO_PROFILE,
@@ -66,6 +67,7 @@ def generate_kedro_project(  # noqa: PLR0913
     architecture_profile: KedroArchitectureProfile | None = None,
     source_facts: NotebookFacts | None = None,
     regression_contract: NotebookRegressionContract | None = None,
+    model_output: str | None = None,
 ) -> tuple[Path, ...]:
     """Validate, compile and publish a minimal project without executing source code."""
     files, copies = render_kedro_project(
@@ -74,6 +76,7 @@ def generate_kedro_project(  # noqa: PLR0913
         architecture_profile=architecture_profile,
         source_facts=source_facts,
         regression_contract=regression_contract,
+        model_output=model_output,
     )
     return write_project(Path(output_path), files, copies)
 
@@ -88,6 +91,7 @@ def render_kedro_project(  # noqa: PLR0912, PLR0913
     source_package_name: str | None = None,
     application_requirement: str | None = None,
     regression_contract: NotebookRegressionContract | None = None,
+    model_output: str | None = None,
 ) -> tuple[dict[Path, str], tuple[tuple[Path, Path], ...]]:
     """Validate and render shared Kedro scaffolding without publishing or executing it."""
     if source_facts is not None:
@@ -103,6 +107,17 @@ def render_kedro_project(  # noqa: PLR0912, PLR0913
             raise ProjectGenerationError("Source package name collides with the generated package")
     profile = DEFAULT_KEDRO_PROFILE if architecture_profile is None else architecture_profile
     node_names = None if architecture_profile is None else resolve_node_names(plan, profile)
+    storage = None
+    if model_output is not None:
+        if source_facts is None:
+            raise ProjectGenerationError("Model output persistence requires original source facts")
+        entries = _pipeline_entries(plan)
+        storage = bind_model_output(
+            model_output,
+            entries,
+            source_facts.notebook.content_sha256,
+            tuple(_ordering_inputs(entries, {} if order_after is None else order_after).values()),
+        )
 
     package_root = Path("src") / package_name
     pipeline_root = package_root / "pipelines" / profile.pipeline_name
@@ -133,6 +148,10 @@ def render_kedro_project(  # noqa: PLR0912, PLR0913
         raise ProjectGenerationError(f"Cannot render valid project Python: {error}") from error
     if plan.catalog_datasets:
         files[Path("conf/base/catalog.yml")] = _catalog(plan)
+    if storage is not None:
+        path = Path("conf/base/catalog.yml")
+        files[path] = files.get(path, "") + storage.catalog_source()
+        files.update(storage.files())
     if plan.parameters:
         files[Path("conf/base/parameters.yml")] = _parameters(plan)
     if architecture_profile is not None:
@@ -153,6 +172,7 @@ def render_kedro_project(  # noqa: PLR0912, PLR0913
                 package_name=package_name,
                 pipeline_name=profile.pipeline_name,
                 source_sha256=source_facts.notebook.content_sha256,
+                model_output=storage,
             )
         )
         if regression_contract.to_dict()["scenarios"]:

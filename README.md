@@ -97,6 +97,11 @@ nine-node cases retain original failure evidence. The fitted-alias layout is now
 [SA009](docs/reference/source-accounting.md#fitted-pipeline-aliases); temporal stacking retains
 its original source library error.
 
+An optional [model output declaration](docs/reference/model-outputs.md) now saves one final
+notebook output through the Kedro catalog. Use `--model-output fitted_model` or the examples
+`project-model.json` settings. Default generation stays memory-only; reload evidence is separate
+from the supplied calculation regressions.
+
 Optional [delivered notebook tests](docs/reference/generated-notebook-tests.md) use supplied
 expectations and SHA-pinned CSV fixtures via `generate --regression-contract`. The
 [three-node example](examples/procedural_regression/workflow.ipynb) ships five standalone

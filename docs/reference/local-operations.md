@@ -44,7 +44,10 @@ Required fields are `schema_version`, `project_root`, `source_kind` and `source`
 limited naming/organization contract. `source_kind` is exactly `notebook` or `functional`.
 Functional inspection accepts settings before `workflow_configuration` is defined. Planning
 and generation require it and report `LO001` before publication when it is missing.
-`regression_contract` is optional.
+`regression_contract` is optional. Notebook settings also accept an optional `model_output`
+source identifier for [one final persisted model leaf](model-outputs.md). It is not a path or
+serializer expression and is rejected for functional sources. Inspection does not bind or load
+a model; planning previews the real catalog/declaration files, and generation remains static.
 The notebook kind refuses functional workflow settings. Its optional `regression_contract`
 uses the separate [notebook regression schema](generated-notebook-tests.md), including pinned
 CSV fixtures and supplied typed observations. Inspection does not load that contract;

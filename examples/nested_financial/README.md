@@ -12,8 +12,11 @@ The original forest cases and their unfavorable results remain separate baseline
 
 Nesting remains inside the authored training node. The converter preserves source code and
 wiring; it does not flatten sklearn's internal estimators into separate Kedro nodes, infer
-their semantics or choose a model. The final `fitted_model` is an in-memory output. There is
-no durable estimator serializer or generated model-object comparator.
+their semantics or choose a model. By default, `fitted_model` remains an in-memory output.
+Optional [model persistence](../../docs/reference/model-outputs.md) selects that final leaf via
+`project-model.json` in either case directory or `--model-output fitted_model`. It adds local
+versioned pickle storage without inventing a model-object oracle. The original `project.json`
+settings, notebook code, data and regression expectations remain unchanged.
 
 ## Temporal fitting
 

@@ -32,6 +32,15 @@ for API/CLI/local and VS Code operations. Inspection does not read fixtures; pro
 previews the emitted tests without running them. Bare notebook `plan` remains a conversion
 report. Omitting the contract preserves the existing generated project output.
 
+## Optional persisted model output
+
+The separate [model output declaration](model-outputs.md) can accompany this test contract.
+For that opt-in only, the generated suite verifies the exact additional model catalog entry
+and removes it before constructing its isolated in-memory produced datasets. Other catalog
+changes remain errors. It creates no model files, infers no fitted-object oracle and retains
+all existing missing-expectation gaps. Persistence/reload checks are separate from these
+calculation regressions. Omitting model_output preserves the original test module/payload.
+
 ## Explicit contract
 
 `NotebookRegressionContract` and `load_notebook_regression_contract` are public API exports.

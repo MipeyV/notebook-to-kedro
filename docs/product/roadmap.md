@@ -90,7 +90,10 @@ authored working layouts. A subsequent [SA009 guard](../reference/source-account
 now refuses the external fitted-alias layout before publication, without changing memory policies
 or repairing source. The original failure record remains frozen; temporal stacking preserves its
 source library error. Next extend independent cases and broader alias evidence before extending
-support claims; estimator persistence and automatic model-graph inference remain separate work.
+support claims. An initial [model output declaration](../reference/model-outputs.md) now binds
+one latest notebook leaf to local versioned pickle storage, with separate reload checks. Further
+serializers, generated model/artifact comparators and automatic model-graph inference remain
+separate work.
 
 Source accounting and supported graph checks are implemented. E2 now has
 [functional inspection](../reference/functional-blocks.md) and a bounded

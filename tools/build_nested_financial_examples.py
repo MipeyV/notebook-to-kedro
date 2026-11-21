@@ -279,15 +279,17 @@ def build_files() -> dict[Path, str]:
             calibrated_folds=3 if case == "lapse_calibrated_vote" else 0,
         )
         files[root / "manifest.json"] = _json(manifest)
-        files[root / "project.json"] = _json(
-            {
-                "schema_version": "1.0",
-                "project_root": ".",
-                "source": "workflow.ipynb",
-                "source_kind": "notebook",
-                "package_name": case,
-                "regression_contract": "regression.json",
-            }
+        configuration = {
+            "schema_version": "1.0",
+            "project_root": ".",
+            "source": "workflow.ipynb",
+            "source_kind": "notebook",
+            "package_name": case,
+            "regression_contract": "regression.json",
+        }
+        files[root / "project.json"] = _json(configuration)
+        files[root / "project-model.json"] = _json(
+            {**configuration, "model_output": "fitted_model"}
         )
     return files
 

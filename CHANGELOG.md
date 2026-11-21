@@ -35,6 +35,12 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Added explicit notebook model_output selection through API, CLI and local settings. One latest
+  leaf binds to local versioned PickleDataset storage with source accounting, declaration metadata
+  and no source/parameter rewrite. Generated regressions validate the declaration but remain
+  memory-only; independent fitted-state, fresh-process reload and CLI/version checks cover the
+  two synthetic nested models. No engine dependency, inferred model type or default output changes.
+
 - Added two synthetic nested-estimator cases on unchanged financial portfolios: sklearn
   ColumnTransformer/Pipeline preprocessing, logistic regression and a temporally calibrated
   soft-voting ensemble. Fitted-state, probability, calendar-gap, CLI/shipped-test and component
