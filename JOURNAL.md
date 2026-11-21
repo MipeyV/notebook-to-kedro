@@ -1,5 +1,25 @@
 # Development Journal
 
+## 2026-11-22 - Measured installed financial-model journeys
+
+Added a fixed-case developer harness composing the existing local operations, measurement kit,
+model leaf and generated reload contract. Original nested credit/lapse sources, data, settings,
+expectations and observation snapshots remain unchanged. An explicit reference subprocess
+captures eight predetermined validation probes; this source-derived oracle is labelled separately
+from independent scientific expectations. No analysis dependency or transformation rule changes.
+
+Each profile variant uses a fresh wheel installation with seven known runtime versions matching
+the reference, an installed-package/no-converter probe and an empty source directory. Twelve
+delivered tests, ordinary CLI model saving, exact-version reload, wrong-oracle comparison failures
+and protected byte identities establish bounded runtime evidence. A separate CI job exercises
+the four journeys without changing the original six-variant bootstrap. Logs, partial batch states,
+runtime identities and machine timing scopes are retained; human effort and savings remain null.
+
+The first attempt retained a preparation failure caused by an invalid effort setup-mode label;
+it was corrected to reuse and subsequent attempts use new destinations. The selected Windows
+results are recorded separately from the original model observations. Generated guidance exposes
+the prepared settings to the VS Code interface but does not claim a timed UI/user trial.
+
 ## 2026-11-21 - Delivered persisted-model prediction checks
 
 Extended the notebook regression contract with optional schema 1.1 model_checks. Explicit

@@ -103,6 +103,15 @@ nine-node cases retain original failure evidence. The fitted-alias layout is now
 [SA009](docs/reference/source-accounting.md#fitted-pipeline-aliases); temporal stacking retains
 its original source library error.
 
+An opt-in [financial journey](docs/evaluation/nested-financial-models.md#measured-installation-journeys)
+now runs both nested models/profiles through measured configuration/preview/generation, fresh
+wheel installation, delivered tests and exact-version reload. It captures original-source
+validation references explicitly and retains human effort as unmeasured:
+
+```bash
+uv run python tools/check_financial_journey.py generated/financial-journey
+```
+
 An optional [model output declaration](docs/reference/model-outputs.md) now saves one final
 notebook output through the Kedro catalog. Use `--model-output fitted_model` or the examples
 `project-model.json` settings. Default generation stays memory-only; reload evidence is separate

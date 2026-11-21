@@ -110,6 +110,52 @@ jobs:
           if-no-files-found: warn
           retention-days: 14
 
+  financial-journey:
+    name: Financial model user journeys
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+        with:
+          version: ${{ env.UV_VERSION }}
+          enable-cache: true
+
+      - name: Install Python and matching locked reference runtime
+        run: uv sync --locked --python 3.12
+
+      - name: Verify both financial models under both naming profiles
+        run: uv run --python 3.12 python tools/check_financial_journey.py generated/financial-journey
+
+      - name: Preserve journey and timing evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: financial-model-journeys
+          path: |
+            generated/financial-journey/journey-summary.json
+            generated/financial-journey/*/evidence.json
+            generated/financial-journey/*/runtime.json
+            generated/financial-journey/*/01-inspect.json
+            generated/financial-journey/*/02-plan.json
+            generated/financial-journey/*/03-generate.json
+            generated/financial-journey/*/JOURNEY.md
+            generated/financial-journey/*/*.log
+            generated/financial-journey/*/*.xml
+            generated/financial-journey/*/capture/*
+            generated/financial-journey/*/runtime-constraints.txt
+            generated/financial-journey/*/workspace/project-journey.json
+            generated/financial-journey/*/workspace/regression-model.json
+            generated/financial-journey/*/workspace/model-probe.csv
+            generated/financial-journey/*/workspace/model-probe-reference.json
+            generated/financial-journey/*/attempts/*/*.json
+            generated/financial-journey/*/effort-comparison/*
+          if-no-files-found: warn
+          retention-days: 14
+
   quality:
     name: Quality and build
     runs-on: ubuntu-latest

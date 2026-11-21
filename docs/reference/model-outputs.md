@@ -97,3 +97,11 @@ now generates real storage/fresh-process prediction checks from supplied probes 
 The original financial contracts and their missing model-object oracles remain unchanged.
 The new cases are not added to the existing six-variant fresh-install bootstrap matrix.
 See [ADR 0026](../decisions/0026-explicit-notebook-model-output.md).
+
+The separate [financial journey](../evaluation/nested-financial-models.md#measured-installation-journeys)
+now generates prediction reload tests for both nested models under default/custom profiles and
+checks new installed wheels without source-tree fallback. It explicitly captures references from
+the original notebook on eight fixed validation positions, constrains seven known runtime package
+versions, and retains hashes, negative controls and machine timings. This does not supply a full
+model-state oracle or measured human savings. It runs in its own Python 3.12 CI job; the original
+six-variant bootstrap and historical financial observations remain unchanged.
