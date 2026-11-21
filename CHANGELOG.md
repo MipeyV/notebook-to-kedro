@@ -9,6 +9,12 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- Source accounting now blocks bounded fitted Pipeline component alias hazards with SA009
+  before publication. Source-ordered import/assignment bindings and actual proposed task
+  ownership distinguish external prototypes from local fitting/export and model-owned access.
+  No source repair, sklearn import, memory-policy change or general alias guarantee is added;
+  original financial corpus failure observations remain frozen.
+
 - Generated projects now include `conf/local` so default `kedro run` can load its environment.
   They declare Hatchling and explicit wheel package inclusion instead of relying on an implicit
   build backend, and select the CSV dataset extra instead of all pandas connectors.

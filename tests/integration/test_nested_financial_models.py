@@ -18,7 +18,6 @@ import pytest
 from kedro.config import OmegaConfigLoader
 from kedro.io import DataCatalog, MemoryDataset
 from kedro.runner import SequentialRunner, ThreadRunner
-from sklearn.exceptions import NotFittedError  # type: ignore[import-untyped]
 
 from notebook_to_kedro import (
     KedroArchitectureProfile,
@@ -28,6 +27,8 @@ from notebook_to_kedro import (
     load_notebook_regression_contract,
     plan_notebook_path,
 )
+from notebook_to_kedro.exceptions import ProjectGenerationError
+from notebook_to_kedro.semantic import plan_tasks
 
 if TYPE_CHECKING:
     from types import ModuleType
@@ -211,23 +212,29 @@ def test_nested_estimators_match_source_and_preserve_fitted_components(
 
 
 @pytest.mark.parametrize("custom", [False, True])
-def test_fitted_alias_is_a_runtime_boundary_not_static_completeness(
+def test_original_fitted_alias_source_succeeds_but_publication_is_now_blocked(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, *, custom: bool
 ) -> None:
-    package = f"nested_alias_{int(custom)}"
-    workspace, project = _prepare(
-        tmp_path, "credit_pipeline", package, custom=custom, filename="boundary_fitted_alias.ipynb"
-    )
+    workspace = tmp_path / "source"
+    shutil.copytree(EXAMPLES / "credit_pipeline", workspace)
     monkeypatch.chdir(workspace)
     reference = _reference(workspace, "boundary_fitted_alias.ipynb")
     assert reference["preprocessor"] is reference["model"].named_steps["preprocessing"]
     assert reference["feature_names"]
-    monkeypatch.syspath_prepend(str(project / "src"))
-    monkeypatch.chdir(project)
-    pipeline, catalog = _pipeline(project, package)
-    with pytest.raises(NotFittedError, match="ColumnTransformer"):
-        SequentialRunner().run(pipeline, catalog)
-    assert not catalog.exists("fitted_model")
+    path = workspace / "boundary_fitted_alias.ipynb"
+    facts = analyze_notebook_path(path)
+    plan = plan_notebook_path(path)
+    assert set(plan.blocking_diagnostic_codes) == {"SA009"}
+    profile = (
+        KedroArchitectureProfile("alias.example", "1.0.0", "training", "ml_") if custom else None
+    )
+    for index, candidate in enumerate((plan, plan_tasks(facts))):
+        project = tmp_path / f"blocked-{index}"
+        with pytest.raises(ProjectGenerationError, match="SA009"):
+            generate_kedro_project(
+                candidate, project, source_facts=facts, architecture_profile=profile
+            )
+        assert not project.exists()
 
 
 @pytest.mark.parametrize("custom", [False, True])

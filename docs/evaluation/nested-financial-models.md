@@ -8,6 +8,13 @@ commands and runtime boundaries. All datasets are byte-identical copies of the o
 synthetic banking/insurance portfolios; original notebooks and results are unchanged.
 No private financial-mdl data, external model provider or real portfolio is involved.
 
+Follow-up, 2026-11-21: the [SA009 guard](../reference/source-accounting.md#fitted-pipeline-aliases)
+now blocks the original fitted-alias layout before project publication. The source, data,
+regression files and measured snapshot below retain their original identities and observations.
+Current tests verify refusal through API, CLI and local operations while the working cases
+retain their runtime/CLI/component checks. The historical account below describes the earlier
+measurement, including the two then-statically-complete runtime boundaries.
+
 ## Acceptance and observations
 
 Two nine-cell notebooks exercise ColumnTransformer, nested preprocessing Pipelines, logistic
