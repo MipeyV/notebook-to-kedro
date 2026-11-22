@@ -1,5 +1,6 @@
 """Tests for deterministic assembly of semantic planning suggestions."""
 
+import ast
 from dataclasses import replace
 from pathlib import Path
 
@@ -125,7 +126,16 @@ def test_assemble_hybrid_plan_renames_parameters_and_records_review_notes(
     nodes = (
         output_path / "src" / "hybrid_project" / "pipelines" / "notebook_pipeline" / "nodes.py"
     ).read_text(encoding="utf-8")
-    assert "def prepare_customer_data(df, prepare_customer_data_drop_columns):" in nodes
+    function = next(
+        node
+        for node in ast.parse(nodes).body
+        if isinstance(node, ast.FunctionDef) and node.name == "prepare_customer_data"
+    )
+    assert [argument.arg for argument in function.args.args] == [
+        "df",
+        "prepare_customer_data_drop_columns",
+    ]
+    assert all(argument.annotation for argument in function.args.args)
     assert "columns=prepare_customer_data_drop_columns" in nodes
 
 

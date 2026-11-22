@@ -40,6 +40,12 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Generated node wrappers include Google-style documentation, quoted interface annotations,
+  provisional scalar parameter types and explicit `Any` gaps. Source instructions/assertions
+  stay unchanged; docstrings count assertions and identify the Python `-O` limitation.
+  Annotation imports avoid source/profile identifiers. Strict provider proposal validation
+  and the lower-level V1 reference renderer remain unchanged; no full typing guarantee is added.
+
 - VS Code extension 0.3.0 adds a read-only conversion/validation summary, supplied-test gaps,
   process timings and separate fixed financial journey evidence imports. Reported execution
   stays distinct from current-project validation and human savings. Invalid imports preserve

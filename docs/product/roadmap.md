@@ -19,6 +19,12 @@ session process timings and explicit imports of the fixed financial journey's de
 Imported run outcomes remain separate from current conversion validation; binding/authenticated
 runtime readiness, training-only time and prospective human-effort measurement remain open.
 
+Generated wrappers now expose Google-style documentation and provisional annotations through
+the shared renderer. Unknown types remain `Any`; scalar defaults supply review hints only.
+Source assertions remain faithful and documented. Explicit reviewed DataFrame/model interfaces,
+strict generated-project typing and a separate assertion-to-domain-exception refactor remain
+future work; adding metadata does not complete general project standardization.
+
 | Order | Deliverable | Dependencies and acceptance gate | Status |
 | --- | --- | --- | --- |
 | 0 | Preserve the existing conversion foundation | Deterministic notebook analysis/generation, safe publication and default/custom Kedro naming profiles. | Implemented; scope and evidence remain bounded. |

@@ -2,6 +2,13 @@
 
 [Documentation index](../README.md)
 
+The shared project renderer adds documented/annotated node interfaces around the unchanged
+deterministic source body. Google-style docstrings expose provenance and retained assertions;
+quoted types distinguish scalar configuration-default hints from unresolved `Any` interfaces.
+Private stdlib annotation imports avoid source/profile identifiers. No runtime type discovery,
+source assertion repair or provider acceptance change is introduced; see the
+[interface boundary](source-accounting.md#generated-node-documentation-and-annotations).
+
 The VS Code [summary presenter](../guides/vscode-extension.md#conversion-and-validation-summary)
 formats existing operation envelopes and generated regression/model declarations. It records
 extension-owned process elapsed time separately from engine operation measurements. An explicit

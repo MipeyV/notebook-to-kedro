@@ -1,5 +1,19 @@
 # Development Journal
 
+## 2026-11-22 - Documented generated node interfaces
+
+The interactive review identified undocumented/unannotated node wrappers and numerous source
+assertions. Added Google-style source/provenance/argument/output documentation, conditional
+AssertionError documentation, assertion counts and the optimization-mode limitation to the
+shared project renderer. Quoted annotations mark unknown runtime types as Any; scalar parameter
+defaults provide provisional hints only. Null/container defaults remain unknown. Private stdlib
+imports avoid generated source/profile names; no ML import, type discovery or dependency is added.
+
+The deterministic body/return and strict provider contracts remain unchanged. Tests compare
+instruction ASTs and original assertion failures, check optimized behavior and annotation
+resolution, and exercise profiles, collisions, future imports and literal-safe provenance.
+Precise reviewed DataFrame/model types and explicit domain-validation refactoring remain open.
+
 ## 2026-11-22 - Visible command feedback in VS Code
 
 The interactive user trial reported apparently inactive configuration/inspection commands.

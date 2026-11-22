@@ -53,7 +53,7 @@ def test_generate_kedro_project_writes_importable_reference_project(
     ).read_text(encoding="utf-8")
 
     assert "from sklearn.datasets import load_iris" in nodes_source
-    assert "def load_data():" in nodes_source
+    assert "def load_data() -> '_ntk_builtins.tuple[" in nodes_source
     assert "return iris, df" in nodes_source
     assert "columns=prepare_features_drop_columns" in nodes_source
     assert "test_size=split_data_test_size" in nodes_source
@@ -96,8 +96,9 @@ def test_generate_kedro_project_parameterizes_standard_scaler(tmp_path: Path) ->
 
     assert "from sklearn.preprocessing import StandardScaler" in nodes_source
     assert (
-        "def scale_features(X_train, X_test, scale_features_with_mean, scale_features_with_std):"
-        in (nodes_source)
+        "def scale_features(X_train: '_ntk_typing.Any', X_test: '_ntk_typing.Any', "
+        "scale_features_with_mean: '_ntk_builtins.bool', "
+        "scale_features_with_std: '_ntk_builtins.bool')" in (nodes_source)
     )
     assert (
         "StandardScaler(with_mean=scale_features_with_mean, with_std=scale_features_with_std)"

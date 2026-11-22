@@ -71,6 +71,11 @@ High-level notebook planning also performs [source accounting](docs/reference/so
 omitted or duplicated statements, changed task/import evidence and unsupported CSV relocation
 block generation. Unsupported standalone assertions/side-effect cells are reported for review.
 
+Generated node wrappers include Google-style docstrings and provisional type annotations.
+Unknown runtime types remain explicit `Any`; scalar parameter hints describe configured defaults.
+Source assertions stay intact and their optimization-mode limitation is documented. See the
+[generated interface boundary](docs/reference/source-accounting.md#generated-node-documentation-and-annotations).
+
 Apply a reusable [Kedro architecture profile](docs/guides/kedro-profiles.md) explicitly with
 `--architecture-profile examples/kedro_profiles/team_training.json` on both `plan` and `generate`.
 This initial schema configures the single pipeline's name and a function/node prefix, with
