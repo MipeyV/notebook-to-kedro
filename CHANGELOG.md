@@ -35,6 +35,12 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- VS Code extension 0.3.0 adds a read-only conversion/validation summary, supplied-test gaps,
+  process timings and separate fixed financial journey evidence imports. Reported execution
+  stays distinct from current-project validation and human savings. Invalid imports preserve
+  previous results; report read failures after publication retain generation success. Existing
+  engine operation schemas and static execution boundaries are unchanged.
+
 - Added an opt-in fixed financial-model journey combining measured local operations, exact
   file previews, fresh wheel installations, twelve delivered tests per variant, Kedro CLI,
   exact-version prediction reload and false-oracle rejection. Source-derived validation probes,

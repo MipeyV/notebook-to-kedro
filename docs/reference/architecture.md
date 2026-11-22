@@ -2,6 +2,13 @@
 
 [Documentation index](../README.md)
 
+The VS Code [summary presenter](../guides/vscode-extension.md#conversion-and-validation-summary)
+formats existing operation envelopes and generated regression/model declarations. It records
+extension-owned process elapsed time separately from engine operation measurements. An explicit
+bounded reader displays the fixed financial journey's reported execution results without
+authenticating them or binding them to the current project. Transformation/comparison rules,
+engine schema 1.0 and execution consent remain unchanged; importing JSON never runs its commands.
+
 The opt-in [notebook regression renderer](generated-notebook-tests.md) binds supplied fixtures
 and observations to the existing backend's dataset entries and resolved profile names.
 It requires source facts/accounting, emits compile-checked standalone tests through the shared

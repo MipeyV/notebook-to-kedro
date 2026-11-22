@@ -6,6 +6,7 @@ import * as vscode from "vscode";
 import type { Envelope, PreviewFile } from "../src/bridge";
 import type { ProjectController } from "../src/extension";
 import { checkConfigurationWizard } from "./setup-host";
+import { declaredJourney } from "./summary-fixture";
 
 export async function run(): Promise<void> {
   const root = process.env.NTK_TEST_WORKSPACE!;
@@ -155,6 +156,36 @@ export async function run(): Promise<void> {
   const preview = await command("preview");
   assert.equal(preview?.status, "planned");
   const file = (preview!.files as PreviewFile[]).find((item) => item.path.endsWith("nodes.py"))!;
+  const summary = await project.showSummary();
+  assert.ok(summary);
+  assert.match(summary.getText(), /Last recorded conversion/);
+  assert.match(summary.getText(), /Not run by the extension/);
+  assert.match(summary.getText(), /Session process timings/);
+  assert.match(summary.getText(), /plan: planned/);
+  const beforeTyping = summary.getText();
+  await vscode.commands.executeCommand("type", { text: "changed" });
+  assert.equal(summary.getText(), beforeTyping);
+  assert.equal(summary.isDirty, false);
+  const executionPath = path.join(root, "declared-evidence.json");
+  await fs.writeFile(executionPath, JSON.stringify(declaredJourney()), "utf8");
+  await command("importExecutionReport", vscode.Uri.file(executionPath));
+  const imported = await project.showSummary();
+  assert.match(imported!.getText(), /Reported passed/);
+  assert.match(
+    imported!.getText(),
+    /Not verified; importing does not validate the current project/,
+  );
+  assert.match(imported!.getText(), /Tests.*Not run by the extension/);
+  assert.equal(await fs.readFile(executionPath, "utf8"), JSON.stringify(declaredJourney()));
+  const malformed = path.join(root, "malformed-evidence.json");
+  await fs.writeFile(malformed, "{}", "utf8");
+  const importErrorDialog = mock.method(vscode.window, "showErrorMessage", async () => undefined);
+  try {
+    await command("importExecutionReport", vscode.Uri.file(malformed));
+    assert.equal((await project.showSummary())!.getText(), imported!.getText());
+  } finally {
+    importErrorDialog.mock.restore();
+  }
   const document = await project.openPreview(file);
   assert.equal(document.uri.scheme, "notebook-to-kedro-preview");
   assert.equal(document.getText(), file.content);
@@ -177,6 +208,11 @@ export async function run(): Promise<void> {
     const generated = await command("generate");
     assert.equal(generated?.status, "generated");
     assert.equal(generated?.execution_status, "not_run");
+    const publishedSummary = (await project.showSummary())!.getText();
+    assert.match(publishedSummary, /Published files/);
+    assert.match(publishedSummary, /Supplied regression report.*Available/);
+    assert.match(publishedSummary, /Installation.*Not checked/);
+    assert.match(publishedSummary, /generate: generated/);
     assert.equal(
       await fs.readFile(path.join(root, "generated/host-project", file.path), "utf8"),
       file.content,
@@ -187,6 +223,33 @@ export async function run(): Promise<void> {
     confirmation.mock.restore();
   }
 
+  const originalOpen = fs.open;
+  const readFailure = mock.method(fs, "open", async (...args: Parameters<typeof fs.open>) => {
+    if (String(args[0]).endsWith("regression-coverage.json"))
+      throw new Error("Simulated report read refusal");
+    return originalOpen(...args);
+  });
+  const repeatDestination = mock.method(
+    vscode.window,
+    "showInputBox",
+    async () => "generated/report-read-failure",
+  );
+  const repeatConfirmation = mock.method(
+    vscode.window,
+    "showWarningMessage",
+    async () => "Generate",
+  );
+  try {
+    const generated = await command("generate");
+    assert.equal(generated?.status, "generated");
+    assert.match((await project.showSummary())!.getText(), /Simulated report read refusal/);
+    assert.ok((await fs.stat(path.join(root, "generated/report-read-failure"))).isDirectory());
+  } finally {
+    readFailure.mock.restore();
+    repeatDestination.mock.restore();
+    repeatConfirmation.mock.restore();
+  }
+
   await command("selectConfiguration", vscode.Uri.file(path.join(root, "notebook.json")));
   assert.equal((await command("inspect"))?.status, "inspected");
   assert.equal((await command("preview"))?.status, "planned");
@@ -195,12 +258,46 @@ export async function run(): Promise<void> {
   const diagnostics = project.getChildren().find((item) => item.label.startsWith("Diagnostics"));
   assert.ok(diagnostics?.children?.length);
   assert.ok(project.getChildren().some((item) => item.label.includes("Inspection blocked")));
+  assert.match((await project.showSummary())!.getText(), /blocked/);
+
+  await command("selectPython", vscode.Uri.file(path.join(root, "missing-python")));
+  const expectedFailure = mock.method(vscode.window, "showErrorMessage", async () => undefined);
+  try {
+    await command("preview");
+    assert.match((await project.showSummary())!.getText(), /plan: failed/);
+    assert.match((await project.showSummary())!.getText(), /missing-python/);
+    assert.match((await project.showSummary())!.getText(), /No successful operation recorded/);
+  } finally {
+    expectedFailure.mock.restore();
+    await command("selectPython", vscode.Uri.file(python));
+  }
+  assert.equal(await project.showSummary(), undefined);
+  const canceledProgress = mock.method(
+    vscode.window,
+    "withProgress",
+    async (_options: any, task: any) => {
+      const cancellation = new vscode.CancellationTokenSource();
+      const pending = task({ report: () => undefined }, cancellation.token);
+      cancellation.cancel();
+      try {
+        return await pending;
+      } finally {
+        cancellation.dispose();
+      }
+    },
+  );
+  try {
+    await command("inspect");
+    assert.match((await project.showSummary())!.getText(), /inspect: canceled/);
+  } finally {
+    canceledProgress.mock.restore();
+  }
 
   await command("selectConfiguration", vscode.Uri.file(path.join(root, "project.json")));
   await command("preview");
   await vscode.commands.executeCommand("notebookToKedro.project.focus");
   console.log(
-    "Extension-host checks passed: activation, commands, inspection, preview, read-only document, canceled generation, confirmed generation, notebook and blocked diagnostics.",
+    "Extension-host checks passed: activation, commands, inspection, preview, read-only summary, separate imported execution evidence, failed report preservation, failed process timings, canceled/confirmed generation, post-publication report errors, notebook and blocked diagnostics.",
   );
   if (process.env.NTK_UI_REVIEW === "1") {
     await fs.writeFile(path.join(root, "ui-ready.txt"), "ready", "utf8");
