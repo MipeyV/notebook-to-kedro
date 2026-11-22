@@ -40,6 +40,13 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Optional source-bound notebook dataset type declarations apply finite scalar, pandas/NumPy
+  and sklearn annotations to producer/consumer signatures through API/CLI/local settings.
+  Stale hashes/unknown datasets/unsupported type expressions block publication. A declaration
+  report retains missing types and unverified runtime status; source bodies/assertions and
+  default output stay unchanged. The credit case adds a separate typed configuration with
+  28 authored declarations. No ML analysis dependency, runtime enforcement or schema inference.
+
 - Generated node wrappers include Google-style documentation, quoted interface annotations,
   provisional scalar parameter types and explicit `Any` gaps. Source instructions/assertions
   stay unchanged; docstrings count assertions and identify the Python `-O` limitation.

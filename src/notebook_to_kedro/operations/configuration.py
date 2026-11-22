@@ -19,6 +19,7 @@ _OPTIONAL = frozenset(
         "architecture_profile",
         "regression_contract",
         "model_output",
+        "node_types",
     }
 )
 
@@ -49,6 +50,7 @@ class LocalProjectConfiguration:
     regression_contract: Path | None = None
     schema_version: str = "1.0"
     model_output: str | None = None
+    node_types: Path | None = None
 
     def __post_init__(self) -> None:
         """Validate direct API settings as well as loaded JSON."""
@@ -82,12 +84,15 @@ class LocalProjectConfiguration:
             raise LocalOperationError(
                 "LO001", "model_output requires a notebook source and a Python identifier"
             )
+        if self.node_types is not None and self.source_kind != "notebook":
+            raise LocalOperationError("LO001", "node_types currently requires a notebook source")
         object.__setattr__(self, "project_root", root)
         for field in (
             "source",
             "workflow_configuration",
             "architecture_profile",
             "regression_contract",
+            "node_types",
         ):
             value = getattr(self, field)
             if value is not None:
@@ -106,7 +111,12 @@ class LocalProjectConfiguration:
         }
         if self.model_output is not None:
             data["model_output"] = self.model_output
-        for field in ("workflow_configuration", "architecture_profile", "regression_contract"):
+        for field in (
+            "workflow_configuration",
+            "architecture_profile",
+            "regression_contract",
+            "node_types",
+        ):
             value = getattr(self, field)
             if value is not None:
                 data[field] = value.relative_to(self.project_root).as_posix()
@@ -166,7 +176,12 @@ def load_local_project_configuration(path: str | Path) -> LocalProjectConfigurat
             model_output=data.get("model_output"),
             **{
                 key: _relative_file(data[key])
-                for key in ("workflow_configuration", "architecture_profile", "regression_contract")
+                for key in (
+                    "workflow_configuration",
+                    "architecture_profile",
+                    "regression_contract",
+                    "node_types",
+                )
                 if key in data
             },
         )

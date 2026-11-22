@@ -76,6 +76,12 @@ Unknown runtime types remain explicit `Any`; scalar parameter hints describe con
 Source assertions stay intact and their optimization-mode limitation is documented. See the
 [generated interface boundary](docs/reference/source-accounting.md#generated-node-documentation-and-annotations).
 
+An optional [dataset type declaration](docs/reference/node-types.md) supplies reviewed scalar,
+pandas/NumPy and sklearn interface types instead of `Any`. It binds to the notebook hash and
+actual dataset versions, preserves source bodies and reports missing types separately from
+runtime validation. Preview the credit example with `project plan` and
+`examples/nested_financial/credit_pipeline/project-typed.json`.
+
 Apply a reusable [Kedro architecture profile](docs/guides/kedro-profiles.md) explicitly with
 `--architecture-profile examples/kedro_profiles/team_training.json` on both `plan` and `generate`.
 This initial schema configures the single pipeline's name and a function/node prefix, with

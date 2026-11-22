@@ -16,6 +16,7 @@ from notebook_to_kedro.generation.kedro.node_documentation import (
     annotation_namespace,
     document_node,
 )
+from notebook_to_kedro.generation.kedro.node_types import NotebookTypeContract
 from notebook_to_kedro.generation.kedro.notebook_regression import render_notebook_regressions
 from notebook_to_kedro.generation.kedro.profiles import (
     DEFAULT_KEDRO_PROFILE,
@@ -72,6 +73,7 @@ def generate_kedro_project(  # noqa: PLR0913
     source_facts: NotebookFacts | None = None,
     regression_contract: NotebookRegressionContract | None = None,
     model_output: str | None = None,
+    node_types: NotebookTypeContract | None = None,
 ) -> tuple[Path, ...]:
     """Validate, compile and publish a minimal project without executing source code."""
     files, copies = render_kedro_project(
@@ -81,6 +83,7 @@ def generate_kedro_project(  # noqa: PLR0913
         source_facts=source_facts,
         regression_contract=regression_contract,
         model_output=model_output,
+        node_types=node_types,
     )
     return write_project(Path(output_path), files, copies)
 
@@ -96,6 +99,7 @@ def render_kedro_project(  # noqa: PLR0912, PLR0913
     application_requirement: str | None = None,
     regression_contract: NotebookRegressionContract | None = None,
     model_output: str | None = None,
+    node_types: NotebookTypeContract | None = None,
 ) -> tuple[dict[Path, str], tuple[tuple[Path, Path], ...]]:
     """Validate and render shared Kedro scaffolding without publishing or executing it."""
     if source_facts is not None:
@@ -111,6 +115,7 @@ def render_kedro_project(  # noqa: PLR0912, PLR0913
             raise ProjectGenerationError("Source package name collides with the generated package")
     profile = DEFAULT_KEDRO_PROFILE if architecture_profile is None else architecture_profile
     node_names = None if architecture_profile is None else resolve_node_names(plan, profile)
+    type_manifest = _node_type_manifest(plan, node_types, source_facts)
     storage = None
     if model_output is not None:
         if source_facts is None:
@@ -144,12 +149,14 @@ def render_kedro_project(  # noqa: PLR0912, PLR0913
         ),
     }
     try:
-        files[pipeline_root / "nodes.py"] = _nodes(plan, node_names)
+        files[pipeline_root / "nodes.py"] = _nodes(plan, node_names, node_types)
         for path, content in files.items():
             if path.suffix == ".py":
                 compile(content, path.as_posix(), "exec", dont_inherit=True)
     except (SyntaxError, ValueError) as error:
         raise ProjectGenerationError(f"Cannot render valid project Python: {error}") from error
+    if type_manifest is not None:
+        files[Path("node-types.json")] = type_manifest
     if plan.catalog_datasets:
         files[Path("conf/base/catalog.yml")] = _catalog(plan)
     if storage is not None:
@@ -266,24 +273,57 @@ __all__ = ["create_pipeline"]
 '''
 
 
-def _nodes(plan: ConversionPlan, node_names: Mapping[str, str] | None = None) -> str:
+def _node_type_manifest(
+    plan: ConversionPlan, contract: NotebookTypeContract | None, facts: NotebookFacts | None
+) -> str | None:
+    if contract is None:
+        return None
+    if not isinstance(contract, NotebookTypeContract) or facts is None:
+        raise ProjectGenerationError("Node types require a contract and original source facts")
+    return contract.bind(facts.notebook.content_sha256, _pipeline_entries(plan))
+
+
+def _nodes(
+    plan: ConversionPlan,
+    node_names: Mapping[str, str] | None = None,
+    node_types: NotebookTypeContract | None = None,
+) -> str:
     functions = [
         render_node_function(
             task, function_name=None if node_names is None else node_names[task.id]
         )
         for task in plan.task_candidates
     ]
-    namespace = annotation_namespace("\n".join([*plan.imports, *functions]))
+    namespace = annotation_namespace(
+        "\n".join([*plan.imports, *functions]),
+        () if node_types is None else node_types.modules,
+    )
     sections = [
         '"""Source-preserving nodes with provisional types; review Any and parameter hints."""',
         *plan.imports,
         f"import builtins as {namespace}_builtins",
         f"import typing as {namespace}_typing",
+        *(() if node_types is None else node_types.imports(namespace)),
     ]
     parameters = {parameter.name: parameter for parameter in plan.parameters}
+    entries = _pipeline_entries(plan)
     sections.extend(
-        document_node(code, task, parameters, namespace)
-        for task, code in zip(plan.task_candidates, functions, strict=True)
+        document_node(
+            code,
+            entry.task,
+            parameters,
+            namespace,
+            input_types=None
+            if node_types is None
+            else {
+                argument: node_types.annotation(dataset, namespace)
+                for argument, dataset in entry.inputs.items()
+            },
+            output_types=None
+            if node_types is None
+            else tuple(node_types.annotation(dataset, namespace) for dataset in entry.outputs),
+        )
+        for entry, code in zip(entries, functions, strict=True)
     )
     return "\n\n".join(section for section in sections if section).rstrip() + "\n"
 

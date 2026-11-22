@@ -9,6 +9,13 @@ Private stdlib annotation imports avoid source/profile identifiers. No runtime t
 source assertion repair or provider acceptance change is introduced; see the
 [interface boundary](source-accounting.md#generated-node-documentation-and-annotations).
 
+Optional [notebook dataset types](node-types.md) are explicit declarations outside source facts.
+Source/hash and graph validation bind finite types to existing dataset identities; the shared
+renderer applies them to producer/consumer interfaces and records untyped gaps. API/CLI/local
+operations share this path; the UI owns no type rules. Runtime imports are fixed; analysis has
+no new dependency or ML imports. Runtime values/schemas are not certified. See
+[ADR 0028](../decisions/0028-explicit-notebook-types.md).
+
 The VS Code [summary presenter](../guides/vscode-extension.md#conversion-and-validation-summary)
 formats existing operation envelopes and generated regression/model declarations. It records
 extension-owned process elapsed time separately from engine operation measurements. An explicit

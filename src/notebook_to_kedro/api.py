@@ -12,6 +12,10 @@ from notebook_to_kedro.generation.kedro.functional import (
     generate_functional_kedro_project,
     plan_functional_workflow_path,
 )
+from notebook_to_kedro.generation.kedro.node_types import (
+    NotebookTypeContract,
+    load_notebook_type_contract,
+)
 from notebook_to_kedro.generation.kedro.notebook_regression_contract import (
     NotebookRegressionContract,
     load_notebook_regression_contract,
@@ -133,6 +137,7 @@ __all__ = [
     "FunctionalWorkflowConfiguration",
     "KedroArchitectureProfile",
     "NotebookRegressionContract",
+    "NotebookTypeContract",
     "SharedDataPolicy",
     "WorkflowCall",
     "WorkflowPreparationDefinition",
@@ -147,6 +152,7 @@ __all__ = [
     "load_functional_workflow_configuration",
     "load_kedro_profile",
     "load_notebook_regression_contract",
+    "load_notebook_type_contract",
     "load_workflow_preparation_definition",
     "load_workflow_regression_contract",
     "plan_functional_workflow_path",

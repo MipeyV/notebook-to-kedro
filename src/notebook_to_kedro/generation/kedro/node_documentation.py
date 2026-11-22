@@ -12,20 +12,23 @@ if TYPE_CHECKING:
     from notebook_to_kedro.ir import ParameterValue, TaskCandidate
 
 
-def annotation_namespace(source: str) -> str:
+def annotation_namespace(source: str, modules: tuple[str, ...] = ()) -> str:
     """Choose private annotation imports absent from all generated source identifiers."""
     names = set(re.findall(r"\w+", source))
     prefix = "_ntk"
-    while {f"{prefix}_typing", f"{prefix}_builtins"} & names:
+    while {f"{prefix}_{module}" for module in ("typing", "builtins", *modules)} & names:
         prefix += "_"
     return prefix
 
 
-def document_node(
+def document_node(  # noqa: PLR0913
     code: str,
     task: TaskCandidate,
     parameters: Mapping[str, ParameterValue],
     namespace: str,
+    *,
+    input_types: Mapping[str, str | None] | None = None,
+    output_types: tuple[str | None, ...] | None = None,
 ) -> str:
     """Add Google-style documentation and explicitly provisional interface annotations."""
     tree = ast.parse(code)
@@ -35,6 +38,10 @@ def document_node(
     unknown = f"{namespace}_typing.Any"
     hints = dict.fromkeys(task.inputs, unknown)
     descriptions = dict.fromkeys(task.inputs, "Source input; runtime type requires review.")
+    for name, annotation in ({} if input_types is None else input_types).items():
+        if annotation is not None:
+            hints[name] = annotation
+            descriptions[name] = "Explicitly declared dataset type; runtime validation not run."
     for name in task.parameters:
         parameter = parameters[name]
         argument = name.replace(".", "_")
@@ -47,11 +54,15 @@ def document_node(
         )
         descriptions[argument] = f"Kedro parameter {name}; annotation based on its default."
 
-    result = unknown
+    outputs = tuple(
+        unknown if annotation is None else annotation
+        for annotation in ((None,) * len(task.outputs) if output_types is None else output_types)
+    )
+    result = unknown if not outputs else outputs[0]
     if not task.outputs:
         result = "None"
     elif len(task.outputs) > 1:
-        result = f"{namespace}_builtins.tuple[{', '.join([unknown] * len(task.outputs))}]"
+        result = f"{namespace}_builtins.tuple[{', '.join(outputs)}]"
     arguments = ", ".join(f"{name}: {hint!r}" for name, hint in hints.items())
     lines = [f"Run source task {task.id}.", ""]
     if hints:
@@ -59,6 +70,13 @@ def document_node(
     display_result = result.replace(f"{namespace}_typing.", "").replace(
         f"{namespace}_builtins.", ""
     )
+    for module, display in (
+        ("pandas", "pandas"),
+        ("numpy", "numpy"),
+        ("sklearn_pipeline", "sklearn.pipeline"),
+        ("sklearn_base", "sklearn.base"),
+    ):
+        display_result = display_result.replace(f"{namespace}_{module}.", f"{display}.")
     lines.extend(
         [
             "Returns:",
@@ -85,6 +103,8 @@ def document_node(
             "    Other source/library exceptions propagate unchanged.",
         ]
     )
+    if input_types is not None:
+        lines.append("    Explicit dataset types are declarations, not verified runtime contracts.")
     # Unparse only the documentation literal, leaving every source instruction untouched.
     literal = ast.unparse(
         ast.Module(

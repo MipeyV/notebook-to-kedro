@@ -53,6 +53,13 @@ claim that the delivered project passes strict type checking. Source-owned modul
 existing annotations/docstrings remain unchanged. Private standard-library annotation imports
 avoid identifiers already present in the rendered source and profile names.
 
+An optional [explicit notebook type contract](node-types.md) replaces selected dataset gaps
+with operator-declared scalar, pandas/NumPy or sklearn types. It requires original source
+facts, a matching notebook hash and current dataset membership. Annotations follow actual
+producer/consumer bindings, including versioned redefinitions. Added runtime imports are fixed;
+analysis still imports no ML libraries. The declaration report retains untyped gaps and
+unverified runtime status; neither declarations nor annotations establish actual value types.
+
 Assertions in business nodes are copied from the source, including conditions, messages and
 order. Their docstrings identify `AssertionError` and warn that Python `-O` disables them.
 Other source/library exceptions propagate. Replacing a source assertion with an explicit

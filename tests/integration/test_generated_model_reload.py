@@ -13,6 +13,7 @@ import pytest
 
 from notebook_to_kedro import (
     KedroArchitectureProfile,
+    NotebookTypeContract,
     analyze_notebook_path,
     generate_kedro_project,
     load_notebook_regression_contract,
@@ -24,7 +25,12 @@ pytestmark = pytest.mark.integration
 
 
 def _project(
-    tmp_path: Path, *, custom: bool = False, nested: bool = False, no_csv: bool = False
+    tmp_path: Path,
+    *,
+    custom: bool = False,
+    nested: bool = False,
+    no_csv: bool = False,
+    typed: bool = False,
 ) -> Path:
     workspace = tmp_path / "workspace"
     shutil.copytree(ROOT / "examples/model_reload", workspace)
@@ -69,14 +75,28 @@ def _project(
         KedroArchitectureProfile("reload.example", "1.0.0", "training", "ml_") if custom else None
     )
     with chdir(workspace):
+        facts = analyze_notebook_path(source)
         generate_kedro_project(
             plan_notebook_path(source),
             project,
-            source_facts=analyze_notebook_path(source),
+            source_facts=facts,
             package_name="reload_example",
             architecture_profile=profile,
             model_output="fitted_model",
             regression_contract=load_notebook_regression_contract(workspace / "regression.json"),
+            node_types=None
+            if not typed
+            else NotebookTypeContract(
+                facts.notebook.content_sha256,
+                (
+                    ("df", "pandas.DataFrame"),
+                    ("X", "pandas.DataFrame"),
+                    ("y", "pandas.Series"),
+                    ("model", "sklearn.pipeline.Pipeline"),
+                    ("fitted_model", "sklearn.pipeline.Pipeline"),
+                    ("predictions", "numpy.ndarray"),
+                ),
+            ),
         )
     return project
 
@@ -118,6 +138,20 @@ def test_model_only_catalog_and_frame_probes_have_a_working_delivered_suite(tmp_
     assert result.returncode == 0, result.stdout + result.stderr
     assert "3 passed" in result.stdout
     assert not (project / "data/06_models").exists()
+
+
+@pytest.mark.parametrize("custom", [False, True])
+def test_explicit_types_preserve_delivered_pipeline_and_fresh_model_reload(
+    tmp_path: Path, *, custom: bool
+) -> None:
+    project = _project(tmp_path, custom=custom, nested=True, typed=True)
+    result = _run(project, tmp_path)
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert "4 passed" in result.stdout
+    report = json.loads((project / "node-types.json").read_text(encoding="utf-8"))
+    assert not report["untyped_datasets"]
+    # External test execution never rewrites the generation-time declaration status.
+    assert report["runtime_type_validation"] == "not_run"
 
 
 _WRONG_MODEL = """import copy

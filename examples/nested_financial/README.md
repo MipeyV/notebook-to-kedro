@@ -18,6 +18,14 @@ Optional [model persistence](../../docs/reference/model-outputs.md) selects that
 versioned pickle storage without inventing a model-object oracle. The original `project.json`
 settings, notebook code, data and regression expectations remain unchanged.
 
+The credit case also supplies opt-in `project-typed.json` and `node-types.contract.json` with
+28 explicitly authored scalar, DataFrame/Series, array and estimator declarations. Preview it
+with `notebook-to-kedro project plan examples/nested_financial/credit_pipeline/project-typed.json`.
+The notebook hash binds declarations to the unchanged source; generated `node-types.json`
+retains untyped gaps and does not certify runtime values, schemas or model fitted state.
+See the [type contract](../../docs/reference/node-types.md). Original experiment observations
+and model-object/prediction oracle gaps are not changed by these annotations.
+
 ## Temporal fitting
 
 Both workflows train on 2018-2020, select a decision threshold on 2022 and score 2024, retaining

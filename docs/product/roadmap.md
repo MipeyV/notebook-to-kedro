@@ -21,9 +21,11 @@ runtime readiness, training-only time and prospective human-effort measurement r
 
 Generated wrappers now expose Google-style documentation and provisional annotations through
 the shared renderer. Unknown types remain `Any`; scalar defaults supply review hints only.
-Source assertions remain faithful and documented. Explicit reviewed DataFrame/model interfaces,
-strict generated-project typing and a separate assertion-to-domain-exception refactor remain
-future work; adding metadata does not complete general project standardization.
+Source assertions remain faithful and documented. Opt-in source-bound notebook dataset
+declarations now supply finite DataFrame/array/model/scalar interface types and preserve
+untyped gaps separately from runtime validation. Rich schemas, functional type declarations,
+strict generated-project typing, runtime enforcement and a separate assertion-to-domain-exception
+refactor remain future work; adding annotations does not complete general project standardization.
 
 | Order | Deliverable | Dependencies and acceptance gate | Status |
 | --- | --- | --- | --- |
