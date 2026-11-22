@@ -11,13 +11,26 @@ import { declaredJourney } from "./summary-fixture";
 export async function run(): Promise<void> {
   const root = process.env.NTK_TEST_WORKSPACE!;
   const python = process.env.NTK_TEST_PYTHON!;
+  if (process.env.NTK_TEST_EMPTY_WINDOW === "1")
+    assert.equal(vscode.workspace.workspaceFolders, undefined);
   assert.ok(root && python, "The host test requires a private workspace and an engine interpreter");
   const extension = vscode.extensions.getExtension<ProjectController>("mipeyv.notebook-to-kedro");
   assert.ok(extension, "Extension must be discoverable through its real manifest");
-  const project = await extension.activate();
   const command = async (name: string, ...args: unknown[]) =>
     vscode.commands.executeCommand<Envelope | undefined>(`notebookToKedro.${name}`, ...args);
+  await vscode.commands.executeCommand("workbench.action.closeSidebar");
   await command("selectConfiguration", vscode.Uri.file(path.join(root, "project.json")));
+  assert.equal(
+    extension.isActive,
+    true,
+    "Selecting configuration must activate the installed commands",
+  );
+  const project = extension.exports;
+  const visibleDeadline = Date.now() + 5000;
+  while (!project.isViewVisible && Date.now() < visibleDeadline)
+    await new Promise((resolve) => setTimeout(resolve, 25));
+  assert.equal(project.isViewVisible, true, "Selecting configuration must reveal the results view");
+  assert.ok(project.getChildren().some((item) => item.label === "Configuration selected"));
   await command("selectPython", vscode.Uri.file(python));
   await checkConfigurationWizard(root);
   // Unexpected engine errors must fail the host test instead of waiting for a dialog dismissal.
@@ -27,6 +40,7 @@ export async function run(): Promise<void> {
   await command("selectConfiguration", vscode.Uri.file(path.join(root, "project.json")));
   const inspection = await command("inspect");
   assert.equal(inspection?.status, "inspected");
+  assert.match(vscode.window.activeTextEditor!.document.getText(), /inspect: inspected/);
   await command("selectConfiguration", vscode.Uri.file(path.join(root, "expression-returns.json")));
   const expressions = await command("inspect");
   assert.equal(expressions?.schema_version, "1.0");
@@ -155,6 +169,7 @@ export async function run(): Promise<void> {
   assert.ok(project.getChildren().some((item) => item.label === "Source"));
   const preview = await command("preview");
   assert.equal(preview?.status, "planned");
+  assert.match(vscode.window.activeTextEditor!.document.getText(), /plan: planned/);
   const file = (preview!.files as PreviewFile[]).find((item) => item.path.endsWith("nodes.py"))!;
   const summary = await project.showSummary();
   assert.ok(summary);
@@ -207,6 +222,7 @@ export async function run(): Promise<void> {
     confirmation.mock.mockImplementation(async () => "Generate");
     const generated = await command("generate");
     assert.equal(generated?.status, "generated");
+    assert.match(vscode.window.activeTextEditor!.document.getText(), /Published files/);
     assert.equal(generated?.execution_status, "not_run");
     const publishedSummary = (await project.showSummary())!.getText();
     assert.match(publishedSummary, /Published files/);
@@ -249,6 +265,29 @@ export async function run(): Promise<void> {
     repeatDestination.mock.restore();
     repeatConfirmation.mock.restore();
   }
+
+  const displayDestination = mock.method(
+    vscode.window,
+    "showInputBox",
+    async () => "generated/display-failure",
+  );
+  const displayConfirmation = mock.method(
+    vscode.window,
+    "showWarningMessage",
+    async () => "Generate",
+  );
+  const failedDisplay = mock.method(project, "showSummary", async () => {
+    throw new Error("Simulated editor display failure");
+  });
+  try {
+    assert.equal((await command("generate"))?.status, "generated");
+    assert.ok((await fs.stat(path.join(root, "generated/display-failure"))).isDirectory());
+  } finally {
+    failedDisplay.mock.restore();
+    displayDestination.mock.restore();
+    displayConfirmation.mock.restore();
+  }
+  assert.match((await project.showSummary())!.getText(), /Published files/);
 
   await command("selectConfiguration", vscode.Uri.file(path.join(root, "notebook.json")));
   assert.equal((await command("inspect"))?.status, "inspected");
@@ -298,6 +337,9 @@ export async function run(): Promise<void> {
   await vscode.commands.executeCommand("notebookToKedro.project.focus");
   console.log(
     "Extension-host checks passed: activation, commands, inspection, preview, read-only summary, separate imported execution evidence, failed report preservation, failed process timings, canceled/confirmed generation, post-publication report errors, notebook and blocked diagnostics.",
+  );
+  console.log(
+    `Visible feedback checks passed; mode=${process.env.NTK_TEST_EMPTY_WINDOW === "1" ? "empty-window" : "folder"}`,
   );
   if (process.env.NTK_UI_REVIEW === "1") {
     await fs.writeFile(path.join(root, "ui-ready.txt"), "ready", "utf8");

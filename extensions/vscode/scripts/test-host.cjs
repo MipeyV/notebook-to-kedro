@@ -145,19 +145,29 @@ async function main() {
       regression_contract: undefined,
     }),
   );
+  let extensionPath = path.resolve(__dirname, "..");
+  let testsPath = path.resolve(__dirname, "../dist/test/host.js");
+  if (process.env.NTK_TEST_EXTENSION_PATH) {
+    extensionPath = path.join(workspace, "extension-under-test");
+    await fs.cp(process.env.NTK_TEST_EXTENSION_PATH, extensionPath, { recursive: true });
+    await fs.cp(path.resolve(__dirname, "../dist/test"), path.join(extensionPath, "dist/test"), {
+      recursive: true,
+    });
+    testsPath = path.join(extensionPath, "dist/test/host.js");
+  }
   await runTests({
     version: "1.145.3",
     vscodeExecutablePath: process.env.VSCODE_EXECUTABLE_PATH,
-    extensionDevelopmentPath: path.resolve(__dirname, ".."),
-    extensionTestsPath: path.resolve(__dirname, "../dist/test/host.js"),
+    extensionDevelopmentPath: extensionPath,
+    extensionTestsPath: testsPath,
     launchArgs: [
-      workspace,
+      ...(process.env.NTK_TEST_EMPTY_WINDOW === "1" ? [] : [workspace]),
       "--user-data-dir",
       path.join(workspace, "user-data"),
       "--extensions-dir",
       path.join(workspace, "extensions"),
       "--disable-extensions",
-      "--disable-workspace-trust",
+      ...(process.env.NTK_TEST_EMPTY_WINDOW === "1" ? [] : ["--disable-workspace-trust"]),
       "--skip-welcome",
       "--skip-release-notes",
       "--disable-gpu",
@@ -167,6 +177,7 @@ async function main() {
       NTK_TEST_WORKSPACE: workspace,
       NTK_TEST_PYTHON: process.env.NTK_TEST_PYTHON,
       NTK_UI_REVIEW: process.env.NTK_UI_REVIEW,
+      NTK_TEST_EMPTY_WINDOW: process.env.NTK_TEST_EMPTY_WINDOW,
     },
   });
   console.log(`Host test workspace: ${workspace}`);

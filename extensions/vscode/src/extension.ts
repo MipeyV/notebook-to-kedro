@@ -39,6 +39,7 @@ export class ProjectController
   private artifactErrors: string[] = [];
   private timings: OperationTiming[] = [];
   private evidence?: ImportedEvidence;
+  private readonly view: vscode.TreeView<Entry>;
 
   constructor(
     private readonly context: vscode.ExtensionContext,
@@ -47,6 +48,12 @@ export class ProjectController
     const saved = context.workspaceState.get<string>("configuration");
     if (saved) this.configuration = vscode.Uri.file(saved);
     context.subscriptions.push(this.changed);
+    this.view = vscode.window.createTreeView("notebookToKedro.project", { treeDataProvider: this });
+    context.subscriptions.push(this.view);
+  }
+
+  get isViewVisible(): boolean {
+    return this.view.visible;
   }
 
   private scope(): vscode.Uri | undefined {
@@ -99,6 +106,9 @@ export class ProjectController
     this.configuration = selected;
     await this.context.workspaceState.update("configuration", selected.fsPath);
     this.reset();
+    this.status = "Configuration selected";
+    this.changed.fire(undefined);
+    await this.presentResult(false);
   }
 
   async selectPython(uri?: vscode.Uri): Promise<void> {
@@ -162,6 +172,7 @@ export class ProjectController
       await vscode.commands.executeCommand("setContext", "notebookToKedro.hasResult", true);
       await vscode.commands.executeCommand("setContext", "notebookToKedro.hasSummary", true);
       this.changed.fire(undefined);
+      await this.presentResult(false);
       await vscode.window.showTextDocument(await vscode.workspace.openTextDocument(created.uri));
       return created.inspection;
     } finally {
@@ -267,7 +278,7 @@ export class ProjectController
     this.status = operation === "inspect" ? "Inspecting source…" : "Preparing file preview…";
     this.changed.fire(undefined);
     try {
-      return await vscode.window.withProgress(
+      const result = await vscode.window.withProgress(
         {
           location: vscode.ProgressLocation.Notification,
           title: this.status,
@@ -283,6 +294,8 @@ export class ProjectController
           }
         },
       );
+      await this.presentResult(true);
+      return result;
     } finally {
       this.busy = false;
       this.changed.fire(undefined);
@@ -335,10 +348,25 @@ export class ProjectController
         () => this.request("generate", undefined, destination),
       );
       void vscode.window.showInformationMessage(`Kedro project generated in ${destination}`);
+      await this.presentResult(true);
       return generated;
     } finally {
       this.busy = false;
       this.changed.fire(undefined);
+    }
+  }
+
+  private async presentResult(openSummary: boolean): Promise<void> {
+    try {
+      await vscode.commands.executeCommand("notebookToKedro.project.focus");
+      if (openSummary) await this.showSummary();
+    } catch (error) {
+      this.output.appendLine(
+        `Could not display results: ${error instanceof Error ? error.message : String(error)}`,
+      );
+      void vscode.window.showWarningMessage(
+        "The action completed, but its results could not be displayed. Use Open Conversion and Validation Summary or Show Engine Output.",
+      );
     }
   }
 
@@ -596,7 +624,6 @@ export function activate(context: vscode.ExtensionContext): ProjectController {
     output,
     new vscode.Disposable(() => project.dispose()),
     vscode.commands.registerCommand("notebookToKedro.showLogs", () => output.show(true)),
-    vscode.window.createTreeView("notebookToKedro.project", { treeDataProvider: project }),
     vscode.workspace.registerTextDocumentContentProvider("notebook-to-kedro-preview", project),
     vscode.workspace.onDidCloseTextDocument((document) => project.closeDocument(document)),
     vscode.workspace.onDidChangeConfiguration((event) => {
