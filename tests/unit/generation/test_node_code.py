@@ -21,6 +21,7 @@ from notebook_to_kedro.generation.code import (
     request_node_code,
     validate_node_code,
 )
+from notebook_to_kedro.generation.kedro import render_node_function
 
 
 @pytest.fixture
@@ -408,7 +409,7 @@ def test_validator_accepts_imports_builtins_and_comprehension_scopes(
     )
 
 
-def test_contract_accepts_existing_v1_generated_nodes(tmp_path: Path) -> None:
+def test_contract_accepts_v1_bodies_and_rejects_project_only_metadata(tmp_path: Path) -> None:
     corpus = Path(__file__).parents[2] / "fixtures/evaluation/planning/v1"
     for case in load_planning_corpus(corpus):
         plan = plan_notebook_path(case.notebook_path)
@@ -422,10 +423,13 @@ def test_contract_accepts_existing_v1_generated_nodes(tmp_path: Path) -> None:
         }
         for task in plan.task_candidates:
             request = build_node_code_request(plan, task.id, request_id=f"code-{task.id}")
-            code = ast.get_source_segment(source, functions[task.name])
-            assert code is not None
+            code = render_node_function(task)
             response = NodeCodeResponse("1.0", request.request_id, task.id, code, plan.imports)
             validate_node_code(request, response)
+            documented = ast.get_source_segment(source, functions[task.name])
+            assert documented is not None
+            with pytest.raises(ValueError, match=r"annotations.*unsupported"):
+                validate_node_code(request, replace(response, function_code=documented))
 
 
 @pytest.mark.parametrize(

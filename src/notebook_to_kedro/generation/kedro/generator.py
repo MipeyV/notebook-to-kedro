@@ -12,6 +12,10 @@ from typing import TYPE_CHECKING, cast
 
 from notebook_to_kedro.exceptions import ConversionPlanValidationError, ProjectGenerationError
 from notebook_to_kedro.generation.kedro.model_output import bind_model_output
+from notebook_to_kedro.generation.kedro.node_documentation import (
+    annotation_namespace,
+    document_node,
+)
 from notebook_to_kedro.generation.kedro.notebook_regression import render_notebook_regressions
 from notebook_to_kedro.generation.kedro.profiles import (
     DEFAULT_KEDRO_PROFILE,
@@ -263,12 +267,23 @@ __all__ = ["create_pipeline"]
 
 
 def _nodes(plan: ConversionPlan, node_names: Mapping[str, str] | None = None) -> str:
-    sections = [*plan.imports, ""]
-    sections.extend(
+    functions = [
         render_node_function(
             task, function_name=None if node_names is None else node_names[task.id]
         )
         for task in plan.task_candidates
+    ]
+    namespace = annotation_namespace("\n".join([*plan.imports, *functions]))
+    sections = [
+        '"""Source-preserving nodes with provisional types; review Any and parameter hints."""',
+        *plan.imports,
+        f"import builtins as {namespace}_builtins",
+        f"import typing as {namespace}_typing",
+    ]
+    parameters = {parameter.name: parameter for parameter in plan.parameters}
+    sections.extend(
+        document_node(code, task, parameters, namespace)
+        for task, code in zip(plan.task_candidates, functions, strict=True)
     )
     return "\n\n".join(section for section in sections if section).rstrip() + "\n"
 

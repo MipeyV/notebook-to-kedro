@@ -37,6 +37,34 @@ destinations and a reason:
 Unparsed/blocked source cannot produce a complete audit just because it has no statements.
 No implicit exclusion policy or human approval is inferred from a passing audit.
 
+## Generated node documentation and annotations
+
+Published `nodes.py` wrappers include Google-style `Args`, `Returns`, conditional `Raises`
+and `Notes` sections. They document source task/cell provenance, ordered outputs and the
+number of preserved source assertions. These are interface metadata around the unchanged
+source-derived instructions and terminal return; they do not replace the source audit.
+
+All wrapper arguments and returns have quoted annotations. Scalar parameter defaults supply
+provisional `bool`, `int`, `float` or `str` hints. Inputs and individual outputs of unknown
+runtime type use `typing.Any`; multiple outputs use an ordered tuple and no outputs use
+`None`. Container/null parameter defaults remain `Any`. These gaps are explicit: the engine
+does not execute source, infer DataFrame schemas or estimator classes, check overrides or
+claim that the delivered project passes strict type checking. Source-owned modules and their
+existing annotations/docstrings remain unchanged. Private standard-library annotation imports
+avoid identifiers already present in the rendered source and profile names.
+
+Assertions in business nodes are copied from the source, including conditions, messages and
+order. Their docstrings identify `AssertionError` and warn that Python `-O` disables them.
+Other source/library exceptions propagate. Replacing a source assertion with an explicit
+`ValueError`/domain exception changes behavior and belongs to a separately reviewed refactor;
+faithful conversion performs no such repair. Assertions in delivered pytest tests remain
+normal test checks and do not substitute for runtime data validation.
+
+The lower-level `render_node_function` and optional provider proposal contracts retain their
+strict, undocumented/unannotated V1 wrappers. Metadata is added only by the shared project
+renderer after source/plan validation. Provider validation still rejects added documentation,
+annotations or changes to instructions; no proposal acceptance rule is weakened.
+
 ## Checks and diagnostics
 
 | Code | Blocking condition |
