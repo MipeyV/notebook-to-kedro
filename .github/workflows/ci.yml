@@ -55,6 +55,13 @@ jobs:
           NTK_TEST_PYTHON: ${{ github.workspace }}/.venv/bin/python
         run: xvfb-run -a npm run test:host
 
+      - name: Test commands without an open folder
+        working-directory: extensions/vscode
+        env:
+          NTK_TEST_PYTHON: ${{ github.workspace }}/.venv/bin/python
+          NTK_TEST_EMPTY_WINDOW: "1"
+        run: xvfb-run -a npm run test:host
+
       - name: Package VSIX
         working-directory: extensions/vscode
         run: npm run package

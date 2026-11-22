@@ -1,5 +1,18 @@
 # Development Journal
 
+## 2026-11-22 - Visible command feedback in VS Code
+
+The interactive user trial reported apparently inactive configuration/inspection commands.
+Its extension output recorded successful inspection and previews, but the commands did not
+reveal a hidden panel or open their result. Added explicit selection feedback, view focus and
+automatic summaries after inspection/preview/confirmed generation. Display errors are caught
+separately from completed operations so publication success is retained.
+
+Actual host tests now exercise command activation, a closed sidebar, real view visibility and
+the active summary editor, including the folderless demo case. The runner can target an extracted
+VSIX through NTK_TEST_EXTENSION_PATH; CI adds a folderless host run. The extension version is
+0.3.1. Engine transformation rules, execution boundaries and source projects remain unchanged.
+
 ## 2026-11-22 - VS Code conversion and validation summaries
 
 Added a native Explorer/read-only Markdown summary over existing engine envelopes and published

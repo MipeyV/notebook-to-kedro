@@ -9,6 +9,11 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- VS Code 0.3.1 reveals its panel after configuration selection and automatically opens the
+  summary after Inspect, Preview and confirmed generation. Successful commands no longer leave
+  results hidden, including in folderless windows. Display failures retain operation/publication
+  success; actual host tests now check panel visibility and the active summary editor.
+
 - Source accounting now blocks bounded fitted Pipeline component alias hazards with SA009
   before publication. Source-ordered import/assignment bindings and actual proposed task
   ownership distinguish external prototypes from local fitting/export and model-owned access.

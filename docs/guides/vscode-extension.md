@@ -17,7 +17,7 @@ npm ci
 npm run package
 ```
 
-Install `generated/notebook-to-kedro-0.3.0.vsix` using **Extensions: Install from VSIX**.
+Install `generated/notebook-to-kedro-0.3.1.vsix` using **Extensions: Install from VSIX**.
 The initial extension targets desktop VS Code 1.145+. Open Explorer's **Notebook to Kedro**
 view and choose the Python executable containing the engine. **Create Project Configuration**
 provides guided setup, and **Choose Project Configuration** opens an existing JSON file.
@@ -100,6 +100,11 @@ The Explorer view also displays the last recorded conversion and its validation 
 summary opens as a read-only Markdown document; the original complete JSON operation report
 remains available. It presents existing engine fields rather than defining conversion rules.
 
+Since 0.3.1, choosing a configuration reveals the Explorer view with explicit selection feedback.
+Inspect, Preview and confirmed generation automatically open their summary. This also applies
+without an open folder: successful commands no longer leave results in a hidden panel. UI
+display errors retain completed operation/publication status and report a separate warning.
+
 Inspection exposes source diagnostics. Preview shows proposed file/copy counts and the existing
 regression-coverage/model-output declarations. After generation, the summary reads those two
 named reports from the published project instead of reusing an earlier preview. Missing
@@ -169,6 +174,11 @@ unreadable report artifacts, invalid-import preservation, separate execution dec
 failed-process timing reset. Protocol/presentation tests cover malformed/schema-incompatible responses,
 exit codes, traversal, content drift and argument separation. CI runs host checks under Xvfb
 with locked Node tooling and locked core-only Python dependencies, then packages a VSIX artifact.
+
+`NTK_TEST_EMPTY_WINDOW=1` repeats host assertions without a workspace folder. The optional
+`NTK_TEST_EXTENSION_PATH` selects an installed/extracted package: the runner copies its release
+files and the compiled tests into one private extension root so VS Code supplies the same API
+context to both. It does not modify the installed package. CI checks folder and folderless modes.
 
 The initial setup assistant creates project settings and selects existing profile/I/O files.
 Authoring business-specific I/O mappings, automatic Python-extension environment integration,

@@ -28,6 +28,9 @@ architecture profile and optional regression expectations with the normal JSON e
 
 - **Inspect source** displays static status and diagnostics. **Open operation report** shows
   the complete JSON facts.
+- Choosing a configuration reveals the Explorer panel. Inspect, Preview and confirmed
+  generation automatically open their read-only summary, including in a window without an
+  open folder. Display failures preserve the completed operation and show a separate warning.
 - **Preview files** displays proposed files and **Files to copy**. Clicking a file opens its exact
   content in a read-only editor.
 - **Generate project** refreshes the plan, asks for a new folder inside the declared project
@@ -76,7 +79,7 @@ npm test
 npm run package
 ```
 
-The package command creates `generated/notebook-to-kedro-0.3.0.vsix` at the repository root.
+The package command creates `generated/notebook-to-kedro-0.3.1.vsix` at the repository root.
 Set `NTK_TEST_PYTHON` to the engine interpreter and run `npm run test:host` for real VS Code
 extension-host checks. `VSCODE_EXECUTABLE_PATH` can select an installed Code executable.
 Otherwise the runner downloads the pinned test version. Tests use a private generated fixture
