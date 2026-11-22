@@ -3,12 +3,24 @@ import * as path from "node:path";
 import { createHash } from "node:crypto";
 import { Envelope, Operation, PreviewFile, PreviewCopy, runEngine } from "./bridge";
 import { createConfiguration } from "./setup";
+import {
+  ARTIFACT_NAMES,
+  importedEvidence,
+  previewArtifacts,
+  readLocalReport,
+  summaryGroups,
+  summaryMarkdown,
+  type ImportedEvidence,
+  type OperationTiming,
+  type SummaryInput,
+} from "./summary";
 
 interface Entry {
   label: string;
   description?: string;
   icon?: string;
   children?: Entry[];
+  collapsed?: boolean;
   command?: vscode.Command;
 }
 
@@ -23,6 +35,10 @@ export class ProjectController
   private busy = false;
   private status = "Ready";
   private activeEngine?: AbortController;
+  private artifacts: Record<string, string> = {};
+  private artifactErrors: string[] = [];
+  private timings: OperationTiming[] = [];
+  private evidence?: ImportedEvidence;
 
   constructor(
     private readonly context: vscode.ExtensionContext,
@@ -45,8 +61,13 @@ export class ProjectController
 
   private reset(): void {
     this.result = undefined;
+    this.artifacts = {};
+    this.artifactErrors = [];
+    this.timings = [];
+    this.evidence = undefined;
     this.status = "Ready";
     void vscode.commands.executeCommand("setContext", "notebookToKedro.hasResult", false);
+    void vscode.commands.executeCommand("setContext", "notebookToKedro.hasSummary", false);
     this.changed.fire(undefined);
   }
 
@@ -130,12 +151,16 @@ export class ProjectController
       this.configuration = created.uri;
       await this.context.workspaceState.update("configuration", created.uri.fsPath);
       await this.savePython(python);
+      this.reset();
       this.result = created.inspection;
+      this.artifacts = {};
+      this.artifactErrors = [];
       this.status =
         created.inspection.status === "blocked"
           ? "Inspection blocked · review diagnostics"
           : "Source inspected";
       await vscode.commands.executeCommand("setContext", "notebookToKedro.hasResult", true);
+      await vscode.commands.executeCommand("setContext", "notebookToKedro.hasSummary", true);
       this.changed.fire(undefined);
       await vscode.window.showTextDocument(await vscode.workspace.openTextDocument(created.uri));
       return created.inspection;
@@ -172,6 +197,9 @@ export class ProjectController
     signal?.addEventListener("abort", abort, { once: true });
     if (signal?.aborted) active.abort();
     let result: Envelope;
+    const started = performance.now();
+    let outcome = "failed";
+    let detail: string | undefined;
     try {
       result = await runEngine({
         python,
@@ -180,11 +208,42 @@ export class ProjectController
         signal: active.signal,
         destination,
       });
+      outcome = result.status;
+    } catch (error) {
+      if (active.signal.aborted) outcome = "canceled";
+      detail = (error instanceof Error ? error.message : String(error)).slice(0, 4096);
+      throw error;
     } finally {
+      this.timings.push({
+        operation,
+        outcome,
+        durationMs: performance.now() - started,
+        recordedAt: new Date().toISOString(),
+        detail,
+      });
       signal?.removeEventListener("abort", abort);
       this.activeEngine = undefined;
+      void vscode.commands.executeCommand("setContext", "notebookToKedro.hasSummary", true);
     }
     this.result = result;
+    this.artifacts = {};
+    this.artifactErrors = [];
+    if (result.operation === "plan") this.artifacts = previewArtifacts(result);
+    if (result.operation === "generate") {
+      for (const name of ARTIFACT_NAMES) {
+        if (!(result.files as string[]).includes(name)) continue;
+        try {
+          this.artifacts[name] = await readLocalReport(
+            path.join(result.destination!, name),
+            1024 * 1024,
+          );
+        } catch (error) {
+          this.artifactErrors.push(
+            `${name}: ${error instanceof Error ? error.message : String(error)}`,
+          );
+        }
+      }
+    }
     this.status =
       result.status === "blocked"
         ? "Inspection blocked · review diagnostics"
@@ -203,6 +262,8 @@ export class ProjectController
     if (!this.available()) return;
     this.busy = true;
     this.result = undefined;
+    this.artifacts = {};
+    this.artifactErrors = [];
     this.status = operation === "inspect" ? "Inspecting source…" : "Preparing file preview…";
     this.changed.fire(undefined);
     try {
@@ -232,6 +293,8 @@ export class ProjectController
     if (!this.available()) return;
     this.busy = true;
     this.result = undefined;
+    this.artifacts = {};
+    this.artifactErrors = [];
     this.status = "Preparing generation…";
     this.changed.fire(undefined);
     try {
@@ -279,17 +342,23 @@ export class ProjectController
     }
   }
 
-  async guarded<T>(action: () => Promise<T>): Promise<T | undefined> {
+  async guarded<T>(action: () => Promise<T>, clearResult = true): Promise<T | undefined> {
     try {
       return await action();
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      this.result = undefined;
-      void vscode.commands.executeCommand("setContext", "notebookToKedro.hasResult", false);
+      if (clearResult) {
+        this.result = undefined;
+        this.artifacts = {};
+        this.artifactErrors = [];
+        void vscode.commands.executeCommand("setContext", "notebookToKedro.hasResult", false);
+      }
       this.status =
         message === "Operation canceled."
           ? "Operation canceled"
-          : "Operation failed · see Engine Output";
+          : clearResult
+            ? "Operation failed · see Engine Output"
+            : "Summary action failed · see Engine Output";
       this.output.appendLine(message);
       this.changed.fire(undefined);
       if (message !== "Operation canceled.") {
@@ -304,7 +373,9 @@ export class ProjectController
     const item = new vscode.TreeItem(
       entry.label,
       entry.children
-        ? vscode.TreeItemCollapsibleState.Expanded
+        ? entry.collapsed
+          ? vscode.TreeItemCollapsibleState.Collapsed
+          : vscode.TreeItemCollapsibleState.Expanded
         : vscode.TreeItemCollapsibleState.None,
     );
     item.description = entry.description;
@@ -337,10 +408,25 @@ export class ProjectController
           action("Inspect source", "inspect", "search"),
           action("Preview files", "preview", "open-preview"),
           action("Generate project", "generate", "new-folder"),
+          action("Import execution report", "importExecutionReport", "file-code"),
         ],
       },
       { label: this.status, icon: this.busy ? "loading~spin" : "info" },
     ];
+    if (this.result || this.timings.length || this.evidence) {
+      entries.push(action("Open conversion summary", "showSummary", "notebook"));
+      entries.push(
+        ...summaryGroups(this.summaryInput())
+          .filter((group) => group.title !== "Source diagnostics")
+          .map((group) => ({
+            label: group.title,
+            collapsed:
+              group.title !== "Last recorded conversion" &&
+              group.title !== "Validation of this conversion",
+            children: group.rows.map((row) => ({ label: row.label, description: row.value })),
+          })),
+      );
+    }
     if (!this.result) return entries;
     entries.push({
       label: "Source",
@@ -414,6 +500,49 @@ export class ProjectController
       await this.openDocument("operation.json", JSON.stringify(this.result, null, 2) + "\n");
   }
 
+  private summaryInput(): SummaryInput {
+    return {
+      result: this.result,
+      artifacts: this.artifacts,
+      artifactErrors: this.artifactErrors,
+      timings: this.timings,
+      evidence: this.evidence,
+    };
+  }
+
+  async showSummary(): Promise<vscode.TextDocument | undefined> {
+    if (this.result || this.timings.length || this.evidence)
+      return this.openDocument("conversion-summary.md", summaryMarkdown(this.summaryInput()));
+  }
+
+  async importExecutionReport(uri?: vscode.Uri): Promise<void> {
+    if (!this.available()) return;
+    if (!this.configuration) throw new Error("Choose a project configuration first.");
+    const selected =
+      uri ??
+      (
+        await vscode.window.showOpenDialog({
+          title: "Import financial journey evidence.json (read only)",
+          canSelectMany: false,
+          filters: { "JSON execution report": ["json"] },
+          defaultUri: this.scope(),
+        })
+      )?.[0];
+    if (!selected) return;
+    if (selected.scheme !== "file") throw new Error("Choose a local execution report.");
+    this.busy = true;
+    try {
+      const content = await readLocalReport(selected.fsPath);
+      this.evidence = importedEvidence(selected.fsPath, content);
+      await vscode.commands.executeCommand("setContext", "notebookToKedro.hasSummary", true);
+      this.changed.fire(undefined);
+      await this.showSummary();
+    } finally {
+      this.busy = false;
+      this.changed.fire(undefined);
+    }
+  }
+
   private async openDocument(name: string, content: string): Promise<vscode.TextDocument> {
     const hash = createHash("sha256").update(content).digest("hex");
     const uri = vscode.Uri.from({ scheme: "notebook-to-kedro-preview", path: `/${hash}/${name}` });
@@ -442,10 +571,14 @@ export class ProjectController
 export function activate(context: vscode.ExtensionContext): ProjectController {
   const output = vscode.window.createOutputChannel("Notebook to Kedro");
   const project = new ProjectController(context, output);
-  const command = (name: string, handler: (...args: any[]) => Promise<unknown>) =>
+  const command = (
+    name: string,
+    handler: (...args: any[]) => Promise<unknown>,
+    clearResult = true,
+  ) =>
     context.subscriptions.push(
       vscode.commands.registerCommand(`notebookToKedro.${name}`, (...args: any[]) =>
-        project.guarded(() => handler(...args)),
+        project.guarded(() => handler(...args), clearResult),
       ),
     );
   command("selectConfiguration", (uri?: vscode.Uri) => project.selectConfiguration(uri));
@@ -456,6 +589,8 @@ export function activate(context: vscode.ExtensionContext): ProjectController {
   command("preview", () => project.operate("plan"));
   command("generate", () => project.generate());
   command("showReport", () => project.showReport());
+  command("showSummary", () => project.showSummary(), false);
+  command("importExecutionReport", (uri?: vscode.Uri) => project.importExecutionReport(uri), false);
   command("openPreview", (file: PreviewFile) => project.openPreview(file));
   context.subscriptions.push(
     output,

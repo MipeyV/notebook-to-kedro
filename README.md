@@ -234,6 +234,10 @@ The initial [VS Code extension](docs/guides/vscode-extension.md) exposes these o
 Explorer with guided configuration creation, interpreter selection, diagnostics, read-only previews and confirmed
 generation. Build its installable VSIX with `npm ci` and `npm run package` in `extensions/vscode`.
 
+Version 0.3.0 adds a read-only conversion/validation summary with supplied-test gaps and session
+process timings. Explicit financial journey report imports display separate reported outcomes;
+they do not verify the current configuration or measure human savings.
+
 The root `README.md` remains the repository and package entry point. The
 [documentation index](docs/README.md) provides reading paths and a categorized document list.
 

@@ -17,7 +17,7 @@ npm ci
 npm run package
 ```
 
-Install `generated/notebook-to-kedro-0.2.1.vsix` using **Extensions: Install from VSIX**.
+Install `generated/notebook-to-kedro-0.3.0.vsix` using **Extensions: Install from VSIX**.
 The initial extension targets desktop VS Code 1.145+. Open Explorer's **Notebook to Kedro**
 view and choose the Python executable containing the engine. **Create Project Configuration**
 provides guided setup, and **Choose Project Configuration** opens an existing JSON file.
@@ -93,6 +93,48 @@ inspection, and generation reads current saved files. A review-hash-bound apply 
 remains future work. Engine output records errors and import/schema problems in the selected
 Python environment. Install/update the engine there when its CLI is unavailable.
 
+## Conversion and validation summary
+
+Version 0.3.0 adds **Open Conversion and Validation Summary** and **Import Execution Report**.
+The Explorer view also displays the last recorded conversion and its validation scope. The
+summary opens as a read-only Markdown document; the original complete JSON operation report
+remains available. It presents existing engine fields rather than defining conversion rules.
+
+Inspection exposes source diagnostics. Preview shows proposed file/copy counts and the existing
+regression-coverage/model-output declarations. After generation, the summary reads those two
+named reports from the published project instead of reusing an earlier preview. Missing
+expectations remain visible, including boolean functional-workflow gaps. Installation, project
+execution, tests and reload remain unverified by this static extension workflow. A missing or
+unreadable summary artifact does not turn completed generation into a publication failure.
+
+Session timings measure each engine process, including Python startup and I/O, with observed
+success/blocked/failure/cancellation outcomes. Failed process diagnostics are retained. These
+are distinct from the engine's run_local_operation_only ledger measurements and from human
+work. They live in memory and reset on configuration/interpreter selection or a newly created
+configuration. Source-file edits do not refresh snapshots; rerun Inspect/Preview as needed.
+
+To view the [financial journey](../evaluation/nested-financial-models.md#measured-installation-journeys),
+select a case/profile's `evidence.json`, such as
+`generated/financial-journey/credit_pipeline-default/evidence.json`. The aggregate
+journey-summary.json, arbitrary JUnit reports and private real-project trial formats are not
+supported imports. This first reader accepts only the two fixed financial cases and their
+existing schema 1.0 declarations. It does not execute any report commands or follow log paths.
+Inputs must be bounded regular UTF-8 JSON files: 8 MiB for selected evidence and 1 MiB per
+generated summary artifact. Reads remain bounded if a file grows during the read.
+
+The imported run appears separately with its case/profile, source hash, import timestamp,
+snapshot SHA-256 and **reported** outcome. Inconsistent statuses, exit codes, duplicate stages,
+incomplete success declarations and invalid timings are rejected. Failure/interruption and
+partial reports retain missing measurements. A failed import preserves the previous result
+and imported snapshot. Selecting a different configuration/interpreter clears that snapshot.
+
+Imported installation/test/CLI/reload durations are nested within case elapsed time and are
+not added to it. Training alone remains unmeasured because the existing report includes it
+within tests/CLI execution. Human effort and savings remain unmeasured. Import does not verify
+current source/configuration/artifact identity, authenticate execution or scientific review,
+or promote this conversion to validated. Source-derived prediction probes and their limits
+remain explicit. Existing pilot/provider/execution consent contracts are unchanged.
+
 ## Runtime and verification
 
 The TypeScript extension starts the selected Python executable with isolated imports and
@@ -122,7 +164,9 @@ pinned VS Code 1.145.3 with private fixture/workspace, user-data and extension d
 `VSCODE_EXECUTABLE_PATH` optionally selects an installed executable. Default testing downloads
 an isolated archive. Host tests exercise actual extension activation/commands, read-only user
 typing, cancellation before generation, confirmed generation, procedural notebook inspection,
-preview and blocked diagnostics. Protocol tests cover malformed/schema-incompatible responses,
+preview and blocked diagnostics. They also exercise summary typing protection, generation with
+unreadable report artifacts, invalid-import preservation, separate execution declarations and
+failed-process timing reset. Protocol/presentation tests cover malformed/schema-incompatible responses,
 exit codes, traversal, content drift and argument separation. CI runs host checks under Xvfb
 with locked Node tooling and locked core-only Python dependencies, then packages a VSIX artifact.
 

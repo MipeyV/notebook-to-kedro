@@ -36,6 +36,17 @@ architecture profile and optional regression expectations with the normal JSON e
 - **Show Engine Output** provides process and engine diagnostics. Install or update the
   engine in the selected interpreter if it reports an import or schema error.
 
+- **Open Conversion and Validation Summary** shows the last operation, source diagnostics,
+  file counts, supplied regression gaps and session process timings in a read-only document.
+  Generation reads its published summary artifacts; an artifact read error preserves the
+  completed generation result. Session process time includes Python startup/I/O and resets
+  when configuration/interpreter selection changes.
+- **Import Execution Report** reads a fixed financial journey case/profile's `evidence.json`
+  (UTF-8, up to 8 MiB). It displays the separate run's reported results, snapshot identity
+  and timing scopes. It does not run report commands or verify the current configuration.
+  Invalid imports preserve the previous result. Aggregate journey summaries and arbitrary
+  test reports are unsupported. Training alone and human effort/savings remain unmeasured.
+
 Source and configuration are read from disk. Save edits before invoking an operation.
 Generation uses current saved inputs. Re-run Preview when reviewing changes between actions.
 Inspection and preview can be canceled. Generation completion is recorded by the returned
@@ -65,7 +76,7 @@ npm test
 npm run package
 ```
 
-The package command creates `generated/notebook-to-kedro-0.2.1.vsix` at the repository root.
+The package command creates `generated/notebook-to-kedro-0.3.0.vsix` at the repository root.
 Set `NTK_TEST_PYTHON` to the engine interpreter and run `npm run test:host` for real VS Code
 extension-host checks. `VSCODE_EXECUTABLE_PATH` can select an installed Code executable.
 Otherwise the runner downloads the pinned test version. Tests use a private generated fixture

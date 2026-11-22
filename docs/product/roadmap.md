@@ -14,6 +14,11 @@ They are acceptance gates, not dates or authorization to implement every phase. 
 exposes its initial operations through a VS Code extension. Transformation logic stays in the
 reusable core and is exercised through API/CLI first.
 
+The VS Code 0.3.0 presentation slice now adds a read-only conversion summary, supplied-test gaps,
+session process timings and explicit imports of the fixed financial journey's declared evidence.
+Imported run outcomes remain separate from current conversion validation; binding/authenticated
+runtime readiness, training-only time and prospective human-effort measurement remain open.
+
 | Order | Deliverable | Dependencies and acceptance gate | Status |
 | --- | --- | --- | --- |
 | 0 | Preserve the existing conversion foundation | Deterministic notebook analysis/generation, safe publication and default/custom Kedro naming profiles. | Implemented; scope and evidence remain bounded. |

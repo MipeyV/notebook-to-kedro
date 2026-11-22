@@ -1,5 +1,24 @@
 # Development Journal
 
+## 2026-11-22 - VS Code conversion and validation summaries
+
+Added a native Explorer/read-only Markdown summary over existing engine envelopes and published
+regression/model declarations, with session process timings including Python startup/I/O.
+Success, blockers, failures and cancellations retain their scope. Settings selection clears
+session state; ordinary source edits require another inspection/preview. The engine and its
+operation/consent contracts remain unchanged.
+
+Explicit financial journey evidence imports accept bounded UTF-8 case/profile reports and
+display source/snapshot identities, declared outcomes and nested machine durations separately.
+Import does not verify current configuration, authenticate execution, approve science or
+measure human savings. Fixed-case format and status/exit-code/count checks retain partial
+failures and reject inconsistent success claims. Invalid imports preserve previous snapshots;
+post-publication report read errors preserve completed generation.
+
+Protocol/presentation and actual VS Code host checks cover read-only summaries, negative
+declarations, failed import/process lifecycle and generation/report boundaries. The extension
+version is 0.3.0; no provider, ML analysis dependency or transformation-rule change is introduced.
+
 ## 2026-11-22 - Measured installed financial-model journeys
 
 Added a fixed-case developer harness composing the existing local operations, measurement kit,

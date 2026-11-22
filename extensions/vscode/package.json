@@ -2,7 +2,7 @@
   "name": "notebook-to-kedro",
   "displayName": "Notebook to Kedro",
   "description": "Inspect, preview and generate local Kedro projects using the Notebook to Kedro Python engine.",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "publisher": "mipeyv",
   "license": "MIT",
   "repository": {
@@ -85,6 +85,18 @@
         "category": "Notebook to Kedro"
       },
       {
+        "command": "notebookToKedro.showSummary",
+        "title": "Open Conversion and Validation Summary",
+        "category": "Notebook to Kedro",
+        "icon": "$(notebook)"
+      },
+      {
+        "command": "notebookToKedro.importExecutionReport",
+        "title": "Import Execution Report",
+        "category": "Notebook to Kedro",
+        "icon": "$(file-code)"
+      },
+      {
         "command": "notebookToKedro.showLogs",
         "title": "Show Engine Output",
         "category": "Notebook to Kedro",
@@ -143,6 +155,10 @@
       ],
       "commandPalette": [
         {
+          "command": "notebookToKedro.showSummary",
+          "when": "notebookToKedro.hasSummary"
+        },
+        {
           "command": "notebookToKedro.showReport",
           "when": "notebookToKedro.hasResult"
         }
@@ -153,7 +169,7 @@
     "compile": "tsc -p .",
     "format": "prettier --write src test scripts package.json tsconfig.json .prettierrc.json",
     "format:check": "prettier --check src test scripts package.json tsconfig.json .prettierrc.json",
-    "test": "npm run compile && node --test dist/test/bridge.test.js",
+    "test": "npm run compile && node --test dist/test/bridge.test.js dist/test/summary.test.js",
     "test:host": "npm run compile && node scripts/test-host.cjs",
     "package": "npm run compile && node scripts/package.cjs",
     "vscode:prepublish": "npm run compile"
