@@ -46,6 +46,8 @@ The file is bounded to 64 KiB and 1-256 dataset entries. Duplicate keys, extra/m
 unsupported versions/types and nonportable names fail. Dataset identifiers contain ASCII
 letters/digits/underscores, start with a letter/underscore and are at most 256 characters.
 The immutable Python `NotebookTypeContract` enforces the same rules and canonical ordering.
+Its compact canonical JSON is also limited to 64 KiB; file loading additionally bounds the
+actual bytes read, including whitespace.
 
 ## Bindings and generation
 

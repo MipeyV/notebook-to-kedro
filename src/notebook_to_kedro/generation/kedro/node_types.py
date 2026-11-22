@@ -71,6 +71,11 @@ class NotebookTypeContract:
                 )
             names.add(pair[0])
         object.__setattr__(self, "datasets", tuple(sorted(self.datasets)))
+        if (
+            len(json.dumps(self.to_dict(), separators=(",", ":")).encode("utf-8"))
+            > MAX_NODE_TYPE_BYTES
+        ):
+            raise ProjectGenerationError("Canonical node type contract exceeds 64 KiB")
 
     def to_dict(self) -> dict[str, object]:
         """Export a detached, canonical declaration rather than execution evidence."""

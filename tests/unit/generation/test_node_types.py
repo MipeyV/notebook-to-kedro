@@ -254,6 +254,9 @@ def test_contract_is_immutable_canonical_and_bounded(tmp_path: Path) -> None:
         "a" * 64, tuple((f"v{i}", "int") for i in range(MAX_DATASET_TYPES))
     )
     assert len(boundary.datasets) == MAX_DATASET_TYPES
+    oversized = tuple((f"v{i:03}" + "x" * 252, "int") for i in range(MAX_DATASET_TYPES))
+    with pytest.raises(ProjectGenerationError, match=r"Canonical.*64 KiB"):
+        NotebookTypeContract("a" * 64, oversized)
 
 
 @pytest.mark.parametrize(
