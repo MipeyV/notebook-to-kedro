@@ -1,5 +1,23 @@
 # Development Journal
 
+## 2026-11-22 - Explicit notebook dataset type declarations
+
+Added an optional independently versioned declaration pinned to notebook bytes and actual
+generated dataset identities. Finite scalar/pandas/NumPy/sklearn types propagate to producer
+return slots and consuming arguments, preserving versioned redefinitions and naming profiles.
+The shared renderer/API/generate CLI/local settings compose the same implementation; VS Code
+previews use the existing bridge. Declaration loading is bounded, duplicate-strict and avoids
+expression evaluation. Original source facts are required before publication.
+
+Generated runtime imports avoid source/profile identifiers; no ML import or new analysis
+dependency is introduced. The report keeps untyped gaps, runtime validation not_run and schema
+validation unsupported. Inaccurate declarations never coerce/repair source or become evidence.
+The credit builder adds two reproducible opt-in settings/declaration assets while preserving
+original notebooks/data/oracles/observations. Targeted controls cover type resolution, source
+edits, dataset redefinitions, profiles, safe refusal and declaration/report separation. The
+small nested-model delivered pipeline/reload suite also runs with explicit types under both
+profiles. [ADR 0028](docs/decisions/0028-explicit-notebook-types.md) records the boundary.
+
 ## 2026-11-22 - Documented generated node interfaces
 
 The interactive review identified undocumented/unannotated node wrappers and numerous source

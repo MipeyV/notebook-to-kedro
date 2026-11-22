@@ -53,6 +53,12 @@ uses the separate [notebook regression schema](generated-notebook-tests.md), inc
 CSV fixtures and supplied typed observations. Inspection does not load that contract;
 project planning and generation validate and render it through the shared backend.
 Existing workflow/profile/regression loaders remain authoritative for their separate schemas.
+
+Notebook settings additionally accept an optional root-contained `node_types` path to
+[explicit dataset type declarations](node-types.md). Inspection still reads source alone;
+planning/generation load the bounded file, require its source hash/current dataset bindings,
+and preview/publish annotated wrappers plus an unverified declaration report. Functional
+settings reject this option. Measurement destinations cannot overlap the declaration file.
 Regression schema 1.1 may reference pinned JSON scenarios relative to its own directory;
 planning/generation capture them on each request and expose generated fixture bytes in previews.
 See the [fixture contract](generated-workflow-tests.md#scenario-fixtures-in-schema-11) for budgets,

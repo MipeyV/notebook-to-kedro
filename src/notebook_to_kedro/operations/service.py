@@ -20,6 +20,7 @@ from notebook_to_kedro.generation.kedro.functional import (
     render_functional_workflow,
 )
 from notebook_to_kedro.generation.kedro.generator import render_kedro_project
+from notebook_to_kedro.generation.kedro.node_types import load_notebook_type_contract
 from notebook_to_kedro.generation.kedro.notebook_regression_contract import (
     load_notebook_regression_contract,
 )
@@ -74,12 +75,17 @@ def _prepare(
             package_name=config.package_name,
             architecture_profile=profile,
             source_facts=None
-            if config.regression_contract is None and config.model_output is None
+            if config.regression_contract is None
+            and config.model_output is None
+            and config.node_types is None
             else analyze_notebook_path(config.source, project_root=config.project_root),
             regression_contract=None
             if config.regression_contract is None
             else load_notebook_regression_contract(config.regression_contract),
             model_output=config.model_output,
+            node_types=None
+            if config.node_types is None
+            else load_notebook_type_contract(config.node_types),
         )
     else:
         if config.workflow_configuration is None:

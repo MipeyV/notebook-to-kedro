@@ -20,6 +20,52 @@ def _json(value: object) -> str:
     return json.dumps(value, indent=2, allow_nan=False) + "\n"
 
 
+def _credit_type_declarations(source: str) -> str:
+    """Render explicit example types without inference or runtime certification."""
+    datasets = {
+        "raw": "pandas.DataFrame",
+        "df": "pandas.DataFrame",
+        "horizon_months": "int",
+        "train_end_month": "int",
+        "portfolio_rows": "int",
+        **dict.fromkeys(
+            ("train", "validation", "test", "X_train", "X_validation", "X_test", "scored_test"),
+            "pandas.DataFrame",
+        ),
+        **dict.fromkeys(("y_train", "y_validation", "y_test"), "pandas.Series"),
+        "preprocessor": "sklearn.base.BaseEstimator",
+        "model": "sklearn.pipeline.Pipeline",
+        "fitted_model": "sklearn.pipeline.Pipeline",
+        "threshold": "float",
+        **dict.fromkeys(
+            (
+                "validation_scores",
+                "candidate_thresholds",
+                "validation_alerts",
+                "validation_misses",
+                "validation_false_alerts",
+                "validation_costs",
+                "test_scores",
+                "test_predictions",
+                "matrix",
+            ),
+            "numpy.ndarray",
+        ),
+    }
+    return (
+        json.dumps(
+            {
+                "schema_version": "1.0",
+                "source_sha256": hashlib.sha256(source.encode()).hexdigest(),
+                "datasets": datasets,
+            },
+            sort_keys=True,
+            indent=2,
+        )
+        + "\n"
+    )
+
+
 def _source(cell: dict[str, Any]) -> str:
     return "".join(cell["source"])
 
@@ -291,6 +337,22 @@ def build_files() -> dict[Path, str]:
         files[root / "project-model.json"] = _json(
             {**configuration, "model_output": "fitted_model"}
         )
+        if case == "credit_pipeline":
+            files[root / "node-types.contract.json"] = _credit_type_declarations(
+                files[root / "workflow.ipynb"]
+            )
+            files[root / "project-typed.json"] = (
+                json.dumps(
+                    {
+                        **configuration,
+                        "model_output": "fitted_model",
+                        "node_types": "node-types.contract.json",
+                    },
+                    sort_keys=True,
+                    indent=2,
+                )
+                + "\n"
+            )
     return files
 
 

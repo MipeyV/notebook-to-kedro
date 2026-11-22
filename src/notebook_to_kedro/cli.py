@@ -18,6 +18,7 @@ from notebook_to_kedro.api import (
     load_functional_workflow_configuration,
     load_kedro_profile,
     load_notebook_regression_contract,
+    load_notebook_type_contract,
     load_workflow_preparation_definition,
     load_workflow_regression_contract,
     plan_functional_workflow_path,
@@ -302,6 +303,11 @@ def _add_source_parsers(subparsers: argparse._SubParsersAction[argparse.Argument
     generate_parser.add_argument(
         "--model-output",
         help="explicit source leaf symbol to save as a local versioned pickle model",
+    )
+    generate_parser.add_argument(
+        "--node-types",
+        type=Path,
+        help="source-bound explicit notebook dataset type declarations (JSON)",
     )
 
 
@@ -623,12 +629,17 @@ def _generate(args: argparse.Namespace) -> int:
         package_name=args.package_name,
         architecture_profile=profile,
         source_facts=None
-        if args.regression_contract is None and args.model_output is None
+        if args.regression_contract is None
+        and args.model_output is None
+        and args.node_types is None
         else analyze_notebook_path(args.notebook, project_root=args.project_root),
         regression_contract=None
         if args.regression_contract is None
         else load_notebook_regression_contract(args.regression_contract),
         model_output=args.model_output,
+        node_types=None
+        if args.node_types is None
+        else load_notebook_type_contract(args.node_types),
     )
     sys.stdout.write(f"Created Kedro project at `{args.output_dir}`\n")
     for path in created_files:

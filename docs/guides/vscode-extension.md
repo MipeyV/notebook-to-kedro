@@ -2,6 +2,12 @@
 
 [Documentation index](../README.md)
 
+Notebook settings can opt into [explicit dataset types](../reference/node-types.md) with a
+root-contained `node_types` contract path. Select the credit example's `project-typed.json`
+and use Preview Generated Files to inspect DataFrame/model annotations and `node-types.json`.
+This uses the existing engine/configuration bridge; the setup wizard does not author type
+declarations. Inspect Source remains source-only, and annotations do not certify runtime values.
+
 Status: first desktop prototype implemented on 2026-11-14. The Explorer's **Notebook to Kedro**
 view selects a local configuration and Python interpreter, displays inspection diagnostics,
 opens file previews and generates into a new project folder.

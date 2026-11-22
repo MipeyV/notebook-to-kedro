@@ -70,6 +70,7 @@ def _target(request: InspectRequest | PlanRequest | GenerateRequest, directory: 
         config.workflow_configuration,
         config.architecture_profile,
         config.regression_contract,
+        config.node_types,
     ]
     protected.extend(
         parent
