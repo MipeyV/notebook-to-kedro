@@ -8,6 +8,11 @@ and use Preview Generated Files to inspect DataFrame/model annotations and `node
 This uses the existing engine/configuration bridge; the setup wizard does not author type
 declarations. Inspect Source remains source-only, and annotations do not certify runtime values.
 
+For prepared class enforcement, select the credit example's `project-checked.json` instead.
+Preview shows the generated `_node_type_validation.py`, decorators and runtime policy in
+`node-types.json`. Generating still runs no model. A later explicit Kedro run enforces declared
+classes; source assertions and schema/value/fitted-state limitations remain separate.
+
 Status: first desktop prototype implemented on 2026-11-14. The Explorer's **Notebook to Kedro**
 view selects a local configuration and Python interpreter, displays inspection diagnostics,
 opens file previews and generates into a new project folder.

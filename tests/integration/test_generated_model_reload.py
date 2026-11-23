@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import shutil
 import subprocess
 import sys
@@ -24,13 +25,14 @@ ROOT = Path(__file__).parents[2]
 pytestmark = pytest.mark.integration
 
 
-def _project(
+def _project(  # noqa: PLR0913
     tmp_path: Path,
     *,
     custom: bool = False,
     nested: bool = False,
     no_csv: bool = False,
     typed: bool = False,
+    enforce: bool = False,
 ) -> Path:
     workspace = tmp_path / "workspace"
     shutil.copytree(ROOT / "examples/model_reload", workspace)
@@ -84,6 +86,7 @@ def _project(
             architecture_profile=profile,
             model_output="fitted_model",
             regression_contract=load_notebook_regression_contract(workspace / "regression.json"),
+            enforce_node_types=enforce,
             node_types=None
             if not typed
             else NotebookTypeContract(
@@ -141,10 +144,11 @@ def test_model_only_catalog_and_frame_probes_have_a_working_delivered_suite(tmp_
 
 
 @pytest.mark.parametrize("custom", [False, True])
+@pytest.mark.parametrize("enforce", [False, True])
 def test_explicit_types_preserve_delivered_pipeline_and_fresh_model_reload(
-    tmp_path: Path, *, custom: bool
+    tmp_path: Path, *, custom: bool, enforce: bool
 ) -> None:
-    project = _project(tmp_path, custom=custom, nested=True, typed=True)
+    project = _project(tmp_path, custom=custom, nested=True, typed=True, enforce=enforce)
     result = _run(project, tmp_path)
     assert result.returncode == 0, result.stdout + result.stderr
     assert "4 passed" in result.stdout
@@ -152,6 +156,101 @@ def test_explicit_types_preserve_delivered_pipeline_and_fresh_model_reload(
     assert not report["untyped_datasets"]
     # External test execution never rewrites the generation-time declaration status.
     assert report["runtime_type_validation"] == "not_run"
+    assert ("runtime_checks" in report) is enforce
+
+
+@pytest.mark.parametrize(("dataset", "code"), [("df", "NTV001"), ("X", "NTV002")])
+def test_runtime_type_failures_stop_kedro_before_model_publication_under_optimization(
+    tmp_path: Path, dataset: str, code: str
+) -> None:
+    project = _project(tmp_path, nested=True, typed=True, enforce=True)
+    declaration = json.loads((project / "node-types.json").read_text(encoding="utf-8"))[
+        "declaration"
+    ]
+    declaration["datasets"][dataset] = "str"
+    source = project.parent / "workflow.ipynb"
+    target = project.parent / "wrong_types"
+    with chdir(source.parent):
+        generate_kedro_project(
+            plan_notebook_path(source),
+            target,
+            source_facts=analyze_notebook_path(source),
+            package_name="wrong_types",
+            node_types=NotebookTypeContract(
+                declaration["source_sha256"], tuple(declaration["datasets"].items())
+            ),
+            enforce_node_types=True,
+            model_output="fitted_model",
+        )
+    result = subprocess.run(
+        [sys.executable, "-O", "-m", "kedro", "run"],
+        cwd=target,
+        env={**os.environ, "PYTHONPATH": str(target / "src"), "KEDRO_DISABLE_TELEMETRY": "1"},
+        capture_output=True,
+        text=True,
+        timeout=90,
+        check=False,
+    )
+    assert result.returncode != 0
+    assert code in result.stdout + result.stderr
+    assert not (target / "data/06_models").exists()
+
+
+_WHEEL_RUNTIME_CHECK = """import builtins
+import sys
+sys.path.insert(0, sys.argv[1])
+original_import = builtins.__import__
+def guarded(name, *args, **kwargs):
+    if name.split(".")[0] == "notebook_to_kedro":
+        raise RuntimeError("Generated runtime imported the converter")
+    return original_import(name, *args, **kwargs)
+builtins.__import__ = guarded
+import reload_example
+import pandas as pd
+from reload_example.pipeline_registry import register_pipelines
+if ".whl" not in reload_example.__file__:
+    raise RuntimeError("The generated package did not load from its wheel")
+function = register_pipelines()["__default__"].nodes[0].func
+try:
+    function(df=[])
+except TypeError as error:
+    if "NTV001" not in str(error):
+        raise RuntimeError("Wrong runtime diagnostic") from error
+else:
+    raise RuntimeError("Runtime class check was disabled by -O")
+result = function(df=pd.DataFrame({"x": [0.0, 1.0], "y": [0, 1]}))
+if not isinstance(result[0], pd.DataFrame) or not isinstance(result[1], pd.Series):
+    raise RuntimeError("Declared outputs failed positive checks")
+print("Wheel runtime checks passed under -O without the converter")
+"""
+
+
+def test_generated_runtime_is_packaged_and_works_from_a_wheel_without_converter_imports(
+    tmp_path: Path,
+) -> None:
+    project = _project(tmp_path, nested=True, typed=True, enforce=True)
+    built = subprocess.run(
+        [sys.executable, "-m", "hatchling", "build", "-t", "wheel", "-d", str(tmp_path / "dist")],
+        cwd=project,
+        capture_output=True,
+        text=True,
+        timeout=60,
+        check=False,
+    )
+    assert built.returncode == 0, built.stdout + built.stderr
+    wheel = next((tmp_path / "dist").glob("*.whl"))
+    empty = tmp_path / "empty"
+    empty.mkdir()
+    result = subprocess.run(
+        [sys.executable, "-O", "-I", "-c", _WHEEL_RUNTIME_CHECK, str(wheel)],
+        cwd=empty,
+        capture_output=True,
+        text=True,
+        timeout=60,
+        check=False,
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert "Wheel runtime checks passed under -O without the converter" in result.stdout
 
 
 _WRONG_MODEL = """import copy

@@ -2,13 +2,14 @@
 
 [Documentation index](../README.md)
 
-Status: current implementation summary reviewed on 2026-11-22; historical evidence follows.
+Status: current implementation summary reviewed on 2026-11-23; historical evidence follows.
 Historical measurements retain their original corpus, runtime and limitations.
 
 ## Project status
 
 | Capability | Current status |
 | --- | --- |
+| Runtime notebook class checks | Optional enforce_node_types wraps only declared boundaries with packaged stdlib checks: inputs before source, outputs before returning to Kedro. Explicit TypeError diagnostics survive Python -O; exact builtin scalars and isinstance object policies preserve identity/signatures and source exceptions. Generation remains static/not_run; original asserts, untyped data, parameter hints, schemas, business values and fitted-state gaps remain unchanged. See [runtime scope](../reference/node-types.md#optional-runtime-class-enforcement). |
 | Explicit notebook dataset types | Opt-in source-bound declarations replace selected `Any` gaps with finite scalar/pandas/NumPy/sklearn types through the shared renderer, API/CLI/local settings and VS Code previews. Actual dataset-version bindings propagate to producers/consumers; unknown datasets/stale source block publication. A declaration report retains untyped gaps, runtime validation not_run and unsupported DataFrame schema validation. No inference/coercion/source repair or full typing guarantee; see [contract](../reference/node-types.md). |
 | Generated node interfaces | Default wrappers have Google-style documentation, quoted annotations, scalar-default parameter hints and explicit `Any` gaps. Source assertions and other body instructions are preserved, with assertion counts and the Python `-O` limitation documented. No DataFrame/model type inference, strict generated-project typing guarantee or source repair is claimed. Provider contracts stay unchanged; see [boundary](../reference/source-accounting.md#generated-node-documentation-and-annotations). |
 | Visible VS Code feedback | Version 0.3.1 reveals the panel after configuration selection and opens the summary after Inspect/Preview/confirmed generation. Actual host assertions check visibility and the active editor, including a folderless window. Presentation errors preserve operation/publication success; engine contracts are unchanged. |

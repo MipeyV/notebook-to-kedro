@@ -392,7 +392,10 @@ def test_current_source_edit_and_unknown_local_path_are_rejected(tmp_path: Path)
             load_local_project_configuration(settings)
 
 
-def test_type_declarations_do_not_bypass_instruction_accounting(tmp_path: Path) -> None:
+@pytest.mark.parametrize("enforce", [False, True])
+def test_type_declarations_do_not_bypass_instruction_accounting(
+    tmp_path: Path, *, enforce: bool
+) -> None:
     source = _source(tmp_path)
     facts, plan = analyze_notebook_path(source), plan_notebook_path(source)
     changed = replace(plan.task_candidates[0], source="value = 999")
@@ -403,6 +406,7 @@ def test_type_declarations_do_not_bypass_instruction_accounting(tmp_path: Path) 
             tmp_path / "blocked",
             source_facts=facts,
             node_types=_contract(source, value="int"),
+            enforce_node_types=enforce,
         )
     assert not (tmp_path / "blocked").exists()
 

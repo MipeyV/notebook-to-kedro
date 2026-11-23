@@ -16,6 +16,14 @@ operations share this path; the UI owns no type rules. Runtime imports are fixed
 no new dependency or ML imports. Runtime values/schemas are not certified. See
 [ADR 0028](../decisions/0028-explicit-notebook-types.md).
 
+An explicit enforce_node_types option composes packaged runtime class decorators around
+declared notebook callables. Shared generation validates the declaration/source first, then
+compile-checks both helper and nodes without execution. At runtime input checks precede source
+and output checks precede return to Kedro; raw business ASTs, identities and original errors
+are preserved. Prepared policy metadata never promotes not_run to validation evidence.
+Schema/value/fitted-state validation and assertion repair remain separate. See
+[ADR 0029](../decisions/0029-runtime-notebook-type-checks.md).
+
 The VS Code [summary presenter](../guides/vscode-extension.md#conversion-and-validation-summary)
 formats existing operation envelopes and generated regression/model declarations. It records
 extension-owned process elapsed time separately from engine operation measurements. An explicit

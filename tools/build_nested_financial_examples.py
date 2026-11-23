@@ -353,6 +353,11 @@ def build_files() -> dict[Path, str]:
                 )
                 + "\n"
             )
+            checked = json.loads(files[root / "project-typed.json"])
+            checked["enforce_node_types"] = True
+            files[root / "project-checked.json"] = (
+                json.dumps(checked, sort_keys=True, indent=2) + "\n"
+            )
     return files
 
 

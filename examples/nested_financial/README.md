@@ -26,6 +26,12 @@ retains untyped gaps and does not certify runtime values, schemas or model fitte
 See the [type contract](../../docs/reference/node-types.md). Original experiment observations
 and model-object/prediction oracle gaps are not changed by these annotations.
 
+`project-checked.json` additionally prepares explicit runtime class checks from that same
+declaration. It does not execute the notebook during preview/generation. Later calls reject
+incompatible declared inputs/outputs with TypeError, including under Python -O. Original
+asserts stay intact; business data, column/dtype, probability and fitted-state checks are not
+inferred. The declaration report remains generation-time not_run even after external tests.
+
 ## Temporal fitting
 
 Both workflows train on 2018-2020, select a decision threshold on 2022 and score 2024, retaining

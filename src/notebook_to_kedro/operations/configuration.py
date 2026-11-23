@@ -20,6 +20,7 @@ _OPTIONAL = frozenset(
         "regression_contract",
         "model_output",
         "node_types",
+        "enforce_node_types",
     }
 )
 
@@ -51,6 +52,7 @@ class LocalProjectConfiguration:
     schema_version: str = "1.0"
     model_output: str | None = None
     node_types: Path | None = None
+    enforce_node_types: bool = False
 
     def __post_init__(self) -> None:
         """Validate direct API settings as well as loaded JSON."""
@@ -86,6 +88,12 @@ class LocalProjectConfiguration:
             )
         if self.node_types is not None and self.source_kind != "notebook":
             raise LocalOperationError("LO001", "node_types currently requires a notebook source")
+        if not isinstance(self.enforce_node_types, bool) or (
+            self.enforce_node_types and self.node_types is None
+        ):
+            raise LocalOperationError(
+                "LO001", "enforce_node_types requires a boolean and node_types"
+            )
         object.__setattr__(self, "project_root", root)
         for field in (
             "source",
@@ -111,6 +119,8 @@ class LocalProjectConfiguration:
         }
         if self.model_output is not None:
             data["model_output"] = self.model_output
+        if self.enforce_node_types:
+            data["enforce_node_types"] = True
         for field in (
             "workflow_configuration",
             "architecture_profile",
@@ -174,6 +184,7 @@ def load_local_project_configuration(path: str | Path) -> LocalProjectConfigurat
             package_name=data.get("package_name", "generated_project"),
             schema_version=data["schema_version"],
             model_output=data.get("model_output"),
+            enforce_node_types=data.get("enforce_node_types", False),
             **{
                 key: _relative_file(data[key])
                 for key in (

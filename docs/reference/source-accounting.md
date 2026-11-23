@@ -60,6 +60,13 @@ producer/consumer bindings, including versioned redefinitions. Added runtime imp
 analysis still imports no ML libraries. The declaration report retains untyped gaps and
 unverified runtime status; neither declarations nor annotations establish actual value types.
 
+Optional runtime class enforcement adds generated decorators and a stdlib helper outside the
+source instruction bodies. It deliberately rejects incompatible declared classes before/after
+source calls, while preserving source ASTs, result identity and original exceptions for inputs
+that pass those boundaries. Annotation-only/default conversion and strict provider validation
+remain unchanged. Prepared checks do not establish source completeness, schema correctness or
+execution consent; see the [runtime contract](node-types.md#optional-runtime-class-enforcement).
+
 Assertions in business nodes are copied from the source, including conditions, messages and
 order. Their docstrings identify `AssertionError` and warn that Python `-O` disables them.
 Other source/library exceptions propagate. Replacing a source assertion with an explicit
