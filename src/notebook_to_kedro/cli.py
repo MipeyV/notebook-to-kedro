@@ -312,7 +312,7 @@ def _add_source_parsers(subparsers: argparse._SubParsersAction[argparse.Argument
     generate_parser.add_argument(
         "--enforce-node-types",
         action="store_true",
-        help="emit runtime input/output class checks for explicit --node-types declarations",
+        help="emit runtime class/frame metadata checks for explicit --node-types declarations",
     )
 
 

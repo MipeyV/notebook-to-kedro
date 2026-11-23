@@ -24,8 +24,9 @@ the shared renderer. Unknown types remain `Any`; scalar defaults supply review h
 Source assertions remain faithful and documented. Opt-in source-bound notebook dataset
 declarations now supply finite DataFrame/array/model/scalar interface types and preserve
 untyped gaps separately from runtime validation. Optional generated decorators now enforce
-declared dataset classes at call boundaries without coercion or source-body changes. Rich schemas,
-business-value checks, functional type declarations, strict generated-project typing and a separate
+declared dataset classes at call boundaries without coercion or source-body changes. Notebook
+type schema 1.1 adds bounded ordered DataFrame column/dtype metadata with explicit extra-column
+policies. Wider schemas, business-value checks, functional type declarations, strict generated-project typing and a separate
 assertion-to-domain-exception refactor remain future work; class checks do not complete general
 project standardization or provide scientific validation.
 

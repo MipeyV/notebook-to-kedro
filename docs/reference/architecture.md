@@ -21,8 +21,15 @@ declared notebook callables. Shared generation validates the declaration/source 
 compile-checks both helper and nodes without execution. At runtime input checks precede source
 and output checks precede return to Kedro; raw business ASTs, identities and original errors
 are preserved. Prepared policy metadata never promotes not_run to validation evidence.
-Schema/value/fitted-state validation and assertion repair remain separate. See
+Wider schema/business-value/fitted-state validation and assertion repair remain separate. See
 [ADR 0029](../decisions/0029-runtime-notebook-type-checks.md).
+
+Notebook type schema 1.1 adds immutable DataFrame column/dtype declarations outside source
+facts. Shared generation binds them to dataset versions; the existing opt-in runtime switch
+composes metadata checks with the unchanged class validator. No pandas import/inference occurs
+during analysis, and runtime code inspects only frame metadata without coercion or data copies.
+Schema gaps/not_run status and separate opt-in error expectations preserve the evidence boundary.
+See [ADR 0030](../decisions/0030-bounded-dataframe-schemas.md).
 
 The VS Code [summary presenter](../guides/vscode-extension.md#conversion-and-validation-summary)
 formats existing operation envelopes and generated regression/model declarations. It records

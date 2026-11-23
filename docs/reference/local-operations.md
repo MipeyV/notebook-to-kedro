@@ -66,6 +66,12 @@ decorators and policy report through the same service used by VS Code. False rem
 from exported settings and preserves annotation-only/default output. No run/approval token or
 automatic change to generation-time validation status is introduced.
 
+The same `node_types` path may select schema 1.1 with bounded DataFrame column/dtype metadata.
+No new local envelope/version or execution command is added. Preview/generate validate the
+declaration without importing pandas; enforcement later applies at declared runtime boundaries.
+Use the credit `project-schema-checked.json` settings for the separately scoped example and
+schema-specific regression expectations.
+
 Regression schema 1.1 may reference pinned JSON scenarios relative to its own directory;
 planning/generation capture them on each request and expose generated fixture bytes in previews.
 See the [fixture contract](generated-workflow-tests.md#scenario-fixtures-in-schema-11) for budgets,

@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from notebook_to_kedro.generation.kedro.dataframe_checks import frame_decorator_arguments
+
 if TYPE_CHECKING:
     from notebook_to_kedro.generation.kedro.generator import _PipelineEntry
     from notebook_to_kedro.generation.kedro.node_types import NotebookTypeContract
@@ -114,7 +116,8 @@ def render_type_decorator(
         f"@{namespace}_validate(\n"
         f"    task_id={entry.task.id!r}, inputs={{{', '.join(inputs)}}},\n"
         f"    outputs={output_tuple},\n"
-        ")\n"
+        + ("" if not contract.dataframes else frame_decorator_arguments(entry, contract))
+        + ")\n"
     )
 
 
@@ -123,7 +126,7 @@ def runtime_check_policy(
 ) -> dict[str, object]:
     """Describe prepared checks without promoting them to execution evidence."""
     declared = dict(contract.datasets)
-    return {
+    policy: dict[str, object] = {
         "enabled": True,
         "implementation": "node-types-runtime-v1",
         "scope": "declared_dataset_classes",
@@ -136,3 +139,24 @@ def runtime_check_policy(
             if any(dataset in declared for dataset in (*entry.inputs.values(), *entry.outputs))
         ],
     }
+    if contract.dataframes:
+        policy.update(
+            implementation="node-types-runtime-v2",
+            scope="declared_dataset_classes_and_dataframe_metadata",
+            dataframe_policy={
+                "columns": "unique_flat_strings",
+                "order": "declared_projection",
+                "extra_columns": "per_declaration",
+                "dtypes": "exact_dtype_string",
+                "datasets": [name for name, _ in contract.dataframes],
+            },
+            schema_checked_tasks=[
+                entry.task.id
+                for entry in entries
+                if any(
+                    dataset in dict(contract.dataframes)
+                    for dataset in (*entry.inputs.values(), *entry.outputs)
+                )
+            ],
+        )
+    return policy

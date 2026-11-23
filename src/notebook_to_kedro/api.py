@@ -8,6 +8,7 @@ from notebook_to_kedro.analysis import analyze_notebook
 from notebook_to_kedro.analysis.functional_sources import analyze_functional_blocks_path
 from notebook_to_kedro.exceptions import PlannerConfigurationError
 from notebook_to_kedro.generation import generate_kedro_project
+from notebook_to_kedro.generation.kedro.dataframe_schema import DataFrameSchema
 from notebook_to_kedro.generation.kedro.functional import (
     generate_functional_kedro_project,
     plan_functional_workflow_path,
@@ -133,6 +134,7 @@ __all__ = [
     "ApplicationProject",
     "ArtifactDestination",
     "ConversionSourceAudit",
+    "DataFrameSchema",
     "FileReferenceInput",
     "FunctionalWorkflowConfiguration",
     "KedroArchitectureProfile",

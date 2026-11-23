@@ -1,0 +1,11 @@
+{
+  "enforce_node_types": true,
+  "model_output": "fitted_model",
+  "node_types": "node-schemas.contract.json",
+  "package_name": "credit_pipeline",
+  "project_root": ".",
+  "regression_contract": "regression-schema.json",
+  "schema_version": "1.0",
+  "source": "workflow.ipynb",
+  "source_kind": "notebook"
+}

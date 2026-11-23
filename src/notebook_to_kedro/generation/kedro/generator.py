@@ -11,6 +11,7 @@ from textwrap import indent
 from typing import TYPE_CHECKING, cast
 
 from notebook_to_kedro.exceptions import ConversionPlanValidationError, ProjectGenerationError
+from notebook_to_kedro.generation.kedro.dataframe_checks import SCHEMA_CHECK_EXTENSION
 from notebook_to_kedro.generation.kedro.model_output import bind_model_output
 from notebook_to_kedro.generation.kedro.node_documentation import (
     annotation_namespace,
@@ -157,7 +158,10 @@ def render_kedro_project(  # noqa: PLR0912, PLR0913
         ),
     }
     files.update(
-        {package_root / "_node_type_validation.py": RUNTIME_CHECK_SOURCE}
+        {
+            package_root / "_node_type_validation.py": RUNTIME_CHECK_SOURCE
+            + (SCHEMA_CHECK_EXTENSION if node_types is not None and node_types.dataframes else "")
+        }
         if enforce_node_types
         else {}
     )
@@ -337,6 +341,11 @@ def _nodes(
         (() if node_types is None else node_types.modules)
         + (() if runtime_package is None else ("validate",)),
     )
+    validator = (
+        "validate_frame_node"
+        if node_types is not None and node_types.dataframes
+        else "validate_node"
+    )
     sections = [
         '"""Source-preserving nodes with provisional types; review Any and parameter hints."""',
         *plan.imports,
@@ -348,7 +357,8 @@ def _nodes(
             if runtime_package is None
             else (
                 f"from {runtime_package}._node_type_validation "
-                f"import validate_node as {namespace}_validate",
+                f"import {validator} "
+                f"as {namespace}_validate",
             )
         ),
     ]
@@ -377,6 +387,12 @@ def _nodes(
                 if node_types is None
                 else tuple(node_types.annotation(dataset, namespace) for dataset in entry.outputs),
                 runtime_checks=bool(decorator),
+                frame_checks=bool(decorator)
+                and node_types is not None
+                and any(
+                    dataset in dict(node_types.dataframes)
+                    for dataset in (*entry.inputs.values(), *entry.outputs)
+                ),
             )
         )
     return "\n\n".join(section for section in sections if section).rstrip() + "\n"
