@@ -1,5 +1,15 @@
 # Development Journal
 
+## 2026-11-23 - VS Code type and schema summaries
+
+Extension 0.3.2 now reads the existing node-types report from previews or bounded published
+files and presents declared classes, ordered frame metadata, extra-column policies, untyped
+datasets and declared DataFrames without schemas. Prepared runtime task lists remain separate
+from not_run validation; missing/unsupported reports cannot imply complete coverage or passing
+execution. Report errors preserve other summaries and completed publication. Presentation and
+real host checks exercise annotation/class/schema modes and published report read failures.
+No engine transformation, schema authoring, ML execution or evidence/consent contract changes.
+
 ## 2026-11-23 - Bounded DataFrame metadata schemas
 
 Extended the independent notebook type contract to 1.1 with immutable ordered column/dtype

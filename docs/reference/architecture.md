@@ -38,6 +38,11 @@ bounded reader displays the fixed financial journey's reported execution results
 authenticating them or binding them to the current project. Transformation/comparison rules,
 engine schema 1.0 and execution consent remain unchanged; importing JSON never runs its commands.
 
+The extension's 0.3.2 type presenter reads the existing notebook `node-types.json` manifest from
+preview files or bounded published-report reads. It formats explicit declarations, ordered frame
+metadata, gaps and prepared runtime task lists without type inference, data validation or new
+engine envelopes. Unsupported report/status shapes stay unavailable and cannot certify execution.
+
 The opt-in [notebook regression renderer](generated-notebook-tests.md) binds supplied fixtures
 and observations to the existing backend's dataset entries and resolved profile names.
 It requires source facts/accounting, emits compile-checked standalone tests through the shared

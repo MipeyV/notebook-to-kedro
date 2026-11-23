@@ -37,7 +37,7 @@ The compatibility policy is authoritative for supported runtimes and library-sup
 | Document | Purpose |
 | --- | --- |
 | [Kedro architecture profiles](guides/kedro-profiles.md) | Versioned JSON conventions, default/custom generation, compatibility and source mappings. |
-| [VS Code extension](guides/vscode-extension.md) | Build/install the desktop prototype, inspect/preview/generate, read conversion summaries and import separate financial journey evidence. |
+| [VS Code extension](guides/vscode-extension.md) | Build/install the desktop prototype, inspect/preview/generate, review type/schema gaps and import separate financial journey evidence. |
 | [Real workflow setup](guides/real-workflow-setup.md) | Separate source facts, proposed graph, candidate parameters and typed I/O/runtime gaps; exercise the synthetic slice and prepare a provenance-bound paired validation trial. |
 | [Hybrid planning](guides/hybrid-planning.md) | Supported suggestions, assembly and deterministic fallback. |
 | [Local Ollama provider](guides/ollama-provider.md) | Provider setup, Python usage and loopback safety boundary. |

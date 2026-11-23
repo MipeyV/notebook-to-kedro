@@ -19,6 +19,11 @@ session process timings and explicit imports of the fixed financial journey's de
 Imported run outcomes remain separate from current conversion validation; binding/authenticated
 runtime readiness, training-only time and prospective human-effort measurement remain open.
 
+The 0.3.2 summary now presents existing notebook type/schema declarations, uncovered datasets,
+ordered metadata and prepared class/metadata tasks in Explorer and Markdown. It keeps missing
+reports distinct from no reported gaps and prepared checks distinct from execution evidence.
+Schema authoring, general quality profiles and running project validation remain separate work.
+
 Generated wrappers now expose Google-style documentation and provisional annotations through
 the shared renderer. Unknown types remain `Any`; scalar defaults supply review hints only.
 Source assertions remain faithful and documented. Opt-in source-bound notebook dataset

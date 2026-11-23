@@ -90,6 +90,10 @@ Generation still executes no notebook; row values/fitted state and source assert
 remain outside these checks. See the
 [runtime boundary](docs/reference/node-types.md#optional-runtime-class-enforcement).
 
+VS Code 0.3.2 displays these type/schema declarations, coverage gaps and prepared runtime
+tasks in its read-only conversion summary after Preview or Generate. Validation remains
+separate; select `project-schema-checked.json` in the credit example to review both schemas.
+
 Apply a reusable [Kedro architecture profile](docs/guides/kedro-profiles.md) explicitly with
 `--architecture-profile examples/kedro_profiles/team_training.json` on both `plan` and `generate`.
 This initial schema configures the single pipeline's name and a function/node prefix, with
