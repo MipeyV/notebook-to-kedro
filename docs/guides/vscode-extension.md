@@ -170,6 +170,21 @@ remain explicit. Existing pilot/provider/execution consent contracts are unchang
 
 ## Runtime and verification
 
+Version 0.4.0 adds the separately authorized **Validate Generated Notebook Project** command.
+Choose a generated notebook with supplied tests, an existing runtime Python, a worker timeout
+and a new attempt directory. Review the read-only snapshot and confirm **Run tests** explicitly.
+The engine checks the review identity again, copies only the current renderer inventory and
+runs its fixed suite. Tests can train models/write files; the copy is not a security sandbox.
+No dependencies are installed. Functional and arbitrary-project execution are not supported.
+
+Cancellation requests graceful engine supervision cleanup, retaining terminal evidence when
+the client remains connected. The summary displays outcome, counts, runtime-phase durations,
+identity checks and attempt location separately from static declarations and imported reports.
+**Open Generated Validation Log** opens retained output read-only. A timeout, failure, missing
+dependency or canceled run stays visible; source/oracle gaps and original not_run manifests stay
+unchanged. See the [runtime contract](../reference/generated-project-validation.md) for identity,
+budget, environment, cleanup and evidence limitations. The static protocol described below is unchanged.
+
 The TypeScript extension starts the selected Python executable with isolated imports and
 separate argument values using `execFile`. CLI schema 1.0 results are checked before display,
 including status/exit-code agreement, relative file paths and preview content hashes. Each
@@ -180,8 +195,9 @@ the destination before retrying because publication may already have completed.
 
 VS Code Workspace Trust governs activation, and this prototype uses local file workspaces.
 The Python engine owns source interpretation, profiles, rendering and publication. The
-extension's processes perform static operations and project generation. Installing generated
-dependencies and running ML project code remain explicit follow-up actions.
+extension's inspect/preview/generate processes perform static operations and project generation.
+Installing dependencies remains separate; the new validation command runs project tests only
+after explicit review and confirmation.
 
 ```bash
 cd extensions/vscode

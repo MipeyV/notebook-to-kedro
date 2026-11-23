@@ -2,13 +2,14 @@
 
 [Documentation index](../README.md)
 
-Status: current implementation summary reviewed on 2026-11-23; historical evidence follows.
+Status: current implementation summary reviewed on 2026-11-24; historical evidence follows.
 Historical measurements retain their original corpus, runtime and limitations.
 
 ## Project status
 
 | Capability | Current status |
 | --- | --- |
+| Explicit generated notebook validation | Separate API/CLI prepare/run operations bind current renderer files, source inputs, selected Python, worker policy and budget to a review hash. An approved run executes supplied tests in a private copy, with bounded logs/JUnit, cancellation/deadline outcomes and postflight identities. VS Code 0.4.0 exposes selection, review, confirmation, summary and logs. No installation, functional execution, scientific acceptance or generation-report promotion is implied; see [contract](../reference/generated-project-validation.md). |
 | Visible notebook type/schema declarations | VS Code 0.3.2 presents existing node-types reports in Explorer and read-only summaries after Preview/Generate: declared classes, ordered DataFrame metadata/extra-column policy, untyped/schema gaps and prepared runtime task IDs. Missing/unsupported reports stay unavailable; runtime validation remains not_run and report errors preserve other evidence/publication. No schema inference, authoring or ML execution is added. |
 | Bounded DataFrame metadata schemas | Notebook type schema 1.1 declares ordered columns, finite dtype labels and extra-column policies for existing DataFrame datasets. The existing enforcement option prepares readonly NVS001/NVS002 ValueError boundaries, active under -O, with no coercion/source changes. Reports retain schema gaps and not_run status; row/index/null/value/fitted-state checks remain outside scope. Schema 1.0 output remains unchanged; see [metadata contract](../reference/node-types.md#bounded-dataframe-schemas-in-version-11). |
 | Runtime notebook class checks | Optional enforce_node_types wraps only declared boundaries with packaged stdlib checks: inputs before source, outputs before returning to Kedro. Explicit TypeError diagnostics survive Python -O; exact builtin scalars and isinstance object policies preserve identity/signatures and source exceptions. Generation remains static/not_run; original asserts, untyped data, parameter hints, schemas, business values and fitted-state gaps remain unchanged. See [runtime scope](../reference/node-types.md#optional-runtime-class-enforcement). |

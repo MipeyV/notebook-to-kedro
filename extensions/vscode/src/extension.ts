@@ -3,6 +3,8 @@ import * as path from "node:path";
 import { createHash } from "node:crypto";
 import { Envelope, Operation, PreviewFile, PreviewCopy, runEngine } from "./bridge";
 import { createConfiguration } from "./setup";
+import { chooseAndValidate } from "./validation-ui";
+import type { ValidationOutcome } from "./validation";
 import {
   ARTIFACT_NAMES,
   importedEvidence,
@@ -39,6 +41,8 @@ export class ProjectController
   private artifactErrors: string[] = [];
   private timings: OperationTiming[] = [];
   private evidence?: ImportedEvidence;
+  private validation?: ValidationOutcome;
+  private selectionRevision = 0;
   private readonly view: vscode.TreeView<Entry>;
 
   constructor(
@@ -67,11 +71,14 @@ export class ProjectController
   }
 
   private reset(): void {
+    this.selectionRevision += 1;
+    this.activeEngine?.abort();
     this.result = undefined;
     this.artifacts = {};
     this.artifactErrors = [];
     this.timings = [];
     this.evidence = undefined;
+    this.validation = undefined;
     this.status = "Ready";
     void vscode.commands.executeCommand("setContext", "notebookToKedro.hasResult", false);
     void vscode.commands.executeCommand("setContext", "notebookToKedro.hasSummary", false);
@@ -192,6 +199,52 @@ export class ProjectController
       );
   }
 
+  async validateGenerated(): Promise<ValidationOutcome | undefined> {
+    if (!this.available()) return;
+    if (!this.configuration || !this.python())
+      throw new Error("Choose a configuration and engine Python first.");
+    this.busy = true;
+    const active = new AbortController();
+    this.activeEngine = active;
+    const revision = this.selectionRevision;
+    this.changed.fire(undefined);
+    try {
+      const validation = await chooseAndValidate({
+        configuration: this.configuration,
+        enginePython: this.python(),
+        project: this.result?.destination,
+        active,
+        showReview: (content) => this.openDocument("validation-review.json", content),
+      });
+      if (validation && revision === this.selectionRevision) {
+        this.validation = validation;
+        this.output.appendLine(`Validation ${validation.status}: ${validation.output}`);
+        void vscode.commands.executeCommand("setContext", "notebookToKedro.hasSummary", true);
+        await this.presentResult(true);
+      }
+      return validation;
+    } finally {
+      this.activeEngine = undefined;
+      this.busy = false;
+      this.changed.fire(undefined);
+    }
+  }
+
+  async showValidationLog(): Promise<void> {
+    if (!this.validation) throw new Error("Run generated-project validation first.");
+    const content = await readLocalReport(
+      path.join(this.validation.output, "tests.log"),
+      2 * 1024 * 1024,
+      false,
+    );
+    await this.openDocument("validation-tests.log", content);
+  }
+
+  async showValidationReport(): Promise<void> {
+    if (!this.validation) throw new Error("Run generated-project validation first.");
+    await this.openDocument("validation-report.json", JSON.stringify(this.validation, null, 2));
+  }
+
   private async request(
     operation: Operation,
     signal?: AbortSignal,
@@ -237,6 +290,7 @@ export class ProjectController
       void vscode.commands.executeCommand("setContext", "notebookToKedro.hasSummary", true);
     }
     this.result = result;
+    this.validation = undefined;
     this.artifacts = {};
     this.artifactErrors = [];
     if (result.operation === "plan") this.artifacts = previewArtifacts(result);
@@ -377,6 +431,7 @@ export class ProjectController
       const message = error instanceof Error ? error.message : String(error);
       if (clearResult) {
         this.result = undefined;
+        this.validation = undefined;
         this.artifacts = {};
         this.artifactErrors = [];
         void vscode.commands.executeCommand("setContext", "notebookToKedro.hasResult", false);
@@ -436,12 +491,19 @@ export class ProjectController
           action("Inspect source", "inspect", "search"),
           action("Preview files", "preview", "open-preview"),
           action("Generate project", "generate", "new-folder"),
+          action("Validate generated project", "validateGenerated", "beaker"),
+          ...(this.validation
+            ? [
+                action("Open validation log", "showValidationLog", "output"),
+                action("Open validation report", "showValidationReport", "file-code"),
+              ]
+            : []),
           action("Import execution report", "importExecutionReport", "file-code"),
         ],
       },
       { label: this.status, icon: this.busy ? "loading~spin" : "info" },
     ];
-    if (this.result || this.timings.length || this.evidence) {
+    if (this.result || this.timings.length || this.evidence || this.validation) {
       entries.push(action("Open conversion summary", "showSummary", "notebook"));
       entries.push(
         ...summaryGroups(this.summaryInput())
@@ -535,11 +597,12 @@ export class ProjectController
       artifactErrors: this.artifactErrors,
       timings: this.timings,
       evidence: this.evidence,
+      validation: this.validation,
     };
   }
 
   async showSummary(): Promise<vscode.TextDocument | undefined> {
-    if (this.result || this.timings.length || this.evidence)
+    if (this.result || this.timings.length || this.evidence || this.validation)
       return this.openDocument("conversion-summary.md", summaryMarkdown(this.summaryInput()));
   }
 
@@ -616,6 +679,9 @@ export function activate(context: vscode.ExtensionContext): ProjectController {
   command("inspect", () => project.operate("inspect"));
   command("preview", () => project.operate("plan"));
   command("generate", () => project.generate());
+  command("validateGenerated", () => project.validateGenerated(), false);
+  command("showValidationLog", () => project.showValidationLog(), false);
+  command("showValidationReport", () => project.showValidationReport(), false);
   command("showReport", () => project.showReport());
   command("showSummary", () => project.showSummary(), false);
   command("importExecutionReport", (uri?: vscode.Uri) => project.importExecutionReport(uri), false);

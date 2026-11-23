@@ -38,6 +38,12 @@ architecture profile and optional regression expectations with the normal JSON e
   inputs and publishes through its staging writer. Existing destinations produce an error.
 - **Show Engine Output** provides process and engine diagnostics. Install or update the
   engine in the selected interpreter if it reports an import or schema error.
+- **Validate Generated Notebook Project** (0.4.0) reviews a generated notebook with supplied
+  regression tests, selected existing runtime, timeout and new evidence directory. Confirm
+  **Run tests** to execute a private snapshot. Tests may train/write files; the copy is not a
+  security sandbox. No packages are installed. Cancellation/failures retain separate outcomes,
+  and **Open Generated Validation Log** displays bounded output read-only. Functional workflows
+  and arbitrary existing projects are outside this first execution slice.
 
 - **Open Conversion and Validation Summary** shows the last operation, source diagnostics,
   file counts, supplied regression gaps, declared dataset types/DataFrame schemas and session

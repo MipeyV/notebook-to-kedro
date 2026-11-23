@@ -40,6 +40,12 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Explicit generated notebook test validation through shared prepare/run APIs, CLI and VS Code
+  0.4.0. Reviewed hashes bind source/rendered files, runtime choice and worker budget/policy before
+  private-copy execution. Exclusive attempts retain environment metadata, bounded logs/JUnit,
+  terminal interruption/failure outcomes and postflight identities. No installation, source/test
+  repair, scientific acceptance or generation-time status promotion is introduced.
+
 - VS Code 0.3.2 presents existing notebook dataset types and bounded DataFrame schemas in
   Explorer and the read-only summary, including ordered metadata, extra-column policies,
   untyped/schema gaps and prepared runtime tasks. Missing/unsupported reports stay unavailable;

@@ -94,6 +94,10 @@ VS Code 0.3.2 displays these type/schema declarations, coverage gaps and prepare
 tasks in its read-only conversion summary after Preview or Generate. Validation remains
 separate; select `project-schema-checked.json` in the credit example to review both schemas.
 
+Version 0.4.0 adds [explicit generated notebook validation](docs/reference/generated-project-validation.md):
+select an existing runtime, review the captured project and confirm running its supplied tests
+in a private copy. Separate reports preserve failures/cancellation and original generation statuses.
+
 Apply a reusable [Kedro architecture profile](docs/guides/kedro-profiles.md) explicitly with
 `--architecture-profile examples/kedro_profiles/team_training.json` on both `plan` and `generate`.
 This initial schema configures the single pipeline's name and a function/node prefix, with

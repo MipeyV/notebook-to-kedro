@@ -2,6 +2,7 @@ import { open } from "node:fs/promises";
 import { createHash } from "node:crypto";
 import type { Envelope, Operation, PreviewFile } from "./bridge";
 import { nodeTypeSummary } from "./type-summary";
+import type { ValidationOutcome } from "./validation";
 
 export const REPORT_LIMIT = 8 * 1024 * 1024;
 export const ARTIFACT_NAMES = [
@@ -43,6 +44,7 @@ export interface ImportedEvidence {
   report: ExecutionEvidence;
 }
 export interface SummaryInput {
+  validation?: ValidationOutcome;
   result?: Envelope;
   artifacts: Record<string, string>;
   artifactErrors: string[];
@@ -156,7 +158,11 @@ export function decodeExecutionEvidence(content: string): ExecutionEvidence {
 }
 
 /** Bound actual reads, even if a file grows after stat; this performs no project execution. */
-export async function readLocalReport(filename: string, limit = REPORT_LIMIT): Promise<string> {
+export async function readLocalReport(
+  filename: string,
+  limit = REPORT_LIMIT,
+  strictUtf8 = true,
+): Promise<string> {
   const handle = await open(filename, "r");
   try {
     const stat = await handle.stat();
@@ -170,7 +176,7 @@ export async function readLocalReport(filename: string, limit = REPORT_LIMIT): P
       size += result.bytesRead;
     }
     if (size > limit) throw new Error("Report exceeds its byte limit.");
-    return new TextDecoder("utf-8", { fatal: true, ignoreBOM: true }).decode(
+    return new TextDecoder("utf-8", { fatal: strictUtf8, ignoreBOM: true }).decode(
       buffer.subarray(0, size),
     );
   } finally {
@@ -239,9 +245,9 @@ export function summaryGroups(input: SummaryInput): SummaryGroup[] {
     title: "Validation of this conversion",
     rows: [
       { label: "Installation", value: "Not checked" },
-      { label: "Training / pipeline execution", value: "Not run by the extension" },
-      { label: "Tests", value: "Not run by the extension" },
-      { label: "Model reload", value: "Not run by the extension" },
+      { label: "Training / pipeline execution", value: "Not run by static operations" },
+      { label: "Tests", value: "Not run by static operations" },
+      { label: "Model reload", value: "Not run by static operations" },
     ],
   };
   if (result) {
@@ -321,6 +327,66 @@ export function summaryGroups(input: SummaryInput): SummaryGroup[] {
       value: `${seconds(timing.durationMs)} at ${timing.recordedAt}${timing.detail ? `: ${timing.detail}` : ""}`,
     })),
   });
+  if (input.validation) {
+    const run = input.validation;
+    groups.push({
+      title: "Explicit generated-project test run",
+      rows: [
+        { label: "Outcome", value: run.status },
+        { label: "Original generated project", value: run.project },
+        { label: "Review SHA-256", value: run.plan_sha256 },
+        { label: "Attempt / evidence directory", value: run.output },
+        { label: "Selected runtime Python", value: run.python },
+        ...(typeof run.environment?.version === "string"
+          ? [{ label: "Runtime Python version", value: run.environment.version }]
+          : []),
+        ...(Array.isArray(run.environment?.missing) &&
+        run.environment.missing.every((item) => typeof item === "string")
+          ? [
+              {
+                label: "Missing distributions",
+                value: run.environment.missing.length
+                  ? run.environment.missing.join(", ")
+                  : "None reported",
+              },
+            ]
+          : []),
+        {
+          label: "Attempt runtime phase (copy, worker, evidence and postflight)",
+          value: seconds(run.duration_ns / 1e6),
+        },
+        {
+          label: "Worker supervision (environment, tests and cleanup)",
+          value:
+            run.worker_duration_ns === null
+              ? "Not completed"
+              : seconds(run.worker_duration_ns / 1e6),
+        },
+        ...Object.entries(run.tests ?? {}).map(([label, value]) => ({
+          label: `Supplied tests: ${label}`,
+          value: String(value),
+        })),
+        {
+          label: "Input / original / copy / Python identities unchanged",
+          value: `${run.inputs_unchanged} / ${run.original_unchanged} / ${run.snapshot_unchanged} / ${run.python_unchanged}`,
+        },
+        {
+          label: "Log",
+          value: `${run.output}/tests.log${run.log_truncated ? " (truncated)" : ""}`,
+        },
+        ...(run.error ? [{ label: "Runner error", value: run.error }] : []),
+        {
+          label: "Dependency constraints / installation",
+          value: "Constraints not evaluated; no installation performed",
+        },
+        {
+          label: "Scope",
+          value:
+            "Supplied tests in a private copy; scientific acceptance not established; static not_run manifests unchanged",
+        },
+      ],
+    });
+  }
   if (!input.timings.length) groups.at(-1)!.rows.push({ label: "Timings", value: "Not recorded" });
   if (evidence) {
     const report = evidence.report;

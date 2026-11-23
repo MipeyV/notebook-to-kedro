@@ -80,6 +80,11 @@ Inspection loads source facts only; planning/generation also load the relevant s
 
 ## Operation behavior
 
+The separate [generated validation boundary](generated-project-validation.md) now provides
+`project validation-plan` and an explicitly approved `project validate`. They run supplied
+notebook tests on a captured copy using a selected existing Python environment, with their own
+review/result envelopes. They do not extend `run_local_operation` or change the static operations below.
+
 | Operation | Result | Side effects |
 | --- | --- | --- |
 | `inspect` | Original notebook facts or functional analysis, with `inspected`/`blocked` status | Read source only; no application imports or execution. |

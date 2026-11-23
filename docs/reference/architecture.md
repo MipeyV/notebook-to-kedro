@@ -2,6 +2,13 @@
 
 [Documentation index](../README.md)
 
+Explicit [generated notebook validation](generated-project-validation.md) is a separate shared
+operation: static renderer/inventory review -> digest-bound execution instruction -> private copy
+and selected-runtime worker -> bounded test evidence and postflight identities. Static local
+envelopes, business ASTs and generation-time not_run reports remain unchanged. The VS Code client
+owns selection/confirmation/presentation, with stdin cancellation handled by the supervising engine.
+No ML analysis dependency or installation step is added. See [ADR 0031](../decisions/0031-explicit-generated-validation.md).
+
 The shared project renderer adds documented/annotated node interfaces around the unchanged
 deterministic source body. Google-style docstrings expose provenance and retained assertions;
 quoted types distinguish scalar configuration-default hints from unresolved `Any` interfaces.

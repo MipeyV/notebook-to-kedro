@@ -1,5 +1,22 @@
 # Development Journal
 
+## 2026-11-24 - Explicit generated notebook test validation
+
+Added a shared read-only review and explicitly approved runtime boundary for generated notebooks
+with supplied regression tests. The operation reuses current renderer identities, captures a
+private copy and selected interpreter, supervises fixed pytest execution with bounded logs and
+records separate terminal outcomes/postflight identities. CLI and VS Code 0.4.0 compose the same
+contract, including graceful stdin cancellation, read-only review/logs and reset of stale UI runs.
+No dependency installation, source/oracle rewrite or static-report promotion occurs.
+
+The tiny synthetic persisted-model example exercises actual saved-model/fresh-process reload
+and client cancellation. Early Windows attempts reached their budget under nested pytest capture;
+direct bounded output capture completes the original tests without altering their expectations.
+Those failed attempts remain local evidence. Unit checks cover stale consent, drift, copy races,
+missing environment, skipped/failed tests, malformed reports, bounded reads and cleanup failures.
+The first runtime contract is notebook-only and is not a sandbox or pilot/scientific approval.
+See [ADR 0031](docs/decisions/0031-explicit-generated-validation.md).
+
 ## 2026-11-23 - VS Code type and schema summaries
 
 Extension 0.3.2 now reads the existing node-types report from previews or bounded published

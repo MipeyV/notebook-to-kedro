@@ -12,6 +12,10 @@ from notebook_to_kedro.operations.contracts import (
     PlanningResult,
     PlanRequest,
 )
+from notebook_to_kedro.operations.generated_validation import (
+    GeneratedValidationResult,
+    run_generated_validation,
+)
 from notebook_to_kedro.operations.measurements import (
     load_effort_declaration,
     measure_local_operation,
@@ -24,9 +28,17 @@ from notebook_to_kedro.operations.service import (
     plan_project,
     run_local_operation,
 )
+from notebook_to_kedro.operations.validation_snapshot import (
+    GeneratedValidationPlan,
+    GeneratedValidationRequest,
+    prepare_generated_validation,
+)
 
 __all__ = [
     "GenerateRequest",
+    "GeneratedValidationPlan",
+    "GeneratedValidationRequest",
+    "GeneratedValidationResult",
     "GenerationResult",
     "InspectRequest",
     "InspectionResult",
@@ -40,6 +52,8 @@ __all__ = [
     "measure_local_operation",
     "plan_project",
     "prepare_effort_comparison",
+    "prepare_generated_validation",
+    "run_generated_validation",
     "run_local_operation",
     "summarize_conversion_measurements",
 ]
