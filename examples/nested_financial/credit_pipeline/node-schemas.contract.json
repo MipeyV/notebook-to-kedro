@@ -1,0 +1,66 @@
+{
+  "dataframes": {
+    "raw": {
+      "allow_extra_columns": true,
+      "columns": [
+        {
+          "dtype": "int64",
+          "name": "snapshot_month"
+        },
+        {
+          "dtype": "int64",
+          "name": "followup_months"
+        }
+      ]
+    },
+    "scored_test": {
+      "allow_extra_columns": true,
+      "columns": [
+        {
+          "dtype": "int64",
+          "name": "snapshot_month"
+        },
+        {
+          "dtype": "float64",
+          "name": "score"
+        },
+        {
+          "dtype": "int64",
+          "name": "prediction"
+        }
+      ]
+    }
+  },
+  "datasets": {
+    "X_test": "pandas.DataFrame",
+    "X_train": "pandas.DataFrame",
+    "X_validation": "pandas.DataFrame",
+    "candidate_thresholds": "numpy.ndarray",
+    "df": "pandas.DataFrame",
+    "fitted_model": "sklearn.pipeline.Pipeline",
+    "horizon_months": "int",
+    "matrix": "numpy.ndarray",
+    "model": "sklearn.pipeline.Pipeline",
+    "portfolio_rows": "int",
+    "preprocessor": "sklearn.base.BaseEstimator",
+    "raw": "pandas.DataFrame",
+    "scored_test": "pandas.DataFrame",
+    "test": "pandas.DataFrame",
+    "test_predictions": "numpy.ndarray",
+    "test_scores": "numpy.ndarray",
+    "threshold": "float",
+    "train": "pandas.DataFrame",
+    "train_end_month": "int",
+    "validation": "pandas.DataFrame",
+    "validation_alerts": "numpy.ndarray",
+    "validation_costs": "numpy.ndarray",
+    "validation_false_alerts": "numpy.ndarray",
+    "validation_misses": "numpy.ndarray",
+    "validation_scores": "numpy.ndarray",
+    "y_test": "pandas.Series",
+    "y_train": "pandas.Series",
+    "y_validation": "pandas.Series"
+  },
+  "schema_version": "1.1",
+  "source_sha256": "73c8fb1e792030913be505f66c156904b130fef8a6a3a59a76546d582f40136a"
+}

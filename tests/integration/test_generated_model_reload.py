@@ -13,6 +13,7 @@ from pathlib import Path
 import pytest
 
 from notebook_to_kedro import (
+    DataFrameSchema,
     KedroArchitectureProfile,
     NotebookTypeContract,
     analyze_notebook_path,
@@ -33,6 +34,7 @@ def _project(  # noqa: PLR0913
     no_csv: bool = False,
     typed: bool = False,
     enforce: bool = False,
+    schemas: bool = False,
 ) -> Path:
     workspace = tmp_path / "workspace"
     shutil.copytree(ROOT / "examples/model_reload", workspace)
@@ -76,6 +78,17 @@ def _project(  # noqa: PLR0913
     profile = (
         KedroArchitectureProfile("reload.example", "1.0.0", "training", "ml_") if custom else None
     )
+    regression_path = workspace / "regression.json"
+    if schemas and enforce:
+        regression = json.loads(regression_path.read_text(encoding="utf-8"))
+        empty = next(case for case in regression["scenarios"] if case["id"] == "empty")
+        empty["raises"] = {
+            "type": "ValueError",
+            "node": "task-0000",
+            "message": "NVS001 task-0000 input df column 'x': expected dtype float64",
+        }
+        regression_path = workspace / "regression-schema.json"
+        regression_path.write_text(json.dumps(regression), encoding="utf-8")
     with chdir(workspace):
         facts = analyze_notebook_path(source)
         generate_kedro_project(
@@ -85,7 +98,7 @@ def _project(  # noqa: PLR0913
             package_name="reload_example",
             architecture_profile=profile,
             model_output="fitted_model",
-            regression_contract=load_notebook_regression_contract(workspace / "regression.json"),
+            regression_contract=load_notebook_regression_contract(regression_path),
             enforce_node_types=enforce,
             node_types=None
             if not typed
@@ -98,6 +111,13 @@ def _project(  # noqa: PLR0913
                     ("model", "sklearn.pipeline.Pipeline"),
                     ("fitted_model", "sklearn.pipeline.Pipeline"),
                     ("predictions", "numpy.ndarray"),
+                ),
+                schema_version="1.1" if schemas else "1.0",
+                dataframes=()
+                if not schemas
+                else (
+                    ("df", DataFrameSchema((("x", "float64"), ("y", "int64")))),
+                    ("X", DataFrameSchema((("x", "float64"),))),
                 ),
             ),
         )
@@ -157,6 +177,22 @@ def test_explicit_types_preserve_delivered_pipeline_and_fresh_model_reload(
     # External test execution never rewrites the generation-time declaration status.
     assert report["runtime_type_validation"] == "not_run"
     assert ("runtime_checks" in report) is enforce
+
+
+@pytest.mark.parametrize("custom", [False, True])
+@pytest.mark.parametrize("enforce", [False, True])
+def test_dataframe_schemas_preserve_delivered_pipeline_and_fresh_reload(
+    tmp_path: Path, *, custom: bool, enforce: bool
+) -> None:
+    project = _project(
+        tmp_path, custom=custom, nested=True, typed=True, enforce=enforce, schemas=True
+    )
+    result = _run(project, tmp_path)
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert "4 passed" in result.stdout
+    report = json.loads((project / "node-types.json").read_text(encoding="utf-8"))
+    assert report["dataframe_schema_validation"] == "not_run"
+    assert report["runtime_type_validation"] == "not_run"
 
 
 @pytest.mark.parametrize(("dataset", "code"), [("df", "NTV001"), ("X", "NTV002")])
@@ -225,10 +261,11 @@ print("Wheel runtime checks passed under -O without the converter")
 """
 
 
+@pytest.mark.parametrize("schemas", [False, True])
 def test_generated_runtime_is_packaged_and_works_from_a_wheel_without_converter_imports(
-    tmp_path: Path,
+    tmp_path: Path, *, schemas: bool
 ) -> None:
-    project = _project(tmp_path, nested=True, typed=True, enforce=True)
+    project = _project(tmp_path, nested=True, typed=True, enforce=True, schemas=schemas)
     built = subprocess.run(
         [sys.executable, "-m", "hatchling", "build", "-t", "wheel", "-d", str(tmp_path / "dist")],
         cwd=project,
@@ -251,6 +288,53 @@ def test_generated_runtime_is_packaged_and_works_from_a_wheel_without_converter_
     )
     assert result.returncode == 0, result.stdout + result.stderr
     assert "Wheel runtime checks passed under -O without the converter" in result.stdout
+
+
+@pytest.mark.parametrize(("dataset", "code"), [("df", "NVS001"), ("X", "NVS002")])
+def test_schema_errors_stop_optimized_kedro_before_model_publication(
+    tmp_path: Path, dataset: str, code: str
+) -> None:
+    project = _project(tmp_path, nested=True, typed=True, enforce=True, schemas=True)
+    data = json.loads((project / "node-types.json").read_text(encoding="utf-8"))["declaration"]
+    changed = (
+        DataFrameSchema((("missing", "float64"), ("y", "int64")))
+        if dataset == "df"
+        else DataFrameSchema((("x", "float32"),))
+    )
+    frames = {
+        name: DataFrameSchema(
+            tuple((column["name"], column["dtype"]) for column in item["columns"]),
+            item["allow_extra_columns"],
+        )
+        for name, item in data["dataframes"].items()
+    }
+    frames[dataset] = changed
+    source = project.parent / "workflow.ipynb"
+    target = project.parent / "wrong_schema"
+    with chdir(source.parent):
+        generate_kedro_project(
+            plan_notebook_path(source),
+            target,
+            source_facts=analyze_notebook_path(source),
+            package_name="wrong_schema",
+            node_types=NotebookTypeContract(
+                data["source_sha256"], tuple(data["datasets"].items()), "1.1", tuple(frames.items())
+            ),
+            enforce_node_types=True,
+            model_output="fitted_model",
+        )
+    result = subprocess.run(
+        [sys.executable, "-O", "-m", "kedro", "run"],
+        cwd=target,
+        env={**os.environ, "PYTHONPATH": str(target / "src"), "KEDRO_DISABLE_TELEMETRY": "1"},
+        capture_output=True,
+        text=True,
+        timeout=90,
+        check=False,
+    )
+    assert result.returncode != 0
+    assert code in result.stdout + result.stderr
+    assert not (target / "data/06_models").exists()
 
 
 _WRONG_MODEL = """import copy

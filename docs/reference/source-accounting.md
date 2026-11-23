@@ -67,6 +67,12 @@ that pass those boundaries. Annotation-only/default conversion and strict provid
 remain unchanged. Prepared checks do not establish source completeness, schema correctness or
 execution consent; see the [runtime contract](node-types.md#optional-runtime-class-enforcement).
 
+Type schema 1.1 additionally prepares declared column/dtype metadata checks without deriving
+constraints from source or rewriting instructions. Class checks precede associated metadata
+checks; stricter boundaries may intentionally fail before a source assertion on incompatible
+inputs. Such opt-in expectations remain separate from original regression/evaluation evidence.
+No metadata mismatch triggers coercion, reordering or an alternate reader option.
+
 Assertions in business nodes are copied from the source, including conditions, messages and
 order. Their docstrings identify `AssertionError` and warn that Python `-O` disables them.
 Other source/library exceptions propagate. Replacing a source assertion with an explicit

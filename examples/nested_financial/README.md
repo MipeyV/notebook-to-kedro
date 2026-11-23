@@ -32,6 +32,13 @@ incompatible declared inputs/outputs with TypeError, including under Python -O. 
 asserts stay intact; business data, column/dtype, probability and fitted-state checks are not
 inferred. The declaration report remains generation-time not_run even after external tests.
 
+`project-schema-checked.json` adds type contract 1.1 and explicit column/dtype metadata for
+raw snapshot/followup fields and scored snapshot/score/prediction fields. Extra columns remain
+allowed; target/maturity/value rules stay in the original source. The separate
+`regression-schema.json` preserves original fixtures/positive expectations and names the earlier
+empty-CSV dtype failure. Original settings, notebooks, data, regression.json and observations
+remain unchanged; this is selected metadata coverage, not complete schema/scientific acceptance.
+
 ## Temporal fitting
 
 Both workflows train on 2018-2020, select a decision threshold on 2022 and score 2024, retaining

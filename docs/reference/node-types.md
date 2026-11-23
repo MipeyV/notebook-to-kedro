@@ -6,8 +6,9 @@
 
 Notebook conversion can apply operator-declared dataset types to generated node signatures.
 This is separate from source facts, parameter-default hints and runtime validation. It is an
-opt-in annotation contract for the existing notebook path, not a DataFrame schema, general
-project specification or functional-workflow type adapter. Default generation is unchanged.
+opt-in contract for the existing notebook path: schema 1.0 supplies class annotations and
+schema 1.1 adds bounded DataFrame metadata. It is not a general project specification or
+functional-workflow type adapter. Default generation is unchanged.
 Optional runtime class enforcement is described below; annotation-only output remains the default.
 
 ## Declaration
@@ -100,12 +101,15 @@ Partially declared tuple outputs retain their ordered declared/`Any` slots. Docs
 explicit types from unresolved types and parameter-default hints.
 
 `runtime_type_validation` remains `not_run`; `dataframe_schema_validation` is `not_supported`.
+The latter describes schema 1.0. With declared DataFrame metadata in schema 1.1 it is `not_run`;
+neither status certifies an execution or an entire dataset.
 Generation never runs source/tests, checks actual values or coerces data. Annotation-only mode
 does not reject semantically wrong but structurally valid declarations: an integer computation
 can be declared as `str`. Users must review declarations and validate values independently.
 Generated regression/model-reload tests retain their supplied oracles/gaps. Running them does
 not rewrite generation-time status. Strict generated-project type checking, rich DataFrame/array
-schemas, custom model types and business-value validation remain future work.
+schemas beyond the bounded metadata contract below, custom model types and business-value
+validation remain future work.
 
 ## Optional runtime class enforcement
 
@@ -142,7 +146,7 @@ return object identity and original exceptions. It introduces no extra data copy
 pipeline ordering policy, import during analysis or engine dependency. Lower-level provider
 contracts and `render_node_function` remain unchanged.
 
-Checks use explicit exceptions and remain active under Python `-O`. Original notebook asserts
+Schema 1.0 checks use explicit exceptions and remain active under Python `-O`. Original notebook asserts
 remain original instructions and can still be disabled by `-O`; this feature does not replace
 them or provide business validation. An unfitted Pipeline or wrong-column DataFrame can pass
 its class check. The wrappers are not an execution sandbox or immutable security policy;
@@ -153,3 +157,81 @@ policies and `checked_tasks`. This records prepared enforcement, not passing exe
 `runtime_type_validation` stays `not_run` even after an external run; evidence must be collected
 separately. Default and annotation-only generation remain byte-compatible. See
 [ADR 0029](../decisions/0029-runtime-notebook-type-checks.md).
+
+## Bounded DataFrame schemas in version 1.1
+
+Schema 1.1 adds a required nonempty `dataframes` object to the same source-bound declaration.
+Each key must already be declared as `pandas.DataFrame` in `datasets`; Series, arrays and models
+cannot receive a frame schema. The existing `enforce_node_types` option controls runtime
+enforcement. Without it, schemas are declarative metadata only and no runtime helper is emitted.
+
+```json
+{
+  "schema_version": "1.1",
+  "source_sha256": "<SHA-256 of the original notebook bytes>",
+  "datasets": {"features": "pandas.DataFrame"},
+  "dataframes": {
+    "features": {
+      "columns": [
+        {"name": "income", "dtype": "float64"},
+        {"name": "age", "dtype": "int64"}
+      ],
+      "allow_extra_columns": false
+    }
+  }
+}
+```
+
+Column declarations are an ordered list; sorting enclosing JSON keys never changes their order.
+The Python API uses `DataFrameSchema(columns=(("income", "float64"), ("age", "int64")))` and
+`NotebookTypeContract(..., schema_version="1.1", dataframes=(("features", schema),))`. Metadata
+columns/pairs are plain immutable tuples and column/dtype names are plain Python strings.
+Names are nonempty printable strings of at most 128 characters; Unicode, spaces and quotes
+are allowed, but duplicate names and control characters are rejected. No expressions or
+dtype constructors are evaluated. Unknown JSON fields and duplicate object keys fail normally.
+
+There are at most 64 frame schemas and 1-256 columns per frame, inside the existing total
+64 KiB file/canonical contract budget. Extra-column policy is a real boolean, defaulting to
+false. Actual columns must always be unique flat strings; MultiIndex/non-string columns are
+unsupported. Index labels, index ordering and row count are outside the contract.
+
+| Policy | Meaning |
+| --- | --- |
+| `allow_extra_columns: false` | Exactly the declared columns, in declared order. |
+| `allow_extra_columns: true` | Additional columns may occur anywhere. Declared columns must still occur in their declared relative order; their dtypes are checked. Other column dtypes are unconstrained. |
+| Dtype | Compare `str(frame[column].dtype)` exactly with the declared label. No aliases, widening, casting, reordering, filling or data copies. |
+| Input metadata mismatch | `ValueError` prefix `NVS001`, before source execution. Class mismatches still use `NTV001` first for that frame. |
+| Output metadata mismatch | `ValueError` prefix `NVS002`, after the source call/class checks and before return to Kedro/catalog publication. Source side effects are not rolled back. |
+
+Allowed dtype labels are finite:
+
+- `bool`, `int8`, `int16`, `int32`, `int64`, `uint8`, `uint16`, `uint32`, `uint64`;
+- `float16`, `float32`, `float64`, `object`;
+- `Int8`, `Int16`, `Int32`, `Int64`, `UInt8`, `UInt16`, `UInt32`, `UInt64`, `Float32`, `Float64`, `boolean`;
+- `string`, `str`, `category`, `datetime64[ns]`, `datetime64[us]`, `timedelta64[ns]`, `timedelta64[us]`.
+
+These are rendered dtype labels, not physical-storage or category-vocabulary guarantees.
+Nullable dtypes allow missing entries; no null count, value range, binary-label, uniqueness,
+finite-value, leakage, fitted-state or scientific check is implied. A matching empty frame
+passes metadata checks, and original source assertions/errors still apply afterwards. Runtime
+version changes can change dtype labels and cause an intentional mismatch; no inferred repair
+or fallback dtype is substituted. Checks remain active under `-O` while original asserts may not.
+
+The generated helper composes schema checks with the unchanged class validator. It remains
+self-contained, uses only metadata reads and preserves source ASTs, signatures and object
+identity. Schema policies/`schema_checked_tasks` are reported under `node-types-runtime-v2`;
+`unschematized_dataframes` lists declared DataFrame datasets without schemas. Untyped datasets
+and undeclared columns remain separate gaps. Generation and external test runs never promote
+the report's `not_run` statuses to evidence. Schema 1.0 default/annotation/class-only output
+stays unchanged.
+
+The [schema-checked credit settings](../../examples/nested_financial/credit_pipeline/project-schema-checked.json)
+select [metadata declarations](../../examples/nested_financial/credit_pipeline/node-schemas.contract.json)
+for raw dates/followup and scored output metadata. They intentionally leave target handling to
+the original maturity/value rules and do not claim full schemas for all 28 typed datasets.
+The separate [schema regression contract](../../examples/nested_financial/credit_pipeline/regression-schema.json)
+keeps original fixtures and positive oracles. Its empty-CSV expectations explicitly identify the
+earlier dtype mismatch at the input boundary. The original notebook/data/regression file and
+historical observations are unchanged. Stricter metadata can change which error occurs first;
+review a separate opt-in expectation contract instead of silently weakening the schema or
+rewriting original evidence. See [ADR 0030](../decisions/0030-bounded-dataframe-schemas.md).

@@ -13,6 +13,11 @@ Preview shows the generated `_node_type_validation.py`, decorators and runtime p
 `node-types.json`. Generating still runs no model. A later explicit Kedro run enforces declared
 classes; source assertions and schema/value/fitted-state limitations remain separate.
 
+Select `project-schema-checked.json` to preview bounded DataFrame column/dtype declarations
+and the composed helper. This uses notebook type schema 1.1 and the same runtime switch;
+the wizard still does not infer or author schemas. The separate schema regression file records
+an earlier empty-CSV metadata failure while original example oracles remain unchanged.
+
 Status: first desktop prototype implemented on 2026-11-14. The Explorer's **Notebook to Kedro**
 view selects a local configuration and Python interpreter, displays inspection diagnostics,
 opens file previews and generates into a new project folder.

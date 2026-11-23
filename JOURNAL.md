@@ -1,5 +1,23 @@
 # Development Journal
 
+## 2026-11-23 - Bounded DataFrame metadata schemas
+
+Extended the independent notebook type contract to 1.1 with immutable ordered column/dtype
+declarations and explicit extra-column policies for declared DataFrame datasets. Shared
+generation binds the same dataset versions/profiles, validates finite metadata/budgets without
+pandas imports, and composes readonly runtime metadata checks with the unchanged class validator.
+Input/output ValueError diagnostics remain active under -O; no data conversion, reorder, fill,
+row-value inspection or source instruction rewrite is introduced. Reports keep prepared policy
+and schema gaps separate from execution evidence. Valid 1.0 paths retain their output.
+
+Testing exposed intended error-order differences: header-only CSVs have object dtypes and fail
+strict metadata before original asserts. Separate opt-in regression expectations record that
+failure while original notebooks, fixtures, expectations and observations stay intact. Raw
+target labels can be missing before maturity filtering, so the credit metadata schema covers
+dates/followup and scored numeric outputs, leaving target handling to original business rules.
+Positive pipelines/reloads, optimized failure controls and wheel-only runtime checks exercise
+the new path. [ADR 0030](docs/decisions/0030-bounded-dataframe-schemas.md) records its scope.
+
 ## 2026-11-23 - Optional runtime notebook dataset class enforcement
 
 Added an explicit enforce_node_types switch around the existing source-bound declarations.

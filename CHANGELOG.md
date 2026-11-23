@@ -40,6 +40,13 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Notebook type contract 1.1 adds bounded immutable DataFrame column/dtype metadata, ordered
+  columns and an explicit extra-column policy. The existing runtime option emits readonly
+  NVS001/NVS002 ValueError checks without coercion, source changes or ML analysis imports.
+  Reports retain schema gaps/not_run status; schema 1.0 output remains unchanged. New credit
+  settings use separate schema expectations for the earlier empty-CSV metadata error, preserving
+  original source/data/oracles. Row/index/value/null-count/fitted-state rules remain outside scope.
+
 - Optional notebook `enforce_node_types` prepares packaged runtime decorators for explicit
   dataset classes. Inputs are checked before source calls and outputs before returning to
   Kedro, with TypeError diagnostics active under Python -O. Exact builtin scalar/isinstance

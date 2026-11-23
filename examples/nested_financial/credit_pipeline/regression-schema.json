@@ -1,0 +1,256 @@
+{
+  "fixtures": {
+    "duplicate": {
+      "path": "data/duplicate.csv",
+      "sha256": "d0b1cbd26425e2577661e4298a67c254558738891dac1bd04b1969f4e3b802b9"
+    },
+    "empty": {
+      "path": "data/empty.csv",
+      "sha256": "0c3a61fe1e6ed6657351fa60385675c9c13ce77a7870101c031b0d39c806e080"
+    },
+    "immature": {
+      "path": "data/immature.csv",
+      "sha256": "7594c16b01765bb9549d57133bc7c704b732cb8583005a66417d6a4b6ab8e9ad"
+    },
+    "invalid_target": {
+      "path": "data/invalid_target.csv",
+      "sha256": "dc3b99adc4f787c530f684dad85ea59efc60a6c30771f50873f88c71efa96cd2"
+    },
+    "portfolio": {
+      "path": "data/portfolio.csv",
+      "sha256": "187febaefd828428cf3954f2009114e646f45aaa4b2142f544877d145b0f2a13"
+    }
+  },
+  "scenarios": [
+    {
+      "expected": {
+        "cohort_counts": {
+          "kind": "json",
+          "value": {
+            "embargo_rows": 1200,
+            "excluded_followup_rows": 0,
+            "test_rows": 600,
+            "train_rows": 1800,
+            "validation_rows": 600
+          }
+        },
+        "feature_names": {
+          "kind": "json",
+          "value": [
+            "numeric__monthly_income",
+            "numeric__existing_debt_payment",
+            "numeric__loan_amount",
+            "numeric__term_months",
+            "numeric__interest_rate_bp",
+            "numeric__utilization_pct",
+            "numeric__late_payments_12m",
+            "numeric__employment_months",
+            "numeric__internal_score",
+            "categorical__employment_type_other",
+            "categorical__employment_type_salaried",
+            "categorical__employment_type_self_employed",
+            "categorical__loan_purpose_debt_consolidation",
+            "categorical__loan_purpose_home_improvement",
+            "categorical__loan_purpose_personal",
+            "categorical__loan_purpose_vehicle",
+            "categorical__origination_channel_branch",
+            "categorical__origination_channel_broker",
+            "categorical__origination_channel_web"
+          ]
+        }
+      },
+      "id": "baseline",
+      "inputs": {
+        "raw": "portfolio"
+      },
+      "nodes": {
+        "task-0008": {
+          "expected": {
+            "matrix": {
+              "data": [
+                [
+                  2,
+                  0
+                ],
+                [
+                  1,
+                  1
+                ]
+              ],
+              "dtype": "int64",
+              "kind": "array"
+            },
+            "metrics": {
+              "kind": "json",
+              "value": {
+                "alert_rate": 0.25,
+                "average_precision": 0.83333333,
+                "brier": 0.158125,
+                "cost_units": 12,
+                "false_negatives": 1,
+                "false_positives": 0,
+                "positive_rate": 0.5,
+                "precision": 1.0,
+                "recall": 0.5,
+                "roc_auc": 0.75,
+                "threshold": 0.5,
+                "true_negatives": 2,
+                "true_positives": 1
+              }
+            }
+          },
+          "inputs": {
+            "test_predictions": {
+              "data": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "dtype": "int64",
+              "kind": "array"
+            },
+            "test_scores": {
+              "data": [
+                0.1,
+                0.4,
+                0.35,
+                0.8
+              ],
+              "dtype": "float64",
+              "kind": "array"
+            },
+            "threshold": {
+              "kind": "json",
+              "value": 0.5
+            },
+            "y_test": {
+              "data": [
+                0,
+                0,
+                1,
+                1
+              ],
+              "dtype": "int64",
+              "index": [
+                0,
+                1,
+                2,
+                3
+              ],
+              "index_name": null,
+              "kind": "series",
+              "name": "default_12m"
+            }
+          }
+        }
+      },
+      "parameters": {}
+    },
+    {
+      "id": "empty",
+      "inputs": {
+        "raw": "empty"
+      },
+      "nodes": {
+        "task-0001": {
+          "inputs": {
+            "raw": {
+              "fixture": "empty",
+              "kind": "csv"
+            }
+          },
+          "raises": {
+            "message": "NVS001 task-0001 input raw column 'snapshot_month': expected dtype int64",
+            "type": "ValueError"
+          }
+        }
+      },
+      "parameters": {},
+      "raises": {
+        "message": "NVS001 task-0001 input raw column 'snapshot_month': expected dtype int64",
+        "node": "task-0001",
+        "type": "ValueError"
+      }
+    },
+    {
+      "id": "duplicate",
+      "inputs": {
+        "raw": "duplicate"
+      },
+      "nodes": {
+        "task-0001": {
+          "inputs": {
+            "raw": {
+              "fixture": "duplicate",
+              "kind": "csv"
+            }
+          },
+          "raises": {
+            "message": "Duplicate entity IDs",
+            "type": "AssertionError"
+          }
+        }
+      },
+      "parameters": {},
+      "raises": {
+        "message": "Duplicate entity IDs",
+        "node": "task-0001",
+        "type": "AssertionError"
+      }
+    },
+    {
+      "id": "immature",
+      "inputs": {
+        "raw": "immature"
+      },
+      "nodes": {
+        "task-0001": {
+          "inputs": {
+            "raw": {
+              "fixture": "immature",
+              "kind": "csv"
+            }
+          },
+          "raises": {
+            "message": "No complete outcome windows",
+            "type": "AssertionError"
+          }
+        }
+      },
+      "parameters": {},
+      "raises": {
+        "message": "No complete outcome windows",
+        "node": "task-0001",
+        "type": "AssertionError"
+      }
+    },
+    {
+      "id": "invalid_target",
+      "inputs": {
+        "raw": "invalid_target"
+      },
+      "nodes": {
+        "task-0001": {
+          "inputs": {
+            "raw": {
+              "fixture": "invalid_target",
+              "kind": "csv"
+            }
+          },
+          "raises": {
+            "message": "Invalid target",
+            "type": "AssertionError"
+          }
+        }
+      },
+      "parameters": {},
+      "raises": {
+        "message": "Invalid target",
+        "node": "task-0001",
+        "type": "AssertionError"
+      }
+    }
+  ],
+  "schema_version": "1.0"
+}

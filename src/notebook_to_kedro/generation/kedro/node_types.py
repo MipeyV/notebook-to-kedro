@@ -9,6 +9,11 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from notebook_to_kedro.exceptions import ProjectGenerationError
+from notebook_to_kedro.generation.kedro.dataframe_schema import (
+    MAX_FRAME_SCHEMAS,
+    DataFrameSchema,
+    parse_frame_schemas,
+)
 
 if TYPE_CHECKING:
     from notebook_to_kedro.generation.kedro.generator import _PipelineEntry
@@ -42,18 +47,19 @@ class NotebookTypeContract:
     source_sha256: str
     datasets: tuple[tuple[str, str], ...]
     schema_version: str = "1.0"
+    dataframes: tuple[tuple[str, DataFrameSchema], ...] = ()
 
     def __post_init__(self) -> None:
         """Validate direct Python construction as strictly as JSON input."""
         if (
-            self.schema_version != "1.0"
+            self.schema_version not in ("1.0", "1.1")
             or not isinstance(self.source_sha256, str)
             or re.fullmatch(r"[0-9a-f]{64}", self.source_sha256) is None
             or not isinstance(self.datasets, tuple)
             or not 0 < len(self.datasets) <= MAX_DATASET_TYPES
         ):
             raise ProjectGenerationError(
-                "Node types require schema 1.0, source SHA-256 and datasets"
+                "Node types require schema 1.0/1.1, source SHA-256 and datasets"
             )
         names: set[str] = set()
         for pair in self.datasets:
@@ -71,19 +77,49 @@ class NotebookTypeContract:
                 )
             names.add(pair[0])
         object.__setattr__(self, "datasets", tuple(sorted(self.datasets)))
+        self._validate_frames()
         if (
             len(json.dumps(self.to_dict(), separators=(",", ":")).encode("utf-8"))
             > MAX_NODE_TYPE_BYTES
         ):
             raise ProjectGenerationError("Canonical node type contract exceeds 64 KiB")
 
+    def _validate_frames(self) -> None:
+        if (
+            not isinstance(self.dataframes, tuple)
+            or (self.schema_version == "1.0" and self.dataframes)
+            or (self.schema_version == "1.1" and not 0 < len(self.dataframes) <= MAX_FRAME_SCHEMAS)
+        ):
+            raise ProjectGenerationError(
+                "DataFrame declarations require schema 1.1 and bounded entries"
+            )
+        names: set[str] = set()
+        declared = dict(self.datasets)
+        for item in self.dataframes:
+            if (
+                not isinstance(item, tuple)
+                or len(item) != _PAIR_LENGTH
+                or not isinstance(item[0], str)
+                or item[0] in names
+                or declared.get(item[0]) != "pandas.DataFrame"
+                or not isinstance(item[1], DataFrameSchema)
+            ):
+                raise ProjectGenerationError(
+                    "DataFrame schemas must bind unique declared pandas.DataFrame datasets"
+                )
+            names.add(item[0])
+        object.__setattr__(self, "dataframes", tuple(sorted(self.dataframes)))
+
     def to_dict(self) -> dict[str, object]:
         """Export a detached, canonical declaration rather than execution evidence."""
-        return {
+        data: dict[str, object] = {
             "schema_version": self.schema_version,
             "source_sha256": self.source_sha256,
             "datasets": dict(self.datasets),
         }
+        if self.schema_version == "1.1":
+            data["dataframes"] = {name: schema.to_dict() for name, schema in self.dataframes}
+        return data
 
     @property
     def modules(self) -> tuple[str, ...]:
@@ -120,7 +156,7 @@ class NotebookTypeContract:
             "schema_version": "1.0",
             "declaration": self.to_dict(),
             "runtime_type_validation": "not_run",
-            "dataframe_schema_validation": "not_supported",
+            "dataframe_schema_validation": "not_run" if self.dataframes else "not_supported",
             "untyped_datasets": sorted(datasets - set(declared)),
             "nodes": [
                 {
@@ -131,6 +167,12 @@ class NotebookTypeContract:
                 for entry in entries
             ],
         }
+        if self.dataframes:
+            manifest["unschematized_dataframes"] = sorted(
+                name
+                for name, label in self.datasets
+                if label == "pandas.DataFrame" and name not in dict(self.dataframes)
+            )
         return json.dumps(manifest, sort_keys=True, indent=2) + "\n"
 
 
@@ -151,16 +193,22 @@ def load_notebook_type_contract(path: str | Path) -> NotebookTypeContract:
         if len(content) > MAX_NODE_TYPE_BYTES:
             raise ProjectGenerationError("Node type contract exceeds 64 KiB")
         data = json.loads(content.decode("utf-8"), object_pairs_hook=_unique_object)
+        fields = {"schema_version", "source_sha256", "datasets"}
+        if isinstance(data, dict) and data.get("schema_version") == "1.1":
+            fields.add("dataframes")
         if (
             not isinstance(data, dict)
-            or set(data) != {"schema_version", "source_sha256", "datasets"}
+            or set(data) != fields
             or not isinstance(data["datasets"], dict)
         ):
             raise ProjectGenerationError(
                 "Node type contract has missing, unknown or invalid fields"
             )
         return NotebookTypeContract(
-            data["source_sha256"], tuple(data["datasets"].items()), data["schema_version"]
+            data["source_sha256"],
+            tuple(data["datasets"].items()),
+            data["schema_version"],
+            () if data["schema_version"] != "1.1" else parse_frame_schemas(data["dataframes"]),
         )
     except (OSError, UnicodeError, ValueError, RecursionError) as error:
         raise ProjectGenerationError(f"Cannot read node type contract: {error}") from error

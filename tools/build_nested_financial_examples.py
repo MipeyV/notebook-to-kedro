@@ -70,6 +70,43 @@ def _source(cell: dict[str, Any]) -> str:
     return "".join(cell["source"])
 
 
+def _credit_frame_declarations(types: str) -> str:
+    """Declare selected numeric metadata while leaving other columns/datasets as explicit gaps."""
+    declaration = json.loads(types)
+    declaration["schema_version"] = "1.1"
+    declaration["dataframes"] = {
+        "raw": {
+            "columns": [
+                {"name": "snapshot_month", "dtype": "int64"},
+                {"name": "followup_months", "dtype": "int64"},
+            ],
+            "allow_extra_columns": True,
+        },
+        "scored_test": {
+            "columns": [
+                {"name": "snapshot_month", "dtype": "int64"},
+                {"name": "score", "dtype": "float64"},
+                {"name": "prediction", "dtype": "int64"},
+            ],
+            "allow_extra_columns": True,
+        },
+    }
+    return json.dumps(declaration, sort_keys=True, indent=2) + "\n"
+
+
+def _credit_schema_regression(original: dict[str, Any]) -> str:
+    """Keep original fixtures/oracles intact and declare the earlier empty-CSV metadata failure."""
+    regression = copy.deepcopy(original)
+    empty = next(case for case in regression["scenarios"] if case["id"] == "empty")
+    outcome = {
+        "type": "ValueError",
+        "message": "NVS001 task-0001 input raw column 'snapshot_month': expected dtype int64",
+    }
+    empty["raises"] = {**outcome, "node": "task-0001"}
+    empty["nodes"]["task-0001"]["raises"] = outcome
+    return json.dumps(regression, sort_keys=True, indent=2) + "\n"
+
+
 def _imports(*, calibrated: bool, stacking: bool) -> str:
     calibration = (
         "from sklearn.calibration import CalibratedClassifierCV\n"
@@ -356,6 +393,15 @@ def build_files() -> dict[Path, str]:
             checked = json.loads(files[root / "project-typed.json"])
             checked["enforce_node_types"] = True
             files[root / "project-checked.json"] = (
+                json.dumps(checked, sort_keys=True, indent=2) + "\n"
+            )
+            files[root / "node-schemas.contract.json"] = _credit_frame_declarations(
+                files[root / "node-types.contract.json"]
+            )
+            files[root / "regression-schema.json"] = _credit_schema_regression(regression)
+            checked["node_types"] = "node-schemas.contract.json"
+            checked["regression_contract"] = "regression-schema.json"
+            files[root / "project-schema-checked.json"] = (
                 json.dumps(checked, sort_keys=True, indent=2) + "\n"
             )
     return files

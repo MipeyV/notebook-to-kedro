@@ -64,7 +64,7 @@ The compatibility policy is authoritative for supported runtimes and library-sup
 | [Tests delivered with functional projects](reference/generated-workflow-tests.md) | Explicit expectations, standalone pytest tests, gaps/negative controls and opt-in fresh-environment wheel/Kedro bootstrap evidence. |
 | [Tests delivered with notebook projects](reference/generated-notebook-tests.md) | Explicit pinned CSV fixtures, typed observations, standalone pytest, missing-oracle reports and isolated procedural wheel/CLI checks. |
 | [Notebook model outputs](reference/model-outputs.md) | Explicit single-leaf versioned pickle storage, declaration preview and supplied fresh-process prediction checks. |
-| [Explicit notebook dataset types](reference/node-types.md) | Source-bound declarations, optional runtime class checks, untyped gaps and separate execution evidence. |
+| [Explicit notebook dataset types](reference/node-types.md) | Source-bound declarations, optional class/DataFrame metadata checks, schema gaps and separate execution evidence. |
 | [Local project operations](reference/local-operations.md) | Explicit root-anchored settings, typed inspect/plan/generate requests/results, real file previews and static-only publication boundaries. |
 
 ## Evaluation
@@ -169,6 +169,8 @@ the dedicated experiment reports for their frozen settings, decisions and limita
   operator declarations, source/dataset binding and separate runtime validation.
 - [ADR 0029 - Runtime notebook type checks](decisions/0029-runtime-notebook-type-checks.md):
   explicit opt-in class boundaries, source-preserving decorators and prepared-versus-executed status.
+- [ADR 0030 - Bounded DataFrame schemas](decisions/0030-bounded-dataframe-schemas.md):
+  explicit ordered columns/dtypes, readonly runtime checks and preserved source/evidence boundaries.
 - [ADR 0017 - Application-aware workflow preparation](decisions/0017-application-aware-workflow-preparation.md)
   records original project layout, metadata capture and subsequent explicit conversion.
 - [ADR 0016 - Explicit application distributions](decisions/0016-explicit-application-distributions.md)

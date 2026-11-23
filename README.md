@@ -85,8 +85,9 @@ runtime validation. Preview the credit example with `project plan` and
 To prepare runtime class checks, select `project-checked.json` in the same directory or use
 `--enforce-node-types` with `--node-types` when generating. Checks raise explicit `TypeError`
 before source execution for incompatible inputs and before returning incompatible outputs to
-Kedro. Generation still executes no notebook; these checks do not validate schemas, business
-values or fitted state and do not replace source assertions. See the
+Kedro. Schema 1.1 can additionally enforce declared DataFrame columns and dtype labels.
+Generation still executes no notebook; row values/fitted state and source assertion repair
+remain outside these checks. See the
 [runtime boundary](docs/reference/node-types.md#optional-runtime-class-enforcement).
 
 Apply a reusable [Kedro architecture profile](docs/guides/kedro-profiles.md) explicitly with

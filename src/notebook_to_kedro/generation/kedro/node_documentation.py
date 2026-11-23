@@ -30,6 +30,7 @@ def document_node(  # noqa: PLR0913
     input_types: Mapping[str, str | None] | None = None,
     output_types: tuple[str | None, ...] | None = None,
     runtime_checks: bool = False,
+    frame_checks: bool = False,
 ) -> str:
     """Add Google-style documentation and explicitly provisional interface annotations."""
     tree = ast.parse(code)
@@ -90,13 +91,7 @@ def document_node(  # noqa: PLR0913
         ]
     )
     assertions = sum(isinstance(node, ast.Assert) for node in ast.walk(function))
-    raises: list[str] = []
-    if assertions:
-        raises.append("    AssertionError: A preserved source assertion fails.")
-    if runtime_checks:
-        raises.append(
-            "    TypeError: A declared input/output class or return tuple is incompatible."
-        )
+    raises = _exception_descriptions(assertions, runtime=runtime_checks, frames=frame_checks)
     if raises:
         lines.extend(["Raises:", *raises, ""])
     lines.extend(
@@ -111,7 +106,9 @@ def document_node(  # noqa: PLR0913
     )
     if input_types is not None:
         lines.append(
-            "    Declared classes are checked on calls; values/schemas/fitted state are not."
+            "    Declared classes/frame metadata are checked; row values/fitted state are not."
+            if frame_checks
+            else "    Declared classes are checked on calls; values/schemas/fitted state are not."
             if runtime_checks
             else "    Explicit dataset types are declarations, not verified runtime contracts."
         )
@@ -124,3 +121,18 @@ def document_node(  # noqa: PLR0913
     documentation = "\n".join("    " + line if line else "" for line in literal.splitlines())
     _, _, body = code.partition("\n")
     return f"def {function.name}({arguments}) -> {result!r}:\n{documentation}\n{body}"
+
+
+def _exception_descriptions(assertions: int, *, runtime: bool, frames: bool) -> list[str]:
+    descriptions: list[str] = []
+    if assertions:
+        descriptions.append("    AssertionError: A preserved source assertion fails.")
+    if runtime:
+        descriptions.append(
+            "    TypeError: A declared input/output class or return tuple is incompatible."
+        )
+    if frames:
+        descriptions.append(
+            "    ValueError: Declared DataFrame columns or dtypes are incompatible."
+        )
+    return descriptions
