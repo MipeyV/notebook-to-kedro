@@ -1,5 +1,23 @@
 # Development Journal
 
+## 2026-11-23 - Optional runtime notebook dataset class enforcement
+
+Added an explicit enforce_node_types switch around the existing source-bound declarations.
+Shared generation validates flags/contracts before publication and emits a standalone stdlib
+helper plus decorators only for declared boundaries. Runtime TypeError diagnostics distinguish
+input mismatches (before source) and output class/tuple mismatches (before return to Kedro).
+Exact builtin scalar and isinstance object checks preserve return identity, source signatures,
+documentation and exceptions. Source body ASTs/asserts and default/annotation-only output stay
+unchanged; class checks are not schema/value/fitted-state checks, coercion or a sandbox.
+
+The credit builder adds a separate checked settings asset without modifying source/data/oracles
+or historical records. Unit controls exercise refusal timing, scalar/object policies, partial
+outputs, source-error identity and static planning. The small nested-model delivered tests run
+under both profiles with checks on/off; optimized Kedro failures leave no model output. An
+isolated optimized interpreter imports the generated wheel and enforces classes without a
+converter import. Generation-time reports retain not_run; actual evidence remains separate.
+[ADR 0029](docs/decisions/0029-runtime-notebook-type-checks.md) records the boundary.
+
 ## 2026-11-22 - Explicit notebook dataset type declarations
 
 Added an optional independently versioned declaration pinned to notebook bytes and actual

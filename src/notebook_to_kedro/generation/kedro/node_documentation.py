@@ -29,6 +29,7 @@ def document_node(  # noqa: PLR0913
     *,
     input_types: Mapping[str, str | None] | None = None,
     output_types: tuple[str | None, ...] | None = None,
+    runtime_checks: bool = False,
 ) -> str:
     """Add Google-style documentation and explicitly provisional interface annotations."""
     tree = ast.parse(code)
@@ -41,7 +42,11 @@ def document_node(  # noqa: PLR0913
     for name, annotation in ({} if input_types is None else input_types).items():
         if annotation is not None:
             hints[name] = annotation
-            descriptions[name] = "Explicitly declared dataset type; runtime validation not run."
+            descriptions[name] = (
+                "Explicitly declared dataset type; checked at this call boundary."
+                if runtime_checks
+                else "Explicitly declared dataset type; runtime validation not run."
+            )
     for name in task.parameters:
         parameter = parameters[name]
         argument = name.replace(".", "_")
@@ -85,14 +90,15 @@ def document_node(  # noqa: PLR0913
         ]
     )
     assertions = sum(isinstance(node, ast.Assert) for node in ast.walk(function))
+    raises: list[str] = []
     if assertions:
-        lines.extend(
-            [
-                "Raises:",
-                "    AssertionError: A preserved source assertion fails.",
-                "",
-            ]
+        raises.append("    AssertionError: A preserved source assertion fails.")
+    if runtime_checks:
+        raises.append(
+            "    TypeError: A declared input/output class or return tuple is incompatible."
         )
+    if raises:
+        lines.extend(["Raises:", *raises, ""])
     lines.extend(
         [
             "Notes:",
@@ -104,7 +110,11 @@ def document_node(  # noqa: PLR0913
         ]
     )
     if input_types is not None:
-        lines.append("    Explicit dataset types are declarations, not verified runtime contracts.")
+        lines.append(
+            "    Declared classes are checked on calls; values/schemas/fitted state are not."
+            if runtime_checks
+            else "    Explicit dataset types are declarations, not verified runtime contracts."
+        )
     # Unparse only the documentation literal, leaving every source instruction untouched.
     literal = ast.unparse(
         ast.Module(

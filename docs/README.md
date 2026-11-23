@@ -28,7 +28,7 @@ The compatibility policy is authoritative for supported runtimes and library-sup
 | Document | Status | Purpose |
 | --- | --- | --- |
 | [Project overview](product/overview.md) | Original design | Context, intended interfaces, scope and principles extracted from the old README. |
-| [Detailed project status](product/project-status.md) | Reviewed: 2026-11-22 | Current capability matrix, implemented APIs and historical measurement context. |
+| [Detailed project status](product/project-status.md) | Reviewed: 2026-11-23 | Current capability matrix, implemented APIs and historical measurement context. |
 | [Conversion roadmap](product/roadmap.md) | V1 completed; V2 ongoing | Existing milestones and checkboxes, without changing completion claims. |
 | [Product vision](product/product-vision.md) | Direction; future features proposed | Existing-project and greenfield entrypoints, reusable enterprise standards, evidence and commercial hypotheses. |
 
@@ -64,7 +64,7 @@ The compatibility policy is authoritative for supported runtimes and library-sup
 | [Tests delivered with functional projects](reference/generated-workflow-tests.md) | Explicit expectations, standalone pytest tests, gaps/negative controls and opt-in fresh-environment wheel/Kedro bootstrap evidence. |
 | [Tests delivered with notebook projects](reference/generated-notebook-tests.md) | Explicit pinned CSV fixtures, typed observations, standalone pytest, missing-oracle reports and isolated procedural wheel/CLI checks. |
 | [Notebook model outputs](reference/model-outputs.md) | Explicit single-leaf versioned pickle storage, declaration preview and supplied fresh-process prediction checks. |
-| [Explicit notebook dataset types](reference/node-types.md) | Source-bound finite type declarations, producer/consumer annotations, untyped gaps and unverified runtime boundaries. |
+| [Explicit notebook dataset types](reference/node-types.md) | Source-bound declarations, optional runtime class checks, untyped gaps and separate execution evidence. |
 | [Local project operations](reference/local-operations.md) | Explicit root-anchored settings, typed inspect/plan/generate requests/results, real file previews and static-only publication boundaries. |
 
 ## Evaluation
@@ -167,6 +167,8 @@ the dedicated experiment reports for their frozen settings, decisions and limita
   binds one declared leaf to local versioned storage without changing business code or inferring types.
 - [ADR 0028 - Explicit notebook types](decisions/0028-explicit-notebook-types.md):
   operator declarations, source/dataset binding and separate runtime validation.
+- [ADR 0029 - Runtime notebook type checks](decisions/0029-runtime-notebook-type-checks.md):
+  explicit opt-in class boundaries, source-preserving decorators and prepared-versus-executed status.
 - [ADR 0017 - Application-aware workflow preparation](decisions/0017-application-aware-workflow-preparation.md)
   records original project layout, metadata capture and subsequent explicit conversion.
 - [ADR 0016 - Explicit application distributions](decisions/0016-explicit-application-distributions.md)

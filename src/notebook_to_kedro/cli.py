@@ -309,6 +309,11 @@ def _add_source_parsers(subparsers: argparse._SubParsersAction[argparse.Argument
         type=Path,
         help="source-bound explicit notebook dataset type declarations (JSON)",
     )
+    generate_parser.add_argument(
+        "--enforce-node-types",
+        action="store_true",
+        help="emit runtime input/output class checks for explicit --node-types declarations",
+    )
 
 
 def _add_workflow_parsers(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
@@ -637,6 +642,7 @@ def _generate(args: argparse.Namespace) -> int:
         if args.regression_contract is None
         else load_notebook_regression_contract(args.regression_contract),
         model_output=args.model_output,
+        enforce_node_types=args.enforce_node_types,
         node_types=None
         if args.node_types is None
         else load_notebook_type_contract(args.node_types),

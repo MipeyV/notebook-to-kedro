@@ -82,6 +82,13 @@ actual dataset versions, preserves source bodies and reports missing types separ
 runtime validation. Preview the credit example with `project plan` and
 `examples/nested_financial/credit_pipeline/project-typed.json`.
 
+To prepare runtime class checks, select `project-checked.json` in the same directory or use
+`--enforce-node-types` with `--node-types` when generating. Checks raise explicit `TypeError`
+before source execution for incompatible inputs and before returning incompatible outputs to
+Kedro. Generation still executes no notebook; these checks do not validate schemas, business
+values or fitted state and do not replace source assertions. See the
+[runtime boundary](docs/reference/node-types.md#optional-runtime-class-enforcement).
+
 Apply a reusable [Kedro architecture profile](docs/guides/kedro-profiles.md) explicitly with
 `--architecture-profile examples/kedro_profiles/team_training.json` on both `plan` and `generate`.
 This initial schema configures the single pipeline's name and a function/node prefix, with

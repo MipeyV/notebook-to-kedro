@@ -59,6 +59,13 @@ Notebook settings additionally accept an optional root-contained `node_types` pa
 planning/generation load the bounded file, require its source hash/current dataset bindings,
 and preview/publish annotated wrappers plus an unverified declaration report. Functional
 settings reject this option. Measurement destinations cannot overlap the declaration file.
+
+Notebook settings may additionally set `enforce_node_types: true`. It requires `node_types`
+and prepares generated runtime class checks without executing them. Preview exposes the helper,
+decorators and policy report through the same service used by VS Code. False remains omitted
+from exported settings and preserves annotation-only/default output. No run/approval token or
+automatic change to generation-time validation status is introduced.
+
 Regression schema 1.1 may reference pinned JSON scenarios relative to its own directory;
 planning/generation capture them on each request and expose generated fixture bytes in previews.
 See the [fixture contract](generated-workflow-tests.md#scenario-fixtures-in-schema-11) for budgets,

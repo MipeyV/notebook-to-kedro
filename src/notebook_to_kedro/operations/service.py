@@ -83,6 +83,7 @@ def _prepare(
             if config.regression_contract is None
             else load_notebook_regression_contract(config.regression_contract),
             model_output=config.model_output,
+            enforce_node_types=config.enforce_node_types,
             node_types=None
             if config.node_types is None
             else load_notebook_type_contract(config.node_types),

@@ -40,6 +40,13 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Optional notebook `enforce_node_types` prepares packaged runtime decorators for explicit
+  dataset classes. Inputs are checked before source calls and outputs before returning to
+  Kedro, with TypeError diagnostics active under Python -O. Exact builtin scalar/isinstance
+  object policies do not coerce, copy data or inspect schemas/fitted state. Source instructions,
+  asserts, original errors and default/annotation-only output remain unchanged. API/CLI/local
+  settings share the renderer; reports describe prepared checks with runtime status not_run.
+
 - Optional source-bound notebook dataset type declarations apply finite scalar, pandas/NumPy
   and sklearn annotations to producer/consumer signatures through API/CLI/local settings.
   Stale hashes/unknown datasets/unsupported type expressions block publication. A declaration

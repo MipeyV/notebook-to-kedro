@@ -2,7 +2,7 @@
 
 [Documentation index](../README.md)
 
-Status: engine/operations/local-interface delivery priorities updated on 2026-11-22;
+Status: engine/operations/local-interface delivery priorities updated on 2026-11-23;
 historical V1/V2 checkboxes are preserved.
 The broader product direction is recorded in [Product vision](product-vision.md).
 
@@ -23,9 +23,11 @@ Generated wrappers now expose Google-style documentation and provisional annotat
 the shared renderer. Unknown types remain `Any`; scalar defaults supply review hints only.
 Source assertions remain faithful and documented. Opt-in source-bound notebook dataset
 declarations now supply finite DataFrame/array/model/scalar interface types and preserve
-untyped gaps separately from runtime validation. Rich schemas, functional type declarations,
-strict generated-project typing, runtime enforcement and a separate assertion-to-domain-exception
-refactor remain future work; adding annotations does not complete general project standardization.
+untyped gaps separately from runtime validation. Optional generated decorators now enforce
+declared dataset classes at call boundaries without coercion or source-body changes. Rich schemas,
+business-value checks, functional type declarations, strict generated-project typing and a separate
+assertion-to-domain-exception refactor remain future work; class checks do not complete general
+project standardization or provide scientific validation.
 
 | Order | Deliverable | Dependencies and acceptance gate | Status |
 | --- | --- | --- | --- |

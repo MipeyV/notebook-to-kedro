@@ -16,6 +16,11 @@ from notebook_to_kedro.generation.kedro.node_documentation import (
     annotation_namespace,
     document_node,
 )
+from notebook_to_kedro.generation.kedro.node_type_checks import (
+    RUNTIME_CHECK_SOURCE,
+    render_type_decorator,
+    runtime_check_policy,
+)
 from notebook_to_kedro.generation.kedro.node_types import NotebookTypeContract
 from notebook_to_kedro.generation.kedro.notebook_regression import render_notebook_regressions
 from notebook_to_kedro.generation.kedro.profiles import (
@@ -74,6 +79,7 @@ def generate_kedro_project(  # noqa: PLR0913
     regression_contract: NotebookRegressionContract | None = None,
     model_output: str | None = None,
     node_types: NotebookTypeContract | None = None,
+    enforce_node_types: bool = False,
 ) -> tuple[Path, ...]:
     """Validate, compile and publish a minimal project without executing source code."""
     files, copies = render_kedro_project(
@@ -84,6 +90,7 @@ def generate_kedro_project(  # noqa: PLR0913
         regression_contract=regression_contract,
         model_output=model_output,
         node_types=node_types,
+        enforce_node_types=enforce_node_types,
     )
     return write_project(Path(output_path), files, copies)
 
@@ -100,6 +107,7 @@ def render_kedro_project(  # noqa: PLR0912, PLR0913
     regression_contract: NotebookRegressionContract | None = None,
     model_output: str | None = None,
     node_types: NotebookTypeContract | None = None,
+    enforce_node_types: bool = False,
 ) -> tuple[dict[Path, str], tuple[tuple[Path, Path], ...]]:
     """Validate and render shared Kedro scaffolding without publishing or executing it."""
     if source_facts is not None:
@@ -115,7 +123,7 @@ def render_kedro_project(  # noqa: PLR0912, PLR0913
             raise ProjectGenerationError("Source package name collides with the generated package")
     profile = DEFAULT_KEDRO_PROFILE if architecture_profile is None else architecture_profile
     node_names = None if architecture_profile is None else resolve_node_names(plan, profile)
-    type_manifest = _node_type_manifest(plan, node_types, source_facts)
+    type_manifest = _node_type_manifest(plan, node_types, source_facts, enforce=enforce_node_types)
     storage = None
     if model_output is not None:
         if source_facts is None:
@@ -148,11 +156,19 @@ def render_kedro_project(  # noqa: PLR0912, PLR0913
             plan, package_name, profile.pipeline_name, node_names, order_after
         ),
     }
+    files.update(
+        {package_root / "_node_type_validation.py": RUNTIME_CHECK_SOURCE}
+        if enforce_node_types
+        else {}
+    )
     try:
-        files[pipeline_root / "nodes.py"] = _nodes(plan, node_names, node_types)
-        for path, content in files.items():
-            if path.suffix == ".py":
-                compile(content, path.as_posix(), "exec", dont_inherit=True)
+        files[pipeline_root / "nodes.py"] = _nodes(
+            plan,
+            node_names,
+            node_types,
+            runtime_package=package_name if enforce_node_types else None,
+        )
+        _compile_generated_python(files)
     except (SyntaxError, ValueError) as error:
         raise ProjectGenerationError(f"Cannot render valid project Python: {error}") from error
     if type_manifest is not None:
@@ -273,20 +289,42 @@ __all__ = ["create_pipeline"]
 '''
 
 
+def _compile_generated_python(files: Mapping[Path, str]) -> None:
+    for path, content in files.items():
+        if path.suffix == ".py":
+            compile(content, path.as_posix(), "exec", dont_inherit=True)
+
+
 def _node_type_manifest(
-    plan: ConversionPlan, contract: NotebookTypeContract | None, facts: NotebookFacts | None
+    plan: ConversionPlan,
+    contract: NotebookTypeContract | None,
+    facts: NotebookFacts | None,
+    *,
+    enforce: bool = False,
 ) -> str | None:
+    if not isinstance(enforce, bool) or (enforce and contract is None):
+        raise ProjectGenerationError(
+            "enforce_node_types requires a boolean and explicit node_types"
+        )
     if contract is None:
         return None
     if not isinstance(contract, NotebookTypeContract) or facts is None:
         raise ProjectGenerationError("Node types require a contract and original source facts")
-    return contract.bind(facts.notebook.content_sha256, _pipeline_entries(plan))
+    entries = _pipeline_entries(plan)
+    text = contract.bind(facts.notebook.content_sha256, entries)
+    if not enforce:
+        return text
+    manifest = json.loads(text)
+    manifest["runtime_checks"] = runtime_check_policy(entries, contract)
+    return json.dumps(manifest, sort_keys=True, indent=2) + "\n"
 
 
 def _nodes(
     plan: ConversionPlan,
     node_names: Mapping[str, str] | None = None,
     node_types: NotebookTypeContract | None = None,
+    *,
+    runtime_package: str | None = None,
 ) -> str:
     functions = [
         render_node_function(
@@ -296,7 +334,8 @@ def _nodes(
     ]
     namespace = annotation_namespace(
         "\n".join([*plan.imports, *functions]),
-        () if node_types is None else node_types.modules,
+        (() if node_types is None else node_types.modules)
+        + (() if runtime_package is None else ("validate",)),
     )
     sections = [
         '"""Source-preserving nodes with provisional types; review Any and parameter hints."""',
@@ -304,27 +343,42 @@ def _nodes(
         f"import builtins as {namespace}_builtins",
         f"import typing as {namespace}_typing",
         *(() if node_types is None else node_types.imports(namespace)),
+        *(
+            ()
+            if runtime_package is None
+            else (
+                f"from {runtime_package}._node_type_validation "
+                f"import validate_node as {namespace}_validate",
+            )
+        ),
     ]
     parameters = {parameter.name: parameter for parameter in plan.parameters}
     entries = _pipeline_entries(plan)
-    sections.extend(
-        document_node(
-            code,
-            entry.task,
-            parameters,
-            namespace,
-            input_types=None
-            if node_types is None
-            else {
-                argument: node_types.annotation(dataset, namespace)
-                for argument, dataset in entry.inputs.items()
-            },
-            output_types=None
-            if node_types is None
-            else tuple(node_types.annotation(dataset, namespace) for dataset in entry.outputs),
+    for entry, code in zip(entries, functions, strict=True):
+        decorator = (
+            ""
+            if node_types is None or runtime_package is None
+            else render_type_decorator(entry, node_types, namespace)
         )
-        for entry, code in zip(entries, functions, strict=True)
-    )
+        sections.append(
+            decorator
+            + document_node(
+                code,
+                entry.task,
+                parameters,
+                namespace,
+                input_types=None
+                if node_types is None
+                else {
+                    argument: node_types.annotation(dataset, namespace)
+                    for argument, dataset in entry.inputs.items()
+                },
+                output_types=None
+                if node_types is None
+                else tuple(node_types.annotation(dataset, namespace) for dataset in entry.outputs),
+                runtime_checks=bool(decorator),
+            )
+        )
     return "\n\n".join(section for section in sections if section).rstrip() + "\n"
 
 
