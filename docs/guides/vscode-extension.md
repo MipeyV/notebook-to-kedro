@@ -122,11 +122,23 @@ without an open folder: successful commands no longer leave results in a hidden 
 display errors retain completed operation/publication status and report a separate warning.
 
 Inspection exposes source diagnostics. Preview shows proposed file/copy counts and the existing
-regression-coverage/model-output declarations. After generation, the summary reads those two
+regression-coverage/model-output/node-types declarations. After generation, the summary reads those three
 named reports from the published project instead of reusing an earlier preview. Missing
 expectations remain visible, including boolean functional-workflow gaps. Installation, project
 execution, tests and reload remain unverified by this static extension workflow. A missing or
 unreadable summary artifact does not turn completed generation into a publication failure.
+
+Version 0.3.2 adds **Declared dataset types and schemas** in both the Explorer and summary.
+It presents the existing `node-types.json` report: source hash/declaration version, dataset
+classes, untyped datasets and, for schema 1.1, ordered columns/dtypes, extra-column policies
+and declared DataFrames without schemas. Runtime policies distinguish declarations only from
+prepared class/metadata checks and list their task IDs. Validation stays **Not run**, even
+when an unrelated imported execution report reports success. Row values, indexes, null counts
+and fitted state remain outside this contract. Missing reports are unavailable, not zero gaps;
+invalid/unsupported report shapes or statuses are unavailable without hiding other reports.
+The extension neither authors schemas nor duplicates the engine's conversion/validation rules.
+Select `examples/nested_financial/credit_pipeline/project-schema-checked.json`, then Preview
+to review the two authored schemas and their coverage gaps. Inspection alone emits no type report.
 
 Session timings measure each engine process, including Python startup and I/O, with observed
 success/blocked/failure/cancellation outcomes. Failed process diagnostics are retained. These
@@ -188,7 +200,11 @@ typing, cancellation before generation, confirmed generation, procedural noteboo
 preview and blocked diagnostics. They also exercise summary typing protection, generation with
 unreadable report artifacts, invalid-import preservation, separate execution declarations and
 failed-process timing reset. Protocol/presentation tests cover malformed/schema-incompatible responses,
-exit codes, traversal, content drift and argument separation. CI runs host checks under Xvfb
+type/schema declaration modes, schema gaps and false passing statuses. Host checks also preview
+the credit example's annotation/class/schema settings and read its published type report, including
+a report read failure that preserves generation success. These are static operations; no model is run.
+Other protocol tests cover exit codes, traversal, content drift and argument separation.
+CI runs host checks under Xvfb
 with locked Node tooling and locked core-only Python dependencies, then packages a VSIX artifact.
 
 `NTK_TEST_EMPTY_WINDOW=1` repeats host assertions without a workspace folder. The optional

@@ -40,7 +40,10 @@ architecture profile and optional regression expectations with the normal JSON e
   engine in the selected interpreter if it reports an import or schema error.
 
 - **Open Conversion and Validation Summary** shows the last operation, source diagnostics,
-  file counts, supplied regression gaps and session process timings in a read-only document.
+  file counts, supplied regression gaps, declared dataset types/DataFrame schemas and session
+  process timings in a read-only document. Version 0.3.2 shows ordered columns/dtypes, the
+  extra-column policy, untyped datasets and declared DataFrames without schemas. Runtime checks
+  are either not requested or prepared and not run; this does not certify data or model quality.
   Generation reads its published summary artifacts; an artifact read error preserves the
   completed generation result. Session process time includes Python startup/I/O and resets
   when configuration/interpreter selection changes.

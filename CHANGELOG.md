@@ -40,6 +40,11 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- VS Code 0.3.2 presents existing notebook dataset types and bounded DataFrame schemas in
+  Explorer and the read-only summary, including ordered metadata, extra-column policies,
+  untyped/schema gaps and prepared runtime tasks. Missing/unsupported reports stay unavailable;
+  declared and prepared checks remain separate from execution evidence. The engine is unchanged.
+
 - Notebook type contract 1.1 adds bounded immutable DataFrame column/dtype metadata, ordered
   columns and an explicit extra-column policy. The existing runtime option emits readonly
   NVS001/NVS002 ValueError checks without coercion, source changes or ML analysis imports.

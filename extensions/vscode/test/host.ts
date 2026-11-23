@@ -7,6 +7,7 @@ import type { Envelope, PreviewFile } from "../src/bridge";
 import type { ProjectController } from "../src/extension";
 import { checkConfigurationWizard } from "./setup-host";
 import { declaredJourney } from "./summary-fixture";
+import { checkTypeSummary } from "./type-summary-host";
 
 export async function run(): Promise<void> {
   const root = process.env.NTK_TEST_WORKSPACE!;
@@ -292,6 +293,7 @@ export async function run(): Promise<void> {
   await command("selectConfiguration", vscode.Uri.file(path.join(root, "notebook.json")));
   assert.equal((await command("inspect"))?.status, "inspected");
   assert.equal((await command("preview"))?.status, "planned");
+  await checkTypeSummary(root, project, command);
   await command("selectConfiguration", vscode.Uri.file(path.join(root, "blocked.json")));
   assert.equal((await command("inspect"))?.status, "blocked");
   const diagnostics = project.getChildren().find((item) => item.label.startsWith("Diagnostics"));

@@ -1,9 +1,14 @@
 import { open } from "node:fs/promises";
 import { createHash } from "node:crypto";
 import type { Envelope, Operation, PreviewFile } from "./bridge";
+import { nodeTypeSummary } from "./type-summary";
 
 export const REPORT_LIMIT = 8 * 1024 * 1024;
-export const ARTIFACT_NAMES = ["regression-coverage.json", "model-output.json"] as const;
+export const ARTIFACT_NAMES = [
+  "regression-coverage.json",
+  "model-output.json",
+  "node-types.json",
+] as const;
 
 export interface OperationTiming {
   operation: Operation;
@@ -308,6 +313,7 @@ export function summaryGroups(input: SummaryInput): SummaryGroup[] {
   }
   for (const message of input.artifactErrors)
     validation.rows.push({ label: "Report read", value: message });
+  if (result) groups.push(nodeTypeSummary(input.artifacts["node-types.json"]));
   groups.push(validation, {
     title: "Session process timings (includes Python startup and I/O)",
     rows: input.timings.map((timing) => ({

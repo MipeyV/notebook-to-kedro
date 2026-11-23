@@ -13,7 +13,7 @@ import {
   summaryMarkdown,
   type SummaryInput,
 } from "../src/summary";
-import { declaredJourney } from "./summary-fixture";
+import { declaredJourney, declaredNodeTypes } from "./summary-fixture";
 
 function input(): SummaryInput {
   const result: Envelope = {
@@ -56,6 +56,129 @@ test("preview summaries preserve missing expectations and cannot claim execution
   assert.match(text, /Not run by the extension/);
   assert.match(text, /Installation.*Not checked/);
   assert.doesNotMatch(text, /Reported passed/);
+});
+
+for (const schema of [false, true]) {
+  for (const enforced of [false, true]) {
+    test(`type declarations ${schema ? "1.1" : "1.0"}, enforcement ${enforced}, remain unexecuted`, () => {
+      const current = input();
+      current.artifacts["node-types.json"] = JSON.stringify(declaredNodeTypes(schema, enforced));
+      const text = summaryMarkdown(current);
+      assert.match(text, /Declared dataset classes.*3/);
+      assert.match(text, /Type: raw.*pandas.DataFrame/);
+      assert.match(text, /Untyped datasets.*model/);
+      assert.match(text, /Runtime type validation.*Not run/);
+      assert.match(
+        text,
+        enforced ? /Runtime enforcement.*Prepared; not run/ : /Runtime enforcement.*Not requested/,
+      );
+      if (enforced) assert.match(text, /Tasks with class checks.*task-0001, task-0002/);
+      if (schema) {
+        assert.match(text, /Ordered columns: raw.*income: float64; age: int64/);
+        assert.match(text, /Extra columns: raw.*Allowed/);
+        assert.match(text, /Declared DataFrames without schemas.*features/);
+        assert.match(text, /DataFrame metadata validation.*Not run/);
+        if (enforced) assert.match(text, /Tasks with metadata checks.*task-0001/);
+      } else assert.match(text, /Not supported by declaration 1.0/);
+      assert.match(text, /Row values \/ index \/ null counts \/ fitted state.*Not checked/);
+      assert.doesNotMatch(text, /Reported passed|Unavailable/);
+    });
+  }
+}
+
+test("invalid type reports cannot hide regression evidence or imply runtime validation", () => {
+  const changes = [
+    (data: any) => {
+      data.schema_version = "9.0";
+    },
+    (data: any) => {
+      data.runtime_type_validation = "passed";
+    },
+    (data: any) => {
+      data.dataframe_schema_validation = "passed";
+    },
+    (data: any) => {
+      data.declaration.schema_version = "9.0";
+    },
+    (data: any) => {
+      data.declaration.source_sha256 = "invalid";
+    },
+    (data: any) => {
+      data.declaration.datasets = [];
+    },
+    (data: any) => {
+      data.untyped_datasets = [false];
+    },
+    (data: any) => {
+      data.declaration.dataframes = [];
+    },
+    (data: any) => {
+      data.unschematized_dataframes = null;
+    },
+    (data: any) => {
+      data.declaration.dataframes.raw.allow_extra_columns = "false";
+    },
+    (data: any) => {
+      data.declaration.dataframes.raw.columns[0].dtype = {};
+    },
+    (data: any) => {
+      data.runtime_checks.enabled = false;
+    },
+    (data: any) => {
+      data.runtime_checks.implementation = "future";
+    },
+    (data: any) => {
+      data.runtime_checks.scope = "all_values";
+    },
+    (data: any) => {
+      data.runtime_checks.checked_tasks = "all";
+    },
+    (data: any) => {
+      data.runtime_checks.schema_checked_tasks = [null];
+    },
+  ];
+  const contents = [
+    "{",
+    "null",
+    ...changes.map((change) => {
+      const data = declaredNodeTypes(true, true);
+      change(data);
+      return JSON.stringify(data);
+    }),
+  ];
+  for (const content of contents) {
+    const current = input();
+    current.artifacts["node-types.json"] = content;
+    const groups = summaryGroups(current);
+    const types = groups.find((group) => group.title === "Declared dataset types and schemas")!;
+    assert.equal(types.rows.length, 1);
+    assert.match(types.rows[0].value, /Unavailable/);
+    assert.match(summaryMarkdown(current), /Supplied regression report.*Available/);
+    assert.match(summaryMarkdown(current), /Tests.*Not run by the extension/);
+  }
+});
+
+test("schema column order, closed policy and escaped names remain visible", () => {
+  const current = input();
+  const data = declaredNodeTypes(true, true);
+  data.declaration.dataframes.raw.allow_extra_columns = false;
+  data.declaration.dataframes.raw.columns = [
+    { name: "[click](command:evil)\n<script>", dtype: "string" },
+    { name: "age", dtype: "int64" },
+  ];
+  current.artifacts["node-types.json"] = JSON.stringify(data);
+  const text = summaryMarkdown(current);
+  assert.match(text, /Extra columns: raw.*Rejected/);
+  assert.doesNotMatch(text, /\[click\]\(command:evil\)|<script>|\n<script>/);
+});
+
+test("no type report or malformed regression report does not invent or hide declarations", () => {
+  const current = input();
+  assert.match(summaryMarkdown(current), /Type report.*Not available/);
+  current.artifacts["regression-coverage.json"] = "{";
+  current.artifacts["node-types.json"] = JSON.stringify(declaredNodeTypes());
+  assert.match(summaryMarkdown(current), /Type: raw.*pandas.DataFrame/);
+  assert.match(summaryMarkdown(current), /Static reports.*Unavailable/);
 });
 
 test("imported success stays separate from current validation and human savings", () => {
@@ -200,8 +323,12 @@ test("only known preview report files are displayed as static evidence", () => {
   current.result!.files = [
     { path: "regression-coverage.json", content: "report", sha256: "a".repeat(64) },
     { path: "arbitrary.json", content: "ignore", sha256: "b".repeat(64) },
+    { path: "node-types.json", content: "types", sha256: "c".repeat(64) },
   ];
-  assert.deepEqual(previewArtifacts(current.result!), { "regression-coverage.json": "report" });
+  assert.deepEqual(previewArtifacts(current.result!), {
+    "regression-coverage.json": "report",
+    "node-types.json": "types",
+  });
 });
 
 test("local report reads are bounded, UTF-8 and read only", async () => {

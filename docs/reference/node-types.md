@@ -96,6 +96,9 @@ does not accept this option; use `project plan` for the actual annotated file pr
 ## Evidence and limitations
 
 The generated `node-types.json` is a report, not an input declaration or runtime certificate.
+The VS Code 0.3.2 [conversion summary](../guides/vscode-extension.md#conversion-and-validation-summary)
+displays this report's declarations, gaps and prepared runtime policy after Preview or Generate.
+It does not author schemas or run checks; missing/unsupported reports remain unavailable.
 It records the canonical declaration, task/dataset bindings and sorted `untyped_datasets`.
 Partially declared tuple outputs retain their ordered declared/`Any` slots. Docstrings distinguish
 explicit types from unresolved types and parameter-default hints.
