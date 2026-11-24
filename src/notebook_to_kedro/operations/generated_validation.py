@@ -147,7 +147,7 @@ def run_generated_validation(
     worker_duration_ns = None
     try:
         _copy_snapshot(plan)
-        (request.output / "worker.py").write_text(WORKER, encoding="utf-8")
+        (request.output / "worker.py").write_text(WORKER, encoding="utf-8", newline="\n")
         worker_started = time.monotonic_ns()
         process_status, returncode, truncated = supervise_validation(
             request.python,

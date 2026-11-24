@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import io
 import json
 import os
@@ -219,6 +220,10 @@ def test_success_is_separate_evidence_and_only_copies_renderer_inventory(
         == "not_run"
     )
     assert json.loads((request_case.output / "report.json").read_text()) == report
+    written_worker_sha = hashlib.sha256(
+        (request_case.output / "worker.py").read_bytes()
+    ).hexdigest()
+    assert written_worker_sha == plan.to_dict()["worker_sha256"]
     report["status"] = "changed"
     assert result.to_dict()["status"] == "passed"
     with pytest.raises(LocalOperationError):
@@ -547,11 +552,14 @@ def test_cli_oserror_is_a_diagnostic(
 
 
 @pytest.mark.parametrize("platform", ["win32", "linux"])
-def test_process_tree_cleanup_platforms(platform: str, monkeypatch: pytest.MonkeyPatch) -> None:
+@pytest.mark.parametrize("already_exited", [False, True])
+def test_process_tree_cleanup_platforms(
+    platform: str, monkeypatch: pytest.MonkeyPatch, *, already_exited: bool
+) -> None:
     calls: list[str] = []
     process: Any = SimpleNamespace(
         pid=123456,
-        poll=lambda: None,
+        poll=lambda: 0 if already_exited else None,
         kill=lambda: calls.append("kill"),
         wait=lambda **_kwargs: calls.append("wait"),
     )
@@ -560,7 +568,11 @@ def test_process_tree_cleanup_platforms(platform: str, monkeypatch: pytest.Monke
     monkeypatch.setattr(os, "killpg", lambda *_args: calls.append("killpg"), raising=False)
     monkeypatch.setattr(signal, "SIGKILL", 9, raising=False)
     processes.terminate_validation_process(process)
-    assert calls == ["taskkill" if platform == "win32" else "killpg", "kill", "wait"]
+    assert calls == [
+        "taskkill" if platform == "win32" else "killpg",
+        *([] if already_exited else ["kill"]),
+        "wait",
+    ]
 
 
 @pytest.mark.parametrize("incomplete", [False, True])

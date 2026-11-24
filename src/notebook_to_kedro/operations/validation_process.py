@@ -115,7 +115,8 @@ def supervise_validation(
     for key in ("PYTHONPATH", "PYTHONHOME", "PYTEST_PLUGINS", "PYTEST_DEBUG"):
         environment.pop(key, None)
     creation_flags = (
-        subprocess.CREATE_NEW_PROCESS_GROUP | subprocess.CREATE_NO_WINDOW
+        cast("int", vars(subprocess)["CREATE_NEW_PROCESS_GROUP"])
+        | cast("int", vars(subprocess)["CREATE_NO_WINDOW"])
         if sys.platform == "win32"
         else 0
     )
