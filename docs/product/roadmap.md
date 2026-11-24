@@ -24,6 +24,10 @@ ordered metadata and prepared class/metadata tasks in Explorer and Markdown. It 
 reports distinct from no reported gaps and prepared checks distinct from execution evidence.
 Schema authoring, general quality profiles and broader project validation remain future work.
 
+Engine 0.2.0/extension 0.4.0 release preparation now bundles verified packages, changelog-derived
+notes, version pairing and checksums. CI review artifacts are separate from tag-triggered draft
+Releases and explicit public publication. This packaging increment does not widen runtime support.
+
 An initial explicit notebook validation operation now closes the supplied-test loop: review a
 renderer-bound snapshot, choose an existing runtime, confirm execution, then retain separate
 counts/logs/identities and interruption outcomes. VS Code 0.4.0 composes that shared boundary.

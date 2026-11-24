@@ -192,7 +192,43 @@ jobs:
         run: uv run mypy
 
       - name: Build distributions
-        run: uv build
+        run: uv build --no-build-isolation --python .venv/bin/python
+
+      - name: Smoke-test the installed engine wheel with core dependencies only
+        run: |
+          uv venv generated/release-engine-smoke --python 3.12
+          uv pip install --python generated/release-engine-smoke/bin/python dist/*.whl
+          smoke_python="$PWD/generated/release-engine-smoke/bin/python"
+          cd "$RUNNER_TEMP"
+          "$smoke_python" -I -c 'import importlib.metadata as m; import notebook_to_kedro as n; assert n.__version__ == m.version("notebook-to-kedro"); print(n.__version__)'
+          "$smoke_python" -I -m notebook_to_kedro.cli project --help
+
+      - name: Install Node for release-bundle verification
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: extensions/vscode/package-lock.json
+
+      - name: Package paired extension for release review
+        working-directory: extensions/vscode
+        run: |
+          npm ci --no-audit --no-fund
+          npm run package
+
+      - name: Verify release bundle without publication
+        run: >-
+          uv run python tools/prepare_release.py
+          --artifacts dist --vsix generated/notebook-to-kedro-*.vsix
+          --output generated/release-bundle --commit "$(git rev-parse HEAD)"
+
+      - name: Preserve reviewable release bundle
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: notebook-to-kedro-release-preview
+          path: generated/release-bundle/*
+          if-no-files-found: error
+          retention-days: 14
 
   tests:
     name: Tests on Python ${{ matrix.python-version }}

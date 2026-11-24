@@ -32,7 +32,7 @@ Notebook to Kedro requires Python 3.11, 3.12, or 3.13. Until the package is publ
 install the wheel attached to a GitHub Release:
 
 ```bash
-python -m pip install notebook_to_kedro-0.1.0-py3-none-any.whl
+python -m pip install notebook_to_kedro-0.2.0-py3-none-any.whl
 ```
 
 For development from a source checkout:
@@ -41,6 +41,11 @@ For development from a source checkout:
 uv sync --locked
 uv run notebook-to-kedro --help
 ```
+
+The 0.2.0 engine preview pairs with VS Code extension 0.4.0. Release bundles include the wheel,
+source archive, VSIX, installation notes, version manifest and SHA-256 checksums. Select the
+interpreter containing engine 0.2.0 after installing the VSIX. See the
+[release process](docs/guides/releasing.md) for preparation and draft/publication boundaries.
 
 ## Quick start
 

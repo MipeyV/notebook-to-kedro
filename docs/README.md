@@ -43,7 +43,7 @@ The compatibility policy is authoritative for supported runtimes and library-sup
 | [Local Ollama provider](guides/ollama-provider.md) | Provider setup, Python usage and loopback safety boundary. |
 | [Body-only Ollama provider](guides/ollama-node-body.md) | Body-generation API, provenance and limitations. |
 | [Durable response capture](guides/response-capture.md) | Capture, inspect and recover evidence without new model calls. |
-| [Release process](guides/releasing.md) | Prepare versions, tags and GitHub release artifacts. |
+| [Release process](guides/releasing.md) | Prepare verified engine/VSIX pairs, checksums, reviewed tags and draft GitHub Releases. |
 
 ## Reference
 
