@@ -150,7 +150,13 @@ def prepare_release(  # noqa: PLR0913
     notes = _notes(root, engine)
     wheel = artifacts / f"notebook_to_kedro-{engine}-py3-none-any.whl"
     source = artifacts / f"notebook_to_kedro-{engine}.tar.gz"
-    if {path.name for path in artifacts.iterdir()} != {wheel.name, source.name}:
+    built = {path.name for path in artifacts.iterdir()}
+    ignore = artifacts / ".gitignore"
+    if ignore.is_file() and not ignore.is_symlink():
+        with ignore.open("rb") as stream:
+            if stream.read(4) in {b"*", b"*\n", b"*\r\n"}:
+                built.discard(".gitignore")
+    if built != {wheel.name, source.name}:
         raise ValueError(
             "Build directory must contain exactly the selected wheel and source archive"
         )

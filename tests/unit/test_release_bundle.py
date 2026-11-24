@@ -80,6 +80,7 @@ def checkout(tmp_path: Path) -> Path:
 def _build(
     root: Path, *, wheel_change: str = "", vsix_change: str = "", sdist_change: str = ""
 ) -> Path:
+    (root / "dist/.gitignore").write_bytes(b"*")
     with zipfile.ZipFile(root / "dist/notebook_to_kedro-0.2.0-py3-none-any.whl", "w") as archive:
         content = (root / "src/notebook_to_kedro/__init__.py").read_bytes()
         archive.writestr(
@@ -184,6 +185,7 @@ def test_wrong_sdist_refuses_bundle(checkout: Path, release_tool: ModuleType, ch
         "tag",
         "commit",
         "artifacts",
+        "bookkeeping",
         "output",
         "uncompiled",
     ],
@@ -216,6 +218,8 @@ def test_metadata_and_publication_inputs_fail_before_writes(
         commit = "short"
     elif change == "artifacts":
         (checkout / "dist/old.whl").write_bytes(b"old")
+    elif change == "bookkeeping":
+        (checkout / "dist/.gitignore").write_bytes(b"unexpected")
     elif change == "output":
         output = checkout / "src/bundle"
     else:

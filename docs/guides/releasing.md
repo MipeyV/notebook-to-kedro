@@ -44,6 +44,7 @@ the supported source/runtime boundaries still apply.
    bundle destination under `generated/`. The tool refuses version/lock mismatches, changed
    wheel/source/VSIX contents, stale artifact names and existing bundle destinations. It uses
    the shared staging writer and verifies copied checksums. It creates no tag or GitHub Release.
+   The standard uv `*` `.gitignore` build marker is ignored and is never a release asset.
 
 5. Open and merge the release pull request after CI succeeds. The quality job installs the
    actual wheel in a separate core-only environment and runs its CLI from outside the checkout.
