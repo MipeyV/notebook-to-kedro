@@ -1,5 +1,19 @@
 # Development Journal
 
+## 2026-11-24 - Paired 0.2.0 engine / 0.4.0 extension release preparation
+
+Prepared the engine version/uv lock and dated 0.2.0 changelog while retaining the 0.1.0 history.
+The existing extension stays at 0.4.0. A repository-owned bundle tool verifies source/compiled
+artifact bytes and paired metadata before using the shared writer to stage the wheel, sdist,
+VSIX, concise notes, manifest and checksums. Version/tag/stale-content refusals precede writes;
+post-copy checks prevent accepting a changed bundle. The tool performs no external publication.
+
+CI now reviews the six-file bundle and tests the actual wheel in a separate core-only environment.
+The tag workflow checks main ancestry, Python/frontend/host checks and the complete pair before
+creating a draft; 0.x drafts are marked prerelease. Public publication, PyPI/Marketplace upload,
+new runtime coverage and pilot/scientific approval remain separate. No tag or Release is created
+by this preparation PR.
+
 ## 2026-11-24 - Explicit generated notebook test validation
 
 Added a shared read-only review and explicitly approved runtime boundary for generated notebooks

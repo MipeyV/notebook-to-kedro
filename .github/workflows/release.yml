@@ -22,6 +22,18 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Require a reviewed main commit
+        run: git merge-base --is-ancestor HEAD origin/main
+
+      - name: Install Node
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: extensions/vscode/package-lock.json
 
       - name: Install uv
         uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
@@ -54,14 +66,60 @@ jobs:
         run: uv run pytest -m "not external and not llm"
 
       - name: Build distributions
-        run: uv build
+        run: uv build --no-build-isolation --python .venv/bin/python
+
+      - name: Smoke-test the installed engine wheel with core dependencies only
+        run: |
+          uv venv generated/release-engine-smoke --python 3.12
+          uv pip install --python generated/release-engine-smoke/bin/python dist/*.whl
+          smoke_python="$PWD/generated/release-engine-smoke/bin/python"
+          cd "$RUNNER_TEMP"
+          "$smoke_python" -I -c 'import importlib.metadata as m; import notebook_to_kedro as n; assert n.__version__ == m.version("notebook-to-kedro"); print(n.__version__)'
+          "$smoke_python" -I -m notebook_to_kedro.cli project --help
+
+      - name: Install locked extension tools
+        working-directory: extensions/vscode
+        run: npm ci --no-audit --no-fund
+
+      - name: Check extension formatting and protocol
+        working-directory: extensions/vscode
+        run: |
+          npm run format:check
+          npm test
+
+      - name: Test actual extension commands
+        working-directory: extensions/vscode
+        env:
+          NTK_TEST_PYTHON: ${{ github.workspace }}/.venv/bin/python
+        run: xvfb-run -a npm run test:host
+
+      - name: Test folderless extension commands
+        working-directory: extensions/vscode
+        env:
+          NTK_TEST_PYTHON: ${{ github.workspace }}/.venv/bin/python
+          NTK_TEST_EMPTY_WINDOW: "1"
+        run: xvfb-run -a npm run test:host
+
+      - name: Package paired extension
+        working-directory: extensions/vscode
+        run: npm run package
+
+      - name: Verify and prepare release bundle
+        run: >-
+          uv run python tools/prepare_release.py
+          --artifacts dist --vsix generated/notebook-to-kedro-*.vsix
+          --output generated/release-bundle
+          --commit "$(git rev-parse HEAD)" --tag "$GITHUB_REF_NAME"
 
       - name: Create draft GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: >-
-          gh release create "$GITHUB_REF_NAME" dist/*
-          --draft
-          --generate-notes
-          --title "$GITHUB_REF_NAME"
-          --verify-tag
+        shell: bash
+        run: |
+          preview_args=()
+          if [[ "$GITHUB_REF_NAME" == v0.* ]]; then
+            preview_args+=(--prerelease)
+          fi
+          gh release create "$GITHUB_REF_NAME" generated/release-bundle/* \
+            --draft --notes-file generated/release-bundle/RELEASE_NOTES.md \
+            --title "Notebook to Kedro $GITHUB_REF_NAME" --verify-tag "${preview_args[@]}"

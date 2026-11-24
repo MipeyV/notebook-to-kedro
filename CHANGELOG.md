@@ -7,6 +7,42 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+No changes recorded.
+
+## [0.2.0] - 2026-11-24
+
+### Release overview
+
+**Pre-release:** engine **0.2.0**, paired with VS Code extension **0.4.0**.
+The public API and supported source subset are still evolving.
+
+- Convert supported procedural notebooks and explicit functional workflows into reviewable
+  Kedro projects, with source accounting, catalog/parameter extraction and naming profiles.
+- Use the VS Code interface to configure, inspect, preview and generate projects locally.
+- Generate documented nodes with type hints; optionally declare dataset classes and bounded
+  DataFrame column/dtype schemas, with explicit runtime checks and visible coverage gaps.
+- Deliver tests from supplied fixtures/oracles, including optional model save/fresh-process reload.
+- Explicitly validate generated notebook test snapshots with a selected runtime, reviewed hashes,
+  cancellation/deadlines, bounded logs and separate execution evidence.
+
+Install the engine wheel with Python **3.11-3.13**:
+
+```bash
+python -m pip install notebook_to_kedro-0.2.0-py3-none-any.whl
+```
+
+Install `notebook-to-kedro-0.4.0.vsix` using **Extensions: Install from VSIX** in VS Code
+**1.145+**, then choose the interpreter containing engine 0.2.0. ML runtime dependencies are
+installed separately in the environment chosen for project execution.
+
+This is a bounded local engineering tool: arbitrary notebooks, greenfield prompt generation,
+general Kedro refactoring and automatic environment provisioning are not supported. Supplied
+tests do not establish scientific acceptance; source assertions, missing oracles and original
+modeling limitations remain explicit. The validation copy is not a security sandbox. Local
+Ollama proposals and consent-gated experiments remain separate from faithful generation.
+
+The release includes the wheel, source archive, VSIX, paired-version manifest and `SHA256SUMS`.
+
 ### Fixed
 
 - VS Code 0.3.1 reveals its panel after configuration selection and automatically opens the
@@ -502,11 +538,6 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   runtime and Ollama provenance, atomic exclusive writes, offline revalidation and execution, and
   CLI comparison of acceptance, behavioral regressions and live-provider latency.
 
-### Planned
-
-- Optional local LLM providers and hybrid semantic planning.
-- Versioned code-generation and review datasets.
-
 ### Changed
 
 - Node-code validator `node-code-validation-v4` extends whole-body AST preservation to tasks
@@ -548,5 +579,6 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   transformations produce diagnostics instead of speculative conversions.
 - LLM-assisted planning and code generation are not included in this release.
 
-[Unreleased]: https://github.com/MipeyV/notebook-to-kedro/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/MipeyV/notebook-to-kedro/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/MipeyV/notebook-to-kedro/releases/tag/v0.2.0
 [0.1.0]: https://github.com/MipeyV/notebook-to-kedro/releases/tag/v0.1.0

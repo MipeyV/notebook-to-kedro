@@ -13,8 +13,8 @@ from notebook_to_kedro import (
 
 
 def test_package_exposes_version() -> None:
-    """The initial package exposes its version through the public API."""
-    assert __version__ == "0.1.0"
+    """The package exposes its release version through the public API."""
+    assert __version__ == "0.2.0"
 
 
 def test_package_exposes_public_analysis_api() -> None:

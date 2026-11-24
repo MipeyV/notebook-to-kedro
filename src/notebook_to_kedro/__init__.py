@@ -60,7 +60,7 @@ from notebook_to_kedro.operations import (
 )
 from notebook_to_kedro.semantic import PlannerMode
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 __all__ = [
     "DEFAULT_KEDRO_PROFILE",
