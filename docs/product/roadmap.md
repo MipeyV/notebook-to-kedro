@@ -2,7 +2,7 @@
 
 [Documentation index](../README.md)
 
-Status: engine/operations/local-interface delivery priorities updated on 2026-11-23;
+Status: engine/operations/local-interface delivery priorities updated on 2026-11-24;
 historical V1/V2 checkboxes are preserved.
 The broader product direction is recorded in [Product vision](product-vision.md).
 
@@ -22,7 +22,13 @@ runtime readiness, training-only time and prospective human-effort measurement r
 The 0.3.2 summary now presents existing notebook type/schema declarations, uncovered datasets,
 ordered metadata and prepared class/metadata tasks in Explorer and Markdown. It keeps missing
 reports distinct from no reported gaps and prepared checks distinct from execution evidence.
-Schema authoring, general quality profiles and running project validation remain separate work.
+Schema authoring, general quality profiles and broader project validation remain future work.
+
+An initial explicit notebook validation operation now closes the supplied-test loop: review a
+renderer-bound snapshot, choose an existing runtime, confirm execution, then retain separate
+counts/logs/identities and interruption outcomes. VS Code 0.4.0 composes that shared boundary.
+Functional/arbitrary-project validation, environment provisioning/locking and general execution
+policies remain future work; passing supplied tests does not establish scientific acceptance.
 
 Generated wrappers now expose Google-style documentation and provisional annotations through
 the shared renderer. Unknown types remain `Any`; scalar defaults supply review hints only.

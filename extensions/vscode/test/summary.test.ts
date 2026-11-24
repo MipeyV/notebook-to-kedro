@@ -53,7 +53,7 @@ test("preview summaries preserve missing expectations and cannot claim execution
   assert.match(text, /fitted\\_model/);
   assert.match(text, /missing pipeline expectations.*Yes/);
   assert.match(text, /SA009/);
-  assert.match(text, /Not run by the extension/);
+  assert.match(text, /Not run by static operations/);
   assert.match(text, /Installation.*Not checked/);
   assert.doesNotMatch(text, /Reported passed/);
 });
@@ -154,7 +154,7 @@ test("invalid type reports cannot hide regression evidence or imply runtime vali
     assert.equal(types.rows.length, 1);
     assert.match(types.rows[0].value, /Unavailable/);
     assert.match(summaryMarkdown(current), /Supplied regression report.*Available/);
-    assert.match(summaryMarkdown(current), /Tests.*Not run by the extension/);
+    assert.match(summaryMarkdown(current), /Tests.*Not run by static operations/);
   }
 });
 
@@ -219,7 +219,7 @@ test("functional node-case maps and boolean gaps retain their original report me
   assert.match(text, /Node scenarios: train.*0/);
   assert.match(text, /missing memory result expectations.*Yes/);
   assert.match(text, /missing pipeline expectations.*No/);
-  assert.match(text, /Tests.*Not run by the extension/);
+  assert.match(text, /Tests.*Not run by static operations/);
 });
 
 for (const [label, mutate] of Object.entries<(data: Record<string, any>) => void>({
@@ -305,7 +305,7 @@ test("malformed static reports remain unavailable and never promote validation",
     current.artifacts["regression-coverage.json"] = content;
     const text = summaryMarkdown(current);
     assert.match(text, /Unavailable/);
-    assert.match(text, /Tests.*Not run by the extension/);
+    assert.match(text, /Tests.*Not run by static operations/);
   }
 });
 
@@ -344,6 +344,7 @@ test("local report reads are bounded, UTF-8 and read only", async () => {
     await assert.rejects(readLocalReport(filename, 8), /bounded regular/);
     await fs.writeFile(filename, Buffer.from([0xff, 0xfe]));
     await assert.rejects(readLocalReport(filename));
+    assert.equal(await readLocalReport(filename, 8, false), "\uFFFD\uFFFD");
     await assert.rejects(readLocalReport(directory));
   } finally {
     assert.equal(path.dirname(path.resolve(directory)), base);

@@ -89,6 +89,7 @@ from notebook_to_kedro.operations import (
     run_local_operation,
     summarize_conversion_measurements,
 )
+from notebook_to_kedro.operations.validation_cli import add_validation_parsers, validation_cli
 from notebook_to_kedro.semantic import (
     DEFAULT_OLLAMA_BASE_URL,
     DEFAULT_OLLAMA_TIMEOUT_SECONDS,
@@ -178,6 +179,7 @@ def _parser() -> argparse.ArgumentParser:
 def _add_project_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
     parser = subparsers.add_parser("project", help="use explicit local project configuration")
     actions = parser.add_subparsers(dest="project_action", required=True)
+    add_validation_parsers(actions)
     for name in ("inspect", "plan", "generate"):
         action = actions.add_parser(name)
         action.add_argument("configuration", type=Path, help="local project JSON settings")
@@ -210,6 +212,8 @@ def _add_project_parser(subparsers: argparse._SubParsersAction[argparse.Argument
 
 
 def _project_operation(args: argparse.Namespace) -> int:
+    if args.project_action in {"validation-plan", "validate"}:
+        return validation_cli(args)
     if args.project_action == "prepare-effort-comparison":
         paths = prepare_effort_comparison(
             args.directory,

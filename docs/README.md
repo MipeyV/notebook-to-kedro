@@ -28,7 +28,7 @@ The compatibility policy is authoritative for supported runtimes and library-sup
 | Document | Status | Purpose |
 | --- | --- | --- |
 | [Project overview](product/overview.md) | Original design | Context, intended interfaces, scope and principles extracted from the old README. |
-| [Detailed project status](product/project-status.md) | Reviewed: 2026-11-23 | Current capability matrix, implemented APIs and historical measurement context. |
+| [Detailed project status](product/project-status.md) | Reviewed: 2026-11-24 | Current capability matrix, implemented APIs and historical measurement context. |
 | [Conversion roadmap](product/roadmap.md) | V1 completed; V2 ongoing | Existing milestones and checkboxes, without changing completion claims. |
 | [Product vision](product/product-vision.md) | Direction; future features proposed | Existing-project and greenfield entrypoints, reusable enterprise standards, evidence and commercial hypotheses. |
 
@@ -66,6 +66,7 @@ The compatibility policy is authoritative for supported runtimes and library-sup
 | [Notebook model outputs](reference/model-outputs.md) | Explicit single-leaf versioned pickle storage, declaration preview and supplied fresh-process prediction checks. |
 | [Explicit notebook dataset types](reference/node-types.md) | Source-bound declarations, optional class/DataFrame metadata checks, schema gaps and separate execution evidence. |
 | [Local project operations](reference/local-operations.md) | Explicit root-anchored settings, typed inspect/plan/generate requests/results, real file previews and static-only publication boundaries. |
+| [Explicit generated validation](reference/generated-project-validation.md) | Reviewed notebook test snapshots, selected runtime, consent-bound execution, cancellation and separate local evidence. |
 
 ## Evaluation
 
@@ -171,6 +172,8 @@ the dedicated experiment reports for their frozen settings, decisions and limita
   explicit opt-in class boundaries, source-preserving decorators and prepared-versus-executed status.
 - [ADR 0030 - Bounded DataFrame schemas](decisions/0030-bounded-dataframe-schemas.md):
   explicit ordered columns/dtypes, readonly runtime checks and preserved source/evidence boundaries.
+- [ADR 0031 - Explicit generated validation](decisions/0031-explicit-generated-validation.md):
+  reviewed private notebook test snapshots, bounded execution and separate evidence.
 - [ADR 0017 - Application-aware workflow preparation](decisions/0017-application-aware-workflow-preparation.md)
   records original project layout, metadata capture and subsequent explicit conversion.
 - [ADR 0016 - Explicit application distributions](decisions/0016-explicit-application-distributions.md)

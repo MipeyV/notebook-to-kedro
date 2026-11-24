@@ -9,6 +9,11 @@ async function main() {
   await fs.mkdir(generated, { recursive: true });
   const workspace = await fs.mkdtemp(path.join(generated, "vscode-host-"));
   await fs.cp(
+    path.join(repository, "examples/model_reload"),
+    path.join(workspace, "model_reload"),
+    { recursive: true },
+  );
+  await fs.cp(
     path.join(repository, "examples/nested_financial/credit_pipeline"),
     path.join(workspace, "credit_pipeline"),
     { recursive: true },

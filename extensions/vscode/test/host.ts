@@ -8,6 +8,7 @@ import type { ProjectController } from "../src/extension";
 import { checkConfigurationWizard } from "./setup-host";
 import { declaredJourney } from "./summary-fixture";
 import { checkTypeSummary } from "./type-summary-host";
+import { checkGeneratedValidation } from "./validation-host";
 
 export async function run(): Promise<void> {
   const root = process.env.NTK_TEST_WORKSPACE!;
@@ -175,7 +176,7 @@ export async function run(): Promise<void> {
   const summary = await project.showSummary();
   assert.ok(summary);
   assert.match(summary.getText(), /Last recorded conversion/);
-  assert.match(summary.getText(), /Not run by the extension/);
+  assert.match(summary.getText(), /Not run by static operations/);
   assert.match(summary.getText(), /Session process timings/);
   assert.match(summary.getText(), /plan: planned/);
   const beforeTyping = summary.getText();
@@ -191,7 +192,7 @@ export async function run(): Promise<void> {
     imported!.getText(),
     /Not verified; importing does not validate the current project/,
   );
-  assert.match(imported!.getText(), /Tests.*Not run by the extension/);
+  assert.match(imported!.getText(), /Tests.*Not run by static operations/);
   assert.equal(await fs.readFile(executionPath, "utf8"), JSON.stringify(declaredJourney()));
   const malformed = path.join(root, "malformed-evidence.json");
   await fs.writeFile(malformed, "{}", "utf8");
@@ -294,6 +295,7 @@ export async function run(): Promise<void> {
   assert.equal((await command("inspect"))?.status, "inspected");
   assert.equal((await command("preview"))?.status, "planned");
   await checkTypeSummary(root, project, command);
+  await checkGeneratedValidation(root, python, project);
   await command("selectConfiguration", vscode.Uri.file(path.join(root, "blocked.json")));
   assert.equal((await command("inspect"))?.status, "blocked");
   const diagnostics = project.getChildren().find((item) => item.label.startsWith("Diagnostics"));
