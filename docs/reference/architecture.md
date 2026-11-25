@@ -65,10 +65,14 @@ supplied probes and oracles; declarations and later execution evidence remain di
 [ADR 0026](../decisions/0026-explicit-notebook-model-output.md) and
 [ADR 0027](../decisions/0027-generated-model-reload-checks.md).
 
-Status: implementation boundaries reviewed on 2026-11-19. The
+Status: implementation boundaries and compiler alignment reviewed on 2026-11-25. The
 [proposed evolution](#proposed-evolution) is separate from current capabilities.
 
 ## Objective
+
+The broader [ML Engineering Compiler vision](../product/product-vision.md) extends the staged
+compiler direction already present here. Current facts/plans and the Kedro backend are reusable
+foundations; this document does not introduce a new IR, pass manager, policy engine or API.
 
 Notebook to Kedro is designed as a staged compiler assisted by an optional semantic planner:
 
@@ -587,8 +591,11 @@ analysis and normal generation remain free of notebook/model execution.
 
 [ADR 0004](../decisions/0004-shared-engine-and-local-interface.md) defines a reusable engine
 composed into operations, exposed first through API/CLI and later a local app or VS Code extension.
-The UI choice is open and must not own transformation logic. Local configuration and reviewable
-plans/diffs precede application/execution. No UI or operation registry is implemented in this slice.
+API/CLI and the initial VS Code interface now compose implemented operations; a standalone local app
+and enterprise API remain proposed. Local settings and file previews are implemented, while existing-
+project diffs and review-bound patch application are not. The original ADR's first increment added
+no UI; later operation/interface slices must not be described as future merely because that historical
+increment did not contain them. No general operation registry is required.
 
 [ADR 0002](../decisions/0002-incremental-platform-evolution.md) records the incremental
 direction. Two future entrypoints should eventually converge on shared project requirements:
@@ -605,6 +612,76 @@ requirements. No `ProjectSpec`, general template engine, greenfield API, remote 
 backend or enterprise service is introduced here.
 Generation, structural checks, behavioral observations, human review and operational acceptance
 remain separate evidence dimensions. See the [roadmap](../product/roadmap.md) for dependencies.
+
+## Compiler alignment and reusable contracts
+
+The conceptual lifecycle is source -> parsing/facts -> diagnostics -> reviewed transformation plan
+-> supported policy-driven transformations -> target generation -> verification -> reviewable project.
+Policy-driven passes and whole-project reconstruction are proposed. Current planning, AST fidelity,
+rendering and publication already implement bounded parts of that lifecycle. Validation is a gate
+before side effects as well as a separate explicitly authorized runtime operation.
+
+| Existing component | Reusable responsibility | Limit to retain |
+| --- | --- | --- |
+| `NotebookFacts` (`ir/facts.py`) | Immutable cell/statement/import/call/name-flow evidence with source locations and versioned serialization. | Notebook-oriented syntax facts, not a whole-project or runtime-object graph. |
+| `ConversionPlan` (`ir/plan.py`) | Candidate task interfaces, source/statement ownership, catalog entries, parameters and diagnostics. | Notebook/Kedro-oriented proposal, not verified behavior or a universal ProjectSpec. |
+| `SourceUnit`, `FunctionalAnalysis` (`ir/functional.py`) | Source identities, explicit function bodies/interfaces, spans and call/reference dependencies across supported source units. | Selected module/notebook inspection; declared package context does not discover arbitrary repository workflows. |
+| `FunctionalWorkflowPlan` (`semantic/functional_workflow.py`) | Explicit entrypoint calls and argument bindings, supported source ordering and declared sharing/artifact policies. | Separate workflow contract with bounded orchestration, not interchangeable with ConversionPlan. |
+| Package, file-input and application-distribution contracts | Selected raw-byte inventories, import namespaces, sidecars and explicit application provenance. | No automatic dependency inference, arbitrary side-effect discovery or full reproducible environment lock. |
+| Type/schema and regression/model-check contracts | Reviewed declarations, fixture identities, observable expectations, tolerances and visible gaps. | Supplied or source-derived expectations do not become independent business/scientific oracles. |
+| Operations and generated validation | Typed static requests/previews/publication; separate digest-bound execution snapshot and durable outcomes. | Static envelopes remain not_run; the private runtime copy is not a sandbox or authenticated certificate. |
+| Kedro renderer, naming profiles and shared writer | Deterministic target files, source mappings, contained staging and preservation of existing destinations. | One target and narrow naming rules; no enterprise compliance engine, conflict resolver or patch transaction. |
+| Provider protocols and evaluation/replay | Replaceable optional semantic proposals, strict constraints, retained provenance and measured comparisons. | Only local Ollama transports; evaluation acceptance does not authorize ordinary generation or live pilots. |
+
+Keep these contracts separate where their evidence and acceptance differ. Derive any future common
+representation from a second working operation, such as read-only Kedro reconstruction, and explicit
+compatibility tests. Candidate future concerns are task/execution and data graphs, parameters,
+artifacts, types/schemas, dependencies, effects, provenance, behavioral contracts and organizational
+rules. Their presence in this list does not add fields to existing schemas or justify an empty layer.
+
+### Diagnostic evidence and transformation boundaries
+
+Distinguish observed syntax/source facts, bounded deterministic findings, heuristic warnings and
+optional semantic suggestions in documentation and future reports. For example, a parsed call is
+observed; a possible-mutation warning does not prove a runtime mutation; an alias hazard checked
+by SA009 does not provide general identity analysis. Do not claim a general diagnostic confidence
+schema or leakage detector exists. New diagnostic rules need precise applicability, evidence and
+positive/negative cases, retaining unknowns for dynamic constructs.
+
+Faithful transformations preserve source bodies/accounting, applicable dependencies and declared
+observables. Changing preprocessing, splits, algorithms or correcting source leakage is a distinct
+authorized behavior change. Future optimization must select explicit objectives, constraints and
+baselines and compare equivalent measurement scopes; it cannot weaken faithful conversion checks.
+
+Future organizational rules should consume facts and emit supported compliance findings before
+proposing corrections. Profile identity, rule applicability, policy-version conflicts and correction
+ownership require decisions beyond current pipeline/prefix naming. UI clients present these results;
+they do not implement transformation or compliance rules.
+
+### Architectural risks and unresolved decisions
+
+- **Source coverage:** dynamic Python, aliases, environment-dependent configuration and multi-module
+  orchestration limit static reconstruction. The first existing-project audit needs a bounded syntax
+  and data-only configuration reader, with explicit unresolved findings rather than importing project
+  registries, hooks, plugins or evaluating resolvers.
+- **IR generalization:** notebook and functional plans encode different boundaries. Decide a shared
+  representation only after concrete consumers expose common requirements; keep versioned adapters
+  and compatibility rather than replacing existing public contracts speculatively.
+- **Policy scope:** rule language, identities, applicability, severity, inherited overrides and evidence
+  freshness are unresolved. Initial naming profiles cannot stand in for dependency/security/CI policy.
+- **Safe correction:** existing-project ownership, changed-source conflicts, idempotence, atomicity and
+  rollback need a separate apply contract. New-destination staging alone does not solve patching.
+- **Verification limits:** incomplete or source-derived oracles, stochastic/model behavior, scientific
+  leakage, dependency drift and editable evidence prevent universal equivalence/acceptance claims.
+  Framework checkpoint and inference bundles require their own preprocessing/target-state contracts.
+- **Runtime and distribution:** environment provisioning/locking, resource isolation, registry ownership,
+  credentials and public-release authorization remain distinct from deterministic source analysis.
+- **Evaluation validity:** representative cases, prospective human baselines, comparable general-agent
+  settings and complete model/resource costs are still needed before productivity claims.
+
+Kedro remains the only target; PyTorch/TensorFlow and GPU/distributed execution have no conversion
+guarantee. Optional framework support must stay in selected runtimes and demonstrate source,
+training/evaluation-state and fresh-process artifact fidelity before broadening compatibility.
 
 ## Test architecture
 

@@ -33,7 +33,8 @@ npm ci
 npm run package
 ```
 
-Install `generated/notebook-to-kedro-0.3.1.vsix` using **Extensions: Install from VSIX**.
+Install `notebook-to-kedro-0.4.0.vsix` from the paired GitHub Release, or the locally built
+`generated/notebook-to-kedro-0.4.0.vsix`, using **Extensions: Install from VSIX**.
 The initial extension targets desktop VS Code 1.145+. Open Explorer's **Notebook to Kedro**
 view and choose the Python executable containing the engine. **Create Project Configuration**
 provides guided setup, and **Choose Project Configuration** opens an existing JSON file.

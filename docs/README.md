@@ -28,9 +28,9 @@ The compatibility policy is authoritative for supported runtimes and library-sup
 | Document | Status | Purpose |
 | --- | --- | --- |
 | [Project overview](product/overview.md) | Original design | Context, intended interfaces, scope and principles extracted from the old README. |
-| [Detailed project status](product/project-status.md) | Reviewed: 2026-11-24 | Current capability matrix, implemented APIs and historical measurement context. |
-| [Conversion roadmap](product/roadmap.md) | V1 completed; V2 ongoing | Existing milestones and checkboxes, without changing completion claims. |
-| [Product vision](product/product-vision.md) | Direction; future features proposed | Existing-project and greenfield entrypoints, reusable enterprise standards, evidence and commercial hypotheses. |
+| [Detailed project status](product/project-status.md) | Reviewed: 2026-11-25 | Compiler alignment audit, capability readiness, implemented APIs and historical evidence. |
+| [Conversion roadmap](product/roadmap.md) | Compiler priorities; V1/V2 history retained | Incremental dependencies/acceptance, next read-only Kedro audit and existing milestones. |
+| [Product vision](product/product-vision.md) | ML Engineering Compiler direction; broader features proposed | Analyze/diagnose, transform, standardize and verify; optional semantic assistance, distribution, evaluation and separate optimization. |
 
 ## Guides
 

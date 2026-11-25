@@ -8,6 +8,12 @@ independent: the 0.2.0 engine is paired with VS Code extension 0.4.0. The releas
 records both versions and the exact source commit. This is a preview with an evolving API;
 the supported source/runtime boundaries still apply.
 
+Public GitHub publication, PyPI publication and Visual Studio Marketplace publication each require
+explicit user authorization for the publication task. Preparing a branch, reviewed artifact bundle
+or draft is separate from public publication. Registry publishing workflows/ownership are proposed
+in the [compiler roadmap](../product/roadmap.md#compiler-delivery-sequence), not implemented by this
+documentation alignment. Ordinary development and CI must not publish packages/extensions.
+
 ## Prepare a release
 
 1. Create a `release/X.Y.Z` branch from an up-to-date `main`.

@@ -2,11 +2,56 @@
 
 [Documentation index](../README.md)
 
-Status: engine/operations/local-interface delivery priorities updated on 2026-11-24;
+Status: compiler delivery priorities aligned on 2026-11-25;
 historical V1/V2 checkboxes are preserved.
 The broader product direction is recorded in [Product vision](product-vision.md).
 
 ## Product delivery priorities
+
+Keep the existing engine/operation boundaries and historical milestones while prioritizing the
+next concrete compiler slices. The sequence below defines dependencies and acceptance gates.
+
+## Compiler delivery sequence
+
+This sequence prioritizes the [ML Engineering Compiler vision](product-vision.md) over the
+existing E1-E7 milestones below. It does not reset their history, expand implemented support,
+authorize implementation/publication, or require a new IR. The
+[capability audit](project-status.md#compiler-vision-alignment-audit) is the current baseline.
+
+| Priority / existing milestone | Increment | Dependencies and acceptance criteria | State |
+| --- | --- | --- | --- |
+| P0 / E4, distribution | Consolidate installation, runtime selection and review feedback; prepare PyPI/Marketplace readiness separately. | Test actual installed wheel/VSIX from an isolated profile/environment; make missing runtime dependencies and the latest explicit validation outcome clear. Document local/offline setup and paired versions. Registry ownership/credentials, workflow review and explicit publication authorization precede each public release. | Partial interfaces/release bundles implemented; readiness improvements and registry publication proposed. |
+| P1 / E5a | Read-only audit of one existing Kedro project: highest-value next engine milestone. | Agree a bounded syntax and data-only config reader; reconstruct one statically declared pipeline's nodes, declared data edges, catalog and parameter references without importing/executing project code. Report source locations, coverage and unresolved dynamic constructs. Deterministic reports, refusal/unknown cases, unchanged source identities and API/CLI-first tests must pass. | Proposed; no audit API is implemented by this documentation task. |
+| P2 / E5b | Initial organizational compliance findings. | Build on E5a facts; check a few explicitly selected naming/layout rules grounded in current profiles, with rule identity/version and applicability. Differentiate proven deviation, warning and unknown; test compliant/noncompliant fixtures. No general security/tracking policy claim. | Proposed. |
+| P3 / E5c | Reviewable standardization plan, then supported corrections. | Findings plus source-bound transformation ownership; preview actual changes and first publish to a new destination. Check source fidelity, declared behavior and idempotence. In-place apply requires its own stale-source/conflict/consent/rollback contract. | Proposed. |
+| P4 / E3-E4 | Extend validation and practical conversion coverage from observed gaps. | Add reviewed multi-input/preprocessing/graph cases and refusal fixtures; preserve originals and independent oracles. Expand functional execution, data/model contracts, exact-version reload, metric/reproducibility and resource checks only with explicit environments/budgets. Label derived checks, missing expectations and scientific limits separately. | Existing bounded regression/snapshot slices implemented; broader suite proposed. |
+| P5 / E6 | One narrow requirements-driven project scaffold. | Reviewed task/data/schema/model/inference requirements with unresolved logic explicit; reuse working generation/validation contracts. Derive common facts/specification only from concrete existing-project and scaffold consumers. | Proposed. |
+| P6 / E7 | Further framework/target and CI/CD integrations. | Introduce one justified integration at a time with compatibility/dependency/effect and runtime evidence. A possible first DL case is an authored CPU PyTorch tabular workflow with tensor/device, training/evaluation and checkpoint/preprocessing/label-state contracts plus fresh-process prediction checks. Other targets, GPU/distributed training and enterprise APIs require later scope. | Proposed; Kedro remains the only generator and DL support is absent. |
+| P7 / separate optimization contract | Measurable authorized optimization and MDL-inspired research. | Mature baseline transformation/validation, explicit runtime/memory/cost/complexity objectives and constraints, retained negative results and behavior-change authorization. Specify any complexity encoding before comparing scores; no automatic optimization in faithful conversion. | Research direction, not implemented product optimization. |
+
+The evaluation workstream runs alongside these increments: compare manual, general coding-assistant,
+deterministic and hybrid approaches under matched source/standards/acceptance/runtime conditions.
+Reuse existing ledgers and prospective forms; collect total and human-active time, corrections,
+completion/refusal, behavior/metric and architecture preservation, test fault detection, reproducibility,
+resources and observed costs. Prepared synthetic clocks and unknown costs/human time remain separate
+from productivity evidence. Independent pilot review and execution/provider consent remain unchanged.
+
+### Next engine milestone acceptance
+
+E5a is the next recommended implementation because it extends the engine from producing projects
+to diagnosing an existing one and establishes real requirements for later policies and shared IR.
+P0 usability/distribution preparation can proceed alongside it without blocking static audit work.
+
+Start with one fixed, explicitly selected local Kedro project and one supported pipeline, then
+negative fixtures for dynamic factories, missing catalog/parameter references and unsupported config.
+The audit must work without importing Kedro or application dependencies, invoking a provider,
+resolving credentials, running a pipeline or modifying the inspected project. Decide whether safe
+YAML parsing needs a separate optional dependency before implementation. A source-bound JSON/Markdown
+report must explain inspected files, graph/config facts, diagnostic evidence and uninspected scope.
+Repeat inspection must be deterministic and leave original bytes unchanged. Expose through API/CLI
+before VS Code; applying corrections, environment installation and benchmarking are separate work.
+
+### Existing milestone history and bounded delivery
 
 These priorities extend [ADR 0002](../decisions/0002-incremental-platform-evolution.md)
 with the shared-engine direction in [ADR 0004](../decisions/0004-shared-engine-and-local-interface.md).

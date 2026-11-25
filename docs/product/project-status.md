@@ -2,8 +2,41 @@
 
 [Documentation index](../README.md)
 
-Status: current implementation summary reviewed on 2026-11-24; historical evidence follows.
+Status: current implementation and compiler alignment reviewed on 2026-11-25; historical evidence follows.
 Historical measurements retain their original corpus, runtime and limitations.
+
+## Compiler vision alignment audit
+
+Audit baseline: `main` commit `7fbc0fffec17e343cdc5dd3cddd996853882ec97` (engine 0.2.0,
+extension 0.4.0), inspected against code, contracts, tests, ADRs and recorded experiments.
+Unmerged feature branches and ignored local trial artifacts do not enlarge this baseline.
+This documentation audit runs no model/provider experiment and grants no execution approval.
+
+**Implemented** means a working bounded contract, not universal support. **Partial** means useful
+implemented slices with major stated gaps. **Experimental** means isolated proposal/evaluation
+paths or scoped measurements, not general acceptance. **Planned** means no current product contract.
+
+| Compiler capability | Readiness | Implemented foundation and remaining boundary |
+| --- | --- | --- |
+| Parse and account for notebook sources | Implemented, bounded | Immutable `NotebookFacts`, AST/name dependencies and source-accounting guard; supported statement/read patterns only. See [source accounting](../reference/source-accounting.md). |
+| Inspect structured Python sources | Partial | `FunctionalAnalysis` captures explicit functions from a saved module/notebook; selected package/resources are declared explicitly. No automatic whole-repository discovery. See [functional inspection](../reference/functional-blocks.md). |
+| Diagnose architecture and ML hazards | Partial | Stable source/plan diagnostics, possible mutations, unsupported constructs, missing expectations and bounded fitted-alias guard. No general coupling/duplication, reproducibility, hidden-state or leakage audit. |
+| Reconstruct data/execution graphs | Partial | Notebook dependencies and explicit `FunctionalWorkflowPlan` calls, ordered joins and selected shared values. Dynamic orchestration, unrestricted aliases and multi-module reconstruction remain unsupported. |
+| Faithful restructuring into Kedro | Implemented, bounded | Existing notebook/functional renderers, selected parameter/catalog relocation, compilation and shared no-overwrite writer. No arbitrary function extraction, framework-neutral generator or in-place refactoring. |
+| Reusable organizational standards | Partial | Versioned Kedro profiles choose one pipeline name and function/node prefixes. Enterprise rule evaluation, compliance scoring and corrective policies are planned; see [profiles](../guides/kedro-profiles.md). |
+| Generated documentation, types and data checks | Partial | Google-style node docs, provisional/explicit finite types and opt-in bounded DataFrame metadata checks. Unknown types and schema/value/fitted-state gaps remain explicit. |
+| Tests and behavioral verification | Partial | Supplied fixture/oracle regression generation, opt-in model prediction reload tests, selected paired source/Kedro and mutation checks. No complete equivalence, automatic independent business oracle or general resource/compliance suite. |
+| Controlled execution | Partial | Explicit reviewed notebook-test snapshot, selected existing Python, timeout/cancellation, logs and postflight identities. No environment provisioning/lock verification, functional/arbitrary-project runner or security sandbox. See [validation](../reference/generated-project-validation.md). |
+| Optional semantic assistance | Experimental | Loopback Ollama naming/grouping plus separate node/body proposal, benchmark and replay paths; no remote transport or automatic code-proposal acceptance. |
+| Evaluation of engineering value | Experimental | Timed operations, pending human-effort forms and prepared synthetic agent comparisons. No measured general human savings, complete four-arm evaluation or enterprise-readiness evidence. |
+| Local distribution and interfaces | Implemented, bounded | Python API/CLI, settings assistant, desktop VS Code, paired GitHub wheel/VSIX release tooling. PyPI/Marketplace publication and simplified environment onboarding remain planned. |
+| Existing Kedro repository audit and corrections | Planned | E5; no current project reconstruction/compliance operation or review-bound patch applier. |
+| Greenfield, other targets, deep learning and optimization | Planned | Reviewed requirements, other backends/frameworks and objective-driven optimization need separate contracts; Kedro is the only generation target. |
+
+The detailed matrix below retains feature-level evidence. The
+[architecture reuse map](../reference/architecture.md#compiler-alignment-and-reusable-contracts)
+and [delivery sequence](roadmap.md#compiler-delivery-sequence) describe gaps and priorities without
+turning this audit into a feature implementation.
 
 ## Project status
 

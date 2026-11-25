@@ -1,5 +1,20 @@
 # Development Journal
 
+## 2026-11-25 - ML Engineering Compiler documentation alignment
+
+Audited the main 7fbc0ff baseline against implementation contracts, tests, ADRs and historical
+experiments. Recorded implemented/partial/experimental/planned capabilities in the existing status
+document and mapped notebook facts/plans, functional contracts, operation snapshots and the Kedro
+writer to the compiler direction. Kept the naming-profile boundary, unknowns, explicit runtime
+consent, provider limits and pending independent pilot review unchanged.
+
+Extended the vision to analyze/diagnose, transform, standardize and verify, with optional LLM
+assistance and separate objective-driven optimization. Prioritized read-only existing Kedro audit
+before policy correction or common-IR generalization, with onboarding/distribution preparation
+alongside it and explicit authorization for public publication. Updated existing architecture,
+roadmap, README/index and agent guidance; no new feature, API, dependency, framework or release.
+The separate model-specific preprocessing branch is not part of this audit baseline or change.
+
 ## 2026-11-24 - Paired 0.2.0 engine / 0.4.0 extension release preparation
 
 Prepared the engine version/uv lock and dated 0.2.0 changelog while retaining the 0.1.0 history.

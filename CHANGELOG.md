@@ -7,7 +7,13 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
-No changes recorded.
+### Documentation
+
+- Align the existing vision, capability audit, roadmap, architecture and agent guidance around
+  the ML Engineering Compiler direction, keeping current contracts and historical evidence intact.
+- Prioritize a bounded read-only existing Kedro audit; distinguish enterprise policy, registry
+  publication, broader frameworks and optimization proposals from implemented capabilities.
+- Correct the paired VSIX installation example and document explicit public-publication authorization.
 
 ## [0.2.0] - 2026-11-24
 

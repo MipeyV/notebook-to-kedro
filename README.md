@@ -2,6 +2,12 @@
 
 > Progressively transform a reasonably clean Data Science notebook into a structured, reproducible Kedro project that is easy to review.
 
+The Python engine is the foundation of a broader
+[ML Engineering Compiler vision](docs/product/product-vision.md): analyze, diagnose, transform,
+standardize, verify and eventually optimize ML projects. Notebook-to-Kedro is the first application;
+the [current capability audit](docs/product/project-status.md#compiler-vision-alignment-audit)
+separates implemented subsets from future repository, policy and optimization capabilities.
+
 ## Project status
 
 The deterministic V1 path is operational for a controlled notebook subset: static analysis,

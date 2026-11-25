@@ -1,8 +1,8 @@
-# Product vision: ML engineering automation
+# Product vision: ML Engineering Compiler
 
 [Documentation index](../README.md)
 
-Status: product direction aligned on 2026-11-06; unimplemented capabilities remain proposals.
+Status: product direction aligned on 2026-11-25; unimplemented capabilities remain proposals.
 See [ADR 0002](../decisions/0002-incremental-platform-evolution.md). This document is not a
 supported-feature list, an executable configuration contract, or a release commitment.
 The [compatibility guide](../reference/compatibility.md) and [README](../../README.md#project-status)
@@ -10,15 +10,23 @@ remain authoritative for current capabilities.
 
 ## Objective
 
-Build an ML Engineering Automation Platform that reduces repetitive engineering work and
-applies reusable organizational standards to heterogeneous ML projects. Notebook-to-Kedro
-is the first use case. The goal is traceable, maintainable, reproducible projects with
-reviewable requirements and evidence, not merely faster Python generation.
+Build a deterministic-first ML Engineering Compiler that analyzes, diagnoses, transforms,
+standardizes and verifies existing Data Science and ML projects, with separate optimization
+operations later. Notebook-to-Kedro is its first concrete application. The Python engine is
+the central asset; framework independence is a design direction, while Kedro remains the only
+implemented generation target. The repository and package keep their current names.
+
+**Analyze -> Diagnose -> Transform -> Standardize -> Verify -> Optimize.**
+
+Validation constrains every transformation rather than occurring only at the end. The goal is
+traceable, maintainable projects with reviewable requirements and evidence. Broader repository
+analysis and industrialization remain ambitions; the current engine supports bounded sources.
 
 The target product experience is a local application or VS Code extension where users open
 an ML project, load local configuration, choose an operation, inspect its plan/diff, apply it
-and review validation evidence. The precise UI choice remains open. Build the Python API/CLI
-core first; product names, commercial packaging and hosting remain undecided.
+and review validation evidence. API/CLI and an initial desktop VS Code extension already expose
+implemented operations. A standalone local application, enterprise APIs, commercial packaging
+and hosting remain proposals. Keep the reusable core independent of presentation.
 Kedro is the initial execution target; other targets would need separate contracts and tests.
 
 ## Shared engine, operations and local interfaces
@@ -28,10 +36,10 @@ Keep three responsibilities separate as recorded in
 
 - **Engine:** deterministic source analysis, provenance, functional workflow representation,
   transformation planning, generation and validation. Models may propose bounded changes.
-- **Operations:** notebook conversion, later script conversion, new-project creation,
+- **Operations:** notebook and bounded explicit-function script conversion, later project creation,
   existing-project refactoring/standardization and inspection. Each has explicit inputs,
   permitted changes and acceptance criteria; a shared core does not imply identical validation.
-- **Interfaces:** API/CLI and later a local app or VS Code extension selecting implemented
+- **Interfaces:** API/CLI and the initial VS Code extension, with a possible later local app selecting
   operations, local configuration and review/execution workflows. Keep transformation logic out of UI.
 
 Reuse the current notebook-to-Kedro components incrementally. First account for source statements
@@ -40,11 +48,41 @@ a common representation. Do not add empty engine/task registries, an HTTP servic
 configuration model ahead of working slices. A first interface can expose a small reliable subset;
 it need not wait for prompt-driven project creation or all future backends.
 
+## Four product operations
+
+These describe the intended product scope. The
+[capability audit](project-status.md#compiler-vision-alignment-audit) distinguishes implemented
+subsets from experimental or planned capabilities.
+
+| Operation | Intended responsibility | Required distinction |
+| --- | --- | --- |
+| Analyze and diagnose | Inspect notebooks, scripts and eventually repositories for dependency/state hazards, coupling, duplication, hardcoded paths/parameters, reproducibility, leakage risks and missing contracts/tests. | Source facts and bounded deterministic findings versus heuristic warnings or semantic proposals; neither warnings nor absent findings prove safety. |
+| Restructure and transform | Extract reusable functions, reconstruct supported execution/data graphs, separate ML responsibilities, externalize configuration and organize datasets/artifacts. | Behavior-preserving restructuring versus an explicitly authorized behavior change; every supported instruction retains accounting/provenance. |
+| Standardize | Check reusable organizational profiles and propose supported corrections for architecture, configuration, data, artifacts, tracking, logging, tests, typing/docs, dependencies, security and CI/CD. | Current naming profiles versus a future enterprise policy engine; declared rules versus demonstrated compliance. |
+| Verify and validate | Combine static checks, supplied/derived tests, runtime evidence, schemas, prediction/metric comparisons, reproducibility, resource budgets and supported policy checks. | Structural success, behavioral observations, independent expectations, execution consent and scientific/operational acceptance remain separate. |
+
+General automatic function extraction, leakage detection, enterprise compliance and repository
+refactoring are not implemented merely because the current converter emits functions and reports.
+The [architecture](../reference/architecture.md#compiler-alignment-and-reusable-contracts) maps
+the existing facts/plans to these responsibilities without introducing a replacement IR.
+
+## Deterministic operation and optional semantic assistance
+
+The default product must work without Ollama, a GPU, an API key or an external AI service.
+Supported analysis, transformation, validation and eventual policy checks belong to the
+deterministic engine. Application execution still needs its explicitly selected runtime.
+
+Optional LLM assistance may propose names/grouping, architectural interpretations, transformations
+or tests. Existing local Ollama transports and constrained experiments are the current boundary.
+Provider output is a proposal with provenance; deterministic constraints, review and appropriate
+behavioral validation govern acceptance. Node/body proposals are not silently accepted by normal
+generation. Remote services and disclosure policies require separately authorized implementation.
+
 ## Two entrypoints
 
 | Entrypoint | Input and intended result | Current boundary |
 | --- | --- | --- |
-| Industrialize an existing project | Analyze notebooks, later scripts/pipelines/repositories; propose a transformation plan, preserve provenance, generate and check a standardized project. | Controlled Python notebooks to minimal Kedro projects are implemented; broader sources remain future work. |
+| Industrialize an existing project | Analyze notebooks, scripts and eventually pipelines/repositories; propose a transformation plan, preserve provenance, generate and check a standardized project. | Controlled notebooks and explicitly configured functional Python workflows generate Kedro; automatic whole-repository reconstruction and existing-project patching are future work. |
 | Create a new project | Explicit data/schema, objective, task, preprocessing, model strategy, metrics, training/inference and integration requirements become a coherent scaffold. | No greenfield entrypoint or specification contract is implemented. |
 
 Both entrypoints should eventually share project requirements, architecture-profile resolution,
@@ -170,6 +208,12 @@ and migration support require their own demonstrated needs. The [initial Kedro p
 now implements a versioned pipeline name and function/node prefix, with explicit source mappings.
 All broader standard-enforcement capabilities described here remain future work.
 
+An eventual policy engine should separate rule identity/version, applicability, evidence,
+diagnostics and permitted correction from ML business semantics. Start with a few verifiable
+rules over reconstructed facts, then a reviewable correction plan; runtime tracking, monitoring,
+security and CI/CD enforcement each require explicit integrations and evidence. Existing profile
+hashes and source mappings are reusable foundations, not an implemented compliance engine.
+
 Proposed enterprise profiles select execution environment, storage adapters, dependency
 constraints, secret references, tracking backend, allowed network destinations and data
 disclosure policies. They must be supplied or reviewed, not inferred from a company name.
@@ -215,6 +259,34 @@ now captures inspect/plan/generate timings and retained attempts. Human active t
 criteria, initial-setup/reuse context and manual/general-assistant baselines remain explicit
 operator declarations. Missing baselines imply no measured saving. This supplies instrumentation
 for the evaluation workstream, not evidence of a productivity or commercial advantage by itself.
+
+The future comparison has four arms: manual industrialization, a general-purpose coding assistant,
+the deterministic compiler, and the hybrid compiler with optional LLM assistance. Reuse the current
+[measurement contracts](../reference/local-operations.md#opt-in-conversion-measurements) and
+[prepared comparisons](../experiments/prepared-agent-comparison.md); retain their historical scope.
+Select identical tasks, source snapshots, standards, environments, acceptance criteria and permitted
+information. Counterbalance task order or use independent operators to limit exposure to solutions.
+
+Measure total elapsed engineering time and human active time separately; configuration, correction
+and review effort; successful, refused and unfinished outcomes; behavioral/metric preservation;
+architecture compliance; test fault-detection quality and coverage; reproducibility; runtime/peak
+resources; and observed financial cost. Include model/runtime versions and repeated-run variability
+where available. Missing costs or human baselines stay unknown. Machine-only, preconfigured synthetic
+timings must not become claimed productivity savings or evidence of enterprise readiness.
+
+## Distribution and onboarding
+
+Keep Python API, CLI and the local VS Code client as interfaces to the same engine. GitHub wheel/VSIX
+release preparation is implemented. Publishing the engine to PyPI and the extension to the official
+Visual Studio Marketplace are short-term distribution priorities, with readiness checks for actual
+installed packages, version pairing, interpreter selection, documentation and a reproducible demo.
+Registry ownership, credentials, publication automation and support commitments are unresolved.
+
+Engine/runtime setup and dependency diagnostics should become easier while preserving offline/local
+operation. CI/CD integrations and enterprise APIs are future consumers of explicit operation contracts.
+Keep public publication separate from development; every public release or registry publication needs
+explicit user authorization. This alignment task neither implements publication workflows nor publishes
+packages/extensions. Follow the existing [release process](../guides/releasing.md).
 
 ## Commercial hypotheses
 
@@ -265,7 +337,7 @@ product tiers remain open decisions; they do not require separate model training
 
 The [roadmap](roadmap.md#product-delivery-priorities) owns priority, dependency and acceptance
 gates. Preserve unfinished V2 work and historical completion claims. Reliability and project-level
-evidence precede broad abstraction; a narrow profile and greenfield slice precede general platform
+evidence precede broad abstraction; a narrow existing-project audit and policy slice precede general platform
 infrastructure. Source connectors and MLOps integrations are selected by validated needs. Explicit
 optimization remains a separate later contract, not a prerequisite for either entrypoint.
 
